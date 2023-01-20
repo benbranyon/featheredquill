@@ -1,0 +1,11 @@
+15-04-2021 16:58:36 - ERROR - v: 7.1.2 - m: 15.4 MB, u: 1 - Invalid json from thenewsletterplugin.com: retrying in 72 hours
+15-04-2021 16:58:36 - ERROR - v: 7.1.2 - m: 15.4 MB, u: 1 - JSON: <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html><head>
+<title>404 Not Found</title>
+</head><body>
+<h1>Not Found</h1>
+<p>The requested URL was not found on this server.</p>
+<hr>
+<address>Apache/2.4.29 (Ubuntu) Server at www.thenewsletterplugin.com Port 80</address>
+</body></html>
+

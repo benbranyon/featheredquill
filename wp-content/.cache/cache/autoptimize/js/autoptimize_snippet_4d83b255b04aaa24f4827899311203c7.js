@@ -1,0 +1,1 @@
+jQuery(document).ready(function(){console.log('spotlight start..');jQuery("#dontmiss").smoothDivScroll({autoScrollingMode:"always",autoScrollingDirection:"endlessloopright",autoScrollingStep:1,autoScrollingInterval:50,});});
