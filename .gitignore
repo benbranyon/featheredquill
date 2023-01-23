@@ -20,6 +20,7 @@ wp-content/wp-cache-config.php
 wp-content/plugins/really-simple-captcha/tmp/
 wp-content/ai1wm-backups/
 wp-content/mu-plugins/gd-system-plugin/
+wp-content/mu-plugins/gd-system-plugin.php
 wp-content/backupwordpress-f4f29d2874-backups/
 sitemap.xml
 sitemap.xml.gz
