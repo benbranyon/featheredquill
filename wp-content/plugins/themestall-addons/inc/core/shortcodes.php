@@ -453,7 +453,7 @@ class Ts_Shortcodes {
 		// Prepare title attribute
 		$atts['title'] = ( $atts['title'] ) ? ' title="' . $atts['title'] . '"' : '';
 		ts_query_asset( 'css', 'ts-content-shortcodes' );
-		return $before . '<a href="' . ts_scattr( $atts['url'] ) . '" data-hoverback="'.esc_attr($atts['background_hover']).'" data-currentbg="'.esc_attr('rgba('.$background.', '.$atts['opacity'].')').'" data-currentbor="'.esc_attr($atts['border']).'" data-currentcolor="'.esc_attr($atts['color']).'" data-hovercolor="'.esc_attr($atts['color_hover']).'" class="' . implode( $classes, ' ' ) . '" style="' . implode( $a_css, ';' ) . '" target="_' . $atts['target'] . '"' . $atts['onclick'] . $atts['rel'] . $atts['title'] . '><span style="' . implode( $span_css, ';' ) . '">' . do_shortcode( stripcslashes( $content ) ) . $desc . '</span></a>' . $after;
+		return $before . '<a href="' . ts_scattr( $atts['url'] ) . '" data-hoverback="'.esc_attr($atts['background_hover']).'" data-currentbg="'.esc_attr('rgba('.$background.', '.$atts['opacity'].')').'" data-currentbor="'.esc_attr($atts['border']).'" data-currentcolor="'.esc_attr($atts['color']).'" data-hovercolor="'.esc_attr($atts['color_hover']).'" class="' . implode( ' ',$classes ) . '" style="' . implode( ';', $a_css ) . '" target="_' . $atts['target'] . '"' . $atts['onclick'] . $atts['rel'] . $atts['title'] . '><span style="' . implode( ';', $span_css ) . '">' . do_shortcode( stripcslashes( $content ) ) . $desc . '</span></a>' . $after;
 	}
 
 	public static function services( $atts = array(), $content= '' ){

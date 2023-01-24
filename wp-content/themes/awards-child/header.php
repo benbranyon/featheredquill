@@ -13,6 +13,12 @@
 <link rel="profile" href="http://gmpg.org/xfn/11" />
 <link rel="pingback" href="<?php bloginfo( 'pingback_url' ); ?>" />
 <?php wp_head(); ?>
+<style>
+    .header{
+        z-index: 99998;
+        position: relative;
+    }
+</style>
 </head>
 
 <body <?php body_class(); ?>>
