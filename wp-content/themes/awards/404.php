@@ -23,7 +23,7 @@ get_header(); ?>
             </div><!-- end col -->
 
             <div class="col-md-5">
-                <img src="<?php echo AWARDSTHEMEURI; ?>images/404.png" alt="" class="img-responsive">
+                <img src="<?php echo AWARDSTHEMEURI; ?>images/404.png" alt="<?php echo esc_attr__('not found image', 'awards'); ?>" class="img-responsive">
             </div>
         </div>
     </div><!-- end search-top -->

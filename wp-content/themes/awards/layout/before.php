@@ -35,15 +35,15 @@
 		$layout = 'full';
 	}
 	
-	if(is_author() || is_search()){
+	if(is_author()){
 		$layout = 'full';
 	}
 	
-	if ( class_exists( 'woocommerce' ) ){ 
+	if ( class_exists( 'woocommerce' ) ){
 		if( is_product() ){
 			$layout = 'full';
 		}
-		elseif( is_woocommerce() || is_cart() || is_checkout() || is_search() ){
+		elseif( is_woocommerce() ){
 			$layout = 'full';
 		}
 	}

@@ -1,6 +1,7 @@
 <?php
 include(AWARDSTHEMEDIR . '/admin/scripts.php');
 include(AWARDSTHEMEDIR . '/admin/awards-settings.php');
+include(AWARDSTHEMEDIR . '/admin/demo-import.php');
 
 function awards_login_logo() { 
 	$logo = (function_exists('ot_get_option'))? ot_get_option('admin_logo') : '';

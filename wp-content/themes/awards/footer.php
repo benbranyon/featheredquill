@@ -19,13 +19,17 @@
             <?php endif; ?>
             <?php
             $footer_widget_area = (function_exists('ot_get_option'))? ot_get_option('footer_widget_area', 'on') : 'on';
-            if($footer_widget_area == 'on'): ?>
-            <div class="footer section">
-                <div class="container">                    
-                    <?php get_template_part('footer/footer-widget-area', ''); ?>                                        
-                </div>                
-            </div>
-            <?php endif; ?>
+            if($footer_widget_area == 'on'):
+                if(is_active_sidebar( 'footer-1' ) || is_active_sidebar( 'footer-2' ) || is_active_sidebar( 'footer-3' ) || is_active_sidebar( 'footer-4' ) || is_active_sidebar( 'footer-widget-top' )):
+                ?>
+                <div class="footer section">
+                    <div class="container">                    
+                        <?php get_template_part('footer/footer-widget-area', ''); ?>                                        
+                    </div>                
+                </div>
+                <?php 
+                endif;
+            endif; ?>
             <div class="copyrights">
                 <div class="container">
                     <div class="row">
@@ -45,11 +49,11 @@
                             <?php
 							$social_array = (function_exists('ot_get_option'))? ot_get_option( 'social_links', array() ) : '';
 							if( !empty($social_array) ): ?>
-							<ul class="list-inline">
-							<?php foreach ($social_array as $key => $value): ?>
-								<li><a title="<?php echo esc_attr($value['title']); ?>" target="_blank" href="<?php echo esc_url($value['link']); ?>"><?php echo esc_attr($value['title']); ?></a></li>
-							<?php endforeach; ?>			
-							</ul>
+                                <ul class="list-inline">
+                                <?php foreach ($social_array as $key => $value): ?>
+                                    <li><a title="<?php echo esc_attr($value['title']); ?>" target="_blank" href="<?php echo esc_url($value['link']); ?>"><?php echo esc_html($value['title']); ?></a></li>
+                                <?php endforeach; ?>			
+                                </ul>
 							<?php
 							endif;
 							?>
@@ -59,6 +63,5 @@
             </div>       
         </div><!-- end wrapper -->
         <?php wp_footer(); ?>  
-        <script type='text/javascript' src='http://featheredquill.com/wp-content/plugins/spotlight/js/smoothDivScroll.js?ver=1.1&#038;nocache=1'></script>
 	</body>
 </html>

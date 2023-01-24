@@ -219,11 +219,6 @@ function awards_common_info($url, $width, $height, $crop, $align, $retina) {
   
   if (preg_match('/\/[0-9]{4}\/[0-9]{2}\/.+$/', $urlinfo['path'], $matches)) {
     $file_path = $wp_upload_dir['basedir'] . $matches[0];
-  } else {
-    $pathinfo = parse_url( $url );
-    $uploads_dir = is_multisite() ? '/files/' : '/wp-content/';
-    $file_path = ABSPATH . str_replace(dirname($_SERVER['SCRIPT_NAME']) . '/', '', strstr($pathinfo['path'], $uploads_dir));
-    $file_path = preg_replace('/(\/\/)/', '/', $file_path);
   }
   
   // Don't process a file that doesn't exist

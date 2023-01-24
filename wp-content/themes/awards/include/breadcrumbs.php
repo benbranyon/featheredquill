@@ -99,7 +99,7 @@ function awards_breadcrumbs() {
 				  }
 				  $breadcrumbs = array_reverse($breadcrumbs);
 				  for ($i = 0; $i < count($breadcrumbs); $i++) {
-					echo force_balance_tags($breadcrumbs[$i]);
+					echo wp_kses($breadcrumbs[$i], array('li'=>array('a'=>array('href'=>array())), 'a'=>array('href'=>array())));
 				  }
 				  if ($showCurrent == 1) echo ' ' . '<li class="active">' . get_the_title() . '</li>';
 			  

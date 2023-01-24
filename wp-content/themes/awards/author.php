@@ -68,7 +68,7 @@ $current_user = wp_get_current_user();
     	<?php while ( $query->have_posts() ) :$query->the_post(); ?>
         <div class="award-image entry">
         	<?php $site_link = get_post_meta(get_the_ID(), 'nominee_site_url', true); ?>
-            <a href="<?php echo esc_url($site_link); ?>" target="_blank" rel="nofollow" title="">
+            <a href="<?php echo esc_url($site_link); ?>" target="_blank" rel="nofollow">
                 <?php awards_post_thumb( 650, 480, true, false ); ?>
                 <div class="magnifier">
                     <div class="magni-desc">

@@ -9,7 +9,7 @@
             <?php endif; ?>
             <div class="blog-meta">
                 <small><?php the_category(', '); ?></small>
-                <h3><a href="<?php esc_url(the_permalink()); ?>" title=""><?php the_title(); ?></a></h3>
+                <h3><a href="<?php esc_url(the_permalink()); ?>"><?php the_title(); ?></a></h3>
                 <ul class="list-inline">
                     <li><?php echo human_time_diff( get_post_time( 'U' ), current_time('timestamp') ) . esc_html__(' ago', 'awards'); ?></li>
                     <li><span><?php echo esc_html__('written by', 'awards'); ?></span> <a href="<?php echo esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ); ?>"><?php echo get_the_author(); ?></a></li>
@@ -25,7 +25,7 @@
 						<a href="<?php echo ( is_single() )? esc_url($link) : esc_url(get_permalink()); ?>"><?php echo esc_html($link); ?><span><?php esc_html__('-', 'awards'); ?><?php echo esc_html($title); ?></span></a>                                    
 					</h3>                                
 				<?php endif; ?>
-                <a href="<?php esc_url(the_permalink()); ?>" title="">
+                <a href="<?php esc_url(the_permalink()); ?>">
                 <?php awards_post_thumb( 1200, 600, true, false ); ?>
                 </a>
             </div><!-- end media -->

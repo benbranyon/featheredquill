@@ -22,7 +22,7 @@
  */
 
 //Define variable
-define('AWARDSTHEMEVERSION', '1.0' );
+define('AWARDSTHEMEVERSION', '2.1.2' );
 define('AWARDSTHEMEURI', trailingslashit( get_template_directory_uri() ) );
 define('AWARDSTHEMEDIR', trailingslashit( get_template_directory() ) );
 
@@ -41,10 +41,6 @@ if ( ! function_exists( 'awards_setup' ) ) :
  * as indicating support post thumbnails.
  *
  */
-if ( ! function_exists( 'populate_roles' ) ) {
-  require_once( ABSPATH . 'wp-admin/includes/schema.php' );
-}
-populate_roles();
 function awards_setup() {
 
 	/*
@@ -56,9 +52,6 @@ function awards_setup() {
 	 * template files.
 	 */
 	load_theme_textdomain( 'awards', AWARDSTHEMEDIR . '/languages' );
-
-	// This theme styles the visual editor to resemble the theme style.
-	add_editor_style( array( 'editor-style.css') );
 
 	// Add RSS feed links to <head> for posts and comments.
 	add_theme_support( 'automatic-feed-links' );
@@ -90,6 +83,14 @@ function awards_setup() {
 	
 	// This theme support woocommerce
 	add_theme_support( 'woocommerce' );
+	
+	// Add support for Block Styles.
+	add_theme_support( 'wp-block-styles' );
+	
+	// Add support for editor styles.
+	add_theme_support( 'editor-styles' );
+	
+	add_editor_style( array(awards_fonts_url(), 'style-editor.css') );
 
 }
 endif; // awards_setup

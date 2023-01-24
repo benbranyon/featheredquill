@@ -3,7 +3,7 @@
 	<div class="col-md-6 col-sm-12">
         <div class="award-image entry">
         	<?php $site_link = get_post_meta(get_the_ID(), 'nominee_site_url', true); ?>
-            <a href="<?php echo esc_url($site_link); ?>" target="_blank" rel="nofollow" title="">
+            <a href="<?php echo esc_url($site_link); ?>" target="_blank" rel="nofollow">
                 <?php awards_post_thumb( 700, 500, true, false ); ?>
                 <div class="magnifier">
                     <div class="magni-desc">
@@ -95,7 +95,7 @@
             <div class="site-publisher clearfix">
             	<div class="single-author-info">
 					<?php echo get_avatar( get_the_author_meta( 'user_email' ), 60 ); ?>
-                    <a href="<?php echo esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ); ?>" title=""><h4><?php echo get_the_author(); ?></h4></a>
+                    <a href="<?php echo esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ); ?>"><h4><?php echo get_the_author(); ?></h4></a>
                     <small><?php echo get_user_meta( get_the_author_meta( 'ID' ), 'designation', true ); ?></small>
                 </div>
                 <div class="site-desc clearfix">
@@ -153,15 +153,15 @@
 <div class="col-md-4 col-sm-6 wow fadeIn" data-wow-duration="1s" data-wow-delay="0.2s">
     <div class="site-wrapper">
         <div class="award-image entry">
-            <a href="<?php the_permalink(); ?>" title="">
+            <a href="<?php the_permalink(); ?>">
                <?php awards_post_thumb( 700, 500, true, false ); ?>
             </a>
         </div><!-- end image -->
 
         <div class="site-small-desc clearfix">  
             <div class="pull-left">
-                <a href="<?php the_permalink(); ?>" title=""><h4><?php the_title(); ?></h4></a>
-                <p><?php echo esc_html__('By:', 'awards'); ?> <a href="<?php echo esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ); ?>" title=""><?php the_author(); ?></a></p>
+                <a href="<?php the_permalink(); ?>"><h4><?php the_title(); ?></h4></a>
+                <p><?php echo esc_html__('By:', 'awards'); ?> <a href="<?php echo esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ); ?>"><?php the_author(); ?></a></p>
             </div>
             <?php if(function_exists('themestall_show_user_likes')): ?>
             <div class="likebutton pull-right text-center">
