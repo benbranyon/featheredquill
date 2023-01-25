@@ -5,7 +5,7 @@ Tags: membership, ecommerce, user registration, user profile, membership plugin,
 Requires at least: 5.3
 Requires PHP: 7.2.0
 Tested up to: 6.1
-Stable tag: 4.5.4
+Stable tag: 4.5.5
 License: GPLv2 or later
 
 Paid membership plugin: accept payments, sell subscriptions & digital downloads, restrict content, create user registration form & login form, user profile & member directory.
@@ -55,7 +55,7 @@ Create excellent checkout page, member login forms, user registration forms, pas
 * **Login & Password Reset Forms** – Allow users to log in and reset their passwords via custom frontent forms.
 * **User Dashboard** – My Account page and edit profile forms for users to manage their profile details and account settings.
 * **Automatic Registration & Login Redirect** – Auto login users after they register and redirect them after they sign in, log out and reset their passwords.
-* Add login, logout, register, and profile links to your website navigation menu that will change based on whether the user is logged in.
+* Add login and logout links, register and profile links to your website navigation menu that will change based on whether the user is logged in.
 
 = User Profiles & Member Directories =
 
@@ -175,6 +175,13 @@ Any file type can be sold using ProfilePress ecommerce and membership plugin, in
 11. Content Protection
 
 == Changelog ==
+
+= Paid Membership, Ecommerce & User Registration 4.5.5 =
+* Fixed PHP Warning: Undefined array key "user_login".
+* Added missing text domain to strings.
+* Bumped Stripe API version to latest.
+* Fixed XSS in shortcode & content protection admin page.
+* Added settings button to [addons page](https://profilepress.com/addons/?ref=changelog).
 
 = Paid Membership, Ecommerce & User Registration 4.5.4 =
 * Fixed more XSS in form builder.

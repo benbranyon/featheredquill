@@ -13,28 +13,25 @@
 <link rel="profile" href="http://gmpg.org/xfn/11" />
 <link rel="pingback" href="<?php bloginfo( 'pingback_url' ); ?>" />
 <?php wp_head(); ?>
-<style>
-    .header{
-/*        z-index: 100000;*/
-        z-index: 99998;
-        position: relative;
-    }
-</style>
 </head>
 
 <body <?php body_class(); ?>>
+    <?php wp_body_open(); ?>
     <!-- LOADER -->
-    <div id="preloader">
-    	<?php $preloader = (function_exists('ot_get_option'))? ot_get_option( 'preloader', AWARDSTHEMEURI. '/images/loader.gif' ) : AWARDSTHEMEURI. '/images/loader.gif'; ?>
-        <img class="preloader" src="<?php echo esc_url($preloader); ?>" alt="">
-    </div><!-- end loader -->
+    <?php $display_preloader = (function_exists('ot_get_option'))? ot_get_option( 'display_preloader', 'on' ) : 'on';
+    if($display_preloader != 'off'): ?>
+        <div id="preloader">
+            <?php $preloader = (function_exists('ot_get_option'))? ot_get_option( 'preloader', AWARDSTHEMEURI. '/images/loader.gif' ) : AWARDSTHEMEURI. '/images/loader.gif'; ?>
+            <img class="preloader" src="<?php echo esc_url($preloader); ?>" alt="<?php echo esc_attr__('preloader image', 'awards'); ?>">
+        </div><!-- end loader -->
+    <?php endif; ?>
     <!-- END LOADER -->
     
     <!-- ******************************************
     START SITE HERE
     ********************************************** -->
 	<div id="wrapper">
-    	<?php $header_slide_menu = (function_exists('ot_get_option'))? ot_get_option( 'header_slide_menu', 'on' ) : 'on'; ?>
+    	<?php $header_slide_menu = (function_exists('ot_get_option'))? ot_get_option( 'header_slide_menu', 'on' ) : 'off'; ?>
         <?php if($header_slide_menu != 'off'): ?>
     	<nav class="sidenav">
 			<?php
@@ -94,7 +91,7 @@
                         
                         <ul class="nav navbar-nav navbar-right">
                             <?php
-                            $search_icon_in_menu = (function_exists('ot_get_option'))? ot_get_option( 'search_icon_in_menu', 'on' ) : 'on';
+                            $search_icon_in_menu = (function_exists('ot_get_option'))? ot_get_option( 'search_icon_in_menu', 'on' ) : 'off';
                             if($search_icon_in_menu != 'off'):
 								awards_custom_search_form();                                                      
                             endif; ?>
@@ -119,7 +116,7 @@
 								endif;						
 								
                                 ?>
-                                <li class="submit"><a title="<?php echo esc_attr__('SUBMIT BOOK', 'awards'); ?>" href="<?php echo esc_url($log_in_url); ?>"><?php echo esc_html__('SUBMIT BOOK', 'awards'); ?></a></li>
+                                <li class="submit"><a title="<?php echo esc_attr__('SUBMIT SITE', 'awards'); ?>" href="<?php echo esc_url($log_in_url); ?>"><?php echo esc_html__('SUBMIT SITE', 'awards'); ?></a></li>
                                 
                             <?php endif;
 							endif;

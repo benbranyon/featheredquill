@@ -47,6 +47,21 @@ function awards_general_options( $options = array() ){
         'condition'   => '',
         'operator'    => 'and'
       ),
+      array(
+        'id'          => 'display_preloader',
+        'label'       => esc_html__( 'Display Preloader', 'awards' ),
+        'desc'        => '',
+        'std'         => 'on',
+        'type'        => 'on-off',
+        'section'     => 'general_options',
+        'rows'        => '',
+        'post_type'   => '',
+        'taxonomy'    => '',
+        'min_max_step'=> '',
+        'class'       => '',
+        'condition'   => '',
+        'operator'    => 'and'
+      ),
 	  array(
         'id'          => 'preloader',
         'label'       => esc_html__( 'Preloader Image', 'awards' ),
@@ -59,7 +74,7 @@ function awards_general_options( $options = array() ){
         'taxonomy'    => '',
         'min_max_step'=> '',
         'class'       => '',
-        'condition'   => '',
+        'condition'   => 'display_preloader:not(off)',
         'operator'    => 'and'
       ),
 	);

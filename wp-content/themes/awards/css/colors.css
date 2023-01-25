@@ -64,7 +64,10 @@ mark,
 .btn-offical:focus,
 .btn-offical:hover,
 .pagination li.current a,
-.more-link {
+.more-link,
+.page-links .post-page-numbers:hover,
+.page-links .post-page-numbers:focus,
+.page-links .post-page-numbers.current {
     background-color: #fc4446;
     border-color: #fc4446;
     color: #ffffff !important;

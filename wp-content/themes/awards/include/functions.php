@@ -60,7 +60,7 @@ function awards_comment_form( $args = array(), $post_id = null ) {
 		'must_log_in'          => '<div class="col-md-12"><p class="must-log-in">' . sprintf( wp_kses( __( 'You must be <a href="%s">logged in</a> to post a comment.', 'awards' ), array('a' => array(
 					  'href' => array()),)) , wp_login_url( apply_filters( 'awards_the_permalink', esc_url(get_permalink( $post_id ) ) ) ) ) . '</p></div>',
 		
-		'logged_in_as'         => '<div class="col-md-12"><p class="logged-in-as">' . sprintf( wp_kses( __( 'Logged in as <a href="%1$s">%2$s</a>. <a href="%3$s" title="">Log out?</a>', 'awards' ), array('a' => array('href' => array()),)) , esc_url(get_edit_user_link()), esc_html($user_identity), wp_logout_url( apply_filters( 'awards_the_permalink', esc_url(get_permalink( $post_id ) ) ) ) ) . '</p></div>',
+		'logged_in_as'         => '<div class="col-md-12"><p class="logged-in-as">' . sprintf( wp_kses( __( 'Logged in as <a href="%1$s">%2$s</a>. <a href="%3$s">Log out?</a>', 'awards' ), array('a' => array('href' => array()),)) , esc_url(get_edit_user_link()), esc_html($user_identity), wp_logout_url( apply_filters( 'awards_the_permalink', esc_url(get_permalink( $post_id ) ) ) ) ) . '</p></div>',
 		
 		'id_form'              => 'commentform',
 		'id_submit'            => 'submit',
@@ -74,9 +74,10 @@ function awards_comment_form( $args = array(), $post_id = null ) {
 	$args = wp_parse_args( $args, apply_filters( 'awards_comment_form_defaults', $defaults ) );
 
 	?>
-		<div class="content blog-list clearfix">
 		<?php if ( comments_open( $post_id ) ) : ?>
-				<div class="commentform" id="respond">
+        
+        <div class="content blog-list clearfix">           
+				<div class="commentform" id="respond">                
 				<?php if ( get_option( 'comment_registration' ) && !is_user_logged_in() ) : ?>
 					<?php 
 					echo wp_kses($args['must_log_in'],array(
@@ -91,7 +92,12 @@ function awards_comment_form( $args = array(), $post_id = null ) {
 				  )); ?>
 					<?php do_action( 'awards_comment_form_must_log_in_after' ); ?>
 				<?php else : ?>
-					<form action="<?php echo site_url( '/wp-comments-post.php' ); ?>" method="post" id="<?php echo esc_attr( $args['id_form'] ); ?>" class="contact-form search-top"<?php echo esc_attr($html5) ? ' novalidate' : ''; ?>>
+                	<h3 class="custom-title">
+                        <?php comment_form_title( $args['title_reply'], $args['title_reply_to'] ); ?>
+                        <?php cancel_comment_reply_link( $args['cancel_reply_link'] ); ?>
+                    </h3>
+					<form action="<?php echo site_url( '/wp-comments-post.php' ); ?>" method="post" id="<?php echo esc_attr( $args['id_form'] ); ?>" class=" contact-form search-top row"<?php echo esc_attr($html5) ? ' novalidate' : ''; ?>>
+                    
                     <?php if ( is_user_logged_in() ) : ?>
 						<?php echo apply_filters( 'awards_comment_form_logged_in', $args['logged_in_as'], $commenter, $user_identity ); ?>
                     <?php endif; ?>
@@ -112,11 +118,10 @@ function awards_comment_form( $args = array(), $post_id = null ) {
 					</form>
 				<?php endif; ?>
                 </div>
-			
+				</div><!--.widget-->
 		<?php else : ?>
 			<?php do_action( 'awards_comment_form_comments_closed' ); ?>
 		<?php endif; ?>
-        </div><!--.widget-->
 	<?php
 } // end awards_comment_form function
 endif;
@@ -282,6 +287,28 @@ function awards_mce_css( $mce_css ) {
 endif;
 
 add_filter( 'mce_css', 'awards_mce_css' );
+
+function awards_gutenberg_fonts() {
+	$fonts_url = '';
+	$fonts     = array();
+	
+   if ( 'off' !== _x( 'on', 'Playfair Display Font: on or off', 'awards' ) ) {
+		$fonts[] = 'Playfair Display: 400,400i,700,900';
+	}
+	
+	if ( 'off' !== _x( 'on', 'Rubik font: on or off', 'awards' ) ) {
+		$fonts[] = 'Rubik: 300,400,400i,500,700,900';
+	}
+	
+	if ( $fonts ) {
+		$fonts_url = add_query_arg( array(
+			'family' => urlencode( implode( '|', $fonts ) )
+		), '//fonts.googleapis.com/css' );
+	}
+	
+    wp_enqueue_style('awards-google-fonts', $fonts_url , array(), false );
+}
+add_action('enqueue_block_editor_assets', 'awards_gutenberg_fonts');
 
 if ( ! function_exists( 'awards_fix_gallery' ) ) :
 function awards_fix_gallery($output, $attr) {
@@ -622,15 +649,15 @@ function awards_related_nominee() {
         	<div class="col-md-6 col-sm-6">
                 <div class="site-wrapper">
                     <div class="award-image entry">
-                        <a href="<?php echo esc_url(get_permalink()); ?>" title="">
+                        <a href="<?php echo esc_url(get_permalink()); ?>">
                         	<?php awards_post_thumb( 700, 500 ); ?>
                         </a>
                     </div><!-- end image -->
 
                     <div class="site-small-desc clearfix">  
                         <div class="pull-left">
-                            <h4><a href="<?php echo esc_url(get_permalink()); ?>" title=""><?php the_title(); ?></a></h4>
-                            <p><?php echo esc_html__('By: ', 'awards'); ?> <a href="<?php echo esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ); ?>" title=""><?php echo get_the_author(); ?></a></p>
+                            <h4><a href="<?php echo esc_url(get_permalink()); ?>"><?php the_title(); ?></a></h4>
+                            <p><?php echo esc_html__('By: ', 'awards'); ?> <a href="<?php echo esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ); ?>"><?php echo get_the_author(); ?></a></p>
                         </div>
                         <?php if(function_exists('themestall_show_user_likes')): ?>
                         <div class="likebutton pull-right text-center">
@@ -668,15 +695,15 @@ function awards_submission_nominee($authorid) {
                 <div class="col-md-12">
                     <div class="site-wrapper">
                         <div class="award-image entry">
-                            <a href="<?php echo esc_url(get_permalink()); ?>" title="">
+                            <a href="<?php echo esc_url(get_permalink()); ?>">
                             	<?php awards_post_thumb( 700, 500 ); ?>
                             </a>
                         </div><!-- end image -->
 
                         <div class="site-small-desc clearfix">  
                             <div class="pull-left">
-                            	<h4><a href="<?php echo esc_url(get_permalink()); ?>" title=""><?php the_title(); ?></a></h4>
-                            	<p><?php echo esc_html__('By: ', 'awards'); ?> <a href="<?php echo esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ); ?>" title=""><?php echo get_the_author(); ?></a></p>
+                            	<h4><a href="<?php echo esc_url(get_permalink()); ?>"><?php the_title(); ?></a></h4>
+                            	<p><?php echo esc_html__('By: ', 'awards'); ?> <a href="<?php echo esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ); ?>"><?php echo get_the_author(); ?></a></p>
                             </div>
                             <?php if(function_exists('themestall_show_user_likes')): ?>
                             <div class="likebutton pull-right text-center">

@@ -1,19 +1,19 @@
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: awards\n"
-"POT-Creation-Date: 2017-01-14 00:48+0600\n"
-"PO-Revision-Date: 2016-12-05 14:26+0600\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2022-04-22 23:06+0600\n"
+"PO-Revision-Date: 2022-04-22 23:06+0600\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: en_US\n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.11\n"
-"X-Poedit-Basepath: ..\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Poedit-KeywordsList: esc_html__;esc_html_e;esc_attr__;esc_attr_e;__;_e\n"
+"X-Generator: Poedit 3.0.1\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-KeywordsList: esc_html__;esc_html_e;esc_html_x;esc_attr__;"
+"esc_attr_e;esc_attr_x;__;_e;_x\n"
 "X-Poedit-SearchPath-0: admin\n"
 "X-Poedit-SearchPath-1: footer\n"
 "X-Poedit-SearchPath-2: header\n"
@@ -22,32 +22,34 @@ msgstr ""
 "X-Poedit-SearchPath-5: library\n"
 "X-Poedit-SearchPath-6: page-templates\n"
 "X-Poedit-SearchPath-7: templates\n"
-"X-Poedit-SearchPath-8: 404.php\n"
-"X-Poedit-SearchPath-9: archive.php\n"
-"X-Poedit-SearchPath-10: archive-nominee.php\n"
-"X-Poedit-SearchPath-11: author.php\n"
-"X-Poedit-SearchPath-12: author-bio.php\n"
-"X-Poedit-SearchPath-13: category.php\n"
-"X-Poedit-SearchPath-14: comments.php\n"
-"X-Poedit-SearchPath-15: content.php\n"
-"X-Poedit-SearchPath-16: content-audio.php\n"
-"X-Poedit-SearchPath-17: content-gallery.php\n"
-"X-Poedit-SearchPath-18: content-link.php\n"
-"X-Poedit-SearchPath-19: content-nominee.php\n"
-"X-Poedit-SearchPath-20: content-none.php\n"
-"X-Poedit-SearchPath-21: content-page.php\n"
-"X-Poedit-SearchPath-22: content-quote.php\n"
-"X-Poedit-SearchPath-23: content-video.php\n"
-"X-Poedit-SearchPath-24: footer.php\n"
-"X-Poedit-SearchPath-25: functions.php\n"
-"X-Poedit-SearchPath-26: header.php\n"
-"X-Poedit-SearchPath-27: index.php\n"
-"X-Poedit-SearchPath-28: page.php\n"
-"X-Poedit-SearchPath-29: search.php\n"
-"X-Poedit-SearchPath-30: sidebar.php\n"
-"X-Poedit-SearchPath-31: single.php\n"
-"X-Poedit-SearchPath-32: single-nominee.php\n"
-"X-Poedit-SearchPath-33: tag.php\n"
+"X-Poedit-SearchPath-8: woocommerce\n"
+"X-Poedit-SearchPath-9: 404.php\n"
+"X-Poedit-SearchPath-10: archive.php\n"
+"X-Poedit-SearchPath-11: archive-nominee.php\n"
+"X-Poedit-SearchPath-12: author.php\n"
+"X-Poedit-SearchPath-13: author-bio.php\n"
+"X-Poedit-SearchPath-14: category.php\n"
+"X-Poedit-SearchPath-15: comments.php\n"
+"X-Poedit-SearchPath-16: content.php\n"
+"X-Poedit-SearchPath-17: content-audio.php\n"
+"X-Poedit-SearchPath-18: content-gallery.php\n"
+"X-Poedit-SearchPath-19: content-link.php\n"
+"X-Poedit-SearchPath-20: content-nominee.php\n"
+"X-Poedit-SearchPath-21: content-none.php\n"
+"X-Poedit-SearchPath-22: content-page.php\n"
+"X-Poedit-SearchPath-23: content-quote.php\n"
+"X-Poedit-SearchPath-24: content-video.php\n"
+"X-Poedit-SearchPath-25: footer.php\n"
+"X-Poedit-SearchPath-26: functions.php\n"
+"X-Poedit-SearchPath-27: header.php\n"
+"X-Poedit-SearchPath-28: index.php\n"
+"X-Poedit-SearchPath-29: page.php\n"
+"X-Poedit-SearchPath-30: search.php\n"
+"X-Poedit-SearchPath-31: sidebar.php\n"
+"X-Poedit-SearchPath-32: single.php\n"
+"X-Poedit-SearchPath-33: single-nominee.php\n"
+"X-Poedit-SearchPath-34: tag.php\n"
+"X-Poedit-SearchPath-35: woocommerce.php\n"
 
 #: 404.php:19
 msgid "404"
@@ -66,6 +68,10 @@ msgstr ""
 
 #: 404.php:22
 msgid "Back to Home"
+msgstr ""
+
+#: 404.php:26
+msgid "not found image"
 msgstr ""
 
 #: admin/awards-settings.php:12
@@ -157,6 +163,18 @@ msgstr ""
 msgid "Boxed background image"
 msgstr ""
 
+#: admin/demo-import.php:5 admin/theme-options/background.php:21
+msgid "Default"
+msgstr ""
+
+#: admin/demo-import.php:10 admin/demo-import.php:19
+msgid "Please wait, it may take 5-10 minutes."
+msgstr ""
+
+#: admin/demo-import.php:14 admin/theme-options/background.php:25
+msgid "Dark"
+msgstr ""
+
 #: admin/theme-options.php:63
 msgid "General Options"
 msgstr ""
@@ -199,14 +217,6 @@ msgstr ""
 
 #: admin/theme-options.php:103 admin/theme-options/customcss.php:6
 msgid "Custom CSS"
-msgstr ""
-
-#: admin/theme-options/background.php:21
-msgid "Default"
-msgstr ""
-
-#: admin/theme-options/background.php:25
-msgid "Dark"
 msgstr ""
 
 #: admin/theme-options/background.php:31
@@ -537,10 +547,14 @@ msgid "Footer login logo"
 msgstr ""
 
 #: admin/theme-options/general.php:52
+msgid "Display Preloader"
+msgstr ""
+
+#: admin/theme-options/general.php:67
 msgid "Preloader Image"
 msgstr ""
 
-#: admin/theme-options/general.php:53
+#: admin/theme-options/general.php:68
 msgid "Preloder image"
 msgstr ""
 
@@ -620,6 +634,22 @@ msgstr ""
 
 #: admin/theme-options/nominee.php:22
 msgid "Nominee page header sub-title"
+msgstr ""
+
+#: admin/theme-options/nominee.php:36
+msgid "Submit site type"
+msgstr ""
+
+#: admin/theme-options/nominee.php:37
+msgid "Submit site will be directly publish or need approval of the admin"
+msgstr ""
+
+#: admin/theme-options/nominee.php:51
+msgid "Pending"
+msgstr ""
+
+#: admin/theme-options/nominee.php:55
+msgid "Publish"
 msgstr ""
 
 #: admin/theme-options/sidebar.php:6
@@ -785,7 +815,7 @@ msgstr ""
 
 #: content-audio.php:14 content-gallery.php:14 content-link.php:14
 #: content-quote.php:14 content-video.php:14 content.php:14
-#: include/functions.php:177
+#: include/functions.php:182
 msgid " ago"
 msgstr ""
 
@@ -836,15 +866,19 @@ msgid ""
 "different keywords."
 msgstr ""
 
-#: functions.php:64
+#: functions.php:61
 msgid "Main Menu"
 msgstr ""
 
-#: functions.php:65
+#: functions.php:62
 msgid "Side Menu"
 msgstr ""
 
-#: header.php:115
+#: header.php:25
+msgid "preloader image"
+msgstr ""
+
+#: header.php:119
 msgid "SUBMIT SITE"
 msgstr ""
 
@@ -876,8 +910,16 @@ msgstr ""
 msgid "Monthly Archives: "
 msgstr ""
 
+#: header/banner.php:44
+msgid "F Y"
+msgstr ""
+
 #: header/banner.php:46
 msgid "Yearly Archives: "
+msgstr ""
+
+#: header/banner.php:46
+msgid "Y"
 msgstr ""
 
 #: header/banner.php:48
@@ -995,7 +1037,7 @@ msgid "Original: %s"
 msgstr ""
 
 #: include/custom-menu/edit_custom_walker.php:363
-#: page-templates/submitsite-page.php:310
+#: page-templates/submitsite-page.php:312
 msgid "Remove"
 msgstr ""
 
@@ -1030,9 +1072,7 @@ msgstr ""
 
 #: include/functions.php:63
 #, php-format
-msgid ""
-"Logged in as <a href=\"%1$s\">%2$s</a>. <a href=\"%3$s\" title=\"\">Log out?"
-"</a>"
+msgid "Logged in as <a href=\"%1$s\">%2$s</a>. <a href=\"%3$s\">Log out?</a>"
 msgstr ""
 
 #: include/functions.php:67
@@ -1052,95 +1092,103 @@ msgstr ""
 msgid "Send Comment"
 msgstr ""
 
-#: include/functions.php:167
+#: include/functions.php:172
 msgid "Pingback:"
 msgstr ""
 
-#: include/functions.php:167 include/functions.php:183
+#: include/functions.php:172 include/functions.php:188
 msgid "Edit"
 msgstr ""
 
-#: include/functions.php:184
+#: include/functions.php:189
 msgid "Reply"
 msgstr ""
 
-#: include/functions.php:187
+#: include/functions.php:192
 msgid "Your comment is awaiting moderation."
 msgstr ""
 
-#: include/functions.php:380
+#: include/functions.php:255 include/functions.php:259
+#: include/functions.php:295 include/functions.php:299
+msgid "on"
+msgstr ""
+
+#: include/functions.php:407
 msgid "images thumbnail"
 msgstr ""
 
-#: include/functions.php:386 include/functions.php:502
+#: include/functions.php:413 include/functions.php:529
 msgid "Previous"
 msgstr ""
 
-#: include/functions.php:390 include/functions.php:508
+#: include/functions.php:417 include/functions.php:535
 msgid "Next"
 msgstr ""
 
-#: include/functions.php:526
+#: include/functions.php:553
 msgid "Sign in Account"
 msgstr ""
 
-#: include/functions.php:531
+#: include/functions.php:558
 msgid "Username or Email"
 msgstr ""
 
-#: include/functions.php:535
+#: include/functions.php:562 woocommerce/myaccount/form-login.php:47
+#: woocommerce/myaccount/form-login.php:95
 msgid "Password"
 msgstr ""
 
-#: include/functions.php:541
+#: include/functions.php:568 woocommerce/myaccount/form-login.php:56
 msgid "Remember me"
 msgstr ""
 
-#: include/functions.php:546
+#: include/functions.php:573 woocommerce/myaccount/form-login.php:37
+#: woocommerce/myaccount/form-login.php:54
 msgid "Login"
 msgstr ""
 
-#: include/functions.php:548
+#: include/functions.php:575 woocommerce/myaccount/form-login.php:60
 msgid "Lost your password?"
 msgstr ""
 
-#: include/functions.php:573
+#: include/functions.php:600
 msgid "Like"
 msgstr ""
 
-#: include/functions.php:574
+#: include/functions.php:601
 msgid "Tweet"
 msgstr ""
 
-#: include/functions.php:575
+#: include/functions.php:602
 msgid "Share"
 msgstr ""
 
-#: include/functions.php:576
+#: include/functions.php:603
 msgid "LinkedIn"
 msgstr ""
 
-#: include/functions.php:617
+#: include/functions.php:644
 msgid "Recent Sites"
 msgstr ""
 
-#: include/functions.php:633 include/functions.php:679
+#: include/functions.php:660 include/functions.php:706
 msgid "By: "
 msgstr ""
 
-#: include/functions.php:662
+#: include/functions.php:689
 msgid "Submissions"
 msgstr ""
 
-#: include/functions.php:703
+#: include/functions.php:730
 msgid "Search"
 msgstr ""
 
-#: include/functions.php:704
+#: include/functions.php:731
 msgid "search"
 msgstr ""
 
-#: include/functions.php:726 page-templates/submitsite-page.php:367
+#: include/functions.php:753 page-templates/submitsite-page.php:369
+#: woocommerce/myaccount/form-edit-account.php:89
 msgid "Apply for Agency or Nominee?"
 msgstr ""
 
@@ -1244,6 +1292,11 @@ msgid ""
 "not packaged in a folder."
 msgstr ""
 
+#: library/class-tgm-plugin-activation.php:1206
+#: library/class-tgm-plugin-activation.php:3033
+msgid "and"
+msgstr ""
+
 #: library/class-tgm-plugin-activation.php:2067
 #, php-format
 msgid "TGMPA v%s"
@@ -1291,6 +1344,15 @@ msgstr ""
 
 #: library/class-tgm-plugin-activation.php:2418
 msgid "Update recommended"
+msgstr ""
+
+#: library/class-tgm-plugin-activation.php:2427
+#, php-format
+msgid "%1$s, %2$s"
+msgstr ""
+
+#: library/class-tgm-plugin-activation.php:2567
+msgid "unknown"
 msgstr ""
 
 #: library/class-tgm-plugin-activation.php:2575
@@ -1410,18 +1472,9 @@ msgid ""
 msgstr ""
 
 #: library/class-tgm-plugin-activation.php:3594
+#: library/class-tgm-plugin-activation.php:3602
 #, php-format
-msgid "%1$s installed and activated successfully."
-msgstr ""
-
-#: library/class-tgm-plugin-activation.php:3594
-#: library/class-tgm-plugin-activation.php:3602
-msgid "Show Details"
-msgstr ""
-
-#: library/class-tgm-plugin-activation.php:3594
-#: library/class-tgm-plugin-activation.php:3602
-msgid "Hide Details"
+msgid "%1$s done."
 msgstr ""
 
 #: library/class-tgm-plugin-activation.php:3595
@@ -1437,11 +1490,6 @@ msgstr ""
 msgid ""
 "The installation process is starting. This process may take a while on some "
 "hosts, so please be patient."
-msgstr ""
-
-#: library/class-tgm-plugin-activation.php:3602
-#, php-format
-msgid "%1$s installed successfully."
 msgstr ""
 
 #: library/class-tgm-plugin-activation.php:3603
@@ -1465,35 +1513,35 @@ msgstr ""
 msgid "OptionTree"
 msgstr ""
 
-#: library/tgm-plugins.php:97
+#: library/tgm-plugins.php:103
 msgid "Contact Form 7"
 msgstr ""
 
-#: library/tgm-plugins.php:104
+#: library/tgm-plugins.php:110
 msgid "Black Studio TinyMCE Widget"
 msgstr ""
 
-#: library/tgm-plugins.php:111
+#: library/tgm-plugins.php:117
 msgid "Page Builder by SiteOrigin"
 msgstr ""
 
-#: library/tgm-plugins.php:118
+#: library/tgm-plugins.php:124
 msgid "Newsletter"
 msgstr ""
 
-#: library/tgm-plugins.php:125
+#: library/tgm-plugins.php:131
 msgid "WP User Avatar"
 msgstr ""
 
-#: library/tgm-plugins.php:132
+#: library/tgm-plugins.php:138
 msgid "One Click Demo Import"
 msgstr ""
 
-#: library/tgm-plugins.php:139
+#: library/tgm-plugins.php:145
 msgid "WooCommerce"
 msgstr ""
 
-#: library/tgm-plugins.php:146
+#: library/tgm-plugins.php:152
 msgid "WP Simple Paypal Shopping cart"
 msgstr ""
 
@@ -1505,107 +1553,108 @@ msgstr ""
 msgid "No Payment is pending"
 msgstr ""
 
-#: page-templates/submitsite-page.php:32 page-templates/submitsite-page.php:114
+#: page-templates/submitsite-page.php:34 page-templates/submitsite-page.php:116
 msgid "Please Type your site name"
 msgstr ""
 
-#: page-templates/submitsite-page.php:37 page-templates/submitsite-page.php:119
+#: page-templates/submitsite-page.php:39 page-templates/submitsite-page.php:121
 msgid "Please Type your site description"
 msgstr ""
 
-#: page-templates/submitsite-page.php:42 page-templates/submitsite-page.php:124
+#: page-templates/submitsite-page.php:44 page-templates/submitsite-page.php:126
 msgid "Please Type your site URL"
 msgstr ""
 
-#: page-templates/submitsite-page.php:47 page-templates/submitsite-page.php:129
+#: page-templates/submitsite-page.php:49 page-templates/submitsite-page.php:131
 msgid "Please upload screenshot"
 msgstr ""
 
-#: page-templates/submitsite-page.php:96
+#: page-templates/submitsite-page.php:98
 msgid "Site Submit Successful!"
 msgstr ""
 
-#: page-templates/submitsite-page.php:200
+#: page-templates/submitsite-page.php:202
 msgid "Site Details"
 msgstr ""
 
-#: page-templates/submitsite-page.php:207
+#: page-templates/submitsite-page.php:209
 msgid "* Required Fields"
 msgstr ""
 
-#: page-templates/submitsite-page.php:211
+#: page-templates/submitsite-page.php:213
 msgid "Site name *"
 msgstr ""
 
-#: page-templates/submitsite-page.php:220
+#: page-templates/submitsite-page.php:222
 msgid "Site URL *"
 msgstr ""
 
-#: page-templates/submitsite-page.php:224
+#: page-templates/submitsite-page.php:226
 msgid "http://"
 msgstr ""
 
-#: page-templates/submitsite-page.php:229
+#: page-templates/submitsite-page.php:231
 msgid "Description *"
 msgstr ""
 
-#: page-templates/submitsite-page.php:241
+#: page-templates/submitsite-page.php:243
 msgid "Colors *"
 msgstr ""
 
-#: page-templates/submitsite-page.php:258
+#: page-templates/submitsite-page.php:260
 msgid "Software *"
 msgstr ""
 
-#: page-templates/submitsite-page.php:272
+#: page-templates/submitsite-page.php:274
 msgid "Categories *"
 msgstr ""
 
-#: page-templates/submitsite-page.php:286
+#: page-templates/submitsite-page.php:288
 msgid "Tags *"
 msgstr ""
 
-#: page-templates/submitsite-page.php:297
+#: page-templates/submitsite-page.php:299
 msgid "Screenshot *"
 msgstr ""
 
-#: page-templates/submitsite-page.php:297
+#: page-templates/submitsite-page.php:299
 msgid "(695px x 496px)"
 msgstr ""
 
-#: page-templates/submitsite-page.php:306
+#: page-templates/submitsite-page.php:308
 msgid "Select Screenshot"
 msgstr ""
 
-#: page-templates/submitsite-page.php:307
+#: page-templates/submitsite-page.php:309
 msgid "Change"
 msgstr ""
 
-#: page-templates/submitsite-page.php:317
+#: page-templates/submitsite-page.php:319
 msgid "Payment Details"
 msgstr ""
 
-#: page-templates/submitsite-page.php:321
+#: page-templates/submitsite-page.php:323
 msgid "Select Plan"
 msgstr ""
 
-#: page-templates/submitsite-page.php:323
+#: page-templates/submitsite-page.php:325
 msgid "Select your plan"
 msgstr ""
 
-#: page-templates/submitsite-page.php:324
+#: page-templates/submitsite-page.php:326
 msgid "Free Submission"
 msgstr ""
 
-#: page-templates/submitsite-page.php:343
+#: page-templates/submitsite-page.php:345
 msgid "Submit"
 msgstr ""
 
-#: page-templates/submitsite-page.php:351
+#: page-templates/submitsite-page.php:353
 msgid "Submit & Pay"
 msgstr ""
 
-#: page-templates/submitsite-page.php:370
+#: page-templates/submitsite-page.php:372
+#: woocommerce/myaccount/form-edit-account.php:92
 msgid "Apply"
 msgstr ""
 
@@ -1644,4 +1693,54 @@ msgstr ""
 
 #: templates/single-post.php:17
 msgid "%n comments"
+msgstr ""
+
+#: woocommerce/myaccount/form-edit-account.php:29
+#: woocommerce/myaccount/form-edit-account.php:84
+msgid "Edit Account"
+msgstr ""
+
+#: woocommerce/myaccount/form-edit-account.php:35
+msgid "First name"
+msgstr ""
+
+#: woocommerce/myaccount/form-edit-account.php:39
+msgid "Last name"
+msgstr ""
+
+#: woocommerce/myaccount/form-edit-account.php:45
+msgid "Email address"
+msgstr ""
+
+#: woocommerce/myaccount/form-edit-account.php:52
+msgid "Current Password (leave blank to leave unchanged)"
+msgstr ""
+
+#: woocommerce/myaccount/form-edit-account.php:56
+msgid "New Password (leave blank to leave unchanged)"
+msgstr ""
+
+#: woocommerce/myaccount/form-edit-account.php:60
+msgid "Confirm New Password"
+msgstr ""
+
+#: woocommerce/myaccount/form-edit-account.php:70
+msgid "Save changes"
+msgstr ""
+
+#: woocommerce/myaccount/form-login.php:44
+msgid "Username or email"
+msgstr ""
+
+#: woocommerce/myaccount/form-login.php:74
+#: woocommerce/myaccount/form-login.php:104
+msgid "Register"
+msgstr ""
+
+#: woocommerce/myaccount/form-login.php:83
+msgid "username"
+msgstr ""
+
+#: woocommerce/myaccount/form-login.php:89
+msgid "email"
 msgstr ""

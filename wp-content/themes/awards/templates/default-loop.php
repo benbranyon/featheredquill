@@ -28,9 +28,9 @@
                                 <?php endif; ?>
                             </ul><!-- end list -->
                         </div><!-- end blog-meta -->
-                        <h4><a href="<?php esc_url(the_permalink()); ?>" title=""><?php the_title(); ?></a></h4>
+                        <h4><a href="<?php esc_url(the_permalink()); ?>"><?php the_title(); ?></a></h4>
                         <?php the_excerpt(); ?>
-                        <a href="<?php esc_url(the_permalink()); ?>" class="readmore" title=""><?php echo esc_html__( 'Read more', 'awards' ); ?></a>
+                        <a href="<?php esc_url(the_permalink()); ?>" class="readmore"><?php echo esc_html__( 'Read more', 'awards' ); ?></a>
                     </div><!-- end blog-title -->
                 </div><!-- end clearfix -->
             </div>

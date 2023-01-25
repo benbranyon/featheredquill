@@ -3,8 +3,8 @@ Tags: widget, button, slider, hero, google maps, image, carousel, lottie, featur
 Requires at least: 4.2
 Tested up to: 6.1
 Requires PHP: 5.6.20
-Stable tag: 1.46.2
-Build time: 2023-01-14T19:28:07+00:00
+Stable tag: 1.46.3
+Build time: 2023-01-24T23:58:02+02:00
 License: GPLv3 or later
 Contributors: gpriday, braam-genis, alexgso
 Donate link: https://siteorigin.com/downloads/premium/
@@ -105,6 +105,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 The Widgets Bundle global interface is available at Plugins > SiteOrigin Widgets. Widgets can be enabled or disabled as needed. If a widget offers global settings, you can access those via the Settings button next to each applicable widget.
 
 == Changelog ==
+
+= 1.46.3 - 23 January 2023 =
+* Simple Masonry: Resolved pre-WordPress 5.9 error.
+* Resolved potential `mce_external_plugins` missing `editor_id` error.
 
 = 1.46.2 - 14 January 2023 =
 * Color Form Field: Added `siteorigin_widget_color_palette` filter.

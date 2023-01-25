@@ -58,12 +58,12 @@ function awards_register_required_plugins() {
 	 * If the source is NOT from the .org repo, then source is also required.
 	 */
 	$plugins = array(
-
+		
 		// This is an example of how to include a plugin bundled with a theme.
 		array(
 			'name'               => esc_html__('ThemeStall Add-ons', 'awards'), // The plugin name.
 			'slug'               => 'themestall-addons', // The plugin slug (typically the folder name).
-			'source'             => esc_url('http://theme-stall.com/awards/plugins/themestall-addons.zip'), // The plugin source.
+			'source'             => 'http://theme-stall.com/awards/plugins/themestall-addons.zip', // The plugin source.
 			'required'           => true, // If false, the plugin is only 'recommended' instead of required.
 			'version'            => '', // E.g. 1.0.0. If set, the active plugin must be this version or higher. If the plugin version is higher than the plugin version installed, the user will be notified to update the plugin.
 			'force_activation'   => false, // If true, plugin is activated upon theme activation and cannot be deactivated until theme switch.
@@ -76,7 +76,7 @@ function awards_register_required_plugins() {
 		array(
 			'name'               => esc_html__('Nominee Likes', 'awards'), // The plugin name.
 			'slug'               => 'nominee-like', // The plugin slug (typically the folder name).
-			'source'             => esc_url('http://theme-stall.com/awards/plugins/nominee-like.zip'), // The plugin source.
+			'source'             => 'http://theme-stall.com/awards/plugins/nominee-like.zip', // The plugin source.
 			'required'           => true, // If false, the plugin is only 'recommended' instead of required.
 			'version'            => '', // E.g. 1.0.0. If set, the active plugin must be this version or higher. If the plugin version is higher than the plugin version installed, the user will be notified to update the plugin.
 			'force_activation'   => false, // If true, plugin is activated upon theme activation and cannot be deactivated until theme switch.
@@ -85,11 +85,17 @@ function awards_register_required_plugins() {
 			'is_callable'        => '', // If set, this callable will be be checked for availability to determine if a plugin is active.
 		),
 		
-		// This is an example of how to include a plugin from an arbitrary external source in your theme.
+		// This is an example of how to include a plugin bundled with a theme.
 		array(
-			'name'      => esc_html__('OptionTree', 'awards'),
-			'slug'      => 'option-tree',
-			'required'  => true,
+			'name'               => esc_html__('OptionTree', 'awards'), // The plugin name.
+			'slug'               => 'option-tree', // The plugin slug (typically the folder name).
+			'source'             => 'http://theme-stall.com/common-plugins/option-tree.zip', // The plugin source.
+			'required'           => true, // If false, the plugin is only 'recommended' instead of required.
+			'version'            => '', // E.g. 1.0.0. If set, the active plugin must be this version or higher. If the plugin version is higher than the plugin version installed, the user will be notified to update the plugin.
+			'force_activation'   => false, // If true, plugin is activated upon theme activation and cannot be deactivated until theme switch.
+			'force_deactivation' => false, // If true, plugin is deactivated upon theme switch, useful for theme-specific plugins.
+			'external_url'       => '', // If set, overrides default API URL and points to an external URL.
+			'is_callable'        => '', // If set, this callable will be be checked for availability to determine if a plugin is active.
 		),
 		
 		// This is an example of how to include a plugin bundled with a theme.

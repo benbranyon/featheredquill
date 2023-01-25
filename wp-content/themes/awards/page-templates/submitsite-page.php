@@ -17,6 +17,8 @@ if(!is_user_logged_in()):
 wp_redirect( home_url('/') );
 endif;
 
+$nominee_site_publish_type = (function_exists('ot_get_option'))? ot_get_option( 'nominee_site_publish_type', 'pending' ) : 'pending';
+
 $success_message = '';
 $current_user = wp_get_current_user();
 $author_link = get_author_posts_url( $current_user->ID );
@@ -52,7 +54,7 @@ if( isset ( $_POST['submit_nominee'] ) ) {
 		$my_post = array(
 		'post_title'    => $post_title,
 		'post_content'  => $post_content,
-		'post_status'   => 'pending',
+		'post_status'   => $nominee_site_publish_type,
 		'post_author'   => $current_user->ID,
 		'post_type'     => 'nominee',
 		);
@@ -134,7 +136,7 @@ if( isset ( $_POST['submit_nominee_paid'] ) ) {
 		$my_post = array(
 		'post_title'    => $post_title,
 		'post_content'  => $post_content,
-		'post_status'   => 'pending',
+		'post_status'   => $nominee_site_publish_type,
 		'post_author'   => $current_user->ID,
 		'post_type'     => 'nominee',
 		);
@@ -212,7 +214,7 @@ if( isset ( $_POST['submit_nominee_for'] ) &&  isset( $_POST['reg_nominee_for'] 
                         <?php if(isset($errors['site_name'])) echo wp_kses($errors['site_name'], array('span'=>array('class'=>array()))); ?>
                         </label>
                         <div class="col-sm-10">
-                            <input type="text" value="<?php if(isset($_POST['site_name'])) echo esc_html($_POST['site_name']); ?>" class="form-control" name="site_name" placeholder="">
+                            <input type="text" value="<?php if(isset($_POST['site_name'])) echo esc_html($_POST['site_name']); ?>" class="form-control" name="site_name">
                         </div>
                     </div>
     
@@ -230,7 +232,7 @@ if( isset ( $_POST['submit_nominee_for'] ) &&  isset( $_POST['reg_nominee_for'] 
                         <?php if(isset($errors['submit_description'])) echo wp_kses($errors['submit_description'], array('span'=>array('class'=>array()))); ?>
                         </label>
                         <div class="col-sm-10">
-                            <textarea name="submit_description" placeholder="" class="form-control"><?php if(isset($_POST['submit_description'])) echo esc_html($_POST['submit_description']); ?></textarea>
+                            <textarea name="submit_description" class="form-control"><?php if(isset($_POST['submit_description'])) echo esc_html($_POST['submit_description']); ?></textarea>
                         </div>
                     </div>
     

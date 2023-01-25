@@ -481,7 +481,7 @@ class AjaxHandler
             $_POST = $_REQUEST = $data;
 
             // variable is populated by parse_str()
-            $user_login = ! empty($data['tabbed-user-login']) ? $data['tabbed-user-login'] : $data['user_login'];
+            $user_login = ! empty($data['tabbed-user-login']) ? $data['tabbed-user-login'] : ppress_var($data, 'user_login', '');
             $user_login = sanitize_text_field($user_login);
 
             $is_melange = ( ! empty($_POST['is_melange']) && $_POST['is_melange'] == 'true');

@@ -21,7 +21,7 @@
 		$author_bio_avatar_size = apply_filters( 'awards_author_bio_avatar_size', 130 );
 		echo get_avatar( get_the_author_meta( 'user_email' ), $author_bio_avatar_size, null, null, array( 'class' => array( 'img-responsive', 'img-circle' ) ) );
 		?>
-        <a href="<?php echo esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ); ?>" title=""><h4>
+        <a href="<?php echo esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ); ?>"><h4>
         <?php if($description != ''): ?>
         <small><?php echo esc_html__('about ', 'awards'); ?></small>
         <?php endif; ?>
