@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the ProfilePress package.
 msgid ""
 msgstr ""
-"Project-Id-Version: ProfilePress 4.5.4\n"
+"Project-Id-Version: ProfilePress 4.5.5\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-user-avatar\n"
-"POT-Creation-Date: 2023-01-11 14:32:46+00:00\n"
+"POT-Creation-Date: 2023-01-21 18:35:51+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -572,7 +572,7 @@ msgstr ""
 #: src/Admin/SettingsPages/DragDropBuilder/DragDropBuilder.php:1229
 #: src/Admin/SettingsPages/LicenseUpgrader.php:176
 #: src/Admin/SettingsPages/Membership/CheckoutFieldsManager.php:101
-#: src/Classes/ExtensionManager.php:82 src/Functions/GlobalFunctions.php:1410
+#: src/Classes/ExtensionManager.php:87 src/Functions/GlobalFunctions.php:1410
 #: src/Themes/DragDrop/AbstractMemberDirectoryTheme.php:216
 msgid "Custom Fields"
 msgstr ""
@@ -600,7 +600,7 @@ msgstr ""
 #: src/AdminBarDashboardAccess/include.settings-page.php:54
 #: src/AdminBarDashboardAccess/include.settings-page.php:109
 #: src/Functions/custom-settings-api.php:1113
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:1097
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:1101
 msgid "Save Changes"
 msgstr ""
 
@@ -653,7 +653,7 @@ msgstr ""
 
 #: src/Admin/SettingsPages/DragDropBuilder/DragDropBuilder.php:1436
 #: src/Admin/SettingsPages/LicenseUpgrader.php:200
-#: src/Classes/ExtensionManager.php:112
+#: src/Classes/ExtensionManager.php:122
 msgid "Passwordless Login"
 msgstr ""
 
@@ -731,6 +731,7 @@ msgstr ""
 #: src/Admin/SettingsPages/DragDropBuilder/FieldBase.php:89
 #: src/Admin/SettingsPages/DragDropBuilder/FieldBase.php:232
 #: src/Admin/SettingsPages/EmailSettings/EmailSettingsPage.php:98
+#: src/Admin/SettingsPages/ExtensionsSettingsPage.php:154
 #: src/Admin/SettingsPages/GeneralSettings.php:43
 #: src/Admin/SettingsPages/GeneralSettings.php:44
 #: src/Admin/SettingsPages/Membership/PaymentSettings.php:30
@@ -962,7 +963,7 @@ msgstr ""
 #: src/Admin/SettingsPages/DragDropBuilder/Fields/Password.php:22
 #: src/Admin/SettingsPages/Membership/CustomersPage/SettingsPage.php:315
 #: src/Membership/CheckoutFields.php:86
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:185
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:186
 #: src/Themes/DragDrop/AbstractTheme.php:165
 #: src/Themes/DragDrop/AbstractTheme.php:205 src/Widgets/TabbedWidget.php:144
 #: src/Widgets/TabbedWidget.php:172 src/templates/checkout/form-login.php:12
@@ -1006,7 +1007,7 @@ msgstr ""
 
 #: src/Admin/SettingsPages/DragDropBuilder/Fields/ConfirmPassword.php:22
 #: src/Membership/CheckoutFields.php:93
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:211
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:212
 #: src/Themes/DragDrop/AbstractTheme.php:168
 msgid "Confirm Password"
 msgstr ""
@@ -1055,7 +1056,7 @@ msgstr ""
 #: src/Admin/SettingsPages/DragDropBuilder/Fields/DisplayName.php:22
 #: src/Admin/SettingsPages/DragDropBuilder/Fields/UserProfile/DisplayName.php:22
 #: src/Functions/GlobalFunctions.php:1392 src/Membership/CheckoutFields.php:114
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:341
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:342
 #: src/Themes/DragDrop/AbstractMemberDirectoryTheme.php:208
 #: src/Themes/DragDrop/AbstractTheme.php:180
 #: src/Themes/DragDrop/MemberDirectory/DefaultTemplate.php:115
@@ -1080,7 +1081,7 @@ msgstr ""
 #: src/Admin/SettingsPages/DragDropBuilder/Fields/UserProfile/Email.php:22
 #: src/Admin/SettingsPages/Membership/CustomersPage/SettingsPage.php:307
 #: src/Functions/GlobalFunctions.php:1393 src/Membership/CheckoutFields.php:51
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:233
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:234
 #: src/Themes/DragDrop/AbstractMemberDirectoryTheme.php:206
 #: src/Themes/DragDrop/AbstractTheme.php:162
 #: src/Themes/DragDrop/AbstractTheme.php:221 src/Widgets/TabbedWidget.php:137
@@ -1091,7 +1092,7 @@ msgstr ""
 #: src/Admin/SettingsPages/DragDropBuilder/Fields/UserProfile/FirstName.php:22
 #: src/Admin/SettingsPages/Membership/CustomersPage/SettingsPage.php:299
 #: src/Functions/GlobalFunctions.php:1389 src/Membership/CheckoutFields.php:65
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:373
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:374
 #: src/Themes/DragDrop/AbstractMemberDirectoryTheme.php:209
 #: src/Themes/DragDrop/AbstractMemberDirectoryTheme.php:479
 #: src/Themes/DragDrop/AbstractTheme.php:183
@@ -1112,7 +1113,7 @@ msgstr ""
 #: src/Admin/SettingsPages/DragDropBuilder/Fields/UserProfile/LastName.php:22
 #: src/Admin/SettingsPages/Membership/CustomersPage/SettingsPage.php:303
 #: src/Functions/GlobalFunctions.php:1390 src/Membership/CheckoutFields.php:72
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:406
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:407
 #: src/Themes/DragDrop/AbstractMemberDirectoryTheme.php:210
 #: src/Themes/DragDrop/AbstractMemberDirectoryTheme.php:480
 #: src/Themes/DragDrop/AbstractTheme.php:186
@@ -1146,8 +1147,8 @@ msgstr ""
 #: src/Admin/SettingsPages/DragDropBuilder/Fields/Nickname.php:22
 #: src/Admin/SettingsPages/DragDropBuilder/Fields/UserProfile/Nickname.php:22
 #: src/Functions/GlobalFunctions.php:1391 src/Membership/CheckoutFields.php:107
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:309
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:323
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:310
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:324
 #: src/ShortcodeParser/MyAccount/edit-profile.tmpl.php:140
 #: src/Themes/DragDrop/AbstractTheme.php:177
 #: src/Themes/DragDrop/UserProfile/DefaultTemplate.php:107
@@ -1304,7 +1305,7 @@ msgstr ""
 #: src/Admin/SettingsPages/DragDropBuilder/Fields/Username.php:22
 #: src/Admin/SettingsPages/Membership/CustomersPage/SettingsPage.php:311
 #: src/Functions/GlobalFunctions.php:1388 src/Membership/CheckoutFields.php:79
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:158
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:159
 #: src/Themes/DragDrop/AbstractMemberDirectoryTheme.php:481
 #: src/Themes/DragDrop/AbstractTheme.php:159
 #: src/Themes/DragDrop/AbstractTheme.php:218
@@ -1316,8 +1317,8 @@ msgstr ""
 #: src/Admin/SettingsPages/DragDropBuilder/Fields/UserProfile/Website.php:22
 #: src/Admin/SettingsPages/DragDropBuilder/Fields/Website.php:22
 #: src/Membership/CheckoutFields.php:100
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:276
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:290
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:277
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:291
 #: src/ShortcodeParser/MyAccount/edit-profile.tmpl.php:150
 #: src/Themes/DragDrop/AbstractMemberDirectoryTheme.php:207
 #: src/Themes/DragDrop/AbstractTheme.php:174
@@ -1914,11 +1915,11 @@ msgstr ""
 msgid "Unavailable: %s"
 msgstr ""
 
-#: src/Admin/SettingsPages/ExtensionsSettingsPage.php:153
+#: src/Admin/SettingsPages/ExtensionsSettingsPage.php:159
 msgid "Activated"
 msgstr ""
 
-#: src/Admin/SettingsPages/ExtensionsSettingsPage.php:153
+#: src/Admin/SettingsPages/ExtensionsSettingsPage.php:159
 msgid "Deactivated"
 msgstr ""
 
@@ -2694,17 +2695,17 @@ msgid "Advanced shortcode builder"
 msgstr ""
 
 #: src/Admin/SettingsPages/LicenseUpgrader.php:182
-#: src/Classes/ExtensionManager.php:106
+#: src/Classes/ExtensionManager.php:115
 msgid "Social Login"
 msgstr ""
 
 #: src/Admin/SettingsPages/LicenseUpgrader.php:188
-#: src/Classes/ExtensionManager.php:124
+#: src/Classes/ExtensionManager.php:136
 msgid "Metered Paywall"
 msgstr ""
 
 #: src/Admin/SettingsPages/LicenseUpgrader.php:194
-#: src/Classes/ExtensionManager.php:100
+#: src/Classes/ExtensionManager.php:108
 msgid "User Moderation"
 msgstr ""
 
@@ -5029,183 +5030,183 @@ msgstr ""
 msgid "Something unexpected happened. Please try again"
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:64
+#: src/Classes/ExtensionManager.php:66
 msgid "PayPal"
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:66
+#: src/Classes/ExtensionManager.php:69
 msgid "Accept payments and sell subscriptions via PayPal."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:70
+#: src/Classes/ExtensionManager.php:73
 msgid "Mollie"
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:72
+#: src/Classes/ExtensionManager.php:76
 msgid "Accept payments and sell subscriptions via Mollie."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:76
+#: src/Classes/ExtensionManager.php:80
 msgid "Receipt"
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:78
+#: src/Classes/ExtensionManager.php:83
 msgid ""
 "Allow customers to view, print and download as PDF, the receipt of their "
 "orders."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:84
+#: src/Classes/ExtensionManager.php:90
 msgid ""
 "Collect unlimited additional information from users besides the standard "
 "profile data."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:88
+#: src/Classes/ExtensionManager.php:94
 msgid "Email Confirmation"
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:90
+#: src/Classes/ExtensionManager.php:97
 msgid ""
 "Ensure newly registered users confirm their email addresses before they can "
 "log in."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:94
+#: src/Classes/ExtensionManager.php:101
 msgid "Two-Factor Authentication (2FA)"
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:96
+#: src/Classes/ExtensionManager.php:104
 msgid ""
 "Adds an additional layer of security to users accounts by requiring more "
 "than just a password to log in."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:102
+#: src/Classes/ExtensionManager.php:111
 msgid ""
 "Decide whether to approve newly registered users or not. You can also block "
 "and unblock users at any time."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:108
+#: src/Classes/ExtensionManager.php:118
 msgid ""
 "Let users easily register/login to your site using their social network "
 "accounts (Facebook, Twitter, Google, LinkedIn, Yahoo, Microsoft, Amazon, "
 "GitHub, WordPress.com, VK)."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:114
+#: src/Classes/ExtensionManager.php:125
 msgid ""
 "Let users log in to your website via a one-time URL sent to their email "
 "addresses."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:118
+#: src/Classes/ExtensionManager.php:129
 msgid "Google reCAPTCHA"
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:120
+#: src/Classes/ExtensionManager.php:132
 msgid "Protect your forms against spam and bot attacks."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:126
+#: src/Classes/ExtensionManager.php:139
 msgid "Let guest and visitors view limited number of restricted content."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:130
+#: src/Classes/ExtensionManager.php:143
 msgid "Join BuddyPress Groups"
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:132
+#: src/Classes/ExtensionManager.php:145
 msgid "Let users select the BuddyPress groups to join during registration."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:135 src/Classes/ExtensionManager.php:144
+#: src/Classes/ExtensionManager.php:148 src/Classes/ExtensionManager.php:157
 msgid "BuddyPress plugin is not active"
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:139
+#: src/Classes/ExtensionManager.php:152
 msgid "BuddyPress Profile Sync"
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:141
+#: src/Classes/ExtensionManager.php:154
 msgid ""
 "It provides a 2-way synchronization between WordPress profile fields and "
 "BuddyPress extended profile."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:148
+#: src/Classes/ExtensionManager.php:161
 msgid "Site Creation"
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:150
+#: src/Classes/ExtensionManager.php:163
 msgid ""
 "Allow users to create new sites on a multisite network via a registration "
 "form powered by ProfilePress."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:153
+#: src/Classes/ExtensionManager.php:166
 msgid "This is not a multisite installation"
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:157
+#: src/Classes/ExtensionManager.php:170
 msgid "WooCommerce"
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:159
+#: src/Classes/ExtensionManager.php:173
 msgid ""
 "It allows you to manage WooCommerce billing and shipping fields, replaces "
 "WooCommerce login and edit account forms in checkout and “My Account” pages "
 "with that of ProfilePress."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:162
+#: src/Classes/ExtensionManager.php:176
 msgid "WooCommerce is not active"
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:166
+#: src/Classes/ExtensionManager.php:180
 msgid "Mailchimp"
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:168
+#: src/Classes/ExtensionManager.php:183
 msgid ""
 "Subscribe members to your Mailchimp audiences when they register or "
 "subscribe to a membership plan. It can also automatically sync membership "
 "and profile changes with Mailchimp."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:172
+#: src/Classes/ExtensionManager.php:187
 msgid "Campaign Monitor"
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:174
+#: src/Classes/ExtensionManager.php:190
 msgid ""
 "Subscribe members to your Campaign Monitor lists when they register or "
 "subscribe to a membership plan. It can also automatically sync membership "
 "and profile changes with Campaign Monitor."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:178
+#: src/Classes/ExtensionManager.php:194
 msgid "Akismet"
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:180
+#: src/Classes/ExtensionManager.php:197
 msgid ""
 "Block spam and bot user registrations with Akismet and keep your membership "
 "site safe and secured."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:184
+#: src/Classes/ExtensionManager.php:201
 msgid "Polylang"
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:186
+#: src/Classes/ExtensionManager.php:203
 msgid ""
 "It allows you to build multilingual login, registration, password reset and "
 "edit profile forms."
 msgstr ""
 
-#: src/Classes/ExtensionManager.php:189
+#: src/Classes/ExtensionManager.php:206
 msgid "Polylang plugin is not active"
 msgstr ""
 
@@ -5264,7 +5265,7 @@ msgstr ""
 msgid "Processing"
 msgstr ""
 
-#: src/Classes/GDPR.php:19 src/Classes/GDPR.php:63 src/Classes/GDPR.php:110
+#: src/Classes/GDPR.php:19 src/Classes/GDPR.php:63 src/Classes/GDPR.php:91
 msgid "User Extra Information"
 msgstr ""
 
@@ -15063,12 +15064,12 @@ msgid "Muchinga"
 msgstr ""
 
 #: src/Membership/CheckoutFields.php:58
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:257
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:258
 msgid "Confirm Email Address"
 msgstr ""
 
 #: src/Membership/CheckoutFields.php:121
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:436
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:437
 msgid "Biographical Info"
 msgstr ""
 
@@ -15778,7 +15779,7 @@ msgid "Log Out"
 msgstr ""
 
 #: src/NavigationMenuLinks/Backend.php:31 src/RegisterActivation/Base.php:187
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:1094
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:1098
 #: src/ShortcodeParser/Builder/GlobalShortcodes.php:184
 #: src/Widgets/TabbedWidget.php:89
 msgid "Sign Up"
@@ -15864,108 +15865,108 @@ msgstr ""
 #: src/ShortcodeParser/Builder/EditProfileBuilder.php:86
 #: src/ShortcodeParser/Builder/EditProfileBuilder.php:99
 #: src/ShortcodeParser/Builder/PasswordResetBuilder.php:220
-#: src/ShortcodeParser/Builder/PasswordResetBuilder.php:232
-#: src/ShortcodeParser/Builder/RegistrationFormBuilder.php:141
-#: src/ShortcodeParser/Builder/RegistrationFormBuilder.php:154
+#: src/ShortcodeParser/Builder/PasswordResetBuilder.php:233
+#: src/ShortcodeParser/Builder/RegistrationFormBuilder.php:142
+#: src/ShortcodeParser/Builder/RegistrationFormBuilder.php:155
 msgid "Strength indicator"
 msgstr ""
 
 #: src/ShortcodeParser/Builder/EditProfileBuilder.php:87
 #: src/ShortcodeParser/Builder/PasswordResetBuilder.php:221
-#: src/ShortcodeParser/Builder/RegistrationFormBuilder.php:142
+#: src/ShortcodeParser/Builder/RegistrationFormBuilder.php:143
 msgid "Very weak"
 msgstr ""
 
 #: src/ShortcodeParser/Builder/EditProfileBuilder.php:88
 #: src/ShortcodeParser/Builder/PasswordResetBuilder.php:222
-#: src/ShortcodeParser/Builder/RegistrationFormBuilder.php:143
+#: src/ShortcodeParser/Builder/RegistrationFormBuilder.php:144
 msgid "Weak"
 msgstr ""
 
 #: src/ShortcodeParser/Builder/EditProfileBuilder.php:89
 #: src/ShortcodeParser/Builder/PasswordResetBuilder.php:223
-#: src/ShortcodeParser/Builder/RegistrationFormBuilder.php:144
+#: src/ShortcodeParser/Builder/RegistrationFormBuilder.php:145
 msgctxt "password strength"
 msgid "Medium"
 msgstr ""
 
 #: src/ShortcodeParser/Builder/EditProfileBuilder.php:90
 #: src/ShortcodeParser/Builder/PasswordResetBuilder.php:224
-#: src/ShortcodeParser/Builder/RegistrationFormBuilder.php:145
+#: src/ShortcodeParser/Builder/RegistrationFormBuilder.php:146
 msgid "Strong"
 msgstr ""
 
 #: src/ShortcodeParser/Builder/EditProfileBuilder.php:91
 #: src/ShortcodeParser/Builder/PasswordResetBuilder.php:225
-#: src/ShortcodeParser/Builder/RegistrationFormBuilder.php:146
+#: src/ShortcodeParser/Builder/RegistrationFormBuilder.php:147
 msgid "Mismatch"
 msgstr ""
 
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:355
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:356
 msgid "Display name"
 msgstr ""
 
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:387
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:388
 #: src/ShortcodeParser/MyAccount/edit-profile.tmpl.php:130
 msgid "First name"
 msgstr ""
 
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:420
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:421
 #: src/ShortcodeParser/MyAccount/edit-profile.tmpl.php:135
 msgid "Last name"
 msgstr ""
 
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:452
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:453
 msgid "Bio description"
 msgstr ""
 
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:473
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:474
 #: src/ShortcodeParser/MyAccount/edit-profile.tmpl.php:110
 msgid "Profile picture"
 msgstr ""
 
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:494
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:495
 msgid "Cover photo"
 msgstr ""
 
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:513
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:570
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:661
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:707
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:734
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:813
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:869
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:930
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:979
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:514
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:571
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:662
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:708
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:735
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:817
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:873
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:934
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:983
 #: src/ShortcodeParser/Builder/FrontendProfileBuilder.php:346
 msgid "Field key is missing"
 msgstr ""
 
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:587
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:588
 msgid "Select country"
 msgstr ""
 
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:738
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:739
 msgid "No dropdown option found."
 msgstr ""
 
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:819
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:823
 msgid "No radio choice found."
 msgstr ""
 
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:874
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:878
 msgid "No checkbox choice found."
 msgstr ""
 
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:1008
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:1012
 msgid "custom field not defined"
 msgstr ""
 
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:1162
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:1166
 msgid "Delete Avatar"
 msgstr ""
 
-#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:1198
+#: src/ShortcodeParser/Builder/FieldsShortcodeCallback.php:1202
 msgid "Delete Cover Photo"
 msgstr ""
 
@@ -15990,7 +15991,7 @@ msgid "No post written yet."
 msgstr ""
 
 #: src/ShortcodeParser/Builder/PasswordResetBuilder.php:106
-#: src/ShortcodeParser/Builder/PasswordResetBuilder.php:344
+#: src/ShortcodeParser/Builder/PasswordResetBuilder.php:346
 #: src/Widgets/TabbedWidget.php:90
 msgid "Get New Password"
 msgstr ""
@@ -17107,9 +17108,9 @@ msgstr ""
 msgid "ProfilePress"
 msgstr ""
 
-#. #-#-#-#-#  wp-user-avatar.pot (ProfilePress 4.5.4)  #-#-#-#-#
+#. #-#-#-#-#  wp-user-avatar.pot (ProfilePress 4.5.5)  #-#-#-#-#
 #. Plugin URI of the plugin/theme
-#. #-#-#-#-#  wp-user-avatar.pot (ProfilePress 4.5.4)  #-#-#-#-#
+#. #-#-#-#-#  wp-user-avatar.pot (ProfilePress 4.5.5)  #-#-#-#-#
 #. Author URI of the plugin/theme
 msgid "https://profilepress.com"
 msgstr ""

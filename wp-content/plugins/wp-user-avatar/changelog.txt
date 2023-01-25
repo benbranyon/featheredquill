@@ -1,5 +1,12 @@
 ﻿== Changelog ==
 
+= 4.5.5 =
+* Fixed PHP Warning: Undefined array key "user_login".
+* Added missing text domain to strings.
+* Bumped Stripe API version to latest.
+* Fixed XSS in shortcode & content protection admin page.
+* Added settings button to [addons page](https://profilepress.com/addons/?ref=changelog).
+
 = 4.5.4 =
 * Fixed more XSS in form builder.
 

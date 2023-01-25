@@ -573,7 +573,7 @@ function ppress_other_field_atts($atts)
 
     foreach ($atts as $key => $value) {
         if ( ! in_array($key, $official_atts)) {
-            $other_atts[$key] = $value;
+            $other_atts[esc_attr($key)] = esc_attr($value);
         }
     }
 
