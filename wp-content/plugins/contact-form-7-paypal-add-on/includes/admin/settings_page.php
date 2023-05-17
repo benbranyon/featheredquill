@@ -17,7 +17,15 @@ function cf7pp_admin_table() {
 
 	// save and update options
 	if (isset($_POST['update'])) {
-
+		
+		if ( empty( $_POST['cf7pp_nonce_field'] ) || !wp_verify_nonce( $_POST['cf7pp_nonce_field'], 'cf7pp_save_settings') ) {
+		
+			wp_die( __( "You do not have sufficient permissions to access this page." ) );
+		
+		}
+		
+		
+		
 		$options['currency'] = 					sanitize_text_field($_POST['currency']);
 		if (empty($options['currency'])) { 		$options['currency'] = ''; }
 
@@ -411,6 +419,8 @@ function cf7pp_admin_table() {
 
 	<input type='hidden' name='update' value='1'>
 	<input type='hidden' name='hidden_tab_value' id="hidden_tab_value" value="<?php echo $active_tab; ?>">
+	
+	<?php wp_nonce_field( 'cf7pp_save_settings','cf7pp_nonce_field' ); ?>
 
 </form>
 
@@ -456,8 +466,6 @@ function cf7pp_admin_table() {
 		
 		<br />
 		<b><center>Over 3,100 Happy Customers</center></b>
-		<br />
-		<b><center>Free Trial Available</center></b>
 		
 		<br />
 		<center><a target='_blank' href="https://wpplugin.org/downloads/contact-form-7-paypal-add-on/" class='button-primary' style='font-size: 17px;line-height: 28px;height: 32px;'>Get the Pro Version</a></center>

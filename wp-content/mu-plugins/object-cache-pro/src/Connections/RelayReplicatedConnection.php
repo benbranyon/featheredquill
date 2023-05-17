@@ -56,11 +56,9 @@ class RelayReplicatedConnection extends RelayConnection implements ConnectionInt
     public function __construct(RelayConnection $primary, array $replicas, Configuration $config)
     {
         $this->primary = $primary;
-        $this->client = $primary->client();
-
         $this->replicas = $replicas;
-        $this->config = $config;
 
+        $this->config = $config;
         $this->log = $this->config->logger;
 
         if (empty($this->replicas)) {
@@ -117,7 +115,8 @@ class RelayReplicatedConnection extends RelayConnection implements ConnectionInt
     /**
      * Returns the primary's node information.
      *
-     * @deprecated  1.17.0  Use `RelayReplicatedConnection::primary()` instead
+     * @deprecated 1.17.0
+     * @see \RedisCachePro\Connections\RelayReplicatedConnection::primary()
      *
      * @return \RedisCachePro\Connections\RelayConnection
      */

@@ -16,9 +16,6 @@ declare(strict_types=1);
 
 namespace RedisCachePro\Connections;
 
-use Generator;
-use Throwable;
-
 use RedisCachePro\Configuration\Configuration;
 use RedisCachePro\Connectors\PhpRedisConnector;
 use RedisCachePro\Exceptions\ConnectionException;
@@ -60,8 +57,8 @@ class PhpRedisReplicatedConnection extends PhpRedisConnection implements Connect
     {
         $this->primary = $primary;
         $this->replicas = $replicas;
-        $this->config = $config;
 
+        $this->config = $config;
         $this->log = $this->config->logger;
 
         if (empty($this->replicas)) {
@@ -118,7 +115,8 @@ class PhpRedisReplicatedConnection extends PhpRedisConnection implements Connect
     /**
      * Returns the primary's node information.
      *
-     * @deprecated  1.17.0  Use `PhpRedisReplicatedConnection::primary()` instead
+     * @deprecated 1.17.0
+     * @see \RedisCachePro\Connections\PhpRedisReplicatedConnection::primary()
      *
      * @return \RedisCachePro\Connections\PhpRedisConnection
      */
@@ -140,18 +138,19 @@ class PhpRedisReplicatedConnection extends PhpRedisConnection implements Connect
     /**
      * Flush the selected Redis database.
      *
-     * Set the connections client to the primary node and calls `PhpRedisConnection::flushdb()`.
+     * @see \RedisCachePro\Connections\PhpRedisConnection::flushdb()
      *
      * @param  bool|null  $async
      * @return bool
      */
     public function flushdb($async = null)
     {
-        /** @var \RedisCachePro\Clients\PhpRedis $client */
-        $client = $this->primary->client();
+        if ($async ?? $this->config->async_flush) {
+            return $this->primary->command('flushdb', [true]);
+        }
 
-        $this->client = $client;
-
-        return parent::flushdb($async);
+        return $this->withoutTimeout(function () {
+            return $this->primary->command('flushdb');
+        });
     }
 }

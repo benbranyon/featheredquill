@@ -504,7 +504,7 @@ trait Health
                 'label' => 'Object cache errors occurred',
                 'description' => sprintf(
                     '<p>The object cache encountered errors.</p><ul>%s</ul>',
-                    implode(', ', array_map(function ($error) {
+                    implode(', ', array_map(static function ($error) {
                         return "<li><b>{$error}</b></li>";
                     }, $wp_object_cache_errors))
                 ),

@@ -102,6 +102,20 @@ if ($controls->is_action('update_inactive')) {
     $count = $wpdb->query("update " . NEWSLETTER_USERS_TABLE . ' set list_' . ((int) $controls->data['list_inactive']) . '=1 where ' . $where);
     $controls->messages = $count . ' subscribers updated';
 }
+
+if ($controls->is_action('change_status')) {
+    $status_1 = $controls->data['status_1'];
+    $status_2 = $controls->data['status_2'];
+    
+    // Status validation
+    if (!TNP_User::is_status_valid($status_1) || !TNP_User::is_status_valid($status_2)) {
+        die('Invalid status value');
+    }
+    
+    $count = $wpdb->query($wpdb->prepare("update `" . NEWSLETTER_USERS_TABLE . "` set status=%s where status=%s", $status_2, $status_1));
+
+    $controls->messages = $count . ' subscribers updated';
+}
 ?>
 
 <div class="wrap tnp-users tnp-users-massive" id="tnp-wrap">
@@ -111,7 +125,7 @@ if ($controls->is_action('update_inactive')) {
     <div id="tnp-heading">
 
         <h2><?php _e('Subscribers Maintenance', 'newsletter') ?></h2>
-        <p><?php _e('Please, backup before run a massive action.', 'newsletter') ?></p>
+        <p><?php _e('Please backup before running a massive action.', 'newsletter') ?></p>
 
     </div>
 
@@ -121,7 +135,7 @@ if ($controls->is_action('update_inactive')) {
 
             <h3>Results</h3>
 
-            <textarea wrap="off" style="width: 100%; height: 150px; font-size: 11px; font-family: monospace"><?php echo htmlspecialchars($results) ?></textarea>
+            <textarea wrap="off" style="width: 100%; height: 150px; font-size: 11px; font-family: monospace"><?php echo esc_html($results) ?></textarea>
 
         <?php } ?>
 
@@ -168,11 +182,8 @@ if ($controls->is_action('update_inactive')) {
                                 <?php echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='S'"); ?>
                             </td>
                             <td nowrap>
-                                <?php $controls->button_confirm('remove_unconfirmed', __('Delete all not confirmed', 'newsletter'), __('Are you sure you want to delete ALL not confirmed subscribers?', 'newsletter')); ?>
+                                <?php $controls->button_confirm('remove_unconfirmed', __('Delete all', 'newsletter')); ?>
                                 <?php $controls->button_confirm('confirm_all', __('Confirm all', 'newsletter'), __('Are you sure you want to mark ALL subscribers as confirmed?', 'newsletter')); ?>
-                                <p class="description">
-                                    <a href="https://www.thenewsletterplugin.com/plugins/newsletter/subscribers-module#resend-activation" target="_blank"><?php _e('We have some tips about global actions, read more.', 'newsletter') ?></a>
-                                </p>
                             </td>
                         </tr>
                         <tr>
@@ -204,6 +215,20 @@ if ($controls->is_action('update_inactive')) {
                                 <?php $controls->button_confirm('remove_complained', __('Delete all', 'newsletter')); ?>
                             </td>
                         </tr>
+                         <tr>
+                            <td>
+                                <?php _e('Change status', 'newsletter') ?>
+                            </td>
+                            <td>
+                                <?php $controls->user_status('status_1'); ?>
+                                <?php _e('to', 'newsletter') ?>
+                                <?php $controls->user_status('status_2'); ?>
+                            </td>
+                            <td>
+                                <?php $controls->button_confirm('change_status', __('Change', 'newsletter')); ?>
+                            </td>
+                         </tr>
+                         
                         <tr>
                             <td>
                                 <?php _e('Inactive since', 'newsletter') ?>
@@ -256,17 +281,12 @@ if ($controls->is_action('update_inactive')) {
                 <div id="tabs-2">
                     <table class="form-table">
                         <tr>
-                            <th>&nbsp;</th>
+                            
                             <td>
-                                <?php $controls->lists_select('list') ?>:
+                                <?php $controls->lists_select('list') ?>
                                 <?php $controls->button_confirm('list_add', 'Activate for everyone'); ?>
                                 <?php $controls->button_confirm('list_remove', 'Deactivate for everyone'); ?>
                                 <?php $controls->button_confirm('list_delete', 'Delete everyone in that list'); ?>
-                                <br><br>
-                                <?php $controls->select('list_action', array('move' => 'Change', 'add' => 'Add')); ?>
-                                <?php _e('all subscribers in', 'newsletter') ?> <?php $controls->lists_select('list_1'); ?>
-                                <?php _e('to', 'newsletter') ?> <?php $controls->lists_select('list_2'); ?>
-                                <?php $controls->button_confirm('list_manage', '&raquo;'); ?>
                                 <p class="description">
                                     If you choose to <strong>delete</strong> users in a list, they will be
                                     <strong>physically deleted</strong> from the database (no way back).
@@ -274,7 +294,17 @@ if ($controls->is_action('update_inactive')) {
                             </td>
                         </tr>
                         <tr>
-                            <th>&nbsp;</th>
+                            
+                            <td>
+                                <?php $controls->select('list_action', array('move' => 'Change', 'add' => 'Add')); ?>
+                                <?php _e('all subscribers in', 'newsletter') ?> <?php $controls->lists_select('list_1'); ?>
+                                <?php _e('to', 'newsletter') ?> <?php $controls->lists_select('list_2'); ?>
+                                <?php $controls->button_confirm('list_manage', '&raquo;'); ?>
+                                
+                            </td>
+                        </tr>
+                        <tr>
+                            
                             <td>
                                 <?php _e('Add to list', 'newsletter') ?>
                                 <?php $controls->lists_select('list_3') ?> <?php _e('subscribers without a list', 'newsletter') ?> <?php $controls->button_confirm('list_none', '&raquo;'); ?>

@@ -100,23 +100,26 @@ $controls->data = Newsletter::instance()->get_email($email_id, ARRAY_A);
 
 <div class="wrap tnp-emails-editor-html" id="tnp-wrap">
 
-    <form action="" method="post">
-        <?php $controls->init() ?>
-        
-        <?php $controls->text('subject', 60, 'Newsletter subject')?>
-               <a href="#" class="button-primary" onclick="tnp_suggest_subject(); return false;"><?php _e('Get ideas', 'newsletter') ?></a>
-        <input type="button" class="button-primary" value="Add media" onclick="tnp_media()">
+    <div id="tnp-body">
+        <form action="" method="post" style="margin-top: 2rem">
+            <?php $controls->init() ?>
 
-        <?php $controls->editor('message', 30); ?>
-        
+            <?php $controls->text('subject', 60, 'Newsletter subject') ?>
+            <a href="#" class="button-primary" onclick="tnp_suggest_subject(); return false;"><?php _e('Get ideas', 'newsletter') ?></a>
+            <input type="button" class="button-primary" value="Add media" onclick="tnp_media()">
+
+            <?php $controls->editor('message', 30); ?>
 
 
-        <div style="text-align: right ">
-            <?php $controls->button_confirm('reset', __('Back to last save', 'newsletter'), 'Are you sure?'); ?>
-            <?php $controls->button('test', __('Test', 'newsletter')); ?>
-            <?php $controls->button('save', __('Save', 'newsletter')); ?>
-            <?php $controls->button('next', __('Next', 'newsletter') . ' &raquo;'); ?>
-        </div>
-    </form>
-    <?php include NEWSLETTER_DIR . '/emails/subjects.php'; ?>
+
+            <div style="text-align: right ">
+                <?php $controls->button_confirm('reset', __('Back to last save', 'newsletter'), 'Are you sure?'); ?>
+                <?php $controls->button('test', __('Test', 'newsletter')); ?>
+                <?php $controls->button('save', __('Save', 'newsletter')); ?>
+                <?php $controls->button('next', __('Next', 'newsletter') . ' &raquo;'); ?>
+            </div>
+        </form>
+        <?php include NEWSLETTER_DIR . '/emails/subjects.php'; ?>
+    </div>
+
 </div>

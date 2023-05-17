@@ -54,10 +54,7 @@ trait Debugbar
             return $panels;
         }
 
-        $panels[] = new RedisCachePro_DebugBar_Insights(
-            $wp_object_cache->info(),
-            $wp_object_cache->metrics(true)
-        );
+        $panels[] = new RedisCachePro_DebugBar_Insights($wp_object_cache);
 
         return $panels;
     }

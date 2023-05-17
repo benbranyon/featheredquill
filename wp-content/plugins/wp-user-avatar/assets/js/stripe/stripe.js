@@ -7,7 +7,6 @@
 
         var _this = this,
             cardElement = false,
-            $checkout_form = $('form#ppress_mb_checkout_form'),
             stripe = Stripe(ppress_stripe_vars.publishable_key, {
                 'locale': ppress_stripe_vars.locale
             });
@@ -16,17 +15,23 @@
 
             window.processCheckoutFlag = false;
 
-            $(document).on('ppress_updated_checkout', _this.mountCardElement);
+            $(document).on('ppress_updated_checkout', _this.updated_checkout);
 
             $(document).on('ppress_update_checkout', _this.unmountCardElement);
 
             $(document).on('click', '#ppress-checkout-button', function () {
                 window.processCheckoutFlag = true;
             });
+        };
 
-            $checkout_form.on('ppress_checkout_place_order_stripe', _this.tokenRequest);
+        this.updated_checkout = function () {
 
-            $checkout_form.on('ppress_process_checkout_stripe', _this.processCheckout);
+            _this.checkout_form = $('form#ppress_mb_checkout_form');
+
+            _this.checkout_form.on('ppress_checkout_place_order_stripe', _this.tokenRequest);
+            _this.checkout_form.on('ppress_process_checkout_stripe', _this.processCheckout);
+
+            _this.mountCardElement();
         };
 
         this.mountCardElement = function () {
@@ -75,8 +80,8 @@
 
                         window.processCheckoutFlag = false;
 
-                        $checkout_form.append('<input id="ppress_stripe_payment_method" type="hidden" name="ppress_stripe_payment_method" value="' + result.paymentMethod.id + '">');
-                        $checkout_form.submit();
+                        _this.checkout_form.append('<input id="ppress_stripe_payment_method" type="hidden" name="ppress_stripe_payment_method" value="' + result.paymentMethod.id + '">');
+                        _this.checkout_form.submit();
                     }
                 });
 

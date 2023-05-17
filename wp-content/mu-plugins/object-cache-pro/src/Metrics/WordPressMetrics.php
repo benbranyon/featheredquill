@@ -129,24 +129,19 @@ class WordPressMetrics
     {
         global $timestart;
 
-        /** @var \RedisCachePro\Support\PhpRedisObjectCacheMetrics $metrics */
-        $metrics = $cache->metrics(true);
-
-        $ioWait = $cache->connection()->ioWait();
-        $ioWaitTotal = array_sum($ioWait);
-        $ioWaitMedian = ObjectCache::array_median($ioWait);
+        $metrics = $cache->metrics();
 
         $this->hits = $metrics->hits;
         $this->misses = $metrics->misses;
-        $this->hitRatio = $metrics->ratio;
-        $this->bytes = $metrics->bytes;
+        $this->hitRatio = $metrics->hitRatio;
+        $this->bytes = $metrics->memory;
         $this->prefetches = $metrics->prefetches;
         $this->storeReads = $metrics->storeReads;
         $this->storeWrites = $metrics->storeWrites;
         $this->storeHits = $metrics->storeHits;
         $this->storeMisses = $metrics->storeMisses;
-        $this->msCache = round($ioWaitTotal * 1000, 2);
-        $this->msCacheMedian = round($ioWaitMedian * 1000, 2);
+        $this->msCache = round($metrics->storeWait * 1000, 2);
+        $this->msCacheMedian = round($metrics->storeWaitAverage * 1000, 2);
 
         $requestStart = $_SERVER['REQUEST_TIME_FLOAT'] ?? $timestart;
 
@@ -194,7 +189,7 @@ class WordPressMetrics
     {
         $metrics = $this->toArray();
 
-        return implode(' ', array_map(function ($metric, $value) {
+        return implode(' ', array_map(static function ($metric, $value) {
             return "metric#{$metric}={$value}";
         }, array_keys($metrics), $metrics));
     }
@@ -279,7 +274,7 @@ class WordPressMetrics
             ],
         ];
 
-        return array_map(function ($metric) {
+        return array_map(static function ($metric) {
             $metric['group'] = 'wp';
 
             return $metric;

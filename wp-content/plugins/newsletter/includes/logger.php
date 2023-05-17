@@ -85,7 +85,7 @@ class NewsletterLogger {
         $memory_limit = size_format(wp_convert_hr_to_bytes(ini_get('memory_limit')));
 
         // The "logs" dir is created on Newsletter constructor.
-        $res = @file_put_contents($this->file, $time . ' - ' . NEWSLETTER_VERSION . ' - ' . size_format(memory_get_usage(), 1) . '/' . $memory_limit . ' - ' . $user . ' > ' . $text . "\n", FILE_APPEND | FILE_TEXT);
+        $res = @file_put_contents($this->file, $time . ' - ' . NEWSLETTER_VERSION . ' - ' . size_format(memory_get_usage(), 1) . '/' . $memory_limit . ' - ' . $user . ' > ' . $text . "\n", FILE_APPEND);
         if ($res === false) {
             //$this->level = self::NONE;
         }

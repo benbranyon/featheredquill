@@ -75,7 +75,7 @@ class Measurements implements ArrayAccess, Countable, IteratorAggregate
         }
 
         $this->cache[$metric] = array_filter(
-            array_map(function ($item) use ($metric) {
+            array_map(static function ($item) use ($metric) {
                 return $item->{$metric};
             }, $this->items),
             function ($value) {
@@ -284,7 +284,7 @@ class Measurements implements ArrayAccess, Countable, IteratorAggregate
      */
     public function pluck(string $metric)
     {
-        return array_map(function ($item) use ($metric) {
+        return array_map(static function ($item) use ($metric) {
             return $item->{$metric};
         }, $this->items);
     }

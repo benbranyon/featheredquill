@@ -206,15 +206,14 @@
 	border-color: transparent;
 	color: rgba(255, 255, 255, 1);
 }
-
+/*
 .wpec_coupon_apply_btn:hover:hover {
 	color: rgba(255, 255, 255, 1);
 }
-
 .wpec_coupon_apply_btn:hover:hover {
 	background-color: rgba(37, 99, 235, 1);
 }
-
+*/
 .wpec_coupon_apply_btn svg {
 	display: none;
 	-webkit-animation: wpec-spinner 1s linear infinite;
@@ -309,27 +308,26 @@
 	color: rgba(255, 255, 255, 1);
 }
 
-.wpec-modal-open:hover:hover {
+/* .wpec-modal-open:hover:hover {
 	color: rgba(255, 255, 255, 1);
 }
-
 .wpec-modal-open:hover:hover {
 	background-color: rgba(29, 78, 216, 1);
-}
+} */
 
 .wpec-place-order-btn:hover {
 	background-color: rgba(29, 78, 216, 1);
 	background-image: none;
 	color: rgba(255, 255, 255, 1);
 }
-
+/*
 .wpec-place-order-btn:hover:hover {
 	color: rgba(255, 255, 255, 1);
 }
-
 .wpec-place-order-btn:hover:hover {
 	background-color: rgba(29, 78, 216, 1);
 }
+*/
 
 .wpec-modal {
 	display: -webkit-box;
@@ -437,6 +435,7 @@
 
 .wpec-modal-item-thumbnail img {
 	border-radius: 6px;
+	object-fit: cover;
 }
 
 .wpec-modal-item-excerpt {
@@ -456,7 +455,9 @@
 .wpec-pointer-events-none {
 	pointer-events: none;
 }
-
+.wpec-pointer-events-all{
+	pointer-events: all !important;
+}
 .wpec_billing_address_container, .wpec_shipping_address_container, .wpec_billing_user_info, .wpec-product-variations-wrapper {
 	display: grid;
 	gap: 24px;
@@ -744,11 +745,11 @@
 	background-color: rgba(255, 255, 255, 1);
 	background-image: none;
 }
-
+/*
 .wpec-custom-number-input button:hover:hover {
 	background-color: rgba(255, 255, 255, 1);
 }
-
+*/
 .wpec-custom-number-input button:first-of-type {
 	border-radius: 6px;
 	border-top-right-radius: 0px;
@@ -851,6 +852,25 @@
 
 .wpec-out-of-stock {
 	font-weight: 700;
+}
+/* Product template 1 CSS */
+.wpec-product-item-template-1 .wpec-product-item-thumbnail{
+	width: 75px;
+	height: 75px;
+	float: left;
+	margin-right: 10px;
+}
+.wpec-product-item-template-1 .wpec-product-item-thumbnail img{
+	width:75px;
+	height: 75px;
+	object-fit: cover;
+}
+
+@media (max-width:768px)
+{
+	.wpec-product-item-template-1 .wpec-entry-title{
+		line-height: 40px;
+	}
 }
 
 /* Product template 3 CSS */

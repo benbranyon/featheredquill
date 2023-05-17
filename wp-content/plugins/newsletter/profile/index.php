@@ -36,9 +36,9 @@ if ($controls->is_action()) {
     <?php include NEWSLETTER_DIR . '/tnp-header.php'; ?>
 
     <div id="tnp-heading">
-
+        <?php $controls->title_help('/profile-page') ?>
         <h2><?php _e('The subscriber profile page', 'newsletter') ?></h2>
-        <?php $controls->page_help('https://www.thenewsletterplugin.com/documentation/profile-page') ?>
+        <p>Where your subscribers can change their data.</p>
     </div>
 
     <div id="tnp-body">
@@ -49,34 +49,42 @@ if ($controls->is_action()) {
             <div id="tabs">
                 <ul>
                     <li><a href="#tabs-general"><?php _e('General', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-labels"><?php _e('Messages and labels', 'newsletter') ?></a></li>
                     <li><a href="#tabs-export"><?php _e('Subscriber data export', 'newsletter') ?></a></li>
 
                 </ul>
 
                 <div id="tabs-general">
 
-
                     <table class="form-table">
 
                         <tr>
                             <th><?php _e('Profile page', 'newsletter') ?>
-                                <br><?php $controls->help('https://www.thenewsletterplugin.com/documentation/subscription#profile') ?>
                             </th>
                             <td>
+                                <p>
+                                    Shown inside the Newsletter dedicated page. Use <code>{profile_form}</code> where you want the data form
+                                    be inserted. Create a link with URL <code>{unsubscribe_url}</code> to give access to the cancellation page.
+                                </p>
                                 <?php $controls->wp_editor('text'); ?>
                             </td>
                         </tr>
 
                         <tr>
-                            <th><?php _e('Alternative profile page URL', 'newsletter') ?></th>
+                            <th><?php _e('Alternative URL', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->text('url', 70); ?>
+                                <p class="description">
+                                    The specified page should containt the <code>[newsletter_profile]</code> shortcode to insert the data form.
+                                </p>
                             </td>
                         </tr>
 
                     </table>
+                </div>
 
-                    <h3><?php _e('Messages', 'newsletter') ?></h3>
+                <div id="tabs-labels">
+
                     <table class="form-table">
                         <tr>
                             <th><?php _e('Profile saved', 'newsletter') ?></th>
@@ -103,10 +111,6 @@ if ($controls->is_action()) {
                             </td>
                         </tr>
 
-                    </table>
-
-                    <h3><?php _e('Labels', 'newsletter') ?></h3>
-                    <table class="form-table">
                         <tr>
                             <th><?php _e('"Save" label', 'newsletter') ?></th>
                             <td>
@@ -142,9 +146,9 @@ if ($controls->is_action()) {
                             </tr>
                         </table>
                     <?php } else { ?>
-                    
-                    <?php $controls->switch_to_all_languages_notice(); ?>
-                       
+
+                        <?php $controls->switch_to_all_languages_notice(); ?>
+
                     <?php } ?>
                 </div>
 

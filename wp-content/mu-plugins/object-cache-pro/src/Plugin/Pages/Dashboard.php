@@ -203,7 +203,7 @@ class Dashboard extends Page
             'series' => [
                 ['field' => 'median', 'name' => 'Median'],
             ],
-            'comboCharts' => array_map(function ($metric) {
+            'comboCharts' => array_map(static function ($metric) {
                 return [
                     'containers' => array_keys($metric['type']),
                     'labels' => $metric['labels'],

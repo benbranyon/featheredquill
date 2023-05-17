@@ -19,8 +19,6 @@ namespace RedisCachePro\Plugin\Api;
 
 use WP_Error;
 use WP_REST_Server;
-use WP_REST_Request;
-use WP_REST_Response;
 use WP_REST_Controller;
 
 use RedisCachePro\Plugin;
@@ -296,7 +294,7 @@ class Analytics extends WP_REST_Controller
         }
 
         if (rest_is_field_included('measurements', $fields)) {
-            $item['measurements'] = array_map(function ($measurement) {
+            $item['measurements'] = array_map(static function ($measurement) {
                 return $measurement->toArray();
             }, $item['measurements'] ? $item['measurements']->all() : []);
         }
@@ -320,7 +318,7 @@ class Analytics extends WP_REST_Controller
             RelayMetrics::schema()
         );
 
-        return array_map(function ($metric) {
+        return array_map(static function ($metric) {
             $metric['computations'] = [
                 'max',
                 'mean',

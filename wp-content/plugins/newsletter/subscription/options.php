@@ -110,7 +110,6 @@ if ($controls->is_action()) {
 } else {
     $controls->data = $module->get_options('', $current_language);
 }
-
 ?>
 
 <div class="wrap" id="tnp-wrap">
@@ -118,14 +117,13 @@ if ($controls->is_action()) {
     <?php include NEWSLETTER_DIR . '/tnp-header.php'; ?>
 
     <div id="tnp-heading">
-
+        <?php $controls->title_help('/subscription') ?>
         <h2><?php _e('Subscription Configuration', 'newsletter') ?></h2>
-        <?php $controls->page_help('https://www.thenewsletterplugin.com/documentation/subscription/subscription/') ?>
 
     </div>
 
     <div id="tnp-body">
-        
+
 
         <form method="post" action="">
             <?php $controls->init(); ?>
@@ -138,55 +136,57 @@ if ($controls->is_action()) {
                 </ul>
 
                 <div id="tabs-general">
+
                     <?php if ($is_all_languages) { ?>
-                    <table class="form-table">
-                        
-                        <tr>
-                            <th><?php $controls->field_label(__('Opt In', 'newsletter'), '/documentation/subscription/subscription/') ?></th>
-                            <td>
-                                <?php $controls->select('noconfirmation', array(0 => __('Double Opt In', 'newsletter'), 1 => __('Single Opt In', 'newsletter'))); ?>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th><?php $controls->field_label(__('Override Opt In', 'newsletter'), '/documentation/subscription/subscription/#advanced') ?></th>
-                            <td>
-                                <?php $controls->yesno('optin_override'); ?>
-                            </td>
-                        </tr>
-                        
-                        <tr>
-                            <th><?php _e('Notifications', 'newsletter') ?></th>
-                            <td>
-                                <?php $controls->yesno('notify'); ?>
-                                <?php $controls->text_email('notify_email'); ?>
-                            </td>
-                        </tr>
-                    </table>
+                        <table class="form-table">
+
+                            <tr>
+                                <th><?php $controls->field_label(__('Opt In', 'newsletter'), '/subscription/subscription/') ?></th>
+                                <td>
+                                    <?php $controls->select('noconfirmation', array(0 => __('Double Opt In', 'newsletter'), 1 => __('Single Opt In', 'newsletter'))); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th><?php $controls->field_label(__('Override Opt In', 'newsletter'), '/subscription/subscription/#advanced') ?></th>
+                                <td>
+                                    <?php $controls->yesno('optin_override'); ?>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th><?php _e('Notifications', 'newsletter') ?></th>
+                                <td>
+                                    <?php $controls->yesno('notify'); ?>
+                                    <?php $controls->text_email('notify_email'); ?>
+                                </td>
+                            </tr>
+                        </table>
                     <?php } else { ?>
                         <?php $controls->switch_to_all_languages_notice(); ?>
                     <?php } ?>
-                    
+
                 </div>
 
 
                 <div id="tabs-2">
-
                     <table class="form-table">
                         <tr>
-                            <th><?php _e('Subscription page', 'newsletter') ?><br><?php echo $controls->help('https://www.thenewsletterplugin.com/documentation/newsletter-tags') ?></th>
+                            <th><?php _e('Subscription page', 'newsletter') ?><br><?php echo $controls->help('/newsletter-tags') ?></th>
                             <td>
                                 <?php $controls->wp_editor('subscription_text'); ?>
                             </td>
                         </tr>
-                        
+
                     </table>
 
                     <table class="form-table">
                         <tr>
-                            <th><?php _e('Repeated subscriptions', 'newsletter')?></th>
+                            <th><?php _e('Repeated subscriptions', 'newsletter') ?></th>
                             <td>
-                                <?php $controls->select('multiple', ['0'=>__('Not allowed', 'newsletter'), '1'=>__('Allowed', 'newsletter'), 
-                                    '1'=>__('Allowed force single opt-in', 'newsletter')]); ?> 
+                                <?php
+                                $controls->select('multiple', ['0' => __('Not allowed', 'newsletter'), '1' => __('Allowed', 'newsletter'),
+                                    '1' => __('Allowed force single opt-in', 'newsletter')]);
+                                ?> 
                                 <br><br>
                                 <?php $controls->wp_editor('error_text'); ?>
                                 <p class="description">Shown only when "not allowed" is selected<p>
@@ -199,7 +199,7 @@ if ($controls->is_action()) {
                 <div id="tabs-3">
 
                     <p><?php _e('Only for double opt-in mode.', 'newsletter') ?></p>
-                    <?php $controls->panel_help('https://www.thenewsletterplugin.com/documentation/subscription#activation') ?>
+
 
                     <table class="form-table">
                         <tr>
@@ -223,7 +223,7 @@ if ($controls->is_action()) {
                             <td>
                                 <?php $controls->email('confirmation', 'wordpress'); ?>
                                 <br>
-                                <?php $controls->button('test-confirmation', 'Send a test'); ?>
+                                <?php $controls->btn('test-confirmation', __('Test', 'newsletter'), ['secondary' => true]); ?>
                             </td>
                         </tr>
                     </table>
@@ -231,9 +231,6 @@ if ($controls->is_action()) {
 
 
                 <div id="tabs-4">
-                    <p>
-                        <?php $controls->panel_help('https://www.thenewsletterplugin.com/documentation/subscription#welcome') ?>
-                    </p>
                     <table class="form-table">
                         <tr>
                             <th><?php _e('Welcome message', 'newsletter') ?></th>
@@ -251,7 +248,7 @@ if ($controls->is_action()) {
 
                         <tr>
                             <th><?php _e('Conversion tracking code', 'newsletter') ?>
-                                <?php $controls->help('https://www.thenewsletterplugin.com/documentation/subscription#conversion') ?></th>
+                                <?php $controls->help('/subscription#conversion') ?></th>
                             <td>
                                 <?php $controls->textarea('confirmed_tracking'); ?>
                             </td>
@@ -265,7 +262,7 @@ if ($controls->is_action()) {
                             <td>
                                 <?php $controls->email('confirmed', 'wordpress', $is_all_languages); ?>
                                 <br>
-                                <?php $controls->button('test-confirmed', 'Send a test'); ?>
+                                <?php $controls->btn('test-confirmed', __('Test', 'newsletter'), ['secondary' => true]); ?>
                             </td>
                         </tr>
 

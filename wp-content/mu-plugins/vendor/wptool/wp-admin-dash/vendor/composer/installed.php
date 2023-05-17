@@ -3,7 +3,7 @@
         'name' => 'wptool/wp-admin-dash',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '69063044f20a695b50c9bb1c945a09bc576fb3f7',
+        'reference' => '1e8e6cbfc7d89f81bd3e7070949f316a7114085d',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'wptool/wp-admin-dash' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '69063044f20a695b50c9bb1c945a09bc576fb3f7',
+            'reference' => '1e8e6cbfc7d89f81bd3e7070949f316a7114085d',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

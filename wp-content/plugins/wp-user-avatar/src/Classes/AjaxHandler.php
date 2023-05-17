@@ -4,7 +4,6 @@ namespace ProfilePress\Core\Classes;
 
 use ProfilePress\Core\Admin\SettingsPages\FormList;
 use ProfilePress\Core\Base;
-use ProfilePress\Core\Membership\Models\Customer\CustomerFactory;
 use ProfilePress\Core\Themes\Shortcode\ThemesRepository as ShortcodeThemesRepository;
 use ProfilePress\Core\Themes\DragDrop\ThemesRepository as DragDropThemesRepository;
 use ProfilePress\Core\Widgets\TabbedWidgetDependency;
@@ -20,6 +19,7 @@ class AjaxHandler
         add_action('wp_ajax_pp_del_cover_image', [$this, 'ajax_delete_profile_cover_image']);
 
         add_action('wp_ajax_pp_profile_fields_sortable', [$this, 'profile_fields_sortable_func']);
+        add_action('wp_ajax_ppress_payment_methods_sortable', [$this, 'payment_methods_sortable']);
 
         add_action('wp_ajax_nopriv_pp_ajax_login', [$this, 'ajax_login_func']);
         add_action('wp_ajax_pp_ajax_login', [$this, 'ajax_login_func']);
@@ -282,11 +282,14 @@ class AjaxHandler
     {
         if (current_user_can('read')) {
 
-            if ( ! wp_verify_nonce($_POST['nonce'], 'ppress-frontend-nonce')) {
+            if (
+                ! wp_verify_nonce($_POST['nonce'], 'ppress-frontend-nonce') ||
+                (get_current_user_id() !== absint($_POST['user_id']) && ! current_user_can('manage_options'))
+            ) {
                 wp_send_json(['error' => 'nonce_failed']);
             }
 
-            EditUserProfile::remove_cover_image();
+            EditUserProfile::remove_cover_image(absint($_POST['user_id']));
 
             $default = get_option('wp_user_cover_default_image_url', '');
 
@@ -351,6 +354,18 @@ class AjaxHandler
         }
 
         wp_die();
+    }
+
+    function payment_methods_sortable()
+    {
+        check_ajax_referer('ppress-admin-nonce', 'csrf');
+
+        if (current_user_can('manage_options')) {
+
+            ppress_update_payment_method_setting('sorted_payment_methods', ppress_clean($_POST['data']));
+
+            wp_die();
+        }
     }
 
     function pp_contact_info_sortable_func()

@@ -77,10 +77,10 @@ $button_options['button_background'] = empty($options['button_background']) ? $g
 
 if (!empty($options['image']['id'])) {
     if ($layout === 'full') {
-        $image_width = 600 - $options['block_padding_left'] - $options['block_padding_right'];
+        $image_width = $composer['width'] - $options['block_padding_left'] - $options['block_padding_right'];
         $media = tnp_resize_2x($options['image']['id'], [$image_width, 0]);
     } else {
-        $td_width = round((600 - $options['block_padding_left'] - $options['block_padding_right'] - 20)/2);
+        $td_width = round(($composer['width'] - $options['block_padding_left'] - $options['block_padding_right'] - 20)/2);
         //$image_width = 300 - $options['block_padding_left'];
         $media = tnp_resize_2x($options['image']['id'], [$td_width, 0]);
     }

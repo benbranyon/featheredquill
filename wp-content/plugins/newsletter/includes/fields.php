@@ -228,12 +228,14 @@ class NewsletterFields {
 
         if (version_compare($wp_version, '4.8', '>=')) {
 
-            $paragraph_style = " p { font-family: ${attrs['text_font_family']}; font-size: ${attrs['text_font_size']}px; font-weight: ${attrs['text_font_weight']}; color: ${attrs['text_font_color']}; line-height: 1.5em; }";
+            $paragraph_style = " p { font-family: {$attrs['text_font_family']}; font-size: {$attrs['text_font_size']}px; font-weight: 0{$attrs['text_font_weight']}; color: {$attrs['text_font_color']}; line-height: 1.5em; }";
             $content_style = $paragraph_style;
 
             echo '<script>';
             echo 'wp.editor.remove("options-', $name, '");';
-            echo 'wp.editor.initialize("options-', $name, '", { tinymce: {content_style: "' . $content_style . '", toolbar1: "undo redo | formatselect fontselect fontsizeselect | bold italic forecolor backcolor | link unlink | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | wp_add_media | charmap | rtl ltr", fontsize_formats: "11px 12px 14px 16px 18px 24px 36px 48px", plugins: "link textcolor colorpicker lists wordpress charmap directionality", default_link_target: "_blank", relative_urls : false, convert_urls: false, keep_styles: true }});';
+            echo 'wp.editor.initialize("options-', $name, '", { tinymce: {'
+                    //. 'font_formats: "Default=; Andale Monox=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Oswald=oswald; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats",'
+                    . 'content_style: "' . $content_style . '", toolbar1: "undo redo | formatselect fontselect fontsizeselect | bold italic forecolor backcolor | link unlink | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | wp_add_media | charmap | rtl ltr", fontsize_formats: "11px 12px 14px 16px 18px 24px 36px 48px", plugins: "link textcolor colorpicker lists wordpress charmap directionality", default_link_target: "_blank", relative_urls : false, convert_urls: false, keep_styles: true }});';
             echo '</script>';
         }
         $this->_description($attrs);

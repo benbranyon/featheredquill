@@ -266,7 +266,7 @@ class NewsletterMailerAddon extends NewsletterAddon {
         $message->to_name = '';
         if (empty($type) || $type == 'html') {
             $message->body = file_get_contents(NEWSLETTER_DIR . '/includes/test-message.html');
-            $message->body = str_replace('{plugin_url}', NEWSLETTER_URL, $message->body);
+            $message->body = str_replace('{plugin_url}', Newsletter::instance()->plugin_url, $message->body);
         }
 
         if (empty($type) || $type == 'text') {
@@ -330,7 +330,7 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
     }
 
     function hook_newsletter_menu_subscription($entries) {
-        $entries[] = array('label' => '<i class="fas fa-envelope"></i> ' . $this->menu_title, 'url' => '?page=newsletter_' . $this->name . '_index', 'description' => $this->menu_description);
+        $entries[] = ['label' => $this->menu_title, 'url' => '?page=newsletter_' . $this->name . '_index'];
         return $entries;
     }
 
@@ -341,7 +341,7 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
                 }
         );
     }
-    
+
     /**
      * Returns a lists of representations of forms available in the plugin subject of integration. 
      * Usually the $fields is not set up on returned objects.
@@ -374,7 +374,7 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
     public function save_form_options($form_id, $data) {
         update_option('newsletter_' . $this->name . '_' . $form_id, $data, false);
     }
-    
+
     /**
      * Gets the form mapping and integration settings. Returns an empty array if the dataset is missing.
      * @param mixed $form_id

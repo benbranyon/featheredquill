@@ -148,10 +148,17 @@ class Groups extends WP_REST_Controller
      */
     protected function parseGroup(string $id)
     {
-        $id = str_replace('options:alloptions:', 'options:alloptions-', $id);
-        $id = str_replace('analytics:measurements:', 'analytics:measurements-', $id);
+        if (! strpos($id, ':')) {
+            return '__ungrouped__';
+        }
 
-        return array_reverse(explode(':', $id))[1];
+        if (strpos('options:alloptions:', $id) !== false) {
+            $id = str_replace('options:alloptions:', 'options:alloptions-', $id);
+        }
+
+        return array_reverse(
+            explode(':', $id)
+        )[1];
     }
 
     /**
@@ -162,7 +169,7 @@ class Groups extends WP_REST_Controller
      */
     protected function prepareGroupsForResponse(array $groups)
     {
-        array_walk($groups, function (&$item, $group) {
+        array_walk($groups, static function (&$item, $group) {
             $item = [
                 'group' => str_replace(['{', '}'], '', (string) $group),
                 'count' => $item,
@@ -171,7 +178,7 @@ class Groups extends WP_REST_Controller
 
         $groups = array_values($groups);
 
-        usort($groups, function ($a, $b) {
+        usort($groups, static function ($a, $b) {
             return strcmp($a['group'], $b['group']);
         });
 

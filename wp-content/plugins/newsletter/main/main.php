@@ -17,8 +17,9 @@ if (!$controls->is_action()) {
     if ($controls->is_action('save')) {
         $errors = null;
 
-        if (!isset($controls->data['roles']))
-            $controls->data['roles'] = array();
+        if (!isset($controls->data['roles'])) {
+            $controls->data['roles'] = [];
+        }
 
         // Validation
         $controls->data['sender_email'] = $this->normalize_email($controls->data['sender_email']);
@@ -35,8 +36,9 @@ if (!$controls->is_action()) {
         }
 
         $controls->data['scheduler_max'] = (int) $controls->data['scheduler_max'];
-        if ($controls->data['scheduler_max'] < 12)
+        if ($controls->data['scheduler_max'] < 12) {
             $controls->data['scheduler_max'] = 12;
+        }
 
 
         if (!$this->is_email($controls->data['reply_to'], true)) {
@@ -60,6 +62,7 @@ if (!$controls->is_action()) {
         //$this->hook_newsletter_extension_versions(true);
         delete_transient("tnp_extensions_json");
         delete_transient('newsletter_license_data');
+        update_option('newsletter_news_updated', 0);
     }
 
     if ($controls->is_action('create')) {
@@ -96,7 +99,7 @@ if (is_wp_error($license_data)) {
         } elseif ($license_data->expire >= time()) {
             $controls->messages = 'Your license is valid and expires on ' . esc_html(date('Y-m-d', $license_data->expire));
         } else {
-            $controls->errors = 'Your license is expired on ' . esc_html(date('Y-m-d', $license_data->expire));
+            $controls->errors = 'Your license has expired on ' . esc_html(date('Y-m-d', $license_data->expire));
         }
     }
 }
@@ -137,6 +140,7 @@ if (!empty($return_path)) {
     <?php include NEWSLETTER_DIR . '/tnp-header.php'; ?>
 
     <div id="tnp-heading">
+        <?php $controls->title_help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-configuration') ?>
 
         <h2><?php _e('General Settings', 'newsletter') ?></h2>
 
@@ -157,11 +161,6 @@ if (!empty($return_path)) {
 
                 <div id="tabs-basic">
 
-                    <p>
-                        <?php $controls->panel_help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-configuration') ?>
-                    </p>
-
-
                     <table class="form-table">
 
                         <tr>
@@ -171,9 +170,9 @@ if (!empty($return_path)) {
                             </th>
                             <td>
                                 <?php $controls->text_email('sender_email', 40); ?>
-                                <div class="description">
-                                    <a href="https://www.thenewsletterplugin.com/documentation/installation/newsletter-configuration/#sender" target="_blank">Emails delivered with a different address?</a>
-                                </div>
+                                <span class="description">
+                                    Emails delivered with a <a href="https://www.thenewsletterplugin.com/documentation/installation/newsletter-configuration/#sender" target="_blank">different address</a>?
+                                </span>
                             </td>
                         </tr>
                         <tr>
@@ -185,26 +184,7 @@ if (!empty($return_path)) {
                             </td>
                         </tr>
 
-                        <tr>
-                            <th>
-                                <?php _e('Return path', 'newsletter') ?>
-                                <?php $controls->field_help('https://www.thenewsletterplugin.com/documentation/installation/newsletter-configuration/#return-path') ?>
-                            </th>
-                            <td>
-                                <?php $controls->text_email('return_path', 40); ?>
 
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-                                <?php _e('Reply to', 'newsletter') ?>
-                                <?php $controls->field_help('https://www.thenewsletterplugin.com/documentation/installation/newsletter-configuration/#reply-to') ?>
-                            </th>
-                            <td>
-                                <?php $controls->text_email('reply_to', 40); ?>
-
-                            </td>
-                        </tr>
                         <tr>
                             <th>
                                 <?php _e('Dedicated page', 'newsletter') ?>
@@ -218,10 +198,10 @@ if (!empty($return_path)) {
                                 }
                                 ?>
                                 <?php if ($this->is_multilanguage()) { ?>
-                                <p class="description">
-                                    With multilanguage plugins be sure the selected page is translated in every language (usually only the title needs to be translated, the content
-                                    should just be the <code>[newsletter]</code> shortcode).
-                                </p>
+                                    <p class="description">
+                                        With multilanguage plugins be sure the selected page is translated in every language (usually only the title needs to be translated, the content
+                                        should just be the <code>[newsletter]</code> shortcode).
+                                    </p>
                                 <?php } ?> 
                             </td>
                         </tr>
@@ -233,10 +213,31 @@ if (!empty($return_path)) {
                                     <?php _e('A license key is set', 'newsletter') ?>
                                 <?php } else { ?>
                                     <?php $controls->text('contract_key', 40); ?>
-                                    <p class="description">
+                                    <span class="description">
                                         <?php printf(__('Find it in <a href="%s" target="_blank">your account</a> page', 'newsletter'), "https://www.thenewsletterplugin.com/account") ?>
-                                    </p>
+                                    </span>
                                 <?php } ?>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>
+                                <?php _e('Return path', 'newsletter') ?>
+                                <?php $controls->field_help('https://www.thenewsletterplugin.com/documentation/installation/newsletter-configuration/#return-path') ?>
+                            </th>
+                            <td>
+                                <?php $controls->text_email('return_path', 40); ?>
+                                <span class="description">Some providers ignore it or <strong>block all emails</strong> if set</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <?php _e('Reply to', 'newsletter') ?>
+                                <?php $controls->field_help('https://www.thenewsletterplugin.com/documentation/installation/newsletter-configuration/#reply-to') ?>
+                            </th>
+                            <td>
+                                <?php $controls->text_email('reply_to', 40); ?>
+
                             </td>
                         </tr>
 
@@ -244,7 +245,7 @@ if (!empty($return_path)) {
                 </div>
 
                 <div id="tabs-speed">
- 
+
                     <table class="form-table">
                         <tr>
                             <th>
@@ -265,10 +266,6 @@ if (!empty($return_path)) {
 
                 <div id="tabs-advanced">
 
-                    <p>
-                        <?php $controls->panel_help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-configuration#advanced') ?>
-                    </p>
-
                     <table class="form-table">
                         <tr>
                             <th><?php _e('Allowed roles', 'newsletter') ?></th>
@@ -288,31 +285,31 @@ if (!empty($return_path)) {
 
                             </td>
                         </tr>
-                        
+
                         <tr>
                             <th>
-                                <?php _e('Tracking default', 'newsletter') ?>
-                                <?php $controls->field_help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-configuration#tracking') ?>
+                                <?php $controls->label(__('Tracking default', 'newsletter'), '/installation/newsletter-configuration/#tracking') ?>
                             </th>
                             <td>
-                                <?php $controls->yesno('track'); ?>
+                                <?php $controls->enabled('track'); ?>
                             </td>
                         </tr>
-                        
+
                         <tr>
                             <th>
-                                <?php _e('Execute shortcodes on newsletters', 'newsletter') ?>
-                                <?php $controls->field_help("https://www.thenewsletterplugin.com/documentation/newsletter-configuration#shortcodes") ?>
+                                <?php $controls->label(__('Shortcodes', 'newsletter'), '/newsletter-configuration#shortcodes') ?>
                             </th>
                             <td>
                                 <?php $controls->yesno('do_shortcodes', 40); ?>
+                                <p class="description">
+                                    Execute shortcodes inside newsletters.
+                                </p>
                             </td>
                         </tr>
-                        
+
                         <tr>
                             <th>
-                                <?php _e('Log level', 'newsletter') ?>
-                                <?php $controls->field_help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-configuration#log') ?>
+                                <?php $controls->label(__('Log level', 'newsletter'), '/newsletter-configuration#log') ?>
                             </th>
                             <td>
                                 <?php $controls->log_level('log_level'); ?>
@@ -325,7 +322,7 @@ if (!empty($return_path)) {
                                 <?php $controls->disabled('css_disabled'); ?>
                             </td>
                         </tr>
-                        
+
                         <tr>
                             <th><?php _e('Custom styles', 'newsletter') ?></th>
                             <td>
@@ -335,8 +332,8 @@ if (!empty($return_path)) {
                                 <?php $controls->textarea('css'); ?>
                             </td>
                         </tr>
-                        
-                        
+
+
                         <tr>
                             <th><?php _e('IP addresses', 'newsletter') ?></th>
                             <td>
@@ -344,12 +341,9 @@ if (!empty($return_path)) {
                             </td>
                         </tr>
 
-                        
-
                         <tr>
                             <th>
-                                <?php _e('Debug mode', 'newsletter') ?>
-                                <?php $controls->field_help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-configuration#debug') ?>
+                                <?php $controls->label(__('Debug mode', 'newsletter'), '/newsletter-configuration#debug') ?>
                             </th>
                             <td>
                                 <?php $controls->yesno('debug', 40); ?>
@@ -358,15 +352,14 @@ if (!empty($return_path)) {
 
                         <tr>
                             <th>
-                                <?php _e('Email encoding', 'newsletter') ?>
-                                <?php $controls->field_help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-configuration#encoding') ?>
+                                <?php $controls->label(__('Email encoding', 'newsletter'), '/newsletter-configuration#encoding') ?>
                             </th>
                             <td>
                                 <?php $controls->select('content_transfer_encoding', array('' => 'Default', '8bit' => '8 bit', 'base64' => 'Base 64', 'binary' => 'Binary', 'quoted-printable' => 'Quoted printable', '7bit' => '7 bit')); ?>
                             </td>
                         </tr>
 
-                        
+
                     </table>
 
                 </div>

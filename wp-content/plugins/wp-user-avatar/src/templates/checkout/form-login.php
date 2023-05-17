@@ -1,4 +1,6 @@
-<?php if ( ! is_user_logged_in()) : ?>
+<?php use ProfilePress\Core\Classes\ExtensionManager;
+
+if ( ! is_user_logged_in()) : ?>
 
     <div class="ppress-main-checkout-form__login_form_wrap" style="display:none">
 
@@ -22,18 +24,20 @@
     </div>
 
     <?php
-    $social_login_buttons = ppress_settings_by_key('checkout_social_login_buttons');
-    if (is_array($social_login_buttons)) {
-        $social_login_buttons = array_filter($social_login_buttons);
-    }
-
-    if ( ! empty($social_login_buttons)) {
-        $redirect_to = ppress_get_current_url_query_string();
-        echo '<div class="ppress-main-checkout-form__social_login_wrap">';
-        foreach ($social_login_buttons as $social_login_button) {
-            echo do_shortcode(sprintf('[pp-social-login type="%s" redirect="%s"]', $social_login_button, $redirect_to), true) . '&nbsp;';
+    if (ExtensionManager::is_enabled(ExtensionManager::SOCIAL_LOGIN)) {
+        $social_login_buttons = ppress_settings_by_key('checkout_social_login_buttons');
+        if (is_array($social_login_buttons)) {
+            $social_login_buttons = array_filter($social_login_buttons);
         }
-        echo '</div>';
+
+        if ( ! empty($social_login_buttons)) {
+            $redirect_to = ppress_get_current_url_query_string();
+            echo '<div class="ppress-main-checkout-form__social_login_wrap">';
+            foreach ($social_login_buttons as $social_login_button) {
+                echo do_shortcode(sprintf('[pp-social-login type="%s" redirect="%s"]', $social_login_button, $redirect_to), true) . '&nbsp;';
+            }
+            echo '</div>';
+        }
     }
     ?>
 

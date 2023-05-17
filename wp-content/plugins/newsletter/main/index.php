@@ -159,7 +159,7 @@ $lists = $this->get_lists();
                                     <?php echo esc_html($s->name) ?> <?php echo esc_html($s->surname) ?>
                                 </div>
                                 <div class="tnp-card-newsletters-subscriber-status">
-                                    <?php echo $emails_module->get_user_status_label($s) ?>
+                                    <?php echo $emails_module->get_user_status_label($s, true) ?>
                                 </div>
                                 <div class="tnp-card-newsletters-action">
                                         <a class="button-primary"
@@ -195,7 +195,7 @@ $lists = $this->get_lists();
                                 label: "<?php _e('Subscriptions', 'newsletter') ?>",
                                 fill: true,
                                 strokeColor: "#27AE60",
-                                backgroundColor: "#293544",
+                                backgroundColor: "#eee",
                                 borderColor: "#27AE60",
                                 pointBorderColor: "#27AE60",
                                 pointBackgroundColor: "#ECF0F1",

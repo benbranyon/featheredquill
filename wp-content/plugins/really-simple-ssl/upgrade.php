@@ -134,8 +134,11 @@ function rsssl_upgrade() {
 		} else {
 			update_option( 'rsssl_options', $new_options );
 		}
+		update_option('rsssl_flush_rewrite_rules', time() );
 		update_option('rsssl_6_upgrade_completed', true, false);
 	}
+
+
 
 	#clean up old rest api optimizer on upgrade
 	if ( $prev_version && version_compare( $prev_version, '6.0.5', '<' ) ) {
@@ -162,6 +165,10 @@ function rsssl_upgrade() {
 		$plus_ones = get_transient('rsssl_plusone_count');
 		update_option('rsssl_admin_notices', $notices);
 		update_option('rsssl_plusone_count', $plus_ones);
+	}
+
+	if ( version_compare( $prev_version, '6.2.3', '<' ) ) {
+		rsssl_update_option('send_notifications_email', 1 );
 	}
 
 	//delete in future upgrade. We want to check the review notice dismissed as fallback still.

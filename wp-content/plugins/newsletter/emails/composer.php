@@ -15,6 +15,14 @@ $email = null;
 
 if ($controls->is_action()) {
 
+    if ($controls->is_action('reset')) {
+        $redirect = $module->get_admin_page_url('composer');
+        if (isset($_GET['id'])) {
+            $redirect = $this->add_qs($redirect, 'id=' . ((int) $_GET['id']), false);
+        }
+        $controls->js_redirect($redirect);
+    }
+
     if ($controls->is_action('save_preset')) {
         $this->admin_logger->info('Saving new preset: ' . $controls->data['subject']);
         // Create new preset email
@@ -94,14 +102,14 @@ if ($controls->is_action()) {
             }
         } else {
             TNP_Composer::update_email($email, $controls);
-            
+
             if (empty($email->options['text_message_mode'])) {
                 $text = TNP_Composer::convert_to_text($email->message);
                 if ($text) {
                     $email->message_text = TNP_Composer::convert_to_text($email->message);
                 }
             }
-            
+
             $email->updated = time();
             $email = Newsletter::instance()->save_email($email);
             TNP_Composer::prepare_controls($controls, $email);
@@ -142,34 +150,61 @@ if ($controls->is_action()) {
 }
 ?>
 
-<div id="tnp-notification">
-<?php
-$controls->show();
-$controls->messages = '';
-$controls->errors = '';
-?>
-</div>
+<style>
+    .tnp-composer-footer {
+        background-color: #0073aa;
+        border-radius: 3px !important;
+        margin: 15px 0px 10px 0;
+        padding: 10px;
+        font-size: 15px;
+        color: #fff !important;
+        line-height: 32px;
+    }
+
+    .tnp-composer-footer form {
+        display: inline-block;
+        /*margin-left: 30px;*/
+    }
+</style>
+
+
 
 <div class="wrap tnp-emails-composer" id="tnp-wrap">
 
-    <?php $controls->composer_load_v2(true); ?>
+    <div id="tnp-notification">
+        <?php
+        $controls->show();
+        $controls->messages = '';
+        $controls->errors = '';
+        ?>
+    </div>
 
-    <div id="tnp-heading" class="tnp-composer-heading">
-        <div class="tnpc-logo">
-            <p>The Newsletter Plugin <strong>Composer</strong></p>
+    <div id="tnp-body" style="display: flex; flex-direction: column">
+
+        <div>
+            <?php $controls->composer_load_v2(true); ?>
         </div>
-        <div class="tnpc-controls">
-            <form method="post" action="" id="tnpc-form">
-<?php $controls->init(); ?>
 
-<?php $controls->composer_fields_v2(); ?>
+        <div class="tnp-composer-footer">
+            <div class="tnpc-logo">
+                The Newsletter Plugin <strong>Composer</strong>
+            </div>
+            <div class="tnpc-controls">
+                <form method="post" action="" id="tnpc-form">
+                    <?php $controls->init(); ?>
 
-<?php $controls->button('update_preset', __('Update preset', 'newsletter'), 'tnpc_update_preset(this.form)', 'update-preset-button'); ?>
-                <?php $controls->button('save_preset', __('Save as preset', 'newsletter'), 'tnpc_save_preset(this.form)', 'save-preset-button'); ?>
-                <?php $controls->button_confirm('reset', __('Back to last save', 'newsletter'), 'Are you sure?'); ?>
-                <?php $controls->button('save', __('Save', 'newsletter'), 'tnpc_save(this.form); this.form.submit();'); ?>
-                <?php $controls->button('preview', __('Next', 'newsletter') . ' &raquo;', 'tnpc_save(this.form); this.form.submit();'); ?>
-            </form>
+                    <?php $controls->composer_fields_v2(); ?>
+
+
+
+                    <?php $controls->button('update_preset', __('Update preset', 'newsletter'), 'tnpc_update_preset(this.form)', 'update-preset-button'); ?>
+                    <?php $controls->button('save_preset', __('Save as preset', 'newsletter'), 'tnpc_save_preset(this.form)', 'save-preset-button'); ?>
+                    <?php $controls->button_confirm('reset', __('Back to last save', 'newsletter'), 'Are you sure?'); ?>
+                    <?php $controls->button('save', __('Save', 'newsletter'), 'tnpc_save(this.form); this.form.submit();'); ?>
+                    <?php $controls->button('preview', __('Next', 'newsletter') . ' &raquo;', 'tnpc_save(this.form); this.form.submit();'); ?>
+                </form>
+            </div>
         </div>
+
     </div>
 </div>

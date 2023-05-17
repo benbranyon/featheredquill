@@ -59,15 +59,6 @@ class ObjectCacheInfo
     /** @var bool */
     public $status;
 
-    /** @var int */
-    public $hits;
-
-    /** @var int */
-    public $misses;
-
-    /** @var int|float */
-    public $ratio;
-
     /** @var object */
     public $groups;
 
@@ -78,56 +69,14 @@ class ObjectCacheInfo
     public $meta;
 }
 
-class PhpRedisObjectCacheInfo extends ObjectCacheInfo
-{
-    /** @var ?int */
-    public $prefetches;
-
-    /** @var int */
-    public $storeReads;
-
-    /** @var int */
-    public $storeWrites;
-
-    /** @var int */
-    public $storeHits;
-
-    /** @var int */
-    public $storeMisses;
-}
-
-class ObjectCacheMetrics
+class ObjectCacheMetricsGroup
 {
     /** @var int */
-    public $hits;
+    public $keys = 0;
 
     /** @var int */
-    public $misses;
+    public $memory = 0;
 
-    /** @var int|float */
-    public $ratio;
-
-    /** @var int|float|null */
-    public $bytes;
-
-    /** @var array<string, array{keys: int, keys: int}>|null */
-    public $groups;
-}
-
-class PhpRedisObjectCacheMetrics extends ObjectCacheMetrics
-{
-    /** @var ?int */
-    public $prefetches;
-
-    /** @var int */
-    public $storeReads;
-
-    /** @var int */
-    public $storeWrites;
-
-    /** @var int */
-    public $storeHits;
-
-    /** @var int */
-    public $storeMisses;
+    /** @var float */
+    public $wait = 0.0;
 }

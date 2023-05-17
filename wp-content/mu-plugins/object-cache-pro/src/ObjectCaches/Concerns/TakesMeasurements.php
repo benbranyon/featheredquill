@@ -27,7 +27,6 @@ use RedisCachePro\Metrics\WordPressMetrics;
 use RedisCachePro\Clients\PhpRedis;
 use RedisCachePro\Connections\RelayConnection;
 use RedisCachePro\Configuration\Configuration;
-use RedisCachePro\ObjectCaches\PhpRedisObjectCache;
 
 trait TakesMeasurements
 {
@@ -56,8 +55,6 @@ trait TakesMeasurements
         $measurements = new Measurements;
 
         try {
-            $this->storeReads++;
-
             $measurements->push(
                 ...$this->connection->zRevRangeByScore(
                     (string) $this->id('measurements', 'analytics'),
@@ -69,6 +66,8 @@ trait TakesMeasurements
         } catch (Throwable $exception) {
             $this->error($exception);
         }
+
+        $this->metrics->read('analytics');
 
         return $measurements;
     }
@@ -82,11 +81,15 @@ trait TakesMeasurements
      */
     public function countMeasurements($min = '-inf', $max = '+inf')
     {
-        return $this->connection->zcount(
+        $count = $this->connection->zcount(
             (string) $this->id('measurements', 'analytics'),
             (string) $min,
             (string) $max
         );
+
+        $this->metrics->read('analytics');
+
+        return $count;
     }
 
     /**
@@ -107,8 +110,7 @@ trait TakesMeasurements
         $measurement->wp = new WordPressMetrics($this);
 
         try {
-            $lastSample = $this->connection->get("{$id}:sample");
-            $this->storeReads++;
+            $lastSample = $this->get('last-sample', 'analytics');
 
             if ($lastSample < $now - 3) {
                 $measurement->redis = new RedisMetrics($this);
@@ -120,12 +122,12 @@ trait TakesMeasurements
                     $measurement->relay = new RelayMetrics($this->connection, $this->config);
                 }
 
-                $this->connection->set("{$id}:sample", $now);
-                $this->storeWrites++;
+                $this->set('last-sample', $now, 'analytics');
             }
 
             $this->connection->zadd($id, $measurement->timestamp, $measurement);
-            $this->storeWrites++;
+
+            $this->metrics->write('analytics');
         } catch (Throwable $exception) {
             $this->error($exception);
         }
@@ -148,13 +150,13 @@ trait TakesMeasurements
         $retention = (int) apply_filters('objectcache_analytics_retention', $this->config->analytics->retention);
 
         try {
-            $this->storeWrites++;
-
             $this->connection->zRemRangeByScore(
                 (string) $this->id('measurements', 'analytics'),
                 '-inf',
                 (string) (microtime(true) - $retention)
             );
+
+            $this->metrics->write('analytics');
         } catch (Throwable $exception) {
             $this->error($exception);
         }
@@ -171,6 +173,8 @@ trait TakesMeasurements
 
         try {
             $flush = $this->connection->flushdb();
+
+            $this->metrics->flush();
         } catch (Throwable $exception) {
             $this->error($exception);
 
@@ -202,9 +206,13 @@ trait TakesMeasurements
         }
 
         try {
-            return $this->connection->dump(
+            $dump = $this->connection->dump(
                 (string) $this->id('measurements', 'analytics')
             );
+
+            $this->metrics->read('analytics');
+
+            return $dump;
         } catch (Throwable $exception) {
             error_log(sprintf('objectcache.notice: Failed to dump analytics (%s)', $exception));
         }
@@ -221,9 +229,11 @@ trait TakesMeasurements
     protected function restoreMeasurements($measurements)
     {
         try {
-            $id = $this->id('measurements', 'analytics');
+            $result = $this->connection->restore((string) $this->id('measurements', 'analytics'), 0, $measurements);
 
-            return $this->connection->restore((string) $id, 0, $measurements);
+            $this->metrics->write('analytics');
+
+            return $result;
         } catch (Throwable $exception) {
             error_log(sprintf('objectcache.notice: Failed to restore analytics (%s)', $exception));
         }

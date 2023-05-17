@@ -223,7 +223,7 @@ class Tools extends Page
     {
         $frames = array_reverse(explode(', ', $backtrace));
 
-        $frames = array_filter($frames, function ($frame) {
+        $frames = array_filter($frames, static function ($frame) {
             return ! in_array($frame, [
                 'call_user_func',
                 'call_user_func_array',

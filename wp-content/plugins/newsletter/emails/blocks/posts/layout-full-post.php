@@ -1,6 +1,6 @@
 <?php
-$size = ['width' => 600, 'height' => 0];
-$content_width = 600 - $options['block_padding_left'] - $options['block_padding_right'];
+$size = ['width' => $composer['width'], 'height' => 0];
+$content_width = $composer['width'] - $options['block_padding_left'] - $options['block_padding_right'];
 $title_style = TNP_Composer::get_title_style($options, 'title', $composer);
 $text_style = TNP_Composer::get_text_style($options, '', $composer);
 ?>
@@ -12,11 +12,19 @@ $text_style = TNP_Composer::get_text_style($options, '', $composer);
         margin: 0;
         padding-bottom: 20px;
     }
+    
+    .content {
+        <?php $text_style->echo_css() ?>
+    }
 
-    .paragraph {
+    .p {
         <?php $text_style->echo_css() ?>
         line-height: 1.5em!important;
-        text-align: left;
+    }
+    
+    .li {
+        <?php $text_style->echo_css() ?>
+        line-height: normal!important;
     }
 
     .meta {
@@ -88,7 +96,7 @@ $text_style = TNP_Composer::get_text_style($options, '', $composer);
         <?php } ?>
 
         <tr>
-            <td>
+            <td align="<?php echo $align_left?>" dir="<?php echo $dir?>" inline-class="content">
                 <?php echo TNP_Composer::post_content($post) ?>
             </td>
         </tr>

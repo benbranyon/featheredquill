@@ -22,6 +22,8 @@ function wp_cart_init_handler()
     }
     if (is_admin()) {
         add_action('admin_init', 'wp_cart_add_tinymce_button');
+        
+        wspsc_check_and_handle_csv_export();
 
 	//TODO - can be removed at a later version.
 	if (isset($_GET['page']) && $_GET['page'] == 'wordpress-paypal-shopping-cart') {
@@ -191,7 +193,7 @@ function wpspsc_settings_menu_footer()
         <a href="https://www.tipsandtricks-hq.com/wordpress-estore-plugin-complete-solution-to-sell-digital-products-from-your-wordpress-blog-securely-1059" target="_blank"><?php _e("WP eStore Plugin", "wordpress-simple-paypal-shopping-cart"); ?></a>
     </p>
     <p>
-        You can also try our free <a href="https://wordpress.org/plugins/wp-express-checkout/" target="_blank">WP Express Checkout</a> plugin to sell your products using PayPal's Express Checkout API.
+        You can also try our free <a href="https://wordpress.org/plugins/wp-express-checkout/" target="_blank">WP Express Checkout</a> plugin to sell your products using PayPal's Checkout API.
     </p>
     </div>
     <?php

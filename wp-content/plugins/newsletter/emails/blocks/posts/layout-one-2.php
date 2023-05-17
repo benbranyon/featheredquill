@@ -1,7 +1,7 @@
 <?php
-$size = ['width' => 600, 'height' => 0];
-$total_width = 600 - $options['block_padding_left'] - $options['block_padding_right'];
-$column_width = $total_width / 2 - 10;
+$size = ['width' => $composer['width'], 'height' => 0];
+$total_width = $composer['width'] - $options['block_padding_left'] - $options['block_padding_right'];
+$column_width = $total_width / 2 - 20;
 
 $title_style = TNP_Composer::get_style($options, 'title', $composer, 'title');
 $text_style = TNP_Composer::get_style($options, '', $composer, 'text');

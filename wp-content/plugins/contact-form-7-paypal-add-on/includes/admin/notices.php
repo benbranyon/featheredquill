@@ -79,7 +79,13 @@ function cf7pp_show_earnings_notice() {
 add_action('admin_notices', 'cf7pp_admin_stripe_connect_notice');
 function cf7pp_admin_stripe_connect_notice() {
 	$options = get_option('cf7pp_options');
-	$mode = $options['mode_stripe'] == "2" ? 'live' : 'sandbox';
+	
+	if (isset($options['mode_stripe'])) {
+		$mode = $options['mode_stripe'] == "2" ? 'live' : 'sandbox';
+	} else {
+		$mode = 'sandbox';
+	}
+	
 	$acct_id_key = $mode == 'live' ? 'acct_id_live' : 'acct_id_test';
 
 	if (!empty($options[$acct_id_key]) || !empty($options['stripe_connect_notice_dismissed'])) return;

@@ -3,8 +3,8 @@ Contributors: Tips and Tricks HQ, dikiy_forester, mbrsolution, Ivy2120, chanelst
 Donate link: https://wp-express-checkout.com/
 Tags: paypal, payment, woocommerce, digital store, e-commerce, checkout
 Requires at least: 5.6
-Tested up to: 6.1
-Stable tag: 2.2.6
+Tested up to: 6.2
+Stable tag: 2.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,6 +53,7 @@ View configuration and usage details on the [WP Express Checkout](https://wp-exp
 * Shop page that will list all your products in a grid view. Users can browse your products and purchase it.
 * Allow the customers to automatically download the file once the purchase is completed via PayPal.
 * You can deliver the digital downloads using encrypted download links that expire automatically.
+* Ability to enable force download option on your digital products.
 * Offer Buy Now Pay Later payment option to your customers.
 * Accept Payments via Venmo easily. Your customers can pay using the Venmo option.
 * View the transactions from your WordPress admin dashboard.
@@ -72,6 +73,8 @@ View configuration and usage details on the [WP Express Checkout](https://wp-exp
 * Option to configure terms and conditions before checkout.
 * You can see all the orders within your WordPress admin dashboard.
 * Option to customize the Thank You page.
+* Option to create product categories and apply it to some products. 
+* Option to create product tags and apply it to certain products.
 * Ability to configure the download links to expire after X number of hours.
 * Ability to configure the download links to expire after X number of clicks.
 * Option to [Integrate it with WooCommerce](https://wp-express-checkout.com/woocommerce-paypal-express-checkout/) to offer product checkout via PayPal's express checkout system.
@@ -153,6 +156,33 @@ https://wp-express-checkout.com/
 None
 
 == Changelog ==
+
+= 2.3.0 =
+- Added a confirmation dialogue option to the order action items.
+- Added an option to refund a transaction from the orders menu of the plugin. This will work for the new transactions that you receive after the upgrade.
+- Allow the apostrophe character to be used within the email subject field.
+- Output escaping for the settings menu item's description fields.
+- Fixed the price display formatting (regarding the thousand and decimal separator for some currencies).
+
+= 2.2.9 =
+* The Shop page shortcode is now wrapped in a div element so it works better with block themes.
+* The URL payment feature: Improved the scroll bar behavior in Google chrome browser.
+* Better output escaping in the "Add Coupons" interface.
+
+= 2.2.8 =
+* Added a feature to enable "Force Download" option for digital products.
+* Added option to create product categories and apply it to certain products.
+* Added option to create product tags and apply it to some products.
+* Added the following options to sort products in the shop page (sort by latest, sort by title, sort by price).
+* The "button_text" parameter can now be used in the [wp_express_checkout] shortcode to customize the text of the Buy Now button.
+* Fixed tax amount display issue with a subscription type product.
+* Added a separate template file for the "button only" shortcode output.
+* Better thumbnail image fit for product template 1.
+* The shop page has new options to sort the products by title, price, date.
+* Fixed the button preview not working in the settings page.
+
+= 2.2.7 =
+* Fixed a version tagging issue.
 
 = 2.2.6 =
 * The shop page will list the products by ID in descending order by default.

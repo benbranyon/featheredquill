@@ -1,5 +1,21 @@
 <?php
-return;
+/*
+ * Plugin Name: Object Cache Pro (MU)
+ * Plugin URI: https://objectcache.pro
+ * Description: A business class Redis object cache backend for WordPress.
+ * Version: 1.18.0
+ * Author: Rhubarb Group
+ * Author URI: https://rhubarb.group
+ * License: Proprietary
+ * Requires PHP: 7.2
+ */
+
+if (defined('MWP_OBJECT_CACHE_DISABLED') && MWP_OBJECT_CACHE_DISABLED) {
+	return;
+}
+if (!defined('MWP_OBJECT_CACHE_EXPERIMENT') || !MWP_OBJECT_CACHE_EXPERIMENT) {
+	return;
+}
 
 defined('ABSPATH') || exit;
 

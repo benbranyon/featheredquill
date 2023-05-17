@@ -90,6 +90,7 @@ class GlobalInfoController extends BaseController {
 		$xmlrpc_enbled                 = get_option( XmlRpcConstants::OPTION_KEY, ToggleStatus::ENABLED ) === ToggleStatus::ENABLED;
 		$onboarding_completed          = $this->onboarding_service->is_user_onboarded();
 		$login_with_gd_enabled         = $this->gd_login_service->is_gd_login_enabled();
+		$locale_lang                   = str_replace( '_', '-', get_locale() );
 
 		return new \WP_REST_Response(
 			array(
@@ -108,6 +109,7 @@ class GlobalInfoController extends BaseController {
 					'xmlrpc_enabled'                  => $xmlrpc_enbled,
 					'onboarding_completed'            => $onboarding_completed,
 					'login_with_gd_enabled'           => $login_with_gd_enabled,
+					'locale_lng'                      => $locale_lang,
 				),
 			),
 			200

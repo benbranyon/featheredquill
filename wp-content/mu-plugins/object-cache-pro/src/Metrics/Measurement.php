@@ -114,15 +114,19 @@ class Measurement
         $array = $this->wp->toArray();
 
         if ($this->redis) {
-            $array += array_combine(array_map(function ($key) {
+            $redis = $this->redis->toArray();
+
+            $array += array_combine(array_map(static function ($key) {
                 return "redis-{$key}";
-            }, array_keys($redis = $this->redis->toArray())), $redis);
+            }, array_keys($redis)), $redis);
         }
 
         if ($this->relay) {
-            $array += array_combine(array_map(function ($key) {
+            $relay = $this->relay->toArray();
+
+            $array += array_combine(array_map(static function ($key) {
                 return "relay-{$key}";
-            }, array_keys($relay = $this->relay->toArray())), $relay);
+            }, array_keys($relay)), $relay);
         }
 
         return $array;
@@ -151,7 +155,7 @@ class Measurement
     public function __get(string $name)
     {
         if (strpos($name, '->') !== false) {
-            list($type, $metric) = explode('->', $name);
+            [$type, $metric] = explode('->', $name);
 
             if (strpos($metric, '-') !== false) {
                 $metric = lcfirst(str_replace('-', '', ucwords($metric, '-')));

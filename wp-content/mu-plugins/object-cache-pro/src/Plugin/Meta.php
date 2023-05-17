@@ -116,10 +116,6 @@ trait Meta
      */
     public function siteActionLinks($actions, $blog_id)
     {
-        if (! $this->config->cluster) {
-            return $actions;
-        }
-
         if (! $this->blogFlushingEnabled()) {
             return $actions;
         }

@@ -21,7 +21,7 @@ class NewsletterStatistics extends NewsletterModule {
     }
 
     function __construct() {
-        parent::__construct('statistics', '1.2.8');
+        parent::__construct('statistics', '1.3.2');
         add_action('wp_loaded', array($this, 'hook_wp_loaded'));
     }
 
@@ -63,7 +63,7 @@ class NewsletterStatistics extends NewsletterModule {
             }
 
             if ($user_id) {
-                $user = Newsletter::instance()->get_user($user_id);
+                $user = $this->get_user($user_id);
                 if (!$user) {
                     $this->dienow(__('Subscriber not found', 'newsletter'), 'This tracking link contains a reference to a subscriber no more present', 404);
                 }
@@ -73,8 +73,9 @@ class NewsletterStatistics extends NewsletterModule {
             if (!$email) {
                 $this->dienow('Invalid newsletter', 'The link originates from a newsletter not found (it could have been deleted)', 404);
             }
+            
+            $this->set_user_cookie($user);
 
-            setcookie('newsletter', $user->id . '-' . $user->token, time() + 60 * 60 * 24 * 365, '/');
             setcookie('tnpe', $email->id . '-' . $email->token, time() + 60 * 60 * 24 * 365, '/');
 
             $is_action = strpos($url, '?na=');
@@ -118,7 +119,7 @@ class NewsletterStatistics extends NewsletterModule {
             }
 
             if ($email->token) {
-                $this->logger->debug('Signature: ' . $signature);
+                //$this->logger->debug('Signature: ' . $signature);
                 $s = md5($email_id . $user_id . $email->token);
                 if ($s != $signature) {
                     $this->logger->error('Open tracking request with wrong signature. Email token: ' . $email->token);
@@ -172,6 +173,27 @@ class NewsletterStatistics extends NewsletterModule {
         ) $charset_collate;";
 
         dbDelta($sql);
+        
+//        $sql = "CREATE TABLE `" . $wpdb->prefix . "newsletter_days` (
+//          `date` date,
+//          PRIMARY KEY (`date`)
+//          ) $charset_collate;";
+//
+//        dbDelta($sql);
+//        
+//        $dt = new DateTime();
+//        $dt->setDate((int)date('Y'), 1, 1)->setTime(12, 0, 0);
+//        $i = new DateInterval('P1D');
+//        $days = [];
+//        for ($x=1; $x<=366; $x++) {
+//            $days[] = '(\'' . $dt->format('Y-m-d') . '\')';
+//            $dt->add($i);
+//            if ($dt->format('Y') != date('Y')) break;
+//        }
+//        //die();
+//        $wpdb->query("insert ignore into `" . $wpdb->prefix . "newsletter_days` (date) values " . implode(',', $days));
+//        //$t = gmmktime(12, 0, 0, 1, 1, (int)date('Y'));
+        
 
         if (empty($this->options['key'])) {
             $this->options['key'] = md5($_SERVER['REMOTE_ADDR'] . rand(100000, 999999) . time());

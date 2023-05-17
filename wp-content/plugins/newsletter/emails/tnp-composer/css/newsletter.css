@@ -26,7 +26,7 @@ img.aligncenter { display: block; margin: 0 auto;}
     td[class="section-padding-bottom-image"]{
         padding: 50px 15px 0 15px !important;
     }
-
+    /* For grids */
     .max-width-100 { max-width: 100%!important; }
 
     /* Obsolete */

@@ -59,7 +59,7 @@ if ($controls->is_action('test')) {
 $options = $this->get_options('status');
 
 $mailer = Newsletter::instance()->get_mailer();
-$functions = tnp_get_hook_functions('phpmailer_init');
+$functions = $this->get_hook_functions('phpmailer_init');
 $icon = 'fas fa-plug';
 if ($mailer instanceof NewsletterDefaultMailer) {
     $mailer_name = 'Wordpress';
@@ -86,36 +86,7 @@ if ($mailer instanceof NewsletterDefaultMailer) {
     }
 }
 
-function tnp_get_hook_functions($tag) {
-    global $wp_filter;
-    $b = '';
-    if (isset($wp_filter[$tag])) {
-        foreach ($wp_filter[$tag]->callbacks as $priority => $functions) {
-
-            foreach ($functions as $function) {
-                $b .= '[' . $priority . '] ';
-                if (is_array($function['function'])) {
-                    if (is_object($function['function'][0])) {
-                        $b .= get_class($function['function'][0]) . '::' . $function['function'][1];
-                    } else {
-                        $b .= $function['function'][0] . '::' . $function['function'][1];
-                    }
-                } else {
-                    if (is_object($function['function'])) {
-                        $fn = new ReflectionFunction($function['function']);
-                        $b .= get_class($fn->getClosureThis()) . '(closure)';
-                    } else {
-                        $b .= $function['function'];
-                    }
-                }
-                $b .= "<br>";
-            }
-        }
-    }
-    return $b;
-}
-
-$speed = Newsletter::$instance->get_send_speed();
+$speed = Newsletter::instance()->get_send_speed();
 ?>
 
 <style>
@@ -129,7 +100,9 @@ $speed = Newsletter::$instance->get_send_speed();
     <div id="tnp-heading">
 
         <h2><?php _e('Email Delivery', 'newsletter') ?></h2>
-
+        <p>
+            Test here the email delivery and the path it runs across to your subscribers.
+        </p>
     </div>
 
     <div id="tnp-body">
@@ -157,7 +130,7 @@ $speed = Newsletter::$instance->get_send_speed();
                 <?php } ?>
             <?php } else { ?>
                 <p>Last test was successful. If you didn't receive the test email:</p>
-                <ol style="color: #fff">
+                <ol>
                     <li>If you're using an third party SMTP plugin, do a test from that plugin configuration panel</li>
                     <li>If you're using a Newsletter Delivery Addon, do a test from that addon configuration panel</li>
                     <li>If previous points do not apply to you, ask for support to your provider reporting the emails from your blog are not delivered</li>
@@ -172,7 +145,7 @@ $speed = Newsletter::$instance->get_send_speed();
             How are messages delivered by Newsletter to your subscribers?
         </h3>
 
-        <div class="tnp-flow">
+        <div class="tnp-flow tnp-flow-row">
             <div class="tnp-mail"><i class="fas fa-envelope"></i><br><br>Messages<br>
                 (max: <?php echo esc_html($speed) ?> emails per hour)
             </div>
@@ -183,7 +156,7 @@ $speed = Newsletter::$instance->get_send_speed();
                 <?php echo $service_name ?>
             </div>
             <div class="tnp-arrow">&rightarrow;</div>
-            <div class="tnp-user"><i class="fas fa-user"></i></div>
+            <div class="tnp-user"><i class="fas fa-user"></i><br><br>Subscriber</div>
         </div>
 
 

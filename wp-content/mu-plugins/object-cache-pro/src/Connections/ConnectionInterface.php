@@ -63,11 +63,4 @@ interface ConnectionInterface
      * @return mixed
      */
     public function withoutMutations(callable $callback);
-
-    /**
-     * Returns an array of microseconds (μs) waited for the datastore to respond.
-     *
-     * @return float[]
-     */
-    public function ioWait();
 }

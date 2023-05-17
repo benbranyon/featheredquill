@@ -39,10 +39,16 @@ $extra_type = array('text' => __('Text', 'newsletter'), 'select' => __('List', '
 
     <div id="tnp-heading">
 
-        <h2><?php _e('Subscription Form Fields and Layout', 'newsletter') ?></h2>
+        <h2><?php _e('Subscription Form Fields', 'newsletter') ?></h2>
 
         <p>
+        <ul>
+            <li>
             <a href="?page=newsletter_subscription_forms"><?php _e('HTML samples and hand coded forms', 'newsletter') ?></a>
+            </li>
+            <li>
+                Customize newsletters with <a href="https://www.thenewsletterplugin.com/documentation/newsletters/newsletter-tags/" target="_blank">subscriber data tags</a>
+            </li>
         </p>
 
     </div>
@@ -73,6 +79,8 @@ $extra_type = array('text' => __('Text', 'newsletter'), 'select' => __('List', '
                                 </table>
                             </td>
                         </tr>
+                    </table>
+                    <table class="form-table">
                         <tr>
                             <th><?php _e('First name', 'newsletter') ?></th>
                             <td>
@@ -84,7 +92,7 @@ $extra_type = array('text' => __('Text', 'newsletter'), 'select' => __('List', '
                                     <?php } ?>
                                 </table>
                                 <p class="description">
-                                    <?php _e('If you want to collect only a generic "name", use only this field and not the last name field.', 'newsletter') ?>
+                                    <?php _e('If you want to collect only a generic "name", use only this field and not the last name field.', 'newsletter') ?><br>
                                 </p>
                             </td>
                         </tr>
@@ -117,13 +125,26 @@ $extra_type = array('text' => __('Text', 'newsletter'), 'select' => __('List', '
                                             <?php $controls->text('sex_male', 20, __('male', 'newsletter')); ?>
                                         </td>
                                     </tr>
+                                </table>
+                                
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th><?php _e('Salutation', 'newsletter') ?></th>
+                            <td>
+                                <table class="tnpc-grid">
                                     <tr>
-                                        <th><?php _e('Salutation titles', 'newsletter') ?></th>
-                                        <td>
-                                            <?php _e('not specified', 'newsletter') ?>: <?php $controls->text('title_none'); ?><br>
-                                            <?php _e('for females', 'newsletter') ?>: <?php $controls->text('title_female'); ?> (ex. "Mrs")<br>
-                                            <?php _e('for males', 'newsletter') ?>: <?php $controls->text('title_male'); ?> (ex. "Mr")
-                                        </td>
+                                        <th><?php _e('Generic', 'newsletter') ?></th>
+                                        <td><?php $controls->text('title_none'); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th><?php _e('Females', 'newsletter') ?></th>
+                                        <td><?php $controls->text('title_female'); ?> (ex. "Mrs")</td>
+                                    </tr>
+                                    <tr>
+                                        <th><?php _e('Males', 'newsletter') ?></th>
+                                        <td><?php $controls->text('title_male'); ?> (ex. "Mr")</td>
                                     </tr>
                                 </table>
                                 <p class="description">
@@ -146,7 +167,7 @@ $extra_type = array('text' => __('Text', 'newsletter'), 'select' => __('List', '
                         <tr>
                             <th><?php _e('Privacy checkbox/notice', 'newsletter') ?></th>
                             <td>
-                                <table>
+                                <table class="tnpc-grid">
                                     <?php if ($is_all_languages) { ?>
                                         <tr><th><?php _e('Enabled?', 'newsletter') ?></th><td><?php $controls->select('privacy_status', array(0 => __('No', 'newsletter'), 1 => __('Yes', 'newsletter'), 2 => __('Only the notice', 'newsletter'))); ?></td></tr>
                                     <?php } ?>

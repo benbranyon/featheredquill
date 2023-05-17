@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.18.0 - 2023-02-20
+### Added
+- Added `wp redis flush-group` CLI command
+
+### Changed
+- Reduced overall memory usage
+- Made cache key generation slightly faster
+- Enable flush logging by default
+- Log `warning` level by default
+- Execute not split `alloptions` reads on primary node
+- Refactored object cache metrics to use new `ObjectCacheMetrics`
+- Enabled flush logging when `save_commands` is set
+- Disabled command logging entirely unless `save_commands` is set
+- Return primary node from `*SentinelsConnection::client()` instead of sentinel client
+
+### Fixed
+- Handle foreign keys without a group in groups REST API endpoint
+- Respect `async_flush` when using `wp_cache_delete()`
+
+### Removed
+- Dropped support for Query Monitor <=3.8.0 backtraces
+- Removed metrics keys from `info()` in favor of `metrics()`
+- Removed `backtrace_summary` logging and deprecated `BacktraceLogger`
+
+## 1.17.1 - 2023-01-28
+### Changed
+- Switched to faster Zstandard compression level
+- Handle non `int|string` cache keys stricter and more gracefully
+- Throw exception for invalid cache keys when `debug` option is enabled
+- Don't let the perflab plugin hijack the object cache drop-in
+- Defer registering `wp redis` CLI command
+
+### Fixed
+- Fixed several multisite blog flushing issues
+- Fixed accessing client on replicated connections
+- Fixed setting `analytics` option to boolean
+- Fixed calling `get_plugin_data()` on non-existent drop-in
+
 ## 1.17.0 - 2022-11-23
 ### Added
 - Added support replicated and sentinel Relay connections

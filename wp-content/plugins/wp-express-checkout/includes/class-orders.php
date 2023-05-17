@@ -3,7 +3,9 @@
 namespace WP_Express_Checkout;
 
 use Exception;
-
+use WP_Express_Checkout\PayPal\Client;
+use PayPalCheckoutSdk\Payments\CapturesRefundRequest;
+use WP_Express_Checkout\Debug\Logger;
 /**
  * Orders post type register and factory.
  */
@@ -242,5 +244,49 @@ class Orders {
 		$order->set_author_email( $payer['email_address'] );
 		return $order;
 	}
+
+	public static function refund($order)
+	{
+		$client = Client::client();
+
+		$body = array(
+            'amount' =>
+                array(
+                    'value' => $order->get_total(),
+                    'currency_code' => $order->get_currency()
+                )
+        );
+
+		$capture_id = $order->get_capture_id();
+		Logger::log( 'Initiating refund request for capture ID: ' . $capture_id );
+		if( empty( $capture_id )){
+			return new \WP_Error(2002,__( 'The Capture ID value of this transaction is empty. Cannot execute the refund request on this transaction. You can try to refund it from your PayPal account.', 'wp-express-checkout' ));
+		}
+				
+		$request = new CapturesRefundRequest( $capture_id );
+		$request->body = $body ;
+
+		try{
+			$response = $client->execute($request);
+		}
+		catch( Exception $e ) {			
+			$exception_msg = json_decode($e->getMessage());
+			if(is_array($exception_msg->details) && sizeof($exception_msg->details)>0){
+				$error_string = $exception_msg->details[0]->issue.". ".$exception_msg->details[0]->description;							
+				return new \WP_Error(2002,$error_string);
+			}
+			return new \WP_Error(2002,__( 'Something went wrong, refund is not completed!', 'wp-express-checkout' ));
+		}
+		
+		if( $response->result->status == "COMPLETED" ){			
+			$order->set_status("refunded");
+			$current_wp_time = current_time('mysql');
+			$order->set_refund_date($current_wp_time);
+			Logger::log( 'Refund processed successfully!' );
+			return true;
+		}
+		
+		return new \WP_Error(2002,__( 'Something went wrong, refund is not completed!', 'wp-express-checkout' ));
+	}	
 
 }

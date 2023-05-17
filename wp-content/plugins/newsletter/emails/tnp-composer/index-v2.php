@@ -36,9 +36,9 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
 
     function tnp_view(type) {
         if (type === 'mobile') {
-            jQuery('#newsletter-builder-area-center-frame-content').addClass('tnp-view-mobile');
+            jQuery('#tnpb-content').addClass('tnp-view-mobile');
         } else {
-            jQuery('#newsletter-builder-area-center-frame-content').removeClass('tnp-view-mobile');
+            jQuery('#tnpb-content').removeClass('tnp-view-mobile');
         }
     }
 </script>
@@ -48,9 +48,9 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
 <?php echo NewsletterEmails::instance()->get_composer_backend_css(); ?>
 </style>
 
-<div id="newsletter-builder" dir="ltr">
+<div id="tnp-builder" dir="ltr">
 
-    <div id="newsletter-builder-area" class="tnp-builder-column">
+    <div id="tnpb-main">
 
         <?php if ($tnpc_show_subject) { ?>
             <div id="tnpc-subject-wrap" dir="<?php echo $dir ?>">
@@ -89,12 +89,12 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
 
                 <div class="composer-actions">
 
-                    <div id="attachment-newsletter-button" class="button-primary" data-tnp-modal-target="#attachment-modal">
+                    <div class="button-primary" data-tnp-modal-target="#attachment-modal">
                         <i class="fas fa-paperclip"></i>
                     </div>
 
                     <?php if ($show_test) { ?>
-                        <div id="test-newsletter-button" class="button-primary" data-tnp-modal-target="#test-newsletter-modal">
+                        <div class="button-primary" data-tnp-modal-target="#test-newsletter-modal">
                             <i class="fas fa-paper-plane"></i> <?php _e('Test', 'newsletter') ?>
                         </div>
                     <?php } ?>
@@ -115,38 +115,35 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
         <?php } ?>
 
 
-        <div id="newsletter-builder-area-center-frame-content" dir="<?php echo $dir ?>">
+        <div id="tnpb-content" dir="<?php echo $dir ?>">
 
             <!-- Composer content -->
 
         </div>
     </div>
 
-    
-    
-    <div id="newsletter-builder-sidebar" dir="<?php echo $dir ?>">
 
-        <div class="tnpc-tabs">
-            <button class="tablinks" onclick="openTab(event, 'tnpc-blocks')" data-tab-id='tnpc-blocks' id="defaultOpen"><?php _e('Blocks', 'newsletter') ?></button>
-            <button class="tablinks" onclick="openTab(event, 'tnpc-global-styles')" data-tab-id='tnpc-global-styles'><?php _e('Settings', 'newsletter') ?></button>
+    <div id="tnpb-sidebar" dir="<?php echo $dir ?>">
+
+        <div class="tnpb-tabs">
+            <button class="tnpb-tab-button" onclick="tnpb_open_tab(event, 'tnpb-blocks')" data-tab-id='tnpb-blocks' id="defaultOpen"><?php _e('Blocks', 'newsletter') ?></button>
+            <button class="tnpb-tab-button" onclick="tnpb_open_tab(event, 'tnpb-settings')" data-tab-id='tnpb-settings'><?php _e('Settings', 'newsletter') ?></button>
         </div>
 
-        <div id="tnpc-blocks" class="tabcontent">
+        <div id="tnpb-blocks" class="tnpb-tab">
             <?php foreach ($blocks as $k => $section) { ?>
-                <div class="newsletter-sidebar-add-buttons" id="sidebar-add-<?php echo $k ?>">
-                    <!--<h4><span><?php echo ucfirst($k) ?></span></h4>-->
-                    <?php foreach ($section AS $key => $block) { ?>
-                        <div class="newsletter-sidebar-buttons-content-tab" data-id="<?php echo $key ?>" data-name="<?php echo esc_attr($block['name']) ?>">
-                            <img src="<?php echo $block['icon'] ?>" title="<?php echo esc_attr($block['name']) ?>">
+                <div class="tnpb-block-icons" id="sidebar-add-<?php echo esc_attr($k) ?>">
+                    <?php foreach ($section as $key => $block) { ?>
+                        <div class="tnpb-block-icon" data-id="<?php echo esc_attr($key) ?>" data-name="<?php echo esc_attr($block['name']) ?>">
+                            <img src="<?php echo esc_attr($block['icon']) ?>" title="<?php echo esc_attr($block['name']) ?>">
                         </div>
                     <?php } ?>
                 </div>
             <?php } ?>
         </div>
 
-        <div id="tnpc-global-styles" class="tabcontent">
-
-            <form id="tnpc-global-styles-form">
+        <div id="tnpb-settings" class="tnpb-tab">
+            <form id="tnpb-settings-form">
 
                 <div class="tnp-field-row">
                     <div class="tnp-field-col-2">
@@ -161,6 +158,8 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
                 <?php $fields->font('options_composer_text_font', __('Text font', 'newsletter')) ?>
                 <?php $fields->button_style('options_composer_button', __('Button style', 'newsletter')); ?>
 
+                <?php $fields->select('options_composer_width', __('Width', 'newsletter'), ['600' => '600', '650' => '650', '700' => '700']); ?>
+
                 <button class="button-secondary" name="apply"><?php _e("Apply", 'newsletter') ?></button>
 
             </form>
@@ -173,7 +172,9 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
                 <span id="tnpc-block-options-cancel" class="button-secondary"><?php _e("Cancel", "newsletter") ?></span>
                 <span id="tnpc-block-options-save" class="button-primary"><?php _e("Apply", "newsletter") ?></span>
             </div>
-            <form id="tnpc-block-options-form" onsubmit="return false;"></form>
+            <form id="tnpc-block-options-form" onsubmit="return false;">
+                <!-- Block options -->
+            </form>
         </div>
 
     </div>
@@ -185,19 +186,19 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
 <div style="display: none">
     <div id="newsletter-preloaded-export"></div>
     <!-- Block placeholder used by jQuery UI -->
-    <div id="draggable-helper"></div>
-    <div id="sortable-helper"></div>
+    <div id="tnpb-draggable-helper"></div>
+    <div id="tnpb-sortable-helper"></div>
 </div>
 
 <script type="text/javascript">
-    TNP_PLUGIN_URL = "<?php echo esc_js(NEWSLETTER_URL) ?>";
+    TNP_PLUGIN_URL = "<?php echo esc_js(Newsletter::instance()->plugin_url) ?>";
     TNP_HOME_URL = "<?php echo esc_js(home_url('/', is_ssl() ? 'https' : 'http')) ?>";
     tnp_context_type = "<?php echo esc_js($context_type) ?>";
     tnp_nonce = '<?php echo esc_js(wp_create_nonce('save')) ?>';
     tnp_preset_nonce = '<?php echo esc_js(wp_create_nonce('preset')) ?>';
 </script>
 <?php
-wp_enqueue_script('tnp-composer', plugins_url('newsletter') . '/emails/tnp-composer/_scripts/newsletter-builder-v2.js', ['tnp-modal', 'tnp-toast'], NEWSLETTER_VERSION);
+wp_enqueue_script('tnp-composer', plugins_url('newsletter') . '/emails/tnp-composer/_scripts/newsletter-builder-v2.js', [], NEWSLETTER_VERSION);
 ?>
 
 <?php include NEWSLETTER_DIR . '/emails/subjects.php'; ?>

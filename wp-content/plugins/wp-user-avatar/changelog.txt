@@ -1,5 +1,36 @@
 ﻿== Changelog ==
 
+= 4.9.0 =
+* New: [Membership plan group](https://profilepress.com/article/membership-plan-groups/?ref=changelog).
+* Added [Restricted Page Template](https://profilepress.com/article/adding-content-protection-rules/?ref=changelog#rpt) option for content protection.
+* Added ppress_public_js_dependencies filter.
+* Added filters to checkout fields.
+* Added ppress_customer_active_subscriptions filter.
+* Added ppress_checkout_sidebar_order_expiration_date_time filter.
+* Added ppress_stripe_price_search_args filter.
+* Added ppress_checkout_disable_validate_field filter.
+* Added has_any_status_subscription method to customer entity.
+
+= 4.8.0 =
+* Pro: [LearnDash addon](https://profilepress.com/addons/learndash/?ref=changelog).
+* Added filter for skipping custom fields in checkout.
+* Added ppress_plan_expiration_datetime filter.
+* Fixed bug where loggedout condition for elementor content restriction wasn’t working.
+* Fixed PHP Fatal error: Call to a member function wpua_get_default_avatar_url() on null.
+* Removed settings icon from form builder metabox form settings.
+
+= 4.7.0 =
+* Pro: [Paystack addon](https://profilepress.com/addons/paystack/?ref=changelog).
+* Fixed bug where subscription was still active even when order was refunded.
+* Fixed bug with checkout not working when Password reset is not allowed for user.
+
+= 4.6.0 =
+* Added [RazorPay addon](https://profilepress.com/addons/razorPay/?ref=changelog).
+* Added support for 'url' config when adding myaccount page menu tabs.
+* Added color fields to settings API.
+* Fixed bug where admin couldn't delete other users cover photo in the admin dashboard.
+* Fixed incorrect currency in order listing display.
+
 = 4.5.5 =
 * Fixed PHP Warning: Undefined array key "user_login".
 * Added missing text domain to strings.

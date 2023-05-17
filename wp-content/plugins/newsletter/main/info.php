@@ -18,6 +18,7 @@ if (!$controls->is_action()) {
 } else {
 
     if ($controls->is_action('save')) {
+        $controls->data['googleplus_url'] = '';
         $this->merge_options($controls->data);
         $this->save_options($controls->data, 'info');
         $controls->add_message_saved();
@@ -53,7 +54,6 @@ if (!$controls->is_action()) {
                         <tr>
                             <th>
                                 <?php _e('Logo', 'newsletter') ?><br>
-                                <?php $controls->help('https://www.thenewsletterplugin.com/documentation/newsletter-configuration#company-logo') ?>
                             </th>
                             <td style="cursor: pointer">
                                 <?php $controls->media('header_logo', 'medium'); ?>

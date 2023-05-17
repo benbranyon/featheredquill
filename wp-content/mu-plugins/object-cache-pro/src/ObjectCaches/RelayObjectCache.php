@@ -33,14 +33,16 @@ class RelayObjectCache extends PhpRedisObjectCache
      *
      * @param  \RedisCachePro\Connections\RelayConnection  $connection
      * @param  \RedisCachePro\Configuration\Configuration  $config
+     * @param  ?\RedisCachePro\ObjectCaches\ObjectCacheMetrics  $metrics
      */
-    public function __construct(RelayConnection $connection, Configuration $config)
-    {
-        $this->config = $config;
-        $this->connection = $connection;
-        $this->log = $this->config->logger;
+    public function __construct(
+        RelayConnection $connection,
+        Configuration $config,
+        ?ObjectCacheMetrics $metrics = null
+    ) {
+        $this->setup($config, $connection, $metrics);
 
-        if ($this->config->relay->listeners && $this->connection->hasInMemoryCache()) {
+        if ($config->relay->listeners && $connection->hasInMemoryCache()) {
             $this->connection->onInvalidated(
                 [$this, 'invalidated'],
                 $config->prefix ? "{$config->prefix}*" : null

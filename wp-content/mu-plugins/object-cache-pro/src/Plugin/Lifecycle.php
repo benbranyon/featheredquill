@@ -106,7 +106,12 @@ trait Lifecycle
             error_log("objectcache.debug: Flushing object cache... {$traceSummary}");
         }
 
-        if ($this->config->debug || WP_DEBUG || $this->option('flushlog')) {
+        if (
+            $this->config->debug ||
+            $this->config->save_commands ||
+            WP_DEBUG ||
+            $this->option('flushlog')
+        ) {
             $log = (array) get_site_option('objectcache_flushlog', []);
 
             array_unshift($log, [

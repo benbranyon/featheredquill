@@ -40,6 +40,11 @@ export default function () {
             $(document.body).trigger('ppress_update_checkout');
         });
 
+        // Update group selection change
+        $(document.body).on('change', '#ppress_mb_checkout_form [name=group_selector]', function () {
+            _this.update_checkout(true);
+        });
+
         // Update on page load.
         $(document.body).trigger('ppress_update_checkout');
 
@@ -86,7 +91,9 @@ export default function () {
         }
     };
 
-    this.update_checkout = function () {
+    this.update_checkout = function (isChangePlanUpdate) {
+
+        isChangePlanUpdate = isChangePlanUpdate || false;
 
         _this.removeAllAlerts();
 
@@ -106,6 +113,10 @@ export default function () {
             'vat_number': $('#ppress_checkout_main_form .ppress_vat_number').val(),
             'post_data': $('#ppress_mb_checkout_form').serialize()
         };
+
+        if (isChangePlanUpdate === true) {
+            data['isChangePlanUpdate'] = 'true';
+        }
 
         $.post(pp_ajax_form.ajaxurl, data, function (response) {
 
@@ -376,5 +387,9 @@ export default function () {
 
     this.is_var_defined = function (val) {
         return typeof val !== 'undefined' && val !== null;
+    };
+
+    this.get_obj_val = function (val, $default) {
+        return this.is_var_defined(val) && val !== "" ? val : $default;
     };
 }

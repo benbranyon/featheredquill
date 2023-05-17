@@ -1,12 +1,12 @@
 === Contact Form 7 - PayPal & Stripe Add-on ===
 Contributors: scottpaterson,wp-plugin
 Donate link: https://wpplugin.org/donate/
-Tags: paypal, contact form 7, stripe, contact form, contact form paypal
+Tags: paypal, contact form 7, stripe, contact form, ecommerce
 Author URI: https://wpplugin.org
 Requires at least: 3.0
-Tested up to: 5.6
+Tested up to: 6.2
 Requires PHP: 5.5
-Stable tag: 1.9.3
+Stable tag: 1.9.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,12 @@ Here is a short video of how the Pro version works:
 
 
 == Changelog ==
+
+= 1.9.4 =
+* 3/20/23
+* Fix - Security issue
+* Fix - PHP error message resulting from Stripe mode variable
+
 
 = 1.9.3 =
 * 5/7/21

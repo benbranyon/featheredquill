@@ -18,17 +18,16 @@ class NewsletterProfile extends NewsletterModule {
 
     function __construct() {
         parent::__construct('profile', '1.1.0');
-        add_shortcode('newsletter_profile', array($this, 'shortcode_newsletter_profile'));
-        add_filter('newsletter_replace', array($this, 'hook_newsletter_replace'), 10, 4);
-        add_filter('newsletter_page_text', array($this, 'hook_newsletter_page_text'), 10, 3);
-        add_action('newsletter_action', array($this, 'hook_newsletter_action'), 12, 3);
+        add_shortcode('newsletter_profile', [$this, 'shortcode_newsletter_profile']);
+        add_filter('newsletter_replace', [$this, 'hook_newsletter_replace'], 10, 4);
+        add_filter('newsletter_page_text', [$this, 'hook_newsletter_page_text'], 10, 3);
+        add_action('newsletter_action', [$this, 'hook_newsletter_action'], 12, 3);
     }
 
     function hook_newsletter_action($action, $user, $email) {
 
         if (in_array($action, ['p', 'profile', 'pe', 'profile-save', 'profile_export', 'ps'])) {
             if (!$user || $user->status != TNP_User::STATUS_CONFIRMED) {
-
                 $this->dienow(__('The subscriber was not found or is not confirmed.', 'newsletter'), '', 404);
             }
         }

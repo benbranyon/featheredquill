@@ -82,24 +82,26 @@ $controls->data = Newsletter::instance()->get_email($email_id, ARRAY_A);
 
 <div class="wrap tnp-emails-editor-html" id="tnp-wrap">
 
-    <form action="" method="post">
-        <?php $controls->init() ?>
+    <div id="tnp-body">
+        <form action="" method="post" style="margin-top: 2rem">
+            <?php $controls->init() ?>
 
-        <?php $controls->text('subject', 60, 'Newsletter subject') ?>
-        <a href="#" class="button-primary" onclick="tnp_suggest_subject(); return false;"><?php _e('Get ideas', 'newsletter') ?></a>
-        <a href="#" class="button-primary" onclick="newsletter_textarea_preview('options-message'); return false;"><i class="fa fa-eye"></i></a>
+            <?php $controls->text('subject', 60, 'Newsletter subject') ?>
+            <a href="#" class="button-primary" onclick="tnp_suggest_subject(); return false;"><?php _e('Get ideas', 'newsletter') ?></a>
+            <a href="#" class="button-primary" onclick="newsletter_textarea_preview('options-message'); return false;"><i class="fa fa-eye"></i></a>
 
-        <input type="button" class="button-primary" value="Add media" onclick="tnp_media()">
-        <?php $controls->textarea_preview('message', '100%', 700, '', '', false); ?>
+            <input type="button" class="button-primary" value="Add media" onclick="tnp_media()">
+            <?php $controls->textarea_preview('message', '100%', 700, '', '', false); ?>
 
 
 
-        <div style="text-align: right ">
-            <?php $controls->button_confirm('reset', __('Back to last save', 'newsletter'), 'Are you sure?'); ?>
-            <?php $controls->button('test', __('Test', 'newsletter')); ?>
-            <?php $controls->button('save', __('Save', 'newsletter')); ?>
-            <?php $controls->button('next', __('Next', 'newsletter') . ' &raquo;'); ?>
-        </div>
-    </form>
-    <?php include NEWSLETTER_DIR . '/emails/subjects.php'; ?>
+            <div style="text-align: right ">
+                <?php $controls->button_confirm('reset', __('Back to last save', 'newsletter'), 'Are you sure?'); ?>
+                <?php $controls->button('test', __('Test', 'newsletter')); ?>
+                <?php $controls->button('save', __('Save', 'newsletter')); ?>
+                <?php $controls->button('next', __('Next', 'newsletter') . ' &raquo;'); ?>
+            </div>
+        </form>
+        <?php include NEWSLETTER_DIR . '/emails/subjects.php'; ?>
+    </div>
 </div>

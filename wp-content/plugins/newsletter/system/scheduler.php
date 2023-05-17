@@ -54,7 +54,7 @@ if ($controls->is_action('test')) {
 
     <div id="tnp-heading">
 
-        <h2><?php _e('WordPress Scheduler and Newsletter Delivery Engine', 'newsletter') ?></h2>
+        <h2><?php _e('WP Scheduler and Delivery Engine', 'newsletter') ?></h2>
         <p>
             The scheduler is a WordPress component that executes <strong>background tasks</strong> 
             (publish future post, run backups, send newsletters, ...). 
@@ -76,6 +76,13 @@ if ($controls->is_action('test')) {
             <?php $controls->init(); ?>
 
             <table class="widefat">
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th></th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
                 <?php
                 $status = $this->get_job_status();
                 $condition = $status == NewsletterSystem::JOB_OK ? 1 : 0;
@@ -154,11 +161,12 @@ if ($controls->is_action('test')) {
 
                             Samples <?php echo count($stats->deltas) ?>, average <?php echo $stats->avg ?>&nbsp;s, max <?php echo $stats->max ?>&nbsp;s, min <?php echo $stats->min ?>&nbsp;s
 
-                            <canvas id="tnp-cron-chart" style="width: 550px; height: 180px"></canvas>
+                            <canvas id="tnp-cron-chart" style="width: 700px; height: 300px"></canvas>
                             <script>
                                 jQuery(function () {
                                     var cronChartData = {
-                                        labels: <?php echo json_encode(range(1, count($stats->deltas))) ?>,
+                                        //labels: <?php echo json_encode(range(1, count($stats->deltas))) ?>,
+                                        labels: <?php echo json_encode($stats->deltas_ts) ?>,
                                         datasets: [
                                             {
                                                 label: "Batch Average Time",

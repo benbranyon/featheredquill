@@ -99,7 +99,7 @@ $count = $wpdb->get_row("select " . implode(',', $conditions) . ' from ' . NEWSL
                 } else {
                     if (!jQuery(fieldForced).attr('checked')) {
                         jQuery(field).show();
-                        
+
                     }
                     jQuery(fieldProfile).show();
                 }
@@ -117,7 +117,7 @@ $count = $wpdb->get_row("select " . implode(',', $conditions) . ' from ' . NEWSL
     <?php include NEWSLETTER_DIR . '/tnp-header.php'; ?>
 
     <div id="tnp-heading">
-
+        <?php $controls->title_help('/subscription/newsletter-lists/') ?>
         <h2><?php _e('Lists', 'newsletter') ?></h2>
 
     </div>
@@ -129,14 +129,14 @@ $count = $wpdb->get_row("select " . implode(',', $conditions) . ' from ' . NEWSL
             <p>
                 <?php $controls->button_save(); ?>
             </p>
-            <table class="widefat" style="width: auto">
+            <table class="widefat" style="width: auto" scope="presentation">
                 <thead>
                     <tr>
                         <th>#</th>
                         <th><?php _e('Name', 'newsletter') ?></th>
                         <?php if ($is_all_languages) { ?>
                             <th><?php _e('Type', 'newsletter') ?></th>
-                            <th><?php _e('Enforced', 'newsletter') ?> <i class="fas fa-info-circle tnp-notes" title="<?php esc_attr_e('If you check this box, all your new subscribers will be automatically added to this list', 'newsletter')?>"></i></th>
+                            <th><?php _e('Enforced', 'newsletter') ?> <i class="fas fa-info-circle tnp-notes" title="<?php esc_attr_e('If you check this box, all your new subscribers will be automatically added to this list', 'newsletter') ?>"></i></th>
                             <th style="white-space: nowrap"><?php _e('Subscription form', 'newsletter') ?></th>
                             <th><?php _e('Profile form', 'newsletter') ?></th>
                             <?php if ($is_multilanguage) { ?>
@@ -145,8 +145,6 @@ $count = $wpdb->get_row("select " . implode(',', $conditions) . ' from ' . NEWSL
                         <?php } ?>
                         <th><?php _e('Subscribers', 'newsletter') ?></th>
                         <th>&nbsp;</th>
-
-                        <th><?php _e('Notes', 'newsletter') ?></th>
                     </tr>
                 </thead>
                 <?php for ($i = 1; $i <= NEWSLETTER_LIST_MAX; $i++) { ?>
@@ -180,7 +178,10 @@ $count = $wpdb->get_row("select " . implode(',', $conditions) . ' from ' . NEWSL
 
                         <td>
                             <?php //echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where list_" . $i . "=1 and status='C'"); ?>
-                            <?php $field = 'list_' . $i; echo $count->$field; ?>
+                            <?php
+                            $field = 'list_' . $i;
+                            echo $count->$field;
+                            ?>
                         </td>
 
                         <td>
@@ -188,7 +189,10 @@ $count = $wpdb->get_row("select " . implode(',', $conditions) . ' from ' . NEWSL
                                 <?php $controls->button_confirm('unlink', __('Unlink everyone', 'newsletter'), '', $i); ?>
                             <?php } ?>
                         </td>
-                        <td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td colspan="7">
                             <?php $notes = apply_filters('newsletter_lists_notes', array(), $i); ?>
                             <?php
                             $text = '';

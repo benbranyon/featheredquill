@@ -1095,7 +1095,7 @@ class Diagnostics implements ArrayAccess
             return new WP_Error('fs', 'Size of copied test file does not match');
         }
 
-        if (! $wp_filesystem->delete($temp)) {
+        if (! $wp_filesystem->delete($temp)) { // @phpstan-ignore-line
             return new WP_Error('fs', 'Unable to delete copied test file');
         }
 
@@ -1125,19 +1125,33 @@ class Diagnostics implements ArrayAccess
      */
     public static function host()
     {
-        if (isset($_SERVER['cw_allowed_ip']) || isset($_SERVER['CW_ALLOWED_IP'])) {
+        $documentRoot = $_SERVER['DOCUMENT_ROOT'] ?? '';
+
+        if (
+            strpos($documentRoot, '.cloudwaysapps.com/') ||
+            strpos($documentRoot, '.cloudwaysstagingapps.com/') ||
+            isset($_SERVER['cw_allowed_ip']) ||
+            isset($_SERVER['CW_ALLOWED_IP'])
+        ) {
             return 'cloudways';
         }
 
-        if (defined('PAGELYBIN') && constant('PAGELYBIN')) {
+        if (
+            (defined('PAGELYBIN') && constant('PAGELYBIN')) ||
+            strpos($_SERVER['PHP_INI_SCAN_DIR'] ?? '', 'srv/pagely/conf') ||
+            preg_match('~^/data/s\d+/dom\d+~', $documentRoot)
+        ) {
             return 'pagely';
         }
 
-        if (! empty($_SERVER['WPAAS_SITE_ID']) || (class_exists('\WPaaS\Plugin') && \WPaaS\Plugin::is_wpaas())) {
+        if (
+            ! empty($_SERVER['WPAAS_SITE_ID']) ||
+            (class_exists('\WPaaS\Plugin') && \WPaaS\Plugin::is_wpaas())
+        ) {
             return 'godaddy';
         }
 
-        if (defined('CONVESIO_VER') || strpos($_SERVER['DOCUMENT_ROOT'] ?? '', 'convesio')) {
+        if (defined('CONVESIO_VER') || strpos($documentRoot, 'convesio')) {
             return 'convesio';
         }
 
@@ -1187,22 +1201,29 @@ class Diagnostics implements ArrayAccess
     }
 
     /**
-     * Parses the given file header once to retrieve plugin metadata.
+     * Returns the given file's header metadata.
      *
-     * @param  string  $file
+     * @param  string  $path
      * @return array<string, string>
      */
-    protected function fileMetadata($file)
+    protected function fileMetadata($path)
     {
         static $cache = [];
 
-        $file = (string) realpath($file);
+        $path = realpath((string) $path);
 
-        if (! isset($cache[$file])) {
-            $cache[$file] = \get_plugin_data($file, false, false);
+        if ($path && ! isset($cache[$path])) {
+            $cache[$path] = \get_plugin_data($path, false, false);
         }
 
-        return $cache[$file];
+        return $cache[$path] ?? [
+            'Name' => '',
+            'PluginURI' => '',
+            'Version' => '',
+            'Author' => '',
+            'AuthorURI' => '',
+            'AuthorName' => '',
+        ];
     }
 
     /**

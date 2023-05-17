@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, email marketing, welcome email, signup forms, lead generation, marketing automation
 Tested up to: 6.1.1
-Stable tag: 7.5.9
+Stable tag: 7.6.9
 Contributors: satollo,webagile,michael-travan
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -125,6 +125,86 @@ Thank you, The Newsletter Team
 3. The Reports extension
 
 == Changelog ==
+
+= 7.6.9 =
+
+* Security fix
+
+= 7.6.8 =
+
+* More strict checks on get_option function (object caching plugins...)
+* Added massive status change for subscribers
+* Added new controls on common code
+* Fixed some doc links
+* Fixed help badge on some panels
+* Changed the posts block for Outlook on Mac
+
+= 7.6.7 =
+
+* Fixed hook linked functions on status page when closures are used
+* Fixed green color on links in the composer
+* Changed the default style of the text block
+* Optimized CSS an JS
+* Removed old composer code
+* Added trimming for long fields
+* Code for logged in users moved to the WP User Addon
+* Added link on status page to see the advanced report
+* Removed obsolete status page data
+* Fixes for PHP 8.2
+* Removed obsolete "define" statements
+* Fixed permalink generation with WPML in multidomain configuration and block post without a specified language
+* Improved email validation
+* Minor style fixes
+* Fixed composer javascript loading
+
+= 7.6.6 =
+
+* Improved the full post layout of the Posts block
+* Improved the test message to check image loading from different servers
+* Changed the system error reports
+* Merge of CSS to avoid problems with optimizers
+
+= 7.6.5 =
+
+* Urgent. Removed the WPGlobus support from the core
+
+= 7.6.4 =
+
+* Fixed possible composer width not set
+* Added version number on CSS to avoid browser caching
+* Changed the full post alignment (should fix layout problems)
+* When a test newsletter is sent from the composer to a custom address, the matching subscriber is used, if present
+* Fixed lists missing on subscribers' panel
+
+= 7.6.3 =
+
+* Fixed composer sidebar not working on Firefox
+
+= 7.6.2 =
+
+* New administration look and feel
+* Added ID attribute to form shortcodes
+* Fix attempt to the posts block (layout one column) for Outlook on Mac
+
+= 7.6.1 =
+
+* Fixed newsletter global settings saving
+
+= 7.6.0 =
+
+* Added control on admin notification of cancellations
+* Fixed the wrong error logged as "missing block.php" (anyway not affecting the plugin functionality)
+* Added fix to avoid mod_security false positive and newsletter saving problems
+* Improved image block for gmail web
+* Added filters' check on Status panel
+* Fixed Google Plus social url not cleared upon company info saving
+= NEXT =
+
+* New interface to configure the subscription flow
+* Bright style on the admin side
+* New configuration for the opt-out (was unsubscription - wrong word)
+* Improved subscribers' general statistics
+* Improved list panel readability when there are lot of notes
 
 = 7.5.9 =
 

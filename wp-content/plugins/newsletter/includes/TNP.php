@@ -103,7 +103,7 @@ class TNP {
 
         NewsletterUnsubscription::instance()->send_unsubscribed_email($user);
 
-	    NewsletterUnsubscription::instance()->notify_admin_on_unsubscription($user);
+	    NewsletterUnsubscription::instance()->notify_admin($user);
 
         do_action('newsletter_unsubscribed', $user);
 

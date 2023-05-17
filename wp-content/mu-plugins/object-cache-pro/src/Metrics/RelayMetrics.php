@@ -90,7 +90,7 @@ class RelayMetrics
         $stats = $connection->memoize('stats');
         $total = intval($stats['stats']['hits'] + $stats['stats']['misses']);
 
-        $keys = array_sum(array_map(function ($connection) use ($config) {
+        $keys = array_sum(array_map(static function ($connection) use ($config) {
             return $connection['keys'][$config->database] ?? 0;
         }, $stats['endpoints'][$connection->endpointId()]['connections'] ?? [])) ?: null;
 
@@ -132,7 +132,7 @@ class RelayMetrics
     {
         $metrics = $this->toArray();
 
-        return implode(' ', array_map(function ($metric, $value) {
+        return implode(' ', array_map(static function ($metric, $value) {
             return "sample#relay-{$metric}={$value}";
         }, array_keys($metrics), $metrics));
     }
@@ -187,7 +187,7 @@ class RelayMetrics
             ],
         ];
 
-        return array_map(function ($metric) {
+        return array_map(static function ($metric) {
             $metric['group'] = 'relay';
 
             return $metric;

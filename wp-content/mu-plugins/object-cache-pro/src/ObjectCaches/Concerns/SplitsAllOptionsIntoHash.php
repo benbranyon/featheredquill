@@ -47,7 +47,6 @@ trait SplitsAllOptionsIntoHash
      */
     protected function getAllOptions(string $id)
     {
-        $this->storeReads++;
         $alloptions = $this->connection->hgetall("{$id}:hash");
 
         return empty($alloptions) ? false : $alloptions;
@@ -72,16 +71,20 @@ trait SplitsAllOptionsIntoHash
         $removedOptions = array_keys(array_diff_key($runtimeCache, $data));
 
         if (! empty($removedOptions)) {
-            $this->storeWrites++;
             $this->connection->hdel("{$id}:hash", ...$removedOptions);
+
+            $this->metrics->write('options');
         }
 
         $changedOptions = array_diff_assoc($data, $runtimeCache);
 
         if (! empty($changedOptions)) {
-            $this->storeWrites++;
             $this->connection->hmset("{$id}:hash", $changedOptions);
+
+            $this->metrics->write('options');
         }
+
+        $this->storeInMemory($id, $data, 'options');
 
         return true;
     }
@@ -94,10 +97,11 @@ trait SplitsAllOptionsIntoHash
      */
     protected function deleteAllOptions(string $id): bool
     {
-        $this->storeWrites++;
+        $command = $this->config->async_flush ? 'unlink' : 'del';
+        $result = (bool) $this->connection->{$command}("{$id}:hash");
 
-        $command = $this->config->async_flush ? 'UNLINK' : 'DEL';
+        $this->metrics->write('options');
 
-        return (bool) $this->connection->{$command}("{$id}:hash");
+        return $result;
     }
 }

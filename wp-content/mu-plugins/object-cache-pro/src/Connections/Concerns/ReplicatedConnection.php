@@ -19,11 +19,22 @@ namespace RedisCachePro\Connections\Concerns;
 use Generator;
 use Throwable;
 
+use RedisCachePro\Clients\ClientInterface;
 use RedisCachePro\Connections\Transaction;
 use RedisCachePro\Exceptions\ConnectionException;
 
 trait ReplicatedConnection
 {
+    /**
+     * Returns the connection's client.
+     *
+     * @return \RedisCachePro\Clients\ClientInterface
+     */
+    public function client(): ClientInterface
+    {
+        return $this->primary()->client();
+    }
+
     /**
      * Run a command against Redis.
      *
@@ -33,16 +44,24 @@ trait ReplicatedConnection
      */
     public function command(string $name, array $parameters = [])
     {
+        $this->lastCommand = null;
+
         $isReading = \in_array(\strtoupper($name), $this->readonly);
 
-        // send `alloptions` hash read requests to the primary
-        if ($isReading && $this->config->split_alloptions && \is_string($parameters[0] ?? null)) {
-            $isReading = \strpos($parameters[0], 'options:alloptions:') === false;
+        // send `alloptions` read requests to the primary
+        if ($isReading && \is_string($parameters[0] ?? null)) {
+            $isReading = \strpos($parameters[0], 'options:alloptions') === false;
         }
 
-        return $isReading
-            ? $this->pool[\array_rand($this->pool)]->command($name, $parameters)
-            : $this->primary->command($name, $parameters);
+        $node = $isReading
+            ? $this->pool[\array_rand($this->pool)]
+            : $this->primary;
+
+        $result = $node->command($name, $parameters);
+
+        $this->lastCommand = $node->lastCommand;
+
+        return $result;
     }
 
     /**
@@ -56,17 +75,16 @@ trait ReplicatedConnection
     }
 
     /**
-     * Hijack `multi()` calls to allow command logging.
+     * Execute all `multi()` calls on primary node.
      *
      * @param  int  $type
      * @return object
      */
     public function multi(int $type = null)
     {
-        $tx = parent::multi($type);
-        $tx->connection = $this->primary;
-
-        return $tx;
+        return $type === $this->client::PIPELINE
+            ? Transaction::multi($this->primary)
+            : Transaction::pipeline($this->primary);
     }
 
     /**

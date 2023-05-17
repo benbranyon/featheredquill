@@ -32,6 +32,9 @@ trait Dropin
     {
         add_action('file_mod_allowed', [$this, 'applyFileModFilters'], 10, 2);
         add_action('upgrader_process_complete', [$this, 'maybeUpdateDropin'], 10, 2);
+
+        // prevent server-timing drop-in hijack
+        add_filter('perflab_disable_object_cache_dropin', '__return_true');
     }
 
     /**

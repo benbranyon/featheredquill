@@ -1,10 +1,9 @@
 <?php
-return;
 /*
  * Plugin Name: Object Cache Pro
  * Plugin URI: https://objectcache.pro
  * Description: A business class Redis object cache backend for WordPress.
- * Version: 1.17.0
+ * Version: 1.18.0
  * Author: Rhubarb Group
  * Author URI: https://rhubarb.group
  * License: Proprietary
@@ -32,7 +31,7 @@ if (defined('RedisCachePro\Version')) {
 /**
  * The plugin version number.
  */
-define('RedisCachePro\Version', '1.17.0');
+define('RedisCachePro\Version', '1.18.0');
 
 /**
  * The absolute path to the plugin file.
@@ -62,16 +61,11 @@ require_once __DIR__ . '/src/Plugin/Extensions/Debugbar.php';
 require_once __DIR__ . '/src/Plugin/Extensions/QueryMonitor.php';
 require_once __DIR__ . '/src/Plugin.php';
 
-/**
- * Register WP CLI commands when running in console.
- */
 if (defined('WP_CLI') && WP_CLI) {
     require_once dirname(__FILE__) . '/src/Console/Watchers/LogWatcher.php';
     require_once dirname(__FILE__) . '/src/Console/Watchers/DigestWatcher.php';
     require_once dirname(__FILE__) . '/src/Console/Watchers/AggregateWatcher.php';
     require_once dirname(__FILE__) . '/src/Console/Commands.php';
-
-    WP_CLI::add_command('redis', \RedisCachePro\Console\Commands::class);
 }
 
 add_action('plugins_loaded', function () {
@@ -84,6 +78,11 @@ add_action('plugins_loaded', function () {
     // `$GLOBALS['RedisCachePro']` is deprecated since version 1.14.0!
     // Use `$GLOBALS['ObjectCachePro']` instead.
     $GLOBALS['RedisCachePro'] = $GLOBALS['ObjectCachePro'];
+
+    if (defined('WP_CLI') && WP_CLI) {
+        WP_CLI::get_root_command()->remove_subcommand('redis');
+        WP_CLI::add_command('redis', \RedisCachePro\Console\Commands::class);
+    }
 });
 
 add_action('activated_plugin', function ($plugin) {

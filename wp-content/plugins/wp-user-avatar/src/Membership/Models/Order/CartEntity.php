@@ -5,6 +5,10 @@ namespace ProfilePress\Core\Membership\Models\Order;
 
 class CartEntity
 {
+    public $change_plan_sub_id;
+
+    public $prorated_price;
+
     public $sub_total;
 
     public $coupon_code;

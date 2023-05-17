@@ -24,7 +24,7 @@
                 </button>
             </form>
 
-            <div class="separator"><?php _e( "or", 'newsletter' ) ?></div>
+            <div class="tnp-separator"><?php _e( "or", 'newsletter' ) ?></div>
 
             <div class="test-subscribers">
 				<?php if ( ! empty( NewsletterUsers::instance()->get_test_users() ) ): ?>

@@ -57,7 +57,7 @@ class PaymentHelpers
     public static function stripe_amount_to_ppress_amount($amount, $currency = '')
     {
         if ( ! self::is_zero_decimal_currency($currency)) {
-            $amount = ppress_sanitize_amount(Calculator::init($amount)->dividedBy('100')->val());
+            $amount = ppress_cent_to_decimal($amount);
         }
 
         return $amount;
@@ -202,6 +202,8 @@ class PaymentHelpers
         if ($is_recurring) {
             $price_search_args['recurring'] = array('interval' => $period);
         }
+
+        $price_search_args = apply_filters('ppress_stripe_price_search_args', $price_search_args, $subscription, $plan);
 
         $stripe_prices = APIClass::stripeClient()->prices->all($price_search_args)->toArray();
 

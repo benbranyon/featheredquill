@@ -16,6 +16,58 @@ if ($controls->is_action('activate')) {
         $controls->js_redirect('admin.php?page=newsletter_extensions_index');
     }
 }
+
+function tnp_extensions_table($extensions, $category) {
+    ?>
+
+    <table class="widefat tnp-extensions">
+        <?php foreach ($extensions as $e) { ?>
+            <?php if (strpos($e->category, $category) === false) continue; ?> 
+            <tr>
+                <td width="1%">
+                    <?php if ($e->url) { ?>
+                        <a href="<?php echo $e->url ?>" target="_blank">
+                        <?php } ?>
+                        <img src="<?php echo $e->image ?>" alt="<?php echo esc_attr($e->title) ?>">
+                        <?php if ($e->url) { ?>
+                        </a>
+                    <?php } ?>
+                </td>
+                <td width="79%">
+                    <?php if ($e->url) { ?>
+                        <a href="<?php echo $e->url ?>" target="_blank" style="color: #444">
+                        <?php } ?>
+                        <strong><?php echo esc_html($e->title) ?></strong>
+                        <?php if ($e->free) { ?>
+                            <span class="tnp-free">Free</span>
+                        <?php } ?>
+
+                        <div style="font-size:.9em">
+                            <?php echo esc_html($e->description) ?>
+                        </div>
+                        <?php if ($e->url) { ?>
+                        </a>
+                    <?php } ?>
+                </td>
+                <td width="20%">
+                    <?php if ($e->free) { ?>
+                        <a href="#tnp-body" class="tnp-action tnp-install">
+                            <i class="fas fa-download" aria-hidden="true"></i> Free
+                        </a>
+                    <?php } else { ?>
+                        <a href="https://www.thenewsletterplugin.com/premium?utm_source=manager&utm_medium=<?php echo urlencode($e->slug) ?>&utm_campaign=plugin" class="tnp-action tnp-buy" target="_blank">
+                            <i class="fas fa-shopping-cart" aria-hidden="true"></i> Buy Now
+                        </a>
+                    <?php } ?>
+
+
+                </td>
+            </tr>
+        <?php } ?>
+    </table>
+
+    <?php
+}
 ?>
 
 <style>
@@ -42,7 +94,7 @@ if ($controls->is_action('activate')) {
                 </div>
 
             </div>
-        <?php } elseif (is_plugin_inactive('newsletter-extensions/extensions.php')) { ?>
+        <?php } else if (is_plugin_inactive('newsletter-extensions/extensions.php')) { ?>
             <div id="tnp-promo">
                 <div class="tnp-promo-how-to">
                     <p>Addons Manager seems installed but not active.</p>
@@ -54,77 +106,35 @@ if ($controls->is_action('activate')) {
             </div>
         <?php } ?>
 
-        <?php if (is_array($extensions)) { ?>
 
-            <!-- Extensions -->
-            <div class="tnp-section">
-                <h3 class="tnp-section-title">Additional professional features</h3>
-                <?php foreach ($extensions AS $e) { ?>
+        <?php if ($extensions) { ?>
 
-                    <?php if ($e->type == "extension" || $e->type == "premium") { ?>
-                        <div class="<?php echo $e->free ? 'tnp-extension-free-box' : 'tnp-extension-premium-box' ?> <?php echo $e->slug ?>">
+            <h3>Collecting subscribers</h3>
+            <?php tnp_extensions_table($extensions, 'subscription') ?>
 
-                            <?php if ($e->free) { ?>
-                                <img class="tnp-extensions-free-badge" src="<?php echo plugins_url('newsletter') ?>/images/extension-free.png">
-                            <?php } ?>
-                            <div class="tnp-extensions-image"><img src="<?php echo $e->image ?>" alt="" /></div>
-                            <h3><?php echo $e->title ?></h3>
-                            <p><?php echo $e->description ?></p>
-                        </div>
-                    <?php } ?>
-                <?php } ?>
-            </div>
+            <h3>Creating newsletters</h3>
+            <?php tnp_extensions_table($extensions, 'newsletters') ?>
 
-            <!-- Integrations -->
-            <div class="tnp-section">
-                <h3 class="tnp-section-title">Integrations with 3rd party plugins</h3>
-                <?php foreach ($extensions AS $e) { ?>
+            <h3>Automating your work</h3>
+            <?php tnp_extensions_table($extensions, 'automation') ?>
 
-                    <?php if ($e->type == "integration") { ?>
+            <h3>Analytics</h3>
+            <?php tnp_extensions_table($extensions, 'statistics') ?>
 
-                        <div class="<?php echo $e->free ? 'tnp-extension-free-box' : 'tnp-integration-box' ?> <?php echo $e->slug ?>">
+            <h3>Delivery</h3>
+            <p>
+                High speed sending of your newsletter with professional delivery services. Automatic bounces and complaints management.
+            </p>
+            <?php tnp_extensions_table($extensions, 'delivery') ?>
 
-                            <?php if ($e->free) { ?>
-                                <img class="tnp-extensions-free-badge" src="<?php echo plugins_url('newsletter') ?>/images/extension-free.png">
-                            <?php } ?>
-                            <div class="tnp-extensions-image"><img src="<?php echo $e->image ?>"></div>
-                            <h3><?php echo $e->title ?></h3>
-                            <p><?php echo $e->description ?></p>
-                        </div>
-                    <?php } ?>
-
-                <?php } ?>
-            </div>
-
-            <!-- Delivery -->
-            <div class="tnp-section">
-                <h3 class="tnp-section-title">Integrations with reliable mail delivery services</h3>
-                <?php foreach ($extensions AS $e) { ?>
-
-                    <?php if ($e->type == "delivery") { ?>
-                        <div class="<?php echo $e->free ? 'tnp-extension-free-box' : 'tnp-integration-box' ?> <?php echo $e->slug ?>">
-
-                            <?php if ($e->free) { ?>
-                                <img class="tnp-extensions-free-badge" src="<?php echo plugins_url('newsletter') ?>/images/extension-free.png">
-                            <?php } ?>
-                            <div class="tnp-extensions-image"><img src="<?php echo $e->image ?>" alt="" /></div>
-                            <h3><?php echo $e->title ?></h3>
-                            <p><?php echo $e->description ?></p>
-                        </div>
-                    <?php } ?>
-
-                <?php } ?>
-            </div>
-
+            <h3>Tools</h3>
+            <?php tnp_extensions_table($extensions, 'tools') ?>
 
         <?php } else { ?>
 
-            <p style="color: white;">No addons available, try later.</p>
+            <p style="color: white;">No addons available. Could be a connection problem, try later.</p>
 
         <?php } ?>
-
-
-        <p class="clear"></p>
 
     </div>
 

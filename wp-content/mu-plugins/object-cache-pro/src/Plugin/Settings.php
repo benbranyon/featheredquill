@@ -253,7 +253,7 @@ trait Settings
     {
         $defaults = [
             'channel' => 'stable',
-            'flushlog' => false,
+            'flushlog' => true,
         ];
 
         /**
@@ -284,11 +284,11 @@ trait Settings
         $defaults = $this->defaultOptions();
         $sanitizer = new Options\Sanitizer;
 
-        $input = array_filter((array) $input, function ($name) use ($defaults) {
+        $input = array_filter((array) $input, static function ($name) use ($defaults) {
             return array_key_exists($name, $defaults);
         }, ARRAY_FILTER_USE_KEY);
 
-        array_walk($input, function (&$value, $name) use ($sanitizer) {
+        array_walk($input, static function (&$value, $name) use ($sanitizer) {
             $value = $sanitizer->{$name}($value);
         });
 

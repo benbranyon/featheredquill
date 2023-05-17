@@ -129,12 +129,12 @@ class TNP_Pagination_Controller {
 
         <div class="tnp-paginator">
 
-			<?php $this->controls->button( 'first', '«' ); ?>
-			<?php $this->controls->button( 'prev', '‹' ); ?>
+			<?php $this->controls->btn( 'first', '«', ['tertiary'=>true] ); ?>
+			<?php $this->controls->btn( 'prev', '‹', ['tertiary'=>true] ); ?>
 			<?php $this->controls->text( 'search_page', 3 ); ?>
-            of <?php echo $this->last_page ?> <?php $this->controls->button( 'go', __( 'Go', 'newsletter' ) ); ?>
-			<?php $this->controls->button( 'next', '›' ); ?>
-			<?php $this->controls->button( 'last', '»' ); ?>
+            of <?php echo $this->last_page ?> <?php $this->controls->btn( 'go', __( 'Go', 'newsletter' ), ['secondary'=>true] ); ?>
+			<?php $this->controls->btn( 'next', '›', ['tertiary'=>true] ); ?>
+			<?php $this->controls->btn( 'last', '»', ['tertiary'=>true] ); ?>
 			<?php echo $this->get_total_items() ?> <?php _e( 'newsletter(s) found', 'newsletter' ) ?>
 
         </div>

@@ -46,6 +46,12 @@ class NewsletterSubscription extends NewsletterModule {
         return self::$instance;
     }
 
+    static $sources = [];
+
+    static function register_source($source) {
+        self::$sources[] = $source;
+    }
+
     function __construct() {
 
         parent::__construct('subscription', '2.2.7', null, array('lists', 'template', 'profile', 'antibot'));
@@ -218,7 +224,7 @@ class NewsletterSubscription extends NewsletterModule {
 
                 if ($this->antibot_form_check()) {
                     $user = $this->confirm($user);
-                    setcookie('newsletter', $user->id . '-' . $user->token, time() + 60 * 60 * 24 * 365, '/');
+                    $this->set_user_cookie($user);
                     $this->show_message('confirmed', $user);
                 } else {
                     $this->request_to_antibot_form('Confirm');
@@ -298,10 +304,15 @@ class NewsletterSubscription extends NewsletterModule {
     }
 
     function admin_menu() {
-        $this->add_menu_page('options', __('List building', 'newsletter'));
-        $this->add_admin_page('lists', __('Lists', 'newsletter'));
-        $this->add_admin_page('profile', __('Subscription Form', 'newsletter'));
-        $this->add_menu_page('antibot', __('Security', 'newsletter'));
+        $this->add_menu_page('lists', __('Lists', 'newsletter'), 1);
+        $this->add_menu_page('profile', __('Subscription Form', 'newsletter'), 1);
+        if ($this->is_multilanguage()) {
+            $this->add_menu_page('options', __('Subscription', 'newsletter'), 1);
+        } else {
+            $this->add_admin_page('options', __('Subscription', 'newsletter'), 1);
+            //$this->add_menu_page('optionsnew', __('Subscription Flow', 'newsletter'), 1);
+        }
+        $this->add_admin_page('antibot', __('Security', 'newsletter'));
         $this->add_admin_page('forms', __('Forms', 'newsletter'));
         $this->add_admin_page('template', __('Template', 'newsletter'));
     }
@@ -348,17 +359,55 @@ class NewsletterSubscription extends NewsletterModule {
         return parent::save_options($options, $sub, $autoload, $language);
     }
 
-    function get_options($sub = '', $language = '') {
+    function get_raw_options($sub = '', $language = '') {
         if ($sub == '') {
+            $key = 'newsletter';
             // For compatibility the options are wrongly named
             if ($language) {
-                $options = get_option('newsletter_' . $language, []);
-                $options = array_merge(get_option('newsletter', []), $options);
-            } else {
-                $options = get_option('newsletter', []);
+                $key = '_' . $language;
             }
+
+            $options = get_option($key, []);
+
             if (!is_array($options)) {
-                $options = array();
+                $options = [];
+            }
+
+            return $options;
+        }
+
+        if ($sub == 'profile') {
+            $key = 'newsletter_profile';
+            if ($language) {
+                $key = '_' . $language;
+            }
+
+            $options = get_option($key, []);
+
+            if (!is_array($options)) {
+                $options = [];
+            }
+
+            return array_filter($options);
+        }
+
+        if ($sub == 'forms') {
+            // For compatibility the options are wrongly named
+            return get_option('newsletter_forms', []);
+        }
+        return parent::get_options($sub, $language);
+    }
+
+    function get_options($sub = '', $language = '') {
+        if ($sub == '') {
+            // For compatibility the options are wrongly named. The is_array() check prevents problem
+            // with object caching plugins.
+            if ($language) {
+                $options = $this->get_option_array('newsletter_' . $language);
+                $opt2 = $this->get_option_array('newsletter');
+                $options = array_merge($opt2, $options);
+            } else {
+                $options = $this->get_option_array('newsletter');
             }
 
             return $options;
@@ -367,24 +416,18 @@ class NewsletterSubscription extends NewsletterModule {
             if ($language) {
                 // All that because for unknown reasome, sometime the options are returned as string, maybe a WPML
                 // interference...
-                $i18n_options = get_option('newsletter_profile_' . $language, []);
-                if (!is_array($i18n_options)) {
-                    $i18n_options = [];
-                }
-                $options = get_option('newsletter_profile', []);
-                if (!is_array($options)) {
-                    $options = [];
-                }
+                $i18n_options = $this->get_option_array('newsletter_profile_' . $language);
+                $options = $this->get_option_array('newsletter_profile');
                 $options = array_merge($options, array_filter($i18n_options));
             } else {
-                $options = get_option('newsletter_profile', []);
+                $options = $this->get_option_array('newsletter_profile');
             }
             // For compatibility the options are wrongly named
             return $options;
         }
         if ($sub == 'forms') {
             // For compatibility the options are wrongly named
-            return get_option('newsletter_forms', []);
+            return $this->get_option_array('newsletter_forms');
         }
         return parent::get_options($sub, $language);
     }
@@ -479,7 +522,7 @@ class NewsletterSubscription extends NewsletterModule {
 
         $subscription->data->language = $language;
         $subscription->optin = $this->is_double_optin() ? 'double' : 'single';
-        
+
         if (empty($this->options['multiple'])) {
             $subscription->if_exists = TNP_Subscription::EXISTING_ERROR;
         } else if ($this->options['multiple'] == 1) {
@@ -1172,12 +1215,17 @@ class NewsletterSubscription extends NewsletterModule {
 
         $this->setup_form_options();
 
-        $attrs = array_merge(['class' => 'tnp-subscription', 'style' => ''], $attrs);
+        $attrs = array_merge(['class' => 'tnp-subscription', 'style' => '', 'id' => ''], $attrs);
 
         $action = esc_attr($this->build_action_url('s'));
         $class = esc_attr($attrs['class']);
         $style = esc_attr($attrs['style']);
-        $buffer = '<form method="post" action="' . $action . '" class="' . $class . '" style="' . $style . '">' . "\n";
+
+        $buffer = '<form method="post" action="' . $action . '" class="' . $class . '" style="' . $style . '"';
+        if (!empty($attrs['id'])) {
+            $buffer .= ' id="' . esc_attr($attrs['id']) . '"';
+        }
+        $buffer .= '>' . "\n";
 
         $language = $this->get_current_language();
 
@@ -1215,7 +1263,11 @@ class NewsletterSubscription extends NewsletterModule {
     function get_form_implicit_lists($lists, $language = '') {
         $buffer = '';
 
-        $arr = explode(',', $lists);
+        if (is_array($lists)) {
+            $arr = $lists;
+        } else {
+            $arr = explode(',', $lists);
+        }
 
         foreach ($arr as $a) {
             $a = trim($a);
@@ -1648,7 +1700,13 @@ class NewsletterSubscription extends NewsletterModule {
             }
         }
 
-        $buffer .= '<form method="post" action="' . esc_attr($action) . '">' . "\n\n";
+        $buffer .= '<form method="post" action="' . esc_attr($action) . '"';
+
+        if (!empty($attrs['id'])) {
+            $buffer .= ' id="' . esc_attr($attrs['id']) . '"';
+        }
+
+        $buffer .= '>' . "\n\n";
 
         $buffer .= $this->get_form_hidden_fields($attrs);
 
@@ -1806,7 +1864,11 @@ class NewsletterSubscription extends NewsletterModule {
         $form = '';
 
         $form .= '<div class="tnp tnp-subscription-minimal ' . $attrs['class'] . '">';
-        $form .= '<form action="' . esc_attr($this->build_action_url('s')) . '" method="post">';
+        $form .= '<form action="' . esc_attr($this->build_action_url('s')) . '" method="post"';
+        if (!empty($attrs['id'])) {
+            $form .= ' id="' . esc_attr($attrs['id']) . '"';
+        }
+        $form .= '>';
 
         $form .= $this->get_form_hidden_fields($attrs);
 

@@ -2,6 +2,10 @@
 
 defined('ABSPATH') || exit;
 
+class TNP_System_Checks {
+    
+}
+
 class NewsletterSystem extends NewsletterModule {
 
     static $instance;
@@ -38,6 +42,7 @@ class NewsletterSystem extends NewsletterModule {
 
     function reset_cron_stats() {
         update_option('newsletter_diagnostic_cron_calls', [], false);
+        $this->reset_warnings();
     }
 
     /**
@@ -57,7 +62,8 @@ class NewsletterSystem extends NewsletterModule {
 
         for ($i = 1; $i < count($calls); $i++) {
             $delta = $calls[$i] - $calls[$i - 1];
-            $stats->deltas[] = $delta;
+            $stats->deltas[] = $delta/1000;
+            $stats->deltas_ts[] = date('Y-m-d h:i:s', $calls[$i]);
             if ($stats->min > $delta) {
                 $stats->min = $delta;
             }
@@ -72,8 +78,9 @@ class NewsletterSystem extends NewsletterModule {
 
     function get_last_cron_call() {
         $calls = get_option('newsletter_diagnostic_cron_calls', []);
-        if (empty($calls))
+        if (empty($calls)) {
             return 0;
+        }
         return end($calls);
     }
 
@@ -102,15 +109,6 @@ class NewsletterSystem extends NewsletterModule {
         return wp_next_scheduled('newsletter');
     }
 
-    function get_cache_job_status($refresh = false) {
-        $status = get_transient('newsletter_job_status');
-        if ($status === false || $refresh) {
-            $status = $this->get_job_status();
-            set_transient('newsletter_job_status', $status, DAY_IN_SECONDS);
-        }
-        return $status;
-    }
-
     function get_job_status() {
 
         $x = wp_next_scheduled('newsletter');
@@ -122,7 +120,7 @@ class NewsletterSystem extends NewsletterModule {
         $calls = get_option('newsletter_diagnostic_cron_calls', []);
         if (!empty($calls)) {
             $last = end($calls);
-            if ($last > $x) {
+            if ($last > $x + 300) {
                 return self::JOB_SKIPPED;
             }
         }
@@ -135,12 +133,15 @@ class NewsletterSystem extends NewsletterModule {
 
     function reset_send_stats() {
         update_option('newsletter_diagnostic_send_calls', [], false);
+        $this->reset_warnings();
     }
 
     function get_send_stats() {
         // Send calls stats
         $send_calls = get_option('newsletter_diagnostic_send_calls', []);
         if (!$send_calls) {
+            // It clean up possible scrambled data
+            $this->reset_send_stats();
             return null;
         }
         $send_max = 0;
@@ -154,7 +155,7 @@ class NewsletterSystem extends NewsletterModule {
         for ($i = 0; $i < count($send_calls); $i++) {
             // 0 - batch start time
             // 1 - batch end time
-            // 2 - number of sent email in this batch
+            // 2 - number of sent emails in this batch
             // 3 - 0: prematurely stopped, 1: completed
             if (empty($send_calls[$i][2])) {
                 continue;
@@ -221,8 +222,9 @@ class NewsletterSystem extends NewsletterModule {
                         }
                     } else {
                         if (is_object($function['function'])) {
-                            $fn = new ReflectionFunction($function['function']);
-                            $b .= get_class($fn->getClosureThis()) . '(closure)';
+                            //$fn = new ReflectionFunction($function['function']);
+                            //$b .= get_class($fn->getClosureThis()) . '(closure)';
+                            $b .= 'Closure';
                         } else {
                             $b .= $function['function'];
                         }
@@ -248,6 +250,55 @@ class NewsletterSystem extends NewsletterModule {
         }
     }
 
+    function get_wp_content_url_status() {
+        return (strpos(WP_CONTENT_URL, 'http') === 0) ? 1 : 0;
+    }
+
+    function get_status_warnings_count() {
+        $count = 0;
+        if ($this->get_wp_content_url_status() === 0) {
+            $count++;
+        }
+
+        return $count;
+    }
+
+    function get_scheduler_warnings_count() {
+        $count = 0;
+
+        $job_status = NewsletterSystem::instance()->get_job_status();
+        if ($job_status !== self::JOB_OK) {
+            $count++;
+        }
+
+        $stats = NewsletterSystem::instance()->get_cron_stats();
+        if ($stats && !$stats->good) {
+            $count++;
+        }
+
+        return $count;
+    }
+
+    function get_warnings_count() {
+        $count = get_option('newsletter_system_warnings');
+        if (!$count || !is_array($count) || !isset($count['updated']) || $count['updated'] < time() - 6 * 3600) {
+            $count = [];
+            $count['updated'] = time();
+            $count['cached'] = false;
+            $count['status'] = $this->get_status_warnings_count();
+            $count['scheduler'] = $this->get_scheduler_warnings_count();
+            $count['total'] = $count['status'] + $count['scheduler'];
+            update_option('newsletter_system_warnings', $count, false);
+        } else {
+            $count['cached'] = true;
+        }
+        return $count;
+    }
+
+    function reset_warnings() {
+        update_option('newsletter_system_warnings', [], false);
+    }
+
 }
 
 class TNP_Cron_Stats {
@@ -257,6 +308,7 @@ class TNP_Cron_Stats {
     var $avg = 0;
     /* List of intervals between cron calls */
     var $deltas = [];
+    var $deltas_ts = [];
     /* If the cron is triggered enough often */
     var $good = true;
 

@@ -66,7 +66,7 @@ abstract class Logger implements LoggerInterface
     /**
      * Logged levels.
      *
-     * @var array<mixed>
+     * @var string[]|null
      */
     protected $levels;
 
@@ -190,7 +190,7 @@ abstract class Logger implements LoggerInterface
     /**
      * Set the logged levels.
      *
-     * @param  array<mixed> $levels
+     * @param  string[]  $levels
      * @return void
      */
     public function setLevels(array $levels)

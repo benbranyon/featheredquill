@@ -53,7 +53,7 @@ class NewsletterMailer {
         if (!empty($this->options['turbo'])) {
             $this->batch_size = max(1, (int)$this->options['turbo']);
         }
-        $this->get_logger()->debug($options);
+        //$this->get_logger()->debug($options);
     }
 
     public function get_name() {
@@ -317,9 +317,9 @@ class NewsletterDefaultMailer extends NewsletterMailer {
             return new WP_Error(self::ERROR_GENERIC, 'Message format');
         }
 
-        $this->current_message = $message;
-
         $this->last_error = null;
+        
+        $this->current_message = $message;
         $r = wp_mail($message->to, $message->subject, $body, $wp_mail_headers);
         $this->current_message = null;
 

@@ -32,16 +32,16 @@ if (empty($options['image']['id'])) {
         // A placeholder can be set by a preset and it is kept indefinitely
         if (!empty($options['placeholder'])) {
             $media->url = $options['placeholder'];
-            $media->width = 600;
+            $media->width = $composer['width'];
             $media->height = 250;
         } else {
             $media->url = 'https://source.unsplash.com/1200x500/daily';
-            $media->width = 600;
+            $media->width = $composer['width'];
             $media->height = 250;
         }
     }
 } else {
-    $media = tnp_resize_2x($options['image']['id'], [600, 0]);
+    $media = tnp_resize_2x($options['image']['id'], [$composer['width'], 0]);
     // Should never happen but... it happens
     if (!$media) {
         echo 'The selected media file cannot be processed';
@@ -69,7 +69,7 @@ if ($media->height) {
 }
 echo ' alt="', esc_attr($media->alt), '"';
 // The font size is important for the alt text
-echo ' border="0" style="display: block; max-width: ', esc_attr($media->width), 'px !important; width: 100%; padding: 0; border: 0; font-size: 12px"';
+echo ' border="0" style="display: block; height: auto; max-width: ', esc_attr($media->width), 'px !important; width: 100%; padding: 0; border: 0; font-size: 12px"';
 echo '>';
 
 if ($media->link) {

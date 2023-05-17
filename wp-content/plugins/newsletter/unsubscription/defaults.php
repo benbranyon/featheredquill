@@ -23,3 +23,6 @@ $options['unsubscribed_subject'] = __("Goodbye", 'newsletter');
 $options['unsubscribed_message'] = '<p>' . __('This message confirms that you have unsubscribed from our newsletter. Thank you.', 'newsletter') . '</p>';
 
 $options['reactivated_text'] = '<p>' . __('Your subscription has been reactivated.', 'newsletter') . '</p>';
+
+$options['notify'] = '';
+$options['notify_email'] = '';

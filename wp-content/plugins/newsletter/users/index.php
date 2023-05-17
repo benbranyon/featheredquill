@@ -20,8 +20,9 @@ if ($controls->is_action()) {
     $this->save_options($controls->data, 'search');
 } else {
     $controls->data = $this->get_options('search');
-    if (empty($controls->data['search_page']))
+    if (empty($controls->data['search_page'])) {
         $controls->data['search_page'] = 0;
+    }
 }
 
 if ($controls->is_action('resend')) {
@@ -54,7 +55,8 @@ if ($text) {
     $query_args[] = '%' . $text . '%';
     $query_args[] = '%' . $text . '%';
     $query_args[] = '%' . $text . '%';
-    $where .= " and (email like %s or name like %s or surname like %s)";
+    $query_args[] = '%' . $text . '%';
+    $where .= " and (id like %s or email like %s or name like %s or surname like %s)";
 }
 
 if (!empty($controls->data['search_status'])) {
@@ -79,8 +81,9 @@ if (!empty($query_args)) {
 }
 $count = Newsletter::instance()->store->get_count(NEWSLETTER_USERS_TABLE, $where);
 $last_page = floor($count / $items_per_page) - ($count % $items_per_page == 0 ? 1 : 0);
-if ($last_page < 0)
+if ($last_page < 0) {
     $last_page = 0;
+}
 
 if ($controls->is_action('last')) {
     $controls->data['search_page'] = $last_page;
@@ -109,8 +112,12 @@ $query .= " limit " . ($controls->data['search_page'] * $items_per_page) . "," .
 $list = $wpdb->get_results($query);
 
 // Move to base 1
-$controls->data['search_page'] ++;
+$controls->data['search_page']++;
 ?>
+
+<style>
+<?php include __DIR__ . '/css/users.css' ?>
+</style>
 
 <div class="wrap tnp-users tnp-users-index" id="tnp-wrap">
 
@@ -118,10 +125,9 @@ $controls->data['search_page'] ++;
 
     <div id="tnp-heading">
 
-        <h2><?php _e('Subscribers', 'newsletter') ?>
-            <a class="tnp-btn-h1" href="?page=newsletter_users_new"><?php _e('Add a subscriber', 'newsletter') ?></a>
-        </h2>
-        
+        <?php $controls->title_help('/subscribers-and-management/') ?>
+        <h2><?php _e('Subscribers', 'newsletter') ?></h2>
+
         <p>
             See the <a href="admin.php?page=newsletter_users_massive">maintenance panel</a> to move subscribers between list, massively delete and so on.
         </p>
@@ -133,37 +139,43 @@ $controls->data['search_page'] ++;
         <form id="channel" method="post" action="">
             <?php $controls->init(); ?>
 
-            <div class="tnp-subscribers-search">
-                <?php $controls->text('search_text', 45, __('Search text', 'newsletter')); ?>
+            <div class="tnp-users-search">
+                <?php $controls->text('search_text', 45, __('Search by ID, email, name', 'newsletter')); ?>
 
                 <?php _e('filter by', 'newsletter') ?>:
-                <?php $controls->select('search_status', ['' => __('Any', 'newsletter'), 'T' => __('Test subscribers', 'newsletter'), 'C' => TNP_User::get_status_label('C'), 
-                    'S' => TNP_User::get_status_label('S'), 'U' => TNP_User::get_status_label('U'), 'B' => TNP_User::get_status_label('B'), 'P'=> TNP_User::get_status_label('P')]); ?>
+                <?php
+                $controls->select('search_status', ['' => __('Any', 'newsletter'), 'T' => __('Test subscribers', 'newsletter'), 'C' => TNP_User::get_status_label('C'),
+                    'S' => TNP_User::get_status_label('S'), 'U' => TNP_User::get_status_label('U'), 'B' => TNP_User::get_status_label('B'), 'P' => TNP_User::get_status_label('P')]);
+                ?>
                 <?php $controls->lists_select('search_list', '-'); ?>
 
                 <?php $controls->button('search', __('Search', 'newsletter')); ?>
                 <?php if ($where != "where 1=1") { ?>
-                    <?php $controls->button('reset', __('Reset Filters', 'newsletter')); ?>
+                    <?php $controls->btn('reset', __('Reset Filters', 'newsletter'), ['tertiary' => true]); ?>
                 <?php } ?>
+                <!--
                 <br>
                 <?php $controls->checkbox('show_preferences', __('Show lists', 'newsletter')); ?>
+                -->
             </div>
 
-            <?php if ($filtered) { ?>
+            <?php if (false && $filtered) { ?>
                 <p><?php _e('The list below is filtered.', 'newsletter') ?></p>
             <?php } ?>        
 
             <div class="tnp-paginator">
 
-                <?php $controls->button('first', '«'); ?>
-                <?php $controls->button('prev', '‹'); ?>
-                <?php $controls->text('search_page', 3); ?> of <?php echo $last_page + 1 ?> <?php $controls->button('go', __('Go', 'newsletter')); ?>
-                <?php $controls->button('next', '›'); ?>
-                <?php $controls->button('last', '»'); ?>
+                <?php $controls->btn('first', '«', ['tertiary' => true]); ?>
+                <?php $controls->btn('prev', '‹', ['tertiary' => true]); ?>
+                <?php $controls->text('search_page', 3); ?> of <?php echo $last_page + 1 ?> <?php $controls->btn('go', __('Go', 'newsletter'), ['secondary' => true]); ?>
+                <?php $controls->btn('next', '›', ['tertiary' => true]); ?>
+                <?php $controls->btn('last', '»', ['tertiary' => true]); ?>
 
                 <?php echo $count ?> <?php _e('subscriber(s) found', 'newsletter') ?>
-                
-                <?php $controls->button_confirm('delete_selected', __('Delete selected', 'newsletter')); ?>
+
+                <?php $controls->btn_link('?page=newsletter_users_new', __('Add new', 'newsletter')); ?>
+                <?php $controls->btn('delete_selected', __('Delete selected', 'newsletter'), ['tertiary' => true]); ?>
+
 
             </div>
 
@@ -175,48 +187,62 @@ $controls->data['search_page'] ++;
                         <th>Email</th>
                         <th><?php _e('Name', 'newsletter') ?></th>
                         <th><?php _e('Status', 'newsletter') ?></th>
-                        <?php if (isset($options['show_preferences']) && $options['show_preferences'] == 1) { ?>
-                            <th><?php _e('Lists', 'newsletter') ?></th>
-                        <?php } ?>
+                        <th style="white-space: nowrap"><?php $controls->checkbox('show_lists', __('Lists', 'newsletter'), ['onchange'=>'this.form.act.value=\'go\'; this.form.submit()']) ?></th>
                         <th>&nbsp;</th>
-                        
+
                         <th>&nbsp;</th>
                     </tr>
                 </thead>
                 <?php $i = 0; ?>
                 <?php foreach ($list as $s) { ?>
                     <tr>
-                        <th scope="row" class="check-column" style="vertical-align: middle"><input class="tnp-selector" type="checkbox" name="ids[]" value="<?php echo $s->id; ?>"/></td>
+                        <th scope="row" class="check-column">
+                            <input class="tnp-selector" type="checkbox" name="ids[]" value="<?php echo $s->id; ?>">
+                        </th>
                         <td><?php echo $s->id; ?></td>
                         <td><?php echo esc_html($s->email); ?></td>
                         <td><?php echo esc_html($s->name); ?> <?php echo esc_html($s->surname); ?></td>
-                        <td><small><?php echo $this->get_user_status_label($s, true) ?></small></td>
-                        <?php if (isset($options['show_preferences']) && $options['show_preferences'] == 1) { ?>
-                            <td><small><?php
+                        <td>
+                          <?php echo $this->get_user_status_label($s, true) ?>
+                        </td>
+                       
+                            <td>
+                                 <?php if (!empty($controls->data['show_lists'])) { ?>
+                                <small><?php
                                     $lists = $this->get_lists();
                                     foreach ($lists as $item) {
                                         $l = 'list_' . $item->id;
                                         if ($s->$l == 1)
                                             echo esc_html($item->name) . '<br>';
                                     }
-                                    ?></small></td>
-                        <?php } ?>
-                        <td><?php $controls->button_icon_edit($this->get_admin_page_url('edit') . '&amp;id=' . $s->id)?></td>
-                        <td style="white-space: nowrap"><?php $controls->button_icon_delete($s->id); ?>
+                                    ?></small>
+                                <?php } ?>
+                            </td>
+                        
+                        <td>
+                            <?php $controls->button_icon_edit($this->get_admin_page_url('edit') . '&amp;id=' . $s->id) ?>
+                        </td>
+                        <td style="white-space: nowrap">
+                            
                             <?php if ($s->status == "C") { ?>
-                            <?php $controls->button_icon('resend_welcome', 'fa-redo', __('Resend welcome', 'newsletter'), $s->id, true); ?>
+                                <?php $controls->btn('resend_welcome', '', ['secondary' => true, 'data' => $s->id, 'icon' => 'fa-redo', 'confirm' => true, 'title' => __('Resend welcome', 'newsletter')]); ?>
+                                <?php //$controls->button_icon('resend_welcome', 'fa-redo', __('Resend welcome', 'newsletter'), $s->id, true); ?>
                             <?php } else { ?>
-                            <?php $controls->button_icon('resend', 'fa-redo', __('Resend activation', 'newsletter'), $s->id, true); ?>
-                            <?php } ?></td>
+                                <?php $controls->btn('resend', '', ['secondary' => true, 'data' => $s->id, 'icon' => 'fa-redo', 'confirm' => true, 'title' => __('Resend activation', 'newsletter')]); ?>
+                            <?php } ?>
+                            
+                            <?php $controls->button_icon_delete($s->id); ?>
+
+                        </td>
                     </tr>
                 <?php } ?>
             </table>
             <div class="tnp-paginator">
 
-                <?php $controls->button('first', '«'); ?>
-                <?php $controls->button('prev', '‹'); ?>
-                <?php $controls->button('next', '›'); ?>
-                <?php $controls->button('last', '»'); ?>
+                <?php $controls->btn('first', '«', ['tertiary' => true]); ?>
+                <?php $controls->btn('prev', '‹', ['tertiary' => true]); ?>
+                <?php $controls->btn('next', '›', ['tertiary' => true]); ?>
+                <?php $controls->btn('last', '»', ['tertiary' => true]); ?>
             </div>
         </form>
     </div>

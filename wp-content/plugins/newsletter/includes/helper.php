@@ -43,6 +43,7 @@ function tnp_post_thumbnail_src($post, $size = 'thumbnail', $alternative = '') {
 }
 
 $tnp_excerpt_length = 0;
+
 function tnp_excerpt_length($length) {
     global $tnp_excerpt_length;
     return $tnp_excerpt_length;
@@ -56,17 +57,18 @@ function tnp_excerpt_length($length) {
  */
 function tnp_post_excerpt($post, $length = 30, $characters = false) {
     global $tnp_excerpt_length;
-    
-    if (!$length) return '';
-    
-    $tnp_excerpt_length = (int)($length*1.5);
-    
+
+    if (!$length)
+        return '';
+
+    $tnp_excerpt_length = (int) ($length * 1.5);
+
     add_filter('excerpt_length', 'tnp_excerpt_length', PHP_INT_MAX);
-    
+
     $excerpt = get_the_excerpt($post->ID);
-    
+
     remove_filter('excerpt_length', 'tnp_excerpt_length', PHP_INT_MAX);
-    
+
     $excerpt = tnp_delete_all_shordcodes_tags($excerpt);
     $excerpt = trim($excerpt);
     $excerpt = str_replace('&nbsp;', '', $excerpt);
@@ -97,6 +99,12 @@ function tnp_delete_all_shordcodes_tags($post_content = '') {
 }
 
 function tnp_post_permalink($post) {
+    if (class_exists('SitePress')) {
+        $data = apply_filters( 'wpml_post_language_details', [], $post->ID);
+        if (isset($data['language_code'])) {
+            return apply_filters('wpml_permalink', get_permalink($post->ID), $data['language_code'], true);
+        }
+    }
     return get_permalink($post->ID);
 }
 
@@ -105,12 +113,11 @@ function tnp_post_content($post) {
 }
 
 function tnp_post_title($post) {
-    //return $post->post_title;
     return get_the_title($post);
 }
 
 function tnp_post_date($post, $format = null) {
-    return get_the_date( $format, $post );
+    return get_the_date($format, $post);
 }
 
 /**
@@ -319,11 +326,11 @@ function tnp_resize($media_id, $size) {
             Newsletter::instance()->logger->error('Requested size larger than the original one');
             return _tnp_get_default_media($media_id, $size);
         }
-        
+
         if ($height > $original_size['height'] && ($width > $original_size['width'] || $width == 0)) {
             Newsletter::instance()->logger->error('Requested size larger than the original one');
             return _tnp_get_default_media($media_id, $size);
-        }        
+        }
 
         $editor->set_quality(85);
         $resized = $editor->resize($width, $height, $crop);

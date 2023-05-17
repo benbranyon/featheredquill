@@ -63,15 +63,11 @@ trait Network
     {
         global $wp_object_cache;
 
-        if ($this->config->cluster) {
-            return;
-        }
-
         if (! $this->blogFlushingEnabled()) {
             return;
         }
 
-        if (isset($_GET['action']) && $_GET['action'] !== 'flush-blog-object-cache') {
+        if (($_GET['action'] ?? null) !== 'flush-blog-object-cache') {
             return;
         }
 

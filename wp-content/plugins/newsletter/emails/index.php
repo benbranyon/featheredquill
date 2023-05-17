@@ -52,9 +52,9 @@ $emails = $pagination_controller->get_items();
         <form method="post" action="">
             <?php $controls->init(); ?>
 
-            <a href="<?php echo $this->get_admin_page_url('composer'); ?>" class="button-primary"><?php _e('New newsletter', 'newsletter') ?></a>
+            <a href="<?php echo $this->get_admin_page_url('composer'); ?>" class="button-primary"><?php _e('Add new', 'newsletter') ?></a>
 
-            <?php $controls->button_confirm('delete_selected', __('Delete selected newsletters', 'newsletter')); ?>
+            <?php $controls->btn('delete_selected', __('Delete selected', 'newsletter'), ['tertiary'=>true, 'confirm'=>true]); ?>
 
             <?php $pagination_controller->display_paginator(); ?>
 
@@ -78,9 +78,14 @@ $emails = $pagination_controller->get_items();
                 <tbody>
                     <?php foreach ($emails as $email) { ?>
                         <tr>
-                            <td><input type="checkbox" class="tnp-selector" name="ids[]" value="<?php echo $email->id; ?>"/></td>
-                            <td><?php echo $email->id; ?></td>
-                            <td><?php
+                            <td>
+                                <input type="checkbox" class="tnp-selector" name="ids[]" value="<?php echo $email->id; ?>">
+                            </td>
+                            <td>
+                                <?php echo $email->id; ?>
+                            </td>
+                            <td>
+                                <?php
                                 if ($email->subject)
                                     echo htmlspecialchars($email->subject);
                                 else
@@ -94,19 +99,21 @@ $emails = $pagination_controller->get_items();
                             <td>
                                 <?php $this->show_email_progress_bar($email, array('numbers' => true)) ?>
                             </td>
-                            <td><?php if ($email->status == 'sent' || $email->status == 'sending') echo $this->format_date($email->send_on); ?></td>
+                            <td>
+                                <?php if ($email->status == 'sent' || $email->status == 'sending') echo $this->format_date($email->send_on); ?>
+                            </td>
                             <td>
                                 <?php echo $this->get_edit_button($email) ?>
                             </td>
 
                             <td style="white-space: nowrap">
-                                <?php $controls->button_icon_statistics(NewsletterStatistics::instance()->get_statistics_url($email->id)) ?>
+                                <?php $controls->button_icon_statistics(NewsletterStatistics::instance()->get_statistics_url($email->id), ['secondary'=>true]) ?>
                                 <?php $controls->button_icon_view(home_url('/') . '?na=view&id=' . $email->id) ?>
                             </td>
 
                             <td style="white-space: nowrap">
                                 <?php $controls->button_icon_copy($email->id); ?>
-                                <?php $controls->button_icon_delete($email->id); ?>
+                                <?php $controls->button_icon_delete($email->id, ['secondary'=>true]); ?>
                             </td>
                         </tr>
                     <?php } ?>

@@ -7,4 +7,11 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+    'RedisCachePro\\Support\\AnalyticsConfiguration' => $baseDir . '/object-cache-pro/src/Support/Types.php',
+    'RedisCachePro\\Support\\ObjectCacheInfo' => $baseDir . '/object-cache-pro/src/Support/Types.php',
+    'RedisCachePro\\Support\\ObjectCacheMetricsGroup' => $baseDir . '/object-cache-pro/src/Support/Types.php',
+    'RedisCachePro\\Support\\PluginApiResponse' => $baseDir . '/object-cache-pro/src/Support/Types.php',
+    'RedisCachePro\\Support\\RelayConfiguration' => $baseDir . '/object-cache-pro/src/Support/Types.php',
+    'RedisCachePro_DebugBar_Insights' => $baseDir . '/object-cache-pro/src/Extensions/Debugbar/Insights.php',
+    'RedisCachePro_DebugBar_Panel' => $baseDir . '/object-cache-pro/src/Extensions/Debugbar/Panel.php',
 );

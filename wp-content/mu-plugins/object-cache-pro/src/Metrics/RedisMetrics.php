@@ -140,7 +140,7 @@ class RedisMetrics
         $dbKey = "db{$cache->config()->database}";
 
         if (isset($info[$dbKey])) {
-            $keyspace = array_column(array_map(function ($value) {
+            $keyspace = array_column(array_map(static function ($value) {
                 return explode('=', $value);
             }, explode(',', $info[$dbKey])), 1, 0);
 
@@ -180,7 +180,7 @@ class RedisMetrics
     {
         $metrics = $this->toArray();
 
-        return implode(' ', array_map(function ($metric, $value) {
+        return implode(' ', array_map(static function ($metric, $value) {
             return "sample#redis-{$metric}={$value}";
         }, array_keys($metrics), $metrics));
     }
@@ -260,7 +260,7 @@ class RedisMetrics
             ],
         ];
 
-        return array_map(function ($metric) {
+        return array_map(static function ($metric) {
             $metric['group'] = 'redis';
 
             return $metric;

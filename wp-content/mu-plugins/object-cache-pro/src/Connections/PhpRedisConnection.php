@@ -130,6 +130,7 @@ class PhpRedisConnection extends Connection implements ConnectionInterface
 
         if ($this->config->compression === Configuration::COMPRESSION_ZSTD) {
             $this->client->setOption($this->client::OPT_COMPRESSION, (string) $this->client::COMPRESSION_ZSTD);
+            $this->client->setOption($this->client::OPT_COMPRESSION_LEVEL, (string) -5);
         }
 
         if ($this->config->compression === Configuration::COMPRESSION_LZ4) {
@@ -328,23 +329,22 @@ class PhpRedisConnection extends Connection implements ConnectionInterface
      */
     public function commands(Transaction $tx)
     {
-        $method = $tx->type;
+        $this->lastCommand = null;
 
+        $debug = $this->config->debug || $this->config->save_commands;
+
+        $method = $tx->type;
         $context = [
             'command' => \strtoupper($method),
             'parameters' => [],
         ];
 
-        if ($this->config->debug || $this->config->save_commands) {
+        if ($debug) {
             $context['backtrace'] = \debug_backtrace(\DEBUG_BACKTRACE_IGNORE_ARGS);
-
-            if (\function_exists('wp_debug_backtrace_summary')) {
-                $context['backtrace_summary'] = \wp_debug_backtrace_summary(__CLASS__);
-            }
         }
 
         try {
-            $start = $this->now();
+            $start = microtime(true);
 
             $pipe = $this->client->{$method}();
 
@@ -354,10 +354,12 @@ class PhpRedisConnection extends Connection implements ConnectionInterface
                 $context['parameters'][] = \array_merge([\strtoupper($command[0])], $command[1]);
             }
 
+            $memory = memory_get_usage();
+
             $results = $pipe->exec();
 
-            $time = $this->now() - $start;
-            $this->ioWait[] = $time;
+            $memory = memory_get_usage() - $memory;
+            $wait = (microtime(true) - $start) * 1000;
         } catch (Throwable $exception) {
             $this->log->error('Failed to execute transaction', $context + [
                 'exception' => $exception,
@@ -379,12 +381,20 @@ class PhpRedisConnection extends Connection implements ConnectionInterface
             throw new ConnectionException("Transaction returned {$resultsCount} results but unexpected {$commandCount}");
         }
 
-        $ms = \round($time * 1000, 4);
+        $this->lastCommand = [
+            'wait' => $wait,
+            'memory' => $memory,
+        ];
 
-        $this->log->info("Executed transaction in {$ms}ms", $context + [
-            'result' => $results,
-            'time' => $ms,
-        ]);
+        if ($debug) {
+            $ms = \round($wait, 4);
+
+            $this->log->info("Executed transaction in {$ms}ms", $context + [
+                'time' => $wait,
+                'memory' => $memory,
+                'result' => $results,
+            ]);
+        }
 
         return $results;
     }

@@ -33,13 +33,6 @@ trait PrefetchesKeys
     protected $prefetch = [];
 
     /**
-     * The amount of prefetched keys.
-     *
-     * @var int
-     */
-    protected $prefetches = 0;
-
-    /**
      * Whether prefetching occurred.
      *
      * @var bool
@@ -115,7 +108,7 @@ trait PrefetchesKeys
     protected function undoPrefetch(string $key, string $group)
     {
         $this->deleteFromMemory($key, $group);
-        $this->prefetches--;
+        $this->metrics->prefetches--;
 
         if ($this->config->debug) {
             \error_log(
@@ -137,7 +130,7 @@ trait PrefetchesKeys
             return;
         }
 
-        $prefetch = \array_map(function ($group) {
+        $prefetch = \array_map(static function ($group) {
             return \array_keys($group);
         }, $this->prefetch);
 
@@ -173,7 +166,7 @@ trait PrefetchesKeys
             : '*{prefetches}:*';
 
         try {
-            $this->deleteByPattern($pattern);
+            $this->deleteByPattern($pattern, 'prefetches');
         } catch (Throwable $exception) {
             $this->error($exception);
 

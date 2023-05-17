@@ -1,6 +1,6 @@
 <?php
 $size = ['width' => 600, 'height' => 0];
-$content_width = 600 - $options['block_padding_left'] - $options['block_padding_right'];
+$content_width = $composer['width'] - $options['block_padding_left'] - $options['block_padding_right'];
 $title_style = TNP_Composer::get_title_style($options, 'title', $composer);
 $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
 ?>

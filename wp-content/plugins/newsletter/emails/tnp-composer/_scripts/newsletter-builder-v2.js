@@ -58,7 +58,7 @@ jQuery.fn.perform_block_edit = function () {
 
             builderAreaHelper.lock();
             jQuery("#tnpc-block-options-form").load(ajaxurl, data, function () {
-                console.log('Block form options loaded');
+                //console.log('Block form options loaded');
                 start_options = jQuery("#tnpc-block-options-form").serializeArray();
                 tnpc_add_global_options(start_options);
                 builderAreaHelper.unlock();
@@ -82,7 +82,7 @@ jQuery.fn.add_block_clone = function () {
 jQuery.fn.perform_clone = function () {
 
     jQuery(".tnpc-row-clone").click(function (e) {
-        e.preventDefault()
+        e.preventDefault();
     });
 
     this.click(function (e) {
@@ -129,7 +129,7 @@ jQuery(function () {
     if (!preloadedContent) {
         tnpc_show_presets_modal();
     } else {
-        jQuery('#newsletter-builder-area-center-frame-content').html(preloadedContent);
+        jQuery('#tnpb-content').html(preloadedContent);
         start_composer();
     }
 
@@ -145,7 +145,7 @@ jQuery(function () {
     _setBuilderAreaBackgroundColor(document.getElementById('options-options_composer_background').value);
 
     function _setBuilderAreaBackgroundColor(color) {
-        jQuery('#newsletter-builder-area-center-frame-content').css('background-color', color);
+        jQuery('#tnpb-content').css('background-color', color);
     }
 
     window._setBuilderAreaBackgroundColor = _setBuilderAreaBackgroundColor; //BAD STUFF!!!
@@ -158,7 +158,7 @@ jQuery(function () {
 
 function BuilderAreaHelper() {
 
-    var _builderAreaEl = document.querySelector('#newsletter-builder-area');
+    var _builderAreaEl = document.querySelector('#tnpb-main');
     var _overlayEl = document.createElement('div');
     _overlayEl.style.zIndex = 99999;
     _overlayEl.style.position = 'absolute';
@@ -184,18 +184,18 @@ let builderAreaHelper = new BuilderAreaHelper();
 function init_builder_area() {
 
     //Drag & Drop
-    jQuery("#newsletter-builder-area-center-frame-content").sortable({
+    jQuery("#tnpb-content").sortable({
         revert: false,
-        placeholder: "placeholder",
+        placeholder: "tnpb-placeholder",
         forcePlaceholderSize: true,
         opacity: 0.6,
         tolerance: "pointer",
         helper: function (e) {
-            var helper = jQuery(document.getElementById("sortable-helper")).clone();
+            var helper = jQuery(document.getElementById("tnpb-sortable-helper")).clone();
             return helper;
         },
         update: function (event, ui) {
-            if (ui.item.attr("id") == "draggable-helper") {
+            if (ui.item.attr("id") === "tnpb-draggable-helper") {
                 loading_row = jQuery('<div style="text-align: center; padding: 20px; background-color: #d4d5d6; color: #52BE7F;"><i class="fa fa-cog fa-2x fa-spin" /></div>');
                 ui.item.before(loading_row);
                 ui.item.remove();
@@ -234,12 +234,12 @@ function init_builder_area() {
         }
     });
 
-    jQuery(".newsletter-sidebar-buttons-content-tab").draggable({
-        connectToSortable: "#newsletter-builder-area-center-frame-content",
+    jQuery(".tnpb-block-icon").draggable({
+        connectToSortable: "#tnpb-content",
 
         // Build the helper for dragging
         helper: function (e) {
-            var helper = jQuery(document.getElementById("draggable-helper")).clone();
+            var helper = jQuery(document.getElementById("tnpb-draggable-helper")).clone();
             // Do not uset .data() with jQuery
             helper.attr("data-id", e.currentTarget.dataset.id);
             helper.html(e.currentTarget.dataset.name);
@@ -249,7 +249,7 @@ function init_builder_area() {
         start: function () {
             if (jQuery('.tnpc-row').length) {
             } else {
-                jQuery('#newsletter-builder-area-center-frame-content').append('<div class="tnpc-drop-here">Drag&Drop blocks here!</div>');
+                jQuery('#tnpb-content').append('<div class="tnpc-drop-here">Drag&Drop blocks here!</div>');
             }
         },
         stop: function (event, ui) {
@@ -379,7 +379,7 @@ function tnpc_save(form) {
         form.elements["options[subject]"].value = "";
     }
 
-    var global_form = document.getElementById("tnpc-global-styles-form");
+    var global_form = document.getElementById("tnpb-settings-form");
     //Copy "Global styles" form inputs into main form
     tnpc_copy_form(global_form, form);
 
@@ -387,15 +387,15 @@ function tnpc_save(form) {
 
 function tnpc_get_email_content_from_builder_area() {
 
-    var $elMessage = jQuery("#newsletter-builder-area-center-frame-content").clone();
+    var $elMessage = jQuery("#tnpb-content").clone();
 
     $elMessage.find('.tnpc-row-delete').remove();
     $elMessage.find('.tnpc-row-edit-block').remove();
     $elMessage.find('.tnpc-row-clone').remove();
     $elMessage.find('.tnpc-row').removeClass('ui-draggable');
-    $elMessage.find('#sortable-helper').remove();
+    $elMessage.find('#tnpb-sortable-helper').remove();
 
-    return $elMessage.html();
+    return btoa(encodeURIComponent($elMessage.html()));
 
 }
 
@@ -420,31 +420,28 @@ function tnpc_test() {
     form.submit();
 }
 
-function openTab(evt, tabName) {
+function tnpb_open_tab(evt, tabName) {
     evt.preventDefault();
-    // Declare all variables
-    var i, tabcontent, tablinks;
-
-    // Get all elements with class="tabcontent" and hide them
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
+    let items = document.getElementsByClassName("tnpb-tab");
+    for (let i = 0; i < items.length; i++) {
+        items[i].style.display = "none";
     }
 
-    // Get all elements with class="tablinks" and remove the class "active"
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    items = document.getElementsByClassName("tnpb-tab-button");
+    for (let i = 0; i < items.length; i++) {
+        items[i].className = items[i].className.replace(" active", "");
     }
 
-    // Show the current tab, and add an "active" class to the button that opened the tab
+    //document.getElementsByClassName("tnpb-tab").forEach(e => e.style.display = "none");
+    //document.getElementsByClassName("tnpb-tab-button").forEach(e => e.className = e.className.replace(" active", ""));
+
     document.getElementById(tabName).style.display = "block";
     evt.currentTarget.className += " active";
 }
 
 function tnpc_scratch() {
 
-    jQuery('#newsletter-builder-area-center-frame-content').html(" ");
+    jQuery('#tnpb-content').html(" ");
     init_builder_area();
 
 }
@@ -462,7 +459,7 @@ function tnpc_reload_options(e) {
 }
 
 function tnpc_add_global_options(data) {
-    let globalOptions = jQuery("#tnpc-global-styles-form").serializeArray();
+    let globalOptions = jQuery("#tnpb-settings-form").serializeArray();
     for (let i = 0; i < globalOptions.length; i++) {
         globalOptions[i].name = globalOptions[i].name.replace("[options_", "[").replace("options[", "composer[").replace("composer_", "");
         if (Array.isArray(data)) {
@@ -530,7 +527,7 @@ function tnpc_load_preset(id, subject, isEditMode) {
             id: id
         },
         success: function (res) {
-            jQuery('#newsletter-builder-area-center-frame-content').html(res.data.content);
+            jQuery('#tnpb-content').html(res.data.content);
             _restore_global_options(res.data.globalOptions);
 
             start_composer();
@@ -548,7 +545,7 @@ function tnpc_load_preset(id, subject, isEditMode) {
 
     function _restore_global_options(options) {
         jQuery.each(options, function (name, value) {
-            var el = jQuery(`#tnpc-global-styles-form #options-options_composer_${name}`);
+            var el = jQuery(`#tnpb-settings-form #options-options_composer_${name}`);
             if (el.length) {
                 el.val(value);
             }
@@ -621,10 +618,10 @@ function tnpc_edit_preset(presetId, name, event) {
     tnpc_load_preset(presetId, name, true);
 
     const composerForm = document.querySelector('#tnpc-form');
-    
+
     jQuery('#save-preset-button').hide();
     jQuery('#update-preset-button').show();
-    
+
     //Add preset id hidden field
     const presetIdfield = document.createElement("input");
     presetIdfield.type = "hidden";
@@ -662,7 +659,7 @@ jQuery(document).ready(function () {
 
         function init() {
             // find all inline editable elements
-            jQuery('#newsletter-builder-area-center-frame-content').on('click', '.' + className, function (e) {
+            jQuery('#tnpb-content').on('click', '.' + className, function (e) {
                 e.preventDefault();
                 removeAllActiveElements();
 
@@ -684,7 +681,7 @@ jQuery(document).ready(function () {
             });
 
             // Close all created elements if clicked outside
-            jQuery('#newsletter-builder-area-center-frame-content').on('click', function (e) {
+            jQuery('#tnpb-content').on('click', function (e) {
                 if (activeInlineElements.length > 0
                         && !jQuery(e.target).hasClass(className)
                         && jQuery(e.target).closest('.tnpc-inline-editable-container').length === 0) {
@@ -819,134 +816,138 @@ jQuery(document).ready(function () {
 // ===============   GLOBAL STYLE   ================== //
 // =================================================== //
 
-(function globalStyleIIFE() {
+jQuery(function () {
 
-    var _elTrigger = document.querySelector('#tnpc-global-styles-form [name="apply"]');
+    (function globalStyleIIFE() {
 
-    _elTrigger.addEventListener('click', function (e) {
-        e.preventDefault();
+        var _elTrigger = document.querySelector('#tnpb-settings-form [name="apply"]');
 
-        var data = {
-            'action': 'tnpc_regenerate_email',
-            'content': tnpc_get_email_content_from_builder_area(),
-            '_wpnonce': tnp_nonce,
-        };
+        _elTrigger.addEventListener('click', function (e) {
+            e.preventDefault();
 
-        tnpc_add_global_options(data);
+            var data = {
+                'action': 'tnpc_regenerate_email',
+                'content': tnpc_get_email_content_from_builder_area(),
+                '_wpnonce': tnp_nonce,
+            };
 
-        jQuery.post(ajaxurl, data, function (response) {
-            if (response && response.success) {
-                jQuery('#newsletter-builder-area-center-frame-content').html(response.data.content);
-                //Change background color of builder area
-                _setBuilderAreaBackgroundColor(document.getElementById('options-options_composer_background').value);
-                init_builder_area();
-                tnpc_mobile_preview();
+            tnpc_add_global_options(data);
 
-                toastBottom.success(response.data.message);
-            } else {
-                toastBottom.error(response.data.message);
-            }
+            jQuery.post(ajaxurl, data, function (response) {
+                if (response && response.success) {
+                    jQuery('#tnpb-content').html(response.data.content);
+                    //Change background color of builder area
+                    _setBuilderAreaBackgroundColor(document.getElementById('options-options_composer_background').value);
+                    init_builder_area();
+                    tnpc_mobile_preview();
+
+                    toastBottom.success(response.data.message);
+                } else {
+                    toastBottom.error(response.data.message);
+                }
+            });
+
         });
 
-    });
-
-})();
+    })();
 
 // ========================================================= //
 // =================    SEND A TEST    ===================== //
 // ========================================================= //
 
-(function sendATestIIFE($) {
+    (function sendATestIIFE($) {
 
-    var testNewsletterWithEmailFormId = '#test-newsletter-form';
-    var testNewsletterWithEmailForm = document.querySelector(testNewsletterWithEmailFormId);
-    testNewsletterWithEmailForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        var testEmail = testNewsletterWithEmailForm.querySelector('input[name="email"]').value;
+        var testNewsletterWithEmailFormId = '#test-newsletter-form';
+        var testNewsletterWithEmailForm = document.querySelector(testNewsletterWithEmailFormId);
+        testNewsletterWithEmailForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var testEmail = testNewsletterWithEmailForm.querySelector('input[name="email"]').value;
 
-        let form = document.getElementById("tnpc-form");
-        tnpc_save(form);
+            let form = document.getElementById("tnpc-form");
+            tnpc_save(form);
 
-        form.act.value = "send-test-to-email-address";
-        var input = document.createElement("input");
-        input.setAttribute("type", "hidden");
-        input.setAttribute("name", "test_address_email");
-        input.setAttribute("value", testEmail);
-        form.appendChild(input);
+            form.act.value = "send-test-to-email-address";
+            var input = document.createElement("input");
+            input.setAttribute("type", "hidden");
+            input.setAttribute("name", "test_address_email");
+            input.setAttribute("value", testEmail);
+            form.appendChild(input);
 
-        form.submit();
-    });
+            form.submit();
+        });
 
-})(jQuery);
+    })(jQuery);
 
 // ================================================================== //
 // =================    SUBJECT LENGTH ICONS    ===================== //
 // ================================================================== //
 
-(function subjectLengthIconsIIFE($) {
-    var $subjectContainer = $('#tnpc-subject');
-    var $subjectInput = $('#tnpc-subject input');
-    var subjectCharCounterEl = null;
+    (function subjectLengthIconsIIFE($) {
+        var $subjectContainer = $('#tnpc-subject');
+        var $subjectInput = $('#tnpc-subject input');
+        var subjectCharCounterEl = null;
 
-    $subjectInput.on('focusin', function (e) {
-        $subjectContainer.find('img').fadeTo(400, 1);
-    });
+        $subjectInput.on('focusin', function (e) {
+            $subjectContainer.find('img').fadeTo(400, 1);
+        });
 
-    $subjectInput.on('keyup', function (e) {
-        setSubjectCharactersLenght(this.value.length);
-    });
+        $subjectInput.on('keyup', function (e) {
+            setSubjectCharactersLenght(this.value.length);
+        });
 
-    $subjectInput.on('focusout', function (e) {
-        $subjectContainer.find('img').fadeTo(300, 0);
-    });
+        $subjectInput.on('focusout', function (e) {
+            $subjectContainer.find('img').fadeTo(300, 0);
+        });
 
-    function setSubjectCharactersLenght(length = 0) {
+        function setSubjectCharactersLenght(length = 0) {
 
-        if (length === 0 && subjectCharCounterEl !== null) {
-            subjectCharCounterEl.remove();
-            subjectCharCounterEl = null;
-            return;
+            if (length === 0 && subjectCharCounterEl !== null) {
+                subjectCharCounterEl.remove();
+                subjectCharCounterEl = null;
+                return;
+            }
+
+            if (!subjectCharCounterEl) {
+                subjectCharCounterEl = document.createElement("span");
+                subjectCharCounterEl.style.position = 'absolute';
+                subjectCharCounterEl.style.top = '-18px';
+                subjectCharCounterEl.style.right = $subjectContainer[0].getBoundingClientRect().width - $subjectInput[0].getBoundingClientRect().width + 'px';
+                subjectCharCounterEl.style.color = '#999';
+                subjectCharCounterEl.style.fontSize = '0.8rem';
+                $subjectContainer.find('div')[0].appendChild(subjectCharCounterEl);
+            }
+
+            const word = length === 1 ? 'character' : 'characters';
+            subjectCharCounterEl.innerHTML = `${length} ${word}`;
         }
 
-        if (!subjectCharCounterEl) {
-            subjectCharCounterEl = document.createElement("span");
-            subjectCharCounterEl.style.position = 'absolute';
-            subjectCharCounterEl.style.top = '-18px';
-            subjectCharCounterEl.style.right = $subjectContainer[0].getBoundingClientRect().width - $subjectInput[0].getBoundingClientRect().width + 'px';
-            subjectCharCounterEl.style.color = '#999';
-            subjectCharCounterEl.style.fontSize = '0.8rem';
-            $subjectContainer.find('div')[0].appendChild(subjectCharCounterEl);
-        }
-
-        const word = length === 1 ? 'character' : 'characters';
-        subjectCharCounterEl.innerHTML = `${length} ${word}`;
-    }
-
-})(jQuery);
+    })(jQuery);
 
 // ======================================================================= //
 // =================    COMPOSER MODE VIEW SWITCH    ===================== //
 // ======================================================================= //
 
-(function composerModeViewIIFE($) {
-    const activeClass = 'composer-view-mode__item--active';
-    var status = 'desktop';
+    (function composerModeViewIIFE($) {
+        const activeClass = 'composer-view-mode__item--active';
+        var status = 'desktop';
 
-    $('.composer-view-mode__item[data-view-mode="' + status + '"]').addClass(activeClass);
+        $('.composer-view-mode__item[data-view-mode="' + status + '"]').addClass(activeClass);
 
-    $('.composer-view-mode__item').on('click', function () {
-        var $el = $(this);
+        $('.composer-view-mode__item').on('click', function () {
+            var $el = $(this);
 
-        if ($el.data('viewMode') === 'desktop') {
-            status = 'desktop';
-            $('.composer-view-mode__item[data-view-mode="desktop"]').addClass(activeClass);
-            $('.composer-view-mode__item[data-view-mode="mobile"]').removeClass(activeClass);
-        } else if ($el.data('viewMode') === 'mobile') {
-            status = 'mobile';
-            $('.composer-view-mode__item[data-view-mode="desktop"]').removeClass(activeClass);
-            $('.composer-view-mode__item[data-view-mode="mobile"]').addClass(activeClass);
-        }
+            if ($el.data('viewMode') === 'desktop') {
+                status = 'desktop';
+                $('.composer-view-mode__item[data-view-mode="desktop"]').addClass(activeClass);
+                $('.composer-view-mode__item[data-view-mode="mobile"]').removeClass(activeClass);
+            } else if ($el.data('viewMode') === 'mobile') {
+                status = 'mobile';
+                $('.composer-view-mode__item[data-view-mode="desktop"]').removeClass(activeClass);
+                $('.composer-view-mode__item[data-view-mode="mobile"]').addClass(activeClass);
+            }
 
-        tnp_view(status);
-    });
-})(jQuery);
+            tnp_view(status);
+        });
+    })(jQuery);
+
+});

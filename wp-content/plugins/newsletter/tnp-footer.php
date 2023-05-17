@@ -12,7 +12,7 @@ defined('ABSPATH') || exit;
         <ul>
             <li><a href="https://www.thenewsletterplugin.com/account"><?php _e('Your Account', 'newsletter') ?></a></li>
             <li><a href="https://www.thenewsletterplugin.com/forums"><?php _e('Forum', 'newsletter') ?></a></li>
-            <li><a href="https://www.thenewsletterplugin.com/blog"><?php _e('Blog', 'newsletter') ?></a></li>
+            <!--<li><a href="https://www.thenewsletterplugin.com/blog"><?php _e('Blog', 'newsletter') ?></a></li>-->
         </ul>
     </div>
     <div>

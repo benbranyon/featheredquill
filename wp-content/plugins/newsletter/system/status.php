@@ -12,17 +12,6 @@ $controls = new NewsletterControls();
 $newsletter = Newsletter::instance();
 $mailer = $newsletter->get_mailer();
 
-if ($controls->is_action('delete_logs')) {
-    $files = glob(WP_CONTENT_DIR . '/logs/newsletter/*.txt');
-    foreach ($files as $file) {
-        if (is_file($file))
-            unlink($file);
-    }
-    $secret = NewsletterModule::get_token(8);
-    update_option('newsletter_logger_secret', $secret);
-    $controls->messages = __('Logs deleted', 'newsletter');
-}
-
 if ($controls->is_action('conversion')) {
     $this->logger->info('Maybe convert to utf8mb4');
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -43,8 +32,18 @@ if ($controls->is_action('conversion')) {
     }
 }
 
+if ($controls->is_action('reset_dismissed')) {
+    update_option('newsletter_dismissed', [], false);
+    $controls->add_message_done();
+}
+
 if ($controls->is_action('reset_send_stats')) {
     $this->reset_send_stats();
+    $controls->add_message_done();
+}
+
+if ($controls->is_action('reset_warnings')) {
+    $this->reset_warnings();
     $controls->add_message_done();
 }
 
@@ -78,6 +77,39 @@ class TNP_WPDB extends wpdb {
 }
 
 $tnp_wpdb = new TNP_WPDB(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
+
+function tnp_describe_table($table) {
+    global $wpdb;
+    $rs = $wpdb->get_results("show full columns from " . esc_sql($table));
+    ?>
+    <table class="tnp-db-table">
+        <thead>
+            <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Collation</th>
+                <th>Null</th>
+                <th>Key</th>
+                <th>Default</th>
+                <th>Extra</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($rs as $r) { ?>
+                <tr>
+                    <td><?php echo esc_html($r->Field) ?></td>
+                    <td><?php echo esc_html($r->Type) ?></td>
+                    <td><?php echo esc_html($r->Collation) ?></td>
+                    <td><?php echo esc_html($r->Null) ?></td>
+                    <td><?php echo esc_html($r->Key) ?></td>
+                    <td><?php echo esc_html($r->Default) ?></td>
+                    <td><?php echo esc_html($r->Extra) ?></td>
+                </tr>
+            <?php } ?>
+        </tbody>
+    </table>
+    <?php
+}
 ?>
 
 <style>
@@ -99,15 +131,17 @@ $tnp_wpdb = new TNP_WPDB(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
         <form method="post" action="">
             <?php $controls->init(); ?>
 
-
+            <p>
+                <?php $controls->btn('reset_warnings', __('Reset warnings', 'newsletter')) ?>
+            </p>
             <h3>Delivery</h3>
             <table class="widefat" id="tnp-status-table">
 
                 <thead>
                     <tr>
                         <th>Parameter</th>
-                        <th><?php _e('Status', 'newsletter') ?></th>
-                        <th>Action</th>
+                        <th></th>
+                        <th>Note</th>
                     </tr>
 
                 </thead>
@@ -228,20 +262,31 @@ $tnp_wpdb = new TNP_WPDB(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
                 <thead>
                     <tr>
                         <th>Parameter</th>
-                        <th><?php _e('Status', 'newsletter') ?></th>
-                        <th>Action</th>
+                        <th></th>
+                        <th>Note</th>
                     </tr>
 
                 </thead>
 
                 <tbody>
+                    <tr>
+                        <td>
+                            General notices and warnings
+                        </td>
+                        <td>
+
+                        </td>
+                        <td>
+                            <?php $controls->btn('reset_dismissed', 'Restore', ['secondary' => true]) ?>
+                        </td>
+                    </tr>
 
                     <tr>
                         <?php
-                        $page_id = $newsletter->get_newsletter_page_id();
+                        $tnp_page_id = $newsletter->get_newsletter_page_id();
                         $page = $newsletter->get_newsletter_page();
                         $condition = 1;
-                        if ($page_id) {
+                        if ($tnp_page_id) {
                             if (!$page || $page->post_status !== 'publish') {
                                 $condition = 0;
                             }
@@ -538,13 +583,103 @@ $tnp_wpdb = new TNP_WPDB(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
                 </tbody>
             </table>
 
+            <h3>Filters</h3>
+            <table class="widefat" id="tnp-status-table">
+                <thead>
+                    <tr>
+                        <th>Plugin</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>newsletter_message_headers</code></td>
+                        <td>
+                            <?php echo has_filter('newsletter_message_headers') ? '' : '-' ?>
+                            <?php echo $this->get_hook_functions('newsletter_message_headers') ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>newsletter_message_html</code></td>
+                        <td>
+                            <?php echo has_filter('newsletter_message_html') ? '' : '-' ?><br>
+                            <?php echo $this->get_hook_functions('newsletter_message_html') ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>newsletter_message_text</code></td>
+                        <td>
+                            <?php echo has_filter('newsletter_message_text') ? '' : '-' ?><br>
+                            <?php echo $this->get_hook_functions('newsletter_message_text') ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>newsletter_message_subject</code></td>
+                        <td>
+                            <?php echo has_filter('newsletter_message_subject') ? '' : '-' ?>
+                            <?php echo $this->get_hook_functions('newsletter_message_subject') ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>newsletter_message</code></td>
+                        <td>
+                            <?php echo has_filter('newsletter_message') ? '' : '-' ?>
+                            <?php echo $this->get_hook_functions('newsletter_message') ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>newsletter_replace</code></td>
+                        <td>
+                            <?php echo has_filter('newsletter_replace') ? '' : '-' ?>
+                            <?php echo $this->get_hook_functions('newsletter_replace') ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>newsletter_replace_name</code></td>
+                        <td>
+                            <?php echo has_filter('newsletter_replace_name') ? '' : '-' ?>
+                            <?php echo $this->get_hook_functions('newsletter_replace_name') ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>newsletter_current_language</code></td>
+                        <td>
+                            <?php echo has_filter('newsletter_current_language') ? '' : '-' ?>
+                            <?php echo $this->get_hook_functions('newsletter_current_language') ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>newsletter_languages</code></td>
+                        <td>
+                            <?php echo has_filter('newsletter_languages') ? '' : '-' ?>
+                            <?php echo $this->get_hook_functions('newsletter_languages') ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>newsletter_languages</code></td>
+                        <td>
+                            <?php echo has_filter('newsletter_is_multilanguage') ? '' : '-' ?>
+                            <?php echo $this->get_hook_functions('newsletter_is_multilanguage') ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>newsletter_send_user</code></td>
+                        <td>
+                            <?php echo has_filter('newsletter_send_user') ? '' : '-' ?>
+                            <?php echo $this->get_hook_functions('newsletter_send_user') ?>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+
             <h3>3rd party plugins</h3>
             <table class="widefat" id="tnp-status-table">
                 <thead>
                     <tr>
                         <th>Plugin</th>
-                        <th><?php _e('Status', 'newsletter') ?></th>
-                        <th>Action</th>
+                        <th></th>
+                        <th>Note</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -571,7 +706,7 @@ $tnp_wpdb = new TNP_WPDB(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
                             </td>
                         </tr>
                     <?php } ?>
-                        
+
                     <?php if (is_plugin_active('freesoul-deactivate-plugins/freesoul-deactivate-plugins.php')) { ?>
                         <tr>
                             <td><a href="https://wordpress.org/plugins/freesoul-deactivate-plugins/" target="_blank">Freesoul Deactivate Plugins</a></td>
@@ -583,7 +718,7 @@ $tnp_wpdb = new TNP_WPDB(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
                             </td>
                         </tr>
                     <?php } ?>
-                        
+
                 </tbody>
             </table>
 
@@ -594,8 +729,8 @@ $tnp_wpdb = new TNP_WPDB(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
                 <thead>
                     <tr>
                         <th>Parameter</th>
-                        <th><?php _e('Status', 'newsletter') ?></th>
-                        <th>Action</th>
+                        <th></th>
+                        <th>Note</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -686,7 +821,6 @@ $tnp_wpdb = new TNP_WPDB(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
                         </td>
                     </tr>
 
-
                     <tr>
                         <?php
                         $attachments = get_posts([
@@ -710,10 +844,10 @@ $tnp_wpdb = new TNP_WPDB(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
                         </td>
                         <td>
                             Example: <?php echo esc_html($src); ?>
-                           
+
                             <?php if ($condition == 0) { ?>
                                 <br><br>
-                                Your uploadimages seems to be returned with a relative URL: they won't work in your newsletter. Check the <code>WP_CONTENT_URL</code>
+                                Your uploaded images seems to be returned with a relative URL: they won't work in your newsletter. Check the <code>WP_CONTENT_URL</code>
                                 above and fix it if is showing a warning. If not, probably a plugin or some custom code is forcing relative URLs for your
                                 images. Check that with your site developer.
                             <?php } else { ?>
@@ -760,7 +894,7 @@ $tnp_wpdb = new TNP_WPDB(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
                         </td>
                         <td>
                             <?php if ($res !== false) { ?>
-                                Transients cannot be delete. This can block the delivery engine. Usually it is due to a not well coded plugin installed.
+                                Transients cannot be deleted. This can block the delivery engine. Usually it is due to a not well coded plugin installed.
                             <?php } else { ?>
                             <?php } ?>
                         </td>
@@ -775,7 +909,7 @@ $tnp_wpdb = new TNP_WPDB(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
                 <thead>
                     <tr>
                         <th>Parameter</th>
-                        <th><?php _e('Status', 'newsletter') ?></th>
+                        <th></th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -821,7 +955,7 @@ $tnp_wpdb = new TNP_WPDB(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
                             <?php if (!$res) { ?>
                                 Your PHP execution time limit is <?php echo $value ?> seconds. It cannot be changed and it is too lower to grant the maximum delivery rate of Newsletter.
                             <?php } else { ?>
-                                Your PHP execution time limit is <?php echo $value ?> seconds and can be eventually changed by Newsletter.<br>
+                                Your PHP execution time limit is <?php echo $value ?> seconds and can be changed by the Newsletter plugin.<br>
                             <?php } ?>
 
                         </td>
@@ -878,8 +1012,8 @@ $tnp_wpdb = new TNP_WPDB(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
                 <thead>
                     <tr>
                         <th>Parameter</th>
-                        <th><?php _e('Status', 'newsletter') ?></th>
-                        <th>Action</th>
+                        <th></th>
+                        <th>Note</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1001,6 +1135,72 @@ $tnp_wpdb = new TNP_WPDB(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
             </table>
 
 
+            <h3>Tables</h3>
+            <table class="widefat">
+                <thead>
+                    <tr>
+                        <th>Table</th>
+                        <th></th>
+                        <th>Database check result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $r = $wpdb->get_row("check table " . NEWSLETTER_USERS_TABLE);
+                    $condition = $r->Msg_text == 'OK' ? 1 : 0;
+                    ?>
+                    <tr>
+                        <td><code><?php echo NEWSLETTER_USERS_TABLE ?></code></td>
+                        <td>
+                            <?php $this->condition_flag($condition) ?>
+                        </td>
+                        <td>
+                            <?php print_r($r) ?>
+                        </td>
+                    </tr>
+                    <?php
+                    $r = $wpdb->get_row("check table " . NEWSLETTER_EMAILS_TABLE);
+                    $condition = $r->Msg_text == 'OK' ? 1 : 0;
+                    ?>
+                    <tr>
+                        <td><code><?php echo NEWSLETTER_EMAILS_TABLE ?></code></td>
+                        <td>
+                            <?php $this->condition_flag($condition) ?>
+                        </td>
+                        <td>
+                            <?php print_r($r) ?>
+                        </td>
+                    </tr>
+                    <?php
+                    $r = $wpdb->get_row("check table " . NEWSLETTER_SENT_TABLE);
+                    $condition = $r->Msg_text == 'OK' ? 1 : 0;
+                    ?>
+                    <tr>
+                        <td><code><?php echo NEWSLETTER_SENT_TABLE ?></code></td>
+                        <td>
+                            <?php $this->condition_flag($condition) ?>
+                        </td>
+                        <td>
+                            <?php print_r($r) ?>
+                        </td>
+                    </tr>
+                    <?php
+                    $r = $wpdb->get_row("check table " . NEWSLETTER_STATS_TABLE);
+                    $condition = $r->Msg_text == 'OK' ? 1 : 0;
+                    ?>
+                    <tr>
+                        <td><code><?php echo NEWSLETTER_STATS_TABLE ?></code></td>
+                        <td>
+                            <?php $this->condition_flag($condition) ?>
+                        </td>
+                        <td>
+                            <?php print_r($r) ?>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+
 
             <h3>General parameters</h3>
             <table class="widefat" id="tnp-parameters-table">
@@ -1087,77 +1287,153 @@ $tnp_wpdb = new TNP_WPDB(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
             </table>
 
 
-            <?php if (isset($_GET['debug'])) { ?>
+            <?php if (isset($_GET['advanced'])) { ?>
 
-                <h3>Database Tables</h3>
-                <h4><?php echo $wpdb->prefix ?>newsletter</h4>
-                <?php
-                $rs = $wpdb->get_results("describe {$wpdb->prefix}newsletter");
-                ?>
-                <table class="tnp-db-table">
+                <h3>Database tables' status</h3>
+                <table class="widefat">
                     <thead>
                         <tr>
-                            <th>Field</th>
-                            <th>Type</th>
-                            <th>Null</th>
-                            <th>Key</th>
-                            <th>Default</th>
-                            <th>Extra</th>
+                            <th>Table</th>
+                            <th></th>
+                            <th>Database check result</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($rs as $r) { ?>
-                            <tr>
-                                <td><?php echo esc_html($r->Field) ?></td>
-                                <td><?php echo esc_html($r->Type) ?></td>
-                                <td><?php echo esc_html($r->Null) ?></td>
-                                <td><?php echo esc_html($r->Key) ?></td>
-                                <td><?php echo esc_html($r->Default) ?></td>
-                                <td><?php echo esc_html($r->Extra) ?></td>
-                            </tr>
+                        <?php
+                        $r = $wpdb->get_row("check table " . NEWSLETTER_USERS_TABLE);
+                        $condition = $r->Msg_text == 'OK' ? 1 : 0;
+                        ?>
+                        <tr>
+                            <td><code><?php echo NEWSLETTER_USERS_TABLE ?></code></td>
+                            <td>
+                                <?php $this->condition_flag($condition) ?>
+                            </td>
+                            <td>
+                                <?php print_r($r) ?>
+                            </td>
+                        </tr>
+                        <?php
+                        $r = $wpdb->get_row("check table " . NEWSLETTER_EMAILS_TABLE);
+                        $condition = $r->Msg_text == 'OK' ? 1 : 0;
+                        ?>
+                        <tr>
+                            <td><code><?php echo NEWSLETTER_EMAILS_TABLE ?></code></td>
+                            <td>
+                                <?php $this->condition_flag($condition) ?>
+                            </td>
+                            <td>
+                                <?php print_r($r) ?>
+                            </td>
+                        </tr>
+                        <?php
+                        $r = $wpdb->get_row("check table " . NEWSLETTER_SENT_TABLE);
+                        $condition = $r->Msg_text == 'OK' ? 1 : 0;
+                        ?>
+                        <tr>
+                            <td><code><?php echo NEWSLETTER_SENT_TABLE ?></code></td>
+                            <td>
+                                <?php $this->condition_flag($condition) ?>
+                            </td>
+                            <td>
+                                <?php print_r($r) ?>
+                            </td>
+                        </tr>
+                        <?php
+                        $r = $wpdb->get_row("check table " . NEWSLETTER_STATS_TABLE);
+                        $condition = $r->Msg_text == 'OK' ? 1 : 0;
+                        ?>
+                        <tr>
+                            <td><code><?php echo NEWSLETTER_STATS_TABLE ?></code></td>
+                            <td>
+                                <?php $this->condition_flag($condition) ?>
+                            </td>
+                            <td>
+                                <?php print_r($r) ?>
+                            </td>
+                        </tr>
+                        
+                        <?php if (class_exists('NewsletterAutomated')) { ?>
+                        <?php
+                        $r = $wpdb->get_row("check table " . $wpdb->prefix . 'newsletter_automated');
+                        $condition = $r->Msg_text == 'OK' ? 1 : 0;
+                        ?>
+                        <tr>
+                            <td><code><?php echo $wpdb->prefix . 'newsletter_automated' ?></code></td>
+                            <td>
+                                <?php $this->condition_flag($condition) ?>
+                            </td>
+                            <td>
+                                <?php print_r($r) ?>
+                            </td>
+                        </tr>
+                        <?php } ?>
+                        
+                        <?php if (class_exists('NewsletterAutoresponder')) { ?>
+                        <?php
+                        $r = $wpdb->get_row("check table " . $wpdb->prefix . 'newsletter_autoresponder');
+                        $condition = $r->Msg_text == 'OK' ? 1 : 0;
+                        ?>
+                        <tr>
+                            <td><code><?php echo $wpdb->prefix . 'newsletter_autoresponder' ?></code></td>
+                            <td>
+                                <?php $this->condition_flag($condition) ?>
+                            </td>
+                            <td>
+                                <?php print_r($r) ?>
+                            </td>
+                        </tr>
+                        <?php
+                        $r = $wpdb->get_row("check table " . $wpdb->prefix . 'newsletter_autoresponder_steps');
+                        $condition = $r->Msg_text == 'OK' ? 1 : 0;
+                        ?>
+                        <tr>
+                            <td><code><?php echo $wpdb->prefix . 'newsletter_autoresponder_steps' ?></code></td>
+                            <td>
+                                <?php $this->condition_flag($condition) ?>
+                            </td>
+                            <td>
+                                <?php print_r($r) ?>
+                            </td>
+                        </tr>
                         <?php } ?>
                     </tbody>
                 </table>
 
-                <h4><?php echo $wpdb->prefix ?>newsletter_emails</h4>
-                <?php
-                $rs = $wpdb->get_results("show full columns from {$wpdb->prefix}newsletter_emails");
-                ?>
-                <table class="tnp-db-table">
+                <h3>Database tables' structure</h3>
+                <h3>Database tables' status</h3>
+                <table class="widefat">
                     <thead>
                         <tr>
-                            <th>Field</th>
-                            <th>Type</th>
-                            <th>Collation</th>
-                            <th>Null</th>
-                            <th>Key</th>
-                            <th>Default</th>
-                            <th>Extra</th>
+                            <th>Table</th>
+                            <th>Structure</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($rs as $r) { ?>
-                            <tr>
-                                <td><?php echo esc_html($r->Field) ?></td>
-                                <td><?php echo esc_html($r->Type) ?></td>
-                                <td><?php echo esc_html($r->Collation) ?></td>
-                                <td><?php echo esc_html($r->Null) ?></td>
-                                <td><?php echo esc_html($r->Key) ?></td>
-                                <td><?php echo esc_html($r->Default) ?></td>
-                                <td><?php echo esc_html($r->Extra) ?></td>
-                            </tr>
-                        <?php } ?>
+                        <tr>
+                            <td><code><?php echo NEWSLETTER_USERS_TABLE ?></code></td>
+                            <td>
+                                <?php tnp_describe_table(NEWSLETTER_USERS_TABLE) ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code><?php echo NEWSLETTER_EMAILS_TABLE ?></code></td>
+                            <td>
+                                <?php tnp_describe_table(NEWSLETTER_EMAILS_TABLE) ?>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
-
-
-                <h3>Extensions</h3>
-                <pre style="font-size: 11px; font-family: monospace; background-color: #efefef; color: #444"><?php echo esc_html(print_r(get_option('newsletter_extension_versions'), true)); ?></pre>
 
                 <h3>Update plugins data</h3>
                 <pre style="font-size: 11px; font-family: monospace; background-color: #efefef; color: #444"><?php echo esc_html(print_r(get_site_transient('update_plugins'), true)); ?></pre>
 
+            <?php } else { ?>
+
+                <p>
+                    <a href="<?php echo esc_attr(add_query_arg('advanced', '1', $_SERVER['REQUEST_URI'])) ?>">Show advanced parameters</a>
+                </p>    
             <?php } ?>
+        </form>
     </div>
 
     <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>

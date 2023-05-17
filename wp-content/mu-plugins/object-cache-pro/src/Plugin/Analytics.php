@@ -142,6 +142,10 @@ trait Analytics
             return;
         }
 
+        if ($this->incompatibleContentType()) {
+            return;
+        }
+
         if (! $measurement = $wp_object_cache->requestMeasurement()) {
             return;
         }
@@ -152,5 +156,52 @@ trait Analytics
             $wp_object_cache->clientName(),
             (string) $measurement
         );
+    }
+
+    /**
+     * Whether the sent headers are incompatible with HTML comments.
+     *
+     * @see RedisCachePro\Plugin\Analytics::maybePrintMetricsComment()
+     *
+     * @return bool
+     */
+    protected function incompatibleContentType()
+    {
+        $jsonContentType = static function ($headers) {
+            foreach ($headers as $header => $value) {
+                if (stripos((string) $header, 'content-type') === false) {
+                    continue;
+                }
+
+                if (stripos((string) $value, '/json') === false) {
+                    continue;
+                }
+
+                return true;
+            }
+
+            return false;
+        };
+
+        if (function_exists('headers_list')) {
+            $headers = [];
+
+            foreach (headers_list() as $header) {
+                [$name, $value] = explode(':', $header);
+                $headers[$name] = $value;
+            }
+
+            if ($jsonContentType($headers)) {
+                return true;
+            }
+        }
+
+        if (function_exists('apache_response_headers')) {
+            if ($headers = apache_response_headers()) {
+                return $jsonContentType($headers);
+            }
+        }
+
+        return false;
     }
 }

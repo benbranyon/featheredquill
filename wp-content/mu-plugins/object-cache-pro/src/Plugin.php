@@ -184,10 +184,8 @@ final class Plugin
             $this->logFlush();
 
             return $connection->flushdb($this->config->async_flush);
-        } catch (Throwable $exception) {
-            //
+        } catch (Throwable $th) {
+            return false;
         }
-
-        return false;
     }
 }

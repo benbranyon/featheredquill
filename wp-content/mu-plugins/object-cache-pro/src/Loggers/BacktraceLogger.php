@@ -4,10 +4,17 @@ declare(strict_types=1);
 
 namespace RedisCachePro\Loggers;
 
+/**
+ * @deprecated 1.18.0
+ * @see \RedisCachePro\Loggers\CallbackLogger
+ */
 class BacktraceLogger extends Logger
 {
     /**
      * Logs with an arbitrary level.
+     *
+     * @deprecated 1.18.0
+     * @see \RedisCachePro\Loggers\CallbackLogger
      *
      * @param  mixed  $level
      * @param  string  $message
@@ -17,13 +24,7 @@ class BacktraceLogger extends Logger
     public function log($level, $message, array $context = [])
     {
         \error_log(
-            \sprintf(
-                'objectcache.%s: %s [%s]',
-                $level,
-                $message,
-                $context['backtrace_summary']
-                    ?? 'Backtrace not available, enable the `save_commands` configuration option'
-            )
+            "objectcache.{$level}: {$message} [Backtrace not available]"
         );
     }
 }

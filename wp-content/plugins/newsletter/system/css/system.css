@@ -39,7 +39,7 @@ table.widefat {
     box-shadow: none;
 }
 
-#tnp-status-table tbody tr:nth-child(2n+1) {
+#tnp-status-table>tbody>tr:nth-child(2n+1) {
     background-color: #ECF0F1;
     border-radius: 2px;
     margin: 5px;
@@ -95,7 +95,7 @@ table.widefat {
 }
 
 .tnp-log-files li, .tnp-log-files li a {
-    color: #fff;
+    /*color: #fff;*/
 }
 
 .tnp-log-files .tnp-log-size {
@@ -111,10 +111,11 @@ table.widefat {
 .tnp-flow div {
     display: inline-block;
     vertical-align: middle;
-    color: #fff;
+    color: #000;
     text-align: center;
     margin: 0 20px;
     padding: 1em;
+    
 }
 .tnp-flow div i {
     font-size: 50px;
@@ -122,13 +123,14 @@ table.widefat {
 
 .tnp-flow div.tnp-arrow {
     font-size: 40px;
-    color: #bbb;
+    color: #555;
     padding: 0;
     margin: 0;
 }
 
-.tnp-mail, .tnp-addon, .tnp-service {
+.tnp-mail, .tnp-addon, .tnp-service, .tnp-user {
     height: 150px;
     width: 150px;
-    border: 1px solid #fff;
+    border: 1px solid #444;
+    background-color: #fff;
 }

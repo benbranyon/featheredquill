@@ -65,7 +65,7 @@ trait Replication
             throw new ConfigurationException('`servers` must an array of Redis servers');
         }
 
-        $primaries = \array_filter($servers, function ($server) {
+        $primaries = \array_filter($servers, static function ($server) {
             return in_array(static::parseUrl($server)['role'], ['primary', 'master']);
         });
 

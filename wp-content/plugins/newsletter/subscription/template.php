@@ -96,14 +96,6 @@ if (strpos($controls->data['template'], '{message}') === false) {
 
         <form method="post" action="">
             <?php $controls->init(); ?>
-            <p>
-                <?php $controls->button_save(); ?>
-                <?php $controls->button_reset(); ?>
-                <?php $controls->button('test', 'Send a test'); ?>
-            </p>
-
-
-            <h3><?php _e('Template', 'newsletter') ?></h3>
 
             <?php $controls->textarea_preview('template', '100%', '700px'); ?>
             <br><br>

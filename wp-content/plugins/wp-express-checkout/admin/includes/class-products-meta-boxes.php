@@ -346,7 +346,12 @@ class Products_Meta_Boxes {
 			} );
 		</script>
 		<hr />
-		<strong>Download Link Expiry Settings (Optional)</strong>
+		<strong><?php esc_html_e( 'Force Download', 'wp-express-checkout' ); ?></strong>
+		<br />		
+		<p>Read the <a href="https://wp-express-checkout.com/force-download-option-for-digital-products/" target="_blank">force download tutorial</a> to learn how this feature works.</p>
+		<input type="checkbox" value="1" name="wpec_force_download" <?php echo ($post->wpec_force_download == 1) ? "checked":""; ?> ><span><?php esc_html_e( 'Enable Force Download', 'wp-express-checkout' ); ?></span>
+		<hr />
+		<strong><?php esc_html_e( 'Download Link Expiry Settings (Optional)', 'wp-express-checkout' ); ?></strong>
 		<br />
 		<p>Read the <a href="https://wp-express-checkout.com/limiting-product-download-links/" target="_blank">download link expiry tutorial</a> to learn how the feature works.</p>
 		<label><?php esc_html_e( 'Duration of Download Link', 'wp-express-checkout' ); ?></label>
@@ -429,7 +434,13 @@ jQuery(document).ready(function($) {
 	function display_shortcode_meta_box( $post ) {
 		?>
 		<input type="text" name="ppec_product_shortcode" style="width: 100%;" class="wpec-select-on-click large-text" onfocus="this.select();" readonly value="[wp_express_checkout product_id=&quot;<?php echo $post->ID; ?>&quot;]">
-		<p class="description"><?php esc_html_e( 'Use this shortcode to display button for your product.', 'wp-express-checkout' ); ?></p>
+		<p class="description">
+			<?php esc_html_e( 'Use this shortcode to display button for your product.', 'wp-express-checkout' ); ?>
+			<?php esc_html_e( ' Read the ', 'wp-express-checkout' ); ?>
+			<a href="https://wp-express-checkout.com/creating-and-display-a-product/" target="_blank"><?php esc_html_e( 'documentation', 'wp-express-checkout' ); ?></a>
+			<?php esc_html_e( ' to learn more.', 'wp-express-checkout' ); ?>
+			
+		</p>
 		<?php
 	}
 
@@ -525,7 +536,7 @@ jQuery(document).ready(function($) {
 			update_post_meta( $post_id, 'wpec_variations_opts', false );
 		}
 
-		$hide_amount_input = filter_input( INPUT_POST, 'wpec_product_hide_amount_input', FILTER_SANITIZE_STRING );
+		$hide_amount_input = isset( $_POST['wpec_product_hide_amount_input'] ) ? sanitize_text_field( stripslashes ( $_POST['wpec_product_hide_amount_input'] ) ) : '';
 		$hide_amount_input = ! empty( $hide_amount_input ) ? true : false;
 		update_post_meta( $post_id, 'wpec_product_hide_amount_input', $hide_amount_input );
 
@@ -537,13 +548,16 @@ jQuery(document).ready(function($) {
 		} else {
 			update_post_meta( $post_id, 'ppec_product_upload', esc_url( $product_url, array( 'http', 'https', 'dropbox' ) ) );
 		}
+		$force_download = filter_input( INPUT_POST, 'wpec_force_download', FILTER_SANITIZE_NUMBER_INT );				
+		update_post_meta( $post_id, 'wpec_force_download', $force_download );
+		
 		$download_duration = filter_input( INPUT_POST, 'wpec_download_duration', FILTER_SANITIZE_NUMBER_INT );
 		update_post_meta( $post_id, 'wpec_download_duration', $download_duration );
 		$download_count = filter_input( INPUT_POST, 'wpec_download_count', FILTER_SANITIZE_NUMBER_INT );
 		update_post_meta( $post_id, 'wpec_download_count', $download_count );
 
 		// product type.
-		$product_type = filter_input( INPUT_POST, 'wpec_product_type_radio', FILTER_SANITIZE_STRING );
+		$product_type = isset( $_POST['wpec_product_type_radio'] ) ? sanitize_text_field( stripslashes ( $_POST['wpec_product_type_radio'] ) ) : '';
 		update_post_meta( $post_id, 'wpec_product_type', $product_type );
 
 		// product thumbnail.
@@ -557,13 +571,13 @@ jQuery(document).ready(function($) {
 		update_post_meta( $post_id, 'wpec_product_thankyou_page', $thank_url );
 
 		// price.
-		$price = filter_input( INPUT_POST, 'ppec_product_price', FILTER_SANITIZE_STRING );
+		$price = isset( $_POST['ppec_product_price'] ) ? sanitize_text_field( stripslashes ( $_POST['ppec_product_price'] ) ) : '';
 		$price = ! empty( $price ) ? floatval( $price ) : 0;
 
 		update_post_meta( $post_id, 'ppec_product_price', $price );
 
 		// min amount.
-		$min_amount = filter_input( INPUT_POST, 'wpec_product_min_amount', FILTER_SANITIZE_STRING );
+		$min_amount = isset( $_POST['wpec_product_min_amount'] ) ? sanitize_text_field( stripslashes ( $_POST['wpec_product_min_amount'] ) ) : '';
 		$min_amount = ! empty( $min_amount ) ? floatval( $min_amount ) : 0;
 
 		update_post_meta( $post_id, 'wpec_product_min_amount', $min_amount );
@@ -582,22 +596,22 @@ jQuery(document).ready(function($) {
 		update_post_meta( $post_id, 'wpec_product_stock_items', absint( $_POST['wpec_product_stock_items'] ) );
 
 		// shipping & tax.
-		$shipping = filter_input( INPUT_POST, 'wpec_product_shipping', FILTER_SANITIZE_STRING );
+		$shipping = isset( $_POST['wpec_product_shipping'] ) ? sanitize_text_field( stripslashes ( $_POST['wpec_product_shipping'] ) ) : '';
 		$shipping = ! empty( $shipping ) ? floatval( $shipping ) : $shipping;
 		update_post_meta( $post_id, 'wpec_product_shipping', $shipping );
 		// allow custom quantity.
 		$enable_shipping = filter_input( INPUT_POST, 'wpec_product_shipping_enable', FILTER_SANITIZE_NUMBER_INT );
 		update_post_meta( $post_id, 'wpec_product_shipping_enable', $enable_shipping );
 
-		$tax = filter_input( INPUT_POST, 'wpec_product_tax', FILTER_SANITIZE_STRING );
+		$tax = isset( $_POST['wpec_product_tax'] ) ? sanitize_text_field( stripslashes ( $_POST['wpec_product_tax'] ) ) : '';
 		$tax = floatval( $tax );
 		$tax = empty( $tax ) ? '' : $tax;
 		update_post_meta( $post_id, 'wpec_product_tax', $tax );
 
-		$button_text = filter_input( INPUT_POST, 'wpec_product_button_text', FILTER_SANITIZE_STRING );
+		$button_text = isset( $_POST['wpec_product_button_text'] ) ? sanitize_text_field( stripslashes ( $_POST['wpec_product_button_text'] ) ) : '';
 		update_post_meta( $post_id, 'wpec_product_button_text', sanitize_text_field( $button_text ) );
 
-		$button_type = filter_input( INPUT_POST, 'wpec_product_button_type', FILTER_SANITIZE_STRING );
+		$button_type = isset( $_POST['wpec_product_button_type'] ) ? sanitize_text_field( stripslashes ( $_POST['wpec_product_button_type'] ) ) : '';
 		update_post_meta( $post_id, 'wpec_product_button_type', sanitize_text_field( $button_type ) );
 
 		update_post_meta( $post_id, 'wpec_product_coupons_setting', isset( $_POST['wpec_product_coupons_setting'] ) ? sanitize_text_field( $_POST['wpec_product_coupons_setting'] ) : '0' );

@@ -97,7 +97,7 @@ class NewsletterUsers extends NewsletterModule {
     }
 
     function admin_menu() {
-        $this->add_menu_page('index', __('Subscribers', 'newsletter'));
+        $this->add_menu_page('index', __('Subscribers', 'newsletter'), 1);
         $this->add_admin_page('new', __('New subscriber', 'newsletter'));
         $this->add_admin_page('edit', __('Subscriber Edit', 'newsletter'));
         $this->add_admin_page('massive', __('Subscribers Maintenance', 'newsletter'));
@@ -247,7 +247,32 @@ class NewsletterUsers extends NewsletterModule {
 
         return $user ? true : false;
     }
+    
+    /**
+     * 
+     * @global type $wpdb
+     * @return TNP_Subscribers_Stats
+     */
+    function get_stats() {
+        global $wpdb;
+        
+        return $wpdb->get_row("select count(*) as total,
+count(case when status='C' then 1 else null end) as confirmed,
+count(case when status='S' then 1 else null end) as unconfirmed,
+count(case when status='B' then 1 else null end) as bounced,
+count(case when status='P' then 1 else null end) as complained
 
+from " . NEWSLETTER_USERS_TABLE);
+                
+    }
+
+}
+
+class TNP_Subscribers_Stats {
+    var $total;
+    var $confirmed;
+    var $unconfirmed;
+    var $bounced;
 }
 
 NewsletterUsers::instance();

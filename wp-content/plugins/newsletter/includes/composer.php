@@ -522,13 +522,18 @@ class TNP_Composer {
 
     static function post_content($post) {
         $content = $post->post_content;
-        $content = wpautop($content);
+        
+        if (!has_block($post)) {
+            $content = wpautop($content);
+        }
+        
         if (true || $options['enable shortcodes']) {
             remove_shortcode('gallery');
             add_shortcode('gallery', 'tnp_gallery_shortcode');
             $content = do_shortcode($content);
         }
-        $content = str_replace('<p>', '<p class="paragraph">', $content);
+        $content = str_replace('<p>', '<p inline-class="p">', $content);
+        $content = str_replace('<li>', '<li inline-class="li">', $content);
 
         $selected_images = array();
         if (preg_match_all('/<img [^>]+>/', $content, $matches)) {
@@ -567,6 +572,7 @@ class TNP_Composer {
             'options_composer_button_background_color' => '#256F9C',
             'options_composer_background' => '#FFFFFF',
             'options_composer_block_background' => '#FFFFFF',
+            'options_composer_width' => '600'
         ];
     }
 
@@ -646,8 +652,9 @@ class TNP_Composer {
         if (!empty($attrs['scale'])) {
             $scale = (float) $attrs['scale'];
         }
-        if (!empty($prefix))
+        if (!empty($prefix)) {
             $prefix .= '_';
+        }
 
         $style->font_family = empty($options[$prefix . 'font_family']) ? $composer[$type . '_font_family'] : $options[$prefix . 'font_family'];
         $style->font_size = empty($options[$prefix . 'font_size']) ? round($composer[$type . '_font_size'] * $scale) : $options[$prefix . 'font_size'];

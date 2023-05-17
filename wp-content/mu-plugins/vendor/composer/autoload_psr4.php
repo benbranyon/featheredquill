@@ -9,4 +9,12 @@ return array(
     'Wptool\\' => array($vendorDir . '/wptool/wp-admin-dash/src'),
     'Wpsec\\twofa\\' => array($vendorDir . '/wpsec/wp-2fa-plugin/src'),
     'Wpsec\\captcha\\' => array($vendorDir . '/wpsec/wp-captcha-plugin/src'),
+    'RedisCachePro\\' => array($baseDir . '/object-cache-pro/src'),
+    'Psr\\SimpleCache\\' => array($vendorDir . '/psr/simple-cache/src'),
+    'Psr\\Container\\' => array($vendorDir . '/psr/container/src'),
+    'Illuminate\\Contracts\\' => array($vendorDir . '/illuminate/contracts'),
+    'Illuminate\\Container\\' => array($vendorDir . '/illuminate/container'),
+    'GoDaddy\\WordPress\\Plugins\\Launch\\' => array($vendorDir . '/wpex/godaddy-launch/includes'),
+    'GoDaddy\\Styles\\' => array($vendorDir . '/godaddy-wordpress/styles'),
+    'Composer\\Installers\\' => array($vendorDir . '/composer/installers/src/Composer/Installers'),
 );

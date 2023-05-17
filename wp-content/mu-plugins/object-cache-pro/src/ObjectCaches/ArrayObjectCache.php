@@ -24,11 +24,11 @@ class ArrayObjectCache extends ObjectCache
      * Create new array object cache instance.
      *
      * @param  \RedisCachePro\Configuration\Configuration  $config
+     * @param  ?\RedisCachePro\ObjectCaches\ObjectCacheMetrics  $metrics
      */
-    public function __construct(Configuration $config)
+    public function __construct(Configuration $config, ?ObjectCacheMetrics $metrics = null)
     {
-        $this->config = $config;
-        $this->log = $this->config->logger;
+        $this->setup($config, null, $metrics);
     }
 
     /**
@@ -66,7 +66,9 @@ class ArrayObjectCache extends ObjectCache
         $results = [];
 
         foreach ($data as $key => $value) {
-            $results[$key] = $this->add($key, $value, $group);
+            if ($this->id($key, $group)) {
+                $results[$key] = $this->add($key, $value, $group, $expire);
+            }
         }
 
         return $results;
@@ -131,7 +133,9 @@ class ArrayObjectCache extends ObjectCache
             return false;
         }
 
-        $id = $this->id($key, $group);
+        if (! $id = $this->id($key, $group)) {
+            return false;
+        }
 
         unset($this->cache[$group][$id]);
 
@@ -150,7 +154,9 @@ class ArrayObjectCache extends ObjectCache
         $results = [];
 
         foreach ($keys as $key) {
-            $results[$key] = $this->delete($key, $group);
+            if ($this->id($key, $group)) {
+                $results[$key] = $this->delete($key, $group);
+            }
         }
 
         return $results;
@@ -204,13 +210,13 @@ class ArrayObjectCache extends ObjectCache
     {
         if (! $this->has($key, $group)) {
             $found = false;
-            $this->misses += 1;
+            $this->metrics->misses += 1;
 
             return false;
         }
 
         $found = true;
-        $this->hits += 1;
+        $this->metrics->hits += 1;
 
         $id = $this->id($key, $group);
 
@@ -234,7 +240,9 @@ class ArrayObjectCache extends ObjectCache
         $values = [];
 
         foreach ($keys as $key) {
-            $values[$key] = $this->get($key, $group, $force);
+            if ($this->id($key, $group)) {
+                $values[$key] = $this->get($key, $group, $force);
+            }
         }
 
         return $values;
@@ -335,7 +343,9 @@ class ArrayObjectCache extends ObjectCache
         $results = [];
 
         foreach ($data as $key => $value) {
-            $results[$key] = $this->set($key, $value, $group);
+            if ($this->id($key, $group)) {
+                $results[$key] = $this->set($key, $value, $group, $expire);
+            }
         }
 
         return $results;

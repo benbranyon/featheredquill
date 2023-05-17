@@ -11,6 +11,8 @@ class ExtensionManager
     const EMAIL_CONFIRMATION = 'email_confirmation';
     const PAYPAL = 'paypal';
     const MOLLIE = 'mollie';
+    const RAZORPAY = 'razorpay';
+    const PAYSTACK = 'paystack';
     const RECEIPT = 'receipt';
     const JOIN_BUDDYPRESS_GROUPS = 'join_buddypress_groups';
     const BUDDYPRESS_SYNC = 'buddypress_sync';
@@ -27,6 +29,7 @@ class ExtensionManager
     const CUSTOM_FIELDS = 'custom_fields';
     const TWOFA = 'TWOFA';
     const METERED_PAYWALL = 'metered_paywall';
+    const LEARNDASH = 'learndash';
 
     public static function is_premium()
     {
@@ -40,6 +43,8 @@ class ExtensionManager
             self::EMAIL_CONFIRMATION     => 'ProfilePress\Libsodium\EmailConfirmation',
             self::PAYPAL                 => 'ProfilePress\Libsodium\PayPal\Init',
             self::MOLLIE                 => 'ProfilePress\Libsodium\Mollie\Init',
+            self::RAZORPAY               => 'ProfilePress\Libsodium\Razorpay\Init',
+            self::PAYSTACK               => 'ProfilePress\Libsodium\Paystack\Init',
             self::RECEIPT                => 'ProfilePress\Libsodium\Receipt\Init',
             self::JOIN_BUDDYPRESS_GROUPS => 'ProfilePress\Libsodium\BuddyPressJoinGroupSelect\Init',
             self::BUDDYPRESS_SYNC        => 'ProfilePress\Libsodium\BuddyPressProfileSync',
@@ -56,6 +61,7 @@ class ExtensionManager
             self::CUSTOM_FIELDS          => 'ProfilePress\Libsodium\CustomProfileFields\Init',
             self::TWOFA                  => 'ProfilePress\Libsodium\TWOFA\Init',
             self::METERED_PAYWALL        => 'ProfilePress\Libsodium\MeteredPaywall\Init',
+            self::LEARNDASH              => 'ProfilePress\Libsodium\Learndash\Init',
         ];
     }
 
@@ -75,6 +81,20 @@ class ExtensionManager
                 'setting_url' => AbstractPaymentMethod::get_payment_method_admin_page_url(self::MOLLIE),
                 'description' => esc_html__('Accept payments and sell subscriptions via Mollie.', 'wp-user-avatar'),
                 'icon'        => '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"><g fill="none" class="nc-icon-wrapper"><path d="M22 11a11.05 11.05 0 0 1-.42 3.024C20.265 18.629 16.025 22 11 22 4.925 22 0 17.075 0 11S4.925 0 11 0c4.819 0 8.914 3.099 10.401 7.412C21.79 8.537 22 9.744 22 11z" fill="#000"/><path d="M17.787 6.609A5.129 5.129 0 0 1 19 9.937V16h-2.547V9.861c-.006-1.206-.953-2.191-2.105-2.191a2.5 2.5 0 0 0-.21.011c-1.03.11-1.895 1.137-1.895 2.244V16H9.696V9.879c-.005-1.213-.947-2.204-2.1-2.204-.066 0-.138.006-.21.012-1.025.111-1.894 1.136-1.894 2.25V16H3V9.861C3 7.18 5.077 5 7.624 5c1.274 0 2.487.56 3.362 1.533a4.521 4.521 0 0 1 3.788-1.516c1.163.105 2.232.67 3.013 1.592z" fill="#fff"/></g></svg>'
+            ],
+            self::RAZORPAY               => [
+                'title'       => esc_html__('Razorpay', 'wp-user-avatar'),
+                'url'         => 'https://profilepress.com/addons/razorpay/?utm_source=liteplugin&utm_medium=extension-page&utm_campaign=learn-more',
+                'setting_url' => AbstractPaymentMethod::get_payment_method_admin_page_url(self::RAZORPAY),
+                'description' => esc_html__('Accept payments and sell subscriptions via Razorpay.', 'wp-user-avatar'),
+                'icon'        => '<svg viewBox="0 0 576 512" xmlns="http://www.w3.org/2000/svg"><path d="m64 32c-35.3 0-64 28.7-64 64v32h576v-32c0-35.3-28.7-64-64-64zm512 192h-576v192c0 35.3 28.7 64 64 64h448c35.3 0 64-28.7 64-64zm-464 128h64c8.8 0 16 7.2 16 16s-7.2 16-16 16h-64c-8.8 0-16-7.2-16-16s7.2-16 16-16zm112 16c0-8.8 7.2-16 16-16h128c8.8 0 16 7.2 16 16s-7.2 16-16 16h-128c-8.8 0-16-7.2-16-16z"/></svg>'
+            ],
+            self::PAYSTACK               => [
+                'title'       => esc_html__('Paystack', 'wp-user-avatar'),
+                'url'         => 'https://profilepress.com/addons/paystack/?utm_source=liteplugin&utm_medium=extension-page&utm_campaign=learn-more',
+                'setting_url' => AbstractPaymentMethod::get_payment_method_admin_page_url(self::PAYSTACK),
+                'description' => esc_html__('Accept payments and sell subscriptions via Paystack.', 'wp-user-avatar'),
+                'icon'        => '<svg viewBox="0 0 576 512" xmlns="http://www.w3.org/2000/svg"><path d="m64 32c-35.3 0-64 28.7-64 64v32h576v-32c0-35.3-28.7-64-64-64zm512 192h-576v192c0 35.3 28.7 64 64 64h448c35.3 0 64-28.7 64-64zm-464 128h64c8.8 0 16 7.2 16 16s-7.2 16-16 16h-64c-8.8 0-16-7.2-16-16s7.2-16 16-16zm112 16c0-8.8 7.2-16 16-16h128c8.8 0 16 7.2 16 16s-7.2 16-16 16h-128c-8.8 0-16-7.2-16-16z"/></svg>'
             ],
             self::RECEIPT                => [
                 'title'       => esc_html__('Receipt', 'wp-user-avatar'),
@@ -139,24 +159,6 @@ class ExtensionManager
                 'description' => esc_html__('Let guest and visitors view limited number of restricted content.', 'wp-user-avatar'),
                 'icon'        => '<span class="dashicons dashicons-welcome-view-site"></span>'
             ],
-            self::JOIN_BUDDYPRESS_GROUPS => [
-                'title'        => esc_html__('Join BuddyPress Groups', 'wp-user-avatar'),
-                'url'          => 'https://profilepress.com/addons/join-buddypress-groups/?utm_source=liteplugin&utm_medium=extension-page&utm_campaign=learn-more',
-                'description'  => esc_html__('Let users select the BuddyPress groups to join during registration.', 'wp-user-avatar'),
-                'icon'         => '<span class="dashicons dashicons-buddicons-buddypress-logo"></span>',
-                'is_available' => function () {
-                    return class_exists('BuddyPress') ? true : esc_html__('BuddyPress plugin is not active', 'wp-user-avatar');
-                }
-            ],
-            self::BUDDYPRESS_SYNC        => [
-                'title'        => esc_html__('BuddyPress Profile Sync', 'wp-user-avatar'),
-                'url'          => 'https://profilepress.com/addons/buddypress-profile-sync/?utm_source=liteplugin&utm_medium=extension-page&utm_campaign=learn-more',
-                'description'  => esc_html__('It provides a 2-way synchronization between WordPress profile fields and BuddyPress extended profile.', 'wp-user-avatar'),
-                'icon'         => '<span class="dashicons dashicons-buddicons-buddypress-logo"></span>',
-                'is_available' => function () {
-                    return class_exists('BuddyPress') ? true : esc_html__('BuddyPress plugin is not active', 'wp-user-avatar');
-                }
-            ],
             self::MULTISITE              => [
                 'title'        => esc_html__('Site Creation', 'wp-user-avatar'),
                 'url'          => 'https://profilepress.com/addons/site-creation/?utm_source=liteplugin&utm_medium=extension-page&utm_campaign=learn-more',
@@ -176,6 +178,16 @@ class ExtensionManager
                     return class_exists('WooCommerce') ? true : esc_html__('WooCommerce is not active', 'wp-user-avatar');
                 }
             ],
+            self::LEARNDASH              => [
+                'title'        => esc_html__('LearnDash', 'wp-user-avatar'),
+                'setting_url'  => PPRESS_SETTINGS_SETTING_GENERAL_PAGE . '#pp_ld_settings',
+                'url'          => 'https://profilepress.com/addons/learndash/?utm_source=liteplugin&utm_medium=extension-page&utm_campaign=learn-more',
+                'description'  => esc_html__('Sell access to LearnDash courses and groups, enroll users after registration to specific courses and groups, and let users view their enrolled courses from the My Account page.', 'wp-user-avatar'),
+                'icon'         => '<svg fill="none" height="84" viewBox="0 0 70 84" width="70" xmlns="http://www.w3.org/2000/svg"><g fill="#1e1e1e"><path d="m34.5815 21.2887c-1.1646-.0025-2.3181.225-3.3945.6695s-2.0544 1.0972-2.8779 1.9206c-.8234.8235-1.4761 1.8015-1.9206 2.8778-.4445 1.0764-.672 2.23-.6694 3.3945v51.2478c.0121.4305.1885.84.4931 1.1445.3045.3046.714.481 1.1445.4931 4.2642-.0076 8.3516-1.705 11.3669-4.7202 3.0153-3.0153 4.7126-7.1027 4.7203-11.367v-36.7982c.0025-1.1645-.225-2.3181-.6695-3.3945-.4444-1.0763-1.0971-2.0543-1.9206-2.8778-.8235-.8234-1.8015-1.4761-2.8778-1.9206-1.0764-.4445-2.23-.672-3.3945-.6695z"/><path d="m8.86236 46.3348c-1.16454-.0025-2.31812.225-3.3945.6695-1.07638.4444-2.05437 1.0971-2.87783 1.9206-.82345.8235-1.47616 1.8014-1.920633 2.8778-.444478 1.0764-.6719769 2.23-.669437 3.3945v27.1652c.0121336.4305.188563.84.493085 1.1445s.714045.481 1.144535.4931c4.26423-.0076 8.35163-1.705 11.36692-4.7203 3.0153-3.0152 4.7126-7.1026 4.7202-11.3669v-12.7156c.0026-1.1645-.2249-2.3181-.6694-3.3945s-1.0972-2.0543-1.9206-2.8778c-.8235-.8235-1.8015-1.4762-2.8778-1.9206-1.0764-.4445-2.23-.672-3.39454-.6695z"/><path d="m60.3036.00002103c-1.1646-.00253989-2.3181.22495897-3.3945.66943597-1.0764.444473-2.0544 1.097183-2.8778 1.920633-.8235.82346-1.4762 1.80145-1.9207 2.87783s-.672 2.22996-.6694 3.3945v73.11478c.0121.4305.1885.84.4931 1.1445.3045.3045.714.481 1.1445.4931 4.2642-.0076 8.3516-1.705 11.3669-4.7203 3.0153-3.0152 4.7126-7.1027 4.7203-11.3669v-58.66518c.0025-1.16454-.225-2.31812-.6695-3.3945-.4444-1.07638-1.0971-2.05437-1.9206-2.87783-.8235-.82345-1.8015-1.47616-2.8778-1.920633-1.0764-.444477-2.23-.67197586-3.3945-.66943597z"/></g></svg>',
+                'is_available' => function () {
+                    return class_exists('\SFWD_LMS') ? true : esc_html__('LearnDash is not active', 'wp-user-avatar');
+                }
+            ],
             self::MAILCHIMP              => [
                 'title'       => esc_html__('Mailchimp', 'wp-user-avatar'),
                 'url'         => 'https://profilepress.com/addons/mailchimp/?utm_source=liteplugin&utm_medium=extension-page&utm_campaign=learn-more',
@@ -189,6 +201,24 @@ class ExtensionManager
                 'setting_url' => add_query_arg(['view' => 'integrations', 'section' => 'campaign-monitor'], PPRESS_SETTINGS_SETTING_PAGE),
                 'description' => esc_html__('Subscribe members to your Campaign Monitor lists when they register or subscribe to a membership plan. It can also automatically sync membership and profile changes with Campaign Monitor.', 'wp-user-avatar'),
                 'icon'        => '<span class="dashicons dashicons-email"></span>'
+            ],
+            self::JOIN_BUDDYPRESS_GROUPS => [
+                'title'        => esc_html__('Join BuddyPress Groups', 'wp-user-avatar'),
+                'url'          => 'https://profilepress.com/addons/join-buddypress-groups/?utm_source=liteplugin&utm_medium=extension-page&utm_campaign=learn-more',
+                'description'  => esc_html__('Let users select the BuddyPress groups to join during registration.', 'wp-user-avatar'),
+                'icon'         => '<span class="dashicons dashicons-buddicons-buddypress-logo"></span>',
+                'is_available' => function () {
+                    return class_exists('BuddyPress') ? true : esc_html__('BuddyPress plugin is not active', 'wp-user-avatar');
+                }
+            ],
+            self::BUDDYPRESS_SYNC        => [
+                'title'        => esc_html__('BuddyPress Profile Sync', 'wp-user-avatar'),
+                'url'          => 'https://profilepress.com/addons/buddypress-profile-sync/?utm_source=liteplugin&utm_medium=extension-page&utm_campaign=learn-more',
+                'description'  => esc_html__('It provides a 2-way synchronization between WordPress profile fields and BuddyPress extended profile.', 'wp-user-avatar'),
+                'icon'         => '<span class="dashicons dashicons-buddicons-buddypress-logo"></span>',
+                'is_available' => function () {
+                    return class_exists('BuddyPress') ? true : esc_html__('BuddyPress plugin is not active', 'wp-user-avatar');
+                }
             ],
             self::AKISMET                => [
                 'title'       => esc_html__('Akismet', 'wp-user-avatar'),

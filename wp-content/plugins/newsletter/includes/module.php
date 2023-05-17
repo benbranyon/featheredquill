@@ -290,7 +290,6 @@ class TNP_Subscription {
     const EXISTING_ERROR = 1;
     const EXISTING_MERGE = 0;
     const EXISTING_SINGLE_OPTIN = 2;
-    
 
     /**
      * Subscriber's data following the syntax of the TNP_User
@@ -347,18 +346,29 @@ class TNP_User {
 
     public static function get_status_label($status) {
         switch ($status) {
-            case self::STATUS_NOT_CONFIRMED: return __('NOT CONFIRMED', 'newsletter');
+            case self::STATUS_NOT_CONFIRMED: return __('Not confirmed', 'newsletter');
                 break;
-            case self::STATUS_CONFIRMED: return __('CONFIRMED', 'newsletter');
+            case self::STATUS_CONFIRMED: return __('Confirmed', 'newsletter');
                 break;
-            case self::STATUS_UNSUBSCRIBED: return __('UNSUBSCRIBED', 'newsletter');
+            case self::STATUS_UNSUBSCRIBED: return __('Unsubscribed', 'newsletter');
                 break;
-            case self::STATUS_BOUNCED: return __('BOUNCED', 'newsletter');
+            case self::STATUS_BOUNCED: return __('Bounced', 'newsletter');
                 break;
-            case self::STATUS_COMPLAINED: return __('COMPLAINED', 'newsletter');
+            case self::STATUS_COMPLAINED: return __('Compained', 'newsletter');
                 break;
             default:
                 return __('Unknown', 'newsletter');
+        }
+    }
+
+    public static function is_status_valid($status) {
+        switch ($status) {
+            case self::STATUS_CONFIRMED: return true;
+            case self::STATUS_NOT_CONFIRMED: return true;
+            case self::STATUS_UNSUBSCRIBED: return true;
+            case self::STATUS_BOUNCED: return true;
+            case self::STATUS_COMPLAINED: return true;
+            default: return false;
         }
     }
 
@@ -469,6 +479,13 @@ class NewsletterModule {
         }
     }
 
+    function get_option_array($name, $default = []) {
+        $opt = get_option($name, []);
+        if (!is_array($opt))
+            return $default;
+        return $opt;
+    }
+
     /**
      *
      * @global wpdb $wpdb
@@ -565,17 +582,9 @@ class NewsletterModule {
      * Returns the options of a module, if not found an empty array.
      */
     function get_options($sub = '', $language = '') {
-        $options = get_option($this->get_prefix($sub, $language), array());
-        // Protection against scarmled database...
-        if (!is_array($options)) {
-            $options = array();
-        }
+        $options = $this->get_option_array($this->get_prefix($sub, $language));
         if ($language) {
-            $main_options = get_option($this->get_prefix($sub));
-            // Protection against scarmled database...
-            if (!is_array($main_options))
-                $main_options = array();
-            //$options = array_merge($main_options, array_filter($options));
+            $main_options = $this->get_option_array($this->get_prefix($sub));
             $options = array_merge($main_options, $options);
         }
         return $options;
@@ -731,10 +740,20 @@ class NewsletterModule {
         if (!is_string($email)) {
             return false;
         }
+
+        if (mb_strlen($email) > 100) {
+            return false;
+        }
+
         $email = strtolower(trim($email));
         if (!is_email($email)) {
             return false;
         }
+
+        if (strpos($email, '..') !== false) {
+            return false;
+        }
+
         //$email = apply_filters('newsletter_normalize_email', $email);
         return $email;
     }
@@ -743,13 +762,16 @@ class NewsletterModule {
         $name = html_entity_decode($name, ENT_QUOTES);
         $name = str_replace(';', ' ', $name);
         $name = strip_tags($name);
+        if (mb_strlen($name) > 100) {
+            $name = mb_substr($name, 0, 100);
+        }
 
         return $name;
     }
 
     static function normalize_sex($sex) {
         $sex = trim(strtolower($sex));
-        if ($sex != 'f' && $sex != 'm') {
+        if ($sex !== 'f' && $sex !== 'm') {
             $sex = 'n';
         }
         return $sex;
@@ -918,11 +940,12 @@ class NewsletterModule {
         
     }
 
-    function add_menu_page($page, $title, $capability = '') {
-        if (!Newsletter::instance()->is_allowed())
+    function add_menu_page($page, $title, $position = null) {
+        if (!Newsletter::instance()->is_allowed()) {
             return;
+        }
         $name = 'newsletter_' . $this->module . '_' . $page;
-        add_submenu_page('newsletter_main_index', $title, $title, 'exist', $name, array($this, 'menu_page'));
+        add_submenu_page('newsletter_main_index', $title, $title, 'exist', $name, [$this, 'menu_page'], $position);
     }
 
     function add_admin_page($page, $title) {
@@ -930,7 +953,7 @@ class NewsletterModule {
             return;
         }
         $name = 'newsletter_' . $this->module . '_' . $page;
-        add_submenu_page(null, $title, $title, 'exist', $name, array($this, 'menu_page'));
+        add_submenu_page('', $title, $title, 'exist', $name, array($this, 'menu_page'));
     }
 
     function sanitize_file_name($name) {
@@ -1161,7 +1184,7 @@ class NewsletterModule {
     }
 
     function show_email_status_label($email) {
-        echo '<span class="tnp-email-status tnp-email-status--', $this->get_email_status_slug($email), '">', esc_html($this->get_email_status_label($email)), '</span>';
+        echo '<span class="tnp-status tnp-email-status tnp-email-status--', $this->get_email_status_slug($email), '">', esc_html($this->get_email_status_label($email)), '</span>';
     }
 
     function get_email_progress($email, $format = 'percent') {
@@ -1197,6 +1220,26 @@ class NewsletterModule {
             } else {
                 echo '<div class="tnp-progress-numbers">', $email->sent, ' ', __('of', 'newsletter'), ' ', $email->total, '</div>';
             }
+        }
+    }
+
+    function show_email_progress_numbers($email, $attrs = []) {
+
+        $email = (object) $email;
+
+        $attrs = array_merge(array('format' => 'percent', 'numbers' => false, 'scheduled' => false), $attrs);
+
+        if ($email->status == 'sending' && $email->send_on > time()) {
+            //return;
+        } else if ($email->status == 'new') {
+            return;
+        }
+
+
+        if ($email->status == 'sent') {
+            echo '<div class="tnp-progress-numbers">', $email->total, ' ', __('of', 'newsletter'), ' ', $email->total, '</div>';
+        } else {
+            echo '<div class="tnp-progress-numbers">', $email->sent, ' ', __('of', 'newsletter'), ' ', $email->total, '</div>';
         }
     }
 
@@ -1367,9 +1410,32 @@ class NewsletterModule {
         return $user->id . '-' . $user->token;
     }
 
+    /**
+     * Returns the user token, processed by status
+     * @param TNP_User $user
+     * @return string
+     */
+    function get_user_token() {
+        // Just in case...
+        if (empty($user->token)) {
+            $this->refresh_user_token($user);
+        }
+        if ($user->status === TNP_User::STATUS_NOT_CONFIRMED) {
+            return md5($user->token);
+        } else {
+            return $user->token;
+        }
+    }
+
     function get_user_status_label($user, $html = false) {
-        if (!$html)
+        if (is_string($user)) {
+            $x = $user;
+            $user = new stdClass();
+            $user->status = $x;
+        }
+        if (!$html) {
             return TNP_User::get_status_label($user->status);
+        }
 
         $label = TNP_User::get_status_label($user->status);
         $class = 'unknown';
@@ -1385,7 +1451,7 @@ class NewsletterModule {
             case TNP_User::STATUS_COMPLAINED: $class = 'complained';
                 break;
         }
-        return '<span class="' . $class . '">' . esc_html($label) . '</span>';
+        return '<span class="tnp-status tnp-user-status tnp-user-status--' . $class . '">' . esc_html($label) . '</span>';
     }
 
     /**
@@ -1411,13 +1477,7 @@ class NewsletterModule {
             }
         }
 
-        if ($context == 'preconfirm') {
-            $user_token = md5($user->token);
-        } else {
-            $user_token = $user->token;
-        }
-
-        if ($token != $user_token) {
+        if ($token != $user->token && $token != md5($user->token)) {
             if ($die_on_fail) {
                 die(__('No subscriber found.', 'newsletter'));
             } else {
@@ -1427,6 +1487,40 @@ class NewsletterModule {
         return $user;
     }
 
+    function set_user_cookie($user) {
+        setcookie('newsletter', $user->id . '-' . $user->token, time() + YEAR_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN, is_ssl());
+    }
+
+    function delete_user_cookie() {
+        setcookie('newsletter', '', time() - YEAR_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN, is_ssl());
+    }
+
+    function get_current_user() {
+
+        $id = 0;
+        $user = null;
+
+        if (isset($_REQUEST['nk'])) {
+            list($id, $token) = explode('-', $_REQUEST['nk'], 2);
+        } else if (isset($_COOKIE['newsletter'])) {
+            list ($id, $token) = explode('-', $_COOKIE['newsletter'], 2);
+        }
+
+        if ($id) {
+            $user = $this->get_user($id);
+            if ($user && $token !== $user->token && $token !== md5($user->token)) {
+                $user = null;
+            }
+        }
+
+        return apply_filters('newsletter_current_user', $user);
+    }
+
+    /**
+     * Managed by WP Users Addon
+     * @deprecated since version 7.6.7
+     * @return TNP_User
+     */
     function get_user_from_logged_in_user() {
         if (is_user_logged_in()) {
             return $this->get_user_by_wp_user_id(get_current_user_id());
@@ -1712,7 +1806,7 @@ class NewsletterModule {
                 $class = trim($rules[1][$i]);
                 $value = trim($rules[2][$i]);
                 $value = preg_replace('|\s+|', ' ', $value);
-                $content = str_replace(' class="' . $class . '"', ' class="' . $class . '" style="' . $value . '"', $content);
+                //$content = str_replace(' class="' . $class . '"', ' class="' . $class . '" style="' . $value . '"', $content);
                 $content = str_replace(' inline-class="' . $class . '"', ' style="' . $value . '"', $content);
             }
         }
@@ -2077,7 +2171,7 @@ class NewsletterModule {
                 //    break;
                 default:
                     $text = str_replace('{title}', $options_profile['title_none'], $text);
-                    //$text = str_replace('{title}', '', $text);
+                //$text = str_replace('{title}', '', $text);
             }
 
 
@@ -2423,6 +2517,10 @@ class NewsletterModule {
             return self::$current_language;
         }
 
+        if (defined('NEWSLETTER_SIMULATE_MULTILANGUAGE') && NEWSLETTER_SIMULATE_MULTILANGUAGE) {
+            return 'en';
+        }
+
         // WPML
         if (class_exists('SitePress')) {
             $current_language = apply_filters('wpml_current_language', '');
@@ -2467,14 +2565,18 @@ class NewsletterModule {
      * An empty array is returned if no language is available.
      */
     function get_languages() {
-        $language_options = array();
+        if (defined('NEWSLETTER_SIMULATE_MULTILANGUAGE') && NEWSLETTER_SIMULATE_MULTILANGUAGE) {
+            return ['en' => 'English', 'it' => 'Italian', 'es' => 'Spanish'];
+        }
+
+        $language_options = [];
 
         if (class_exists('SitePress')) {
             $languages = apply_filters('wpml_active_languages', null, ['skip_missing' => 0]);
             foreach ($languages as $language) {
                 $language_options[$language['language_code']] = $language['translated_name'];
             }
-            
+
             return $language_options;
         } else if (function_exists('icl_get_languages')) {
             $languages = icl_get_languages();
@@ -2512,11 +2614,15 @@ class NewsletterModule {
         }
     }
 
-    function is_multilanguage() {
+    static function is_multilanguage() {
+        if (defined('NEWSLETTER_SIMULATE_MULTILANGUAGE') && NEWSLETTER_SIMULATE_MULTILANGUAGE) {
+            return true;
+        }
+
         return apply_filters('newsletter_is_multilanguage', class_exists('SitePress') || function_exists('pll_default_language') || class_exists('TRP_Translate_Press'));
     }
 
-    function get_posts($filters = array(), $language = '') {
+    function get_posts($filters = [], $language = '') {
         $current_language = $this->get_current_language();
 
 // Language switch for WPML
@@ -2528,7 +2634,10 @@ class NewsletterModule {
             if (class_exists('Polylang')) {
                 $filters['lang'] = $language;
             }
+
+            $filters = apply_filters('newsletter_get_posts_filters', $filters, $language);
         }
+
         $posts = get_posts($filters);
         if ($language) {
             if (class_exists('SitePress')) {

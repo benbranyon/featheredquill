@@ -12,7 +12,7 @@ function cf7pp_stripe_connection_status() {
 
 		$options = get_option('cf7pp_options');
 
-		if ($options['mode_stripe'] == "2") {
+		if (!isset($options['mode_stripe']) || $options['mode_stripe'] == "2") {
 			$account_id_key = 'acct_id_live';
 			$stripe_connect_token_key = 'stripe_connect_token_live';
 			$mode = 'live';
@@ -92,7 +92,13 @@ function cf7pp_stripe_connection_status_html() {
 function cf7pp_stripe_connect_url($mode = false) {
 	if ( $mode === false ) {
 		$options = get_option('cf7pp_options');
-		$mode = $options['mode_stripe'] == 1 ? 'sandbox' : 'live';
+		
+		if (isset($options['mode_stripe'])) {
+			$mode = $options['mode_stripe'] == "2" ? 'live' : 'sandbox';
+		} else {
+			$mode = 'sandbox';
+		}
+		
 	}
 
 	$stripe_connect_url = CF7PP_STRIPE_CONNECT_ENDPOINT . '?' . http_build_query(

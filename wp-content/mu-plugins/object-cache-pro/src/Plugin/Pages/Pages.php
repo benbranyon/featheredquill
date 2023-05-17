@@ -74,7 +74,7 @@ class Pages implements IteratorAggregate
      */
     public function current()
     {
-        $pages = array_filter($this->pages, function ($page) {
+        $pages = array_filter($this->pages, static function ($page) {
             return $page->isCurrent();
         });
 

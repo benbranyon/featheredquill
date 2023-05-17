@@ -18,21 +18,10 @@ namespace RedisCachePro\Connections\Concerns;
 
 use Throwable;
 
-use RedisCachePro\Clients\ClientInterface;
 use RedisCachePro\Exceptions\ConnectionException;
 
 trait SentinelsConnection
 {
-    /**
-     * Returns the connection's client.
-     *
-     * @return \RedisCachePro\Clients\ClientInterface
-     */
-    public function client(): ClientInterface
-    {
-        return $this->sentinel();
-    }
-
     /**
      * Returns the current Sentinel's URL.
      *
@@ -77,16 +66,20 @@ trait SentinelsConnection
                 $this->setPool();
 
                 return;
-            } catch (Throwable $th) {
+            } catch (Throwable $error) {
                 $this->sentinels[$url] = false;
 
                 if ($this->config->debug) {
-                    error_log('objectcache.notice: ' . $th->getMessage());
+                    error_log('objectcache.notice: ' . $error->getMessage());
                 }
             }
         }
 
-        throw new ConnectionException('Unable to connect to any valid sentinels');
+        $message = isset($error)
+            ? sprintf('Unable to connect to any valid sentinels [%s]', $error->getMessage())
+            : 'Unable to connect to any valid sentinels';
+
+        throw new ConnectionException($message, 0, $error ?? null);
     }
 
     /**
@@ -98,17 +91,25 @@ trait SentinelsConnection
      */
     public function command(string $name, array $parameters = [])
     {
+        $this->lastCommand = null;
+
         $isReading = \in_array(\strtoupper($name), $this->readonly);
 
-        // send `alloptions` hash read requests to the primary node
-        if ($isReading && $this->config->split_alloptions && \is_string($parameters[0] ?? null)) {
-            $isReading = \strpos($parameters[0], 'options:alloptions:') === false;
+        // send `alloptions` read requests to the primary node
+        if ($isReading && \is_string($parameters[0] ?? null)) {
+            $isReading = \strpos($parameters[0], 'options:alloptions') === false;
         }
 
+        $node = $isReading
+            ? $this->pool[\array_rand($this->pool)]
+            : $this->primary;
+
         try {
-            return $isReading
-                ? $this->pool[\array_rand($this->pool)]->command($name, $parameters)
-                : $this->primary->command($name, $parameters);
+            $result = $node->command($name, $parameters);
+
+            $this->lastCommand = $node->lastCommand;
+
+            return $result;
         } catch (Throwable $th) {
             try {
                 $this->connectToSentinels();
@@ -117,8 +118,10 @@ trait SentinelsConnection
             }
         }
 
-        return $isReading
-            ? $this->pool[\array_rand($this->pool)]->command($name, $parameters)
-            : $this->primary->command($name, $parameters);
+        $result = $node->command($name, $parameters);
+
+        $this->lastCommand = $node->lastCommand;
+
+        return $result;
     }
 }

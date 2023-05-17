@@ -253,6 +253,7 @@ final class Configuration
         Logger::ALERT,
         Logger::CRITICAL,
         Logger::ERROR,
+        Logger::WARNING,
     ];
 
     /**
@@ -354,7 +355,8 @@ final class Configuration
     protected $persistent = false;
 
     /**
-     * Whether the Redis server/cluster is shared or dedicated.
+     * Whether the Redis server/cluster is shared between multiple apps,
+     * or dedicated to a single WordPress installation.
      *
      * This affects how memory and key counts are displayed.
      *
@@ -525,11 +527,9 @@ final class Configuration
         $this->analytics = (object) $this->analytics;
 
         if (! $this->logger) {
-            if ($this->debug || $this->save_commands) {
-                $this->setLogger(ArrayLogger::class);
-            } else {
-                $this->setLogger(ErrorLogLogger::class);
-            }
+            $this->logger = $this->debug || $this->save_commands
+                ? new ArrayLogger
+                : new ErrorLogLogger;
         }
 
         if ($this->log_levels && method_exists($this->logger, 'setLevels')) {
@@ -936,7 +936,7 @@ final class Configuration
     /**
      * Set the instance port.
      *
-     * @param  int  $port
+     * @param  int|string  $port
      * @return void
      */
     public function setPort($port)
@@ -957,7 +957,7 @@ final class Configuration
     /**
      * Set the database number.
      *
-     * @param  int  $database
+     * @param  int|string  $database
      * @return void
      */
     public function setDatabase($database)
@@ -1041,7 +1041,7 @@ final class Configuration
     /**
      * Set the  maximum time-to-live in seconds.
      *
-     * @param  int  $seconds
+     * @param  int|string  $seconds
      * @return void
      */
     public function setMaxttl($seconds)
@@ -1126,7 +1126,7 @@ final class Configuration
     /**
      * Set the retry interval in milliseconds.
      *
-     * @param  int  $milliseconds
+     * @param  int|string  $milliseconds
      * @return void
      */
     public function setRetryInterval($milliseconds)
@@ -1477,7 +1477,9 @@ final class Configuration
         }
 
         if (\is_bool($analytics)) {
-            $this->analytics['enabled'] = $analytics;
+            is_object($this->analytics)
+                ? $this->analytics->enabled = $analytics
+                : $this->analytics['enabled'] = $analytics; // @phpstan-ignore-line
 
             return;
         }
@@ -1842,11 +1844,11 @@ final class Configuration
     {
         $config = $this->toArray();
 
-        $encodeJson = function ($value) {
+        $encodeJson = static function ($value) {
             return \json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         };
 
-        $formatter = function ($name, $value) use ($encodeJson) {
+        $formatter = static function ($name, $value) use ($encodeJson) {
             if (in_array($name, ['cluster', 'analytics', 'relay', 'tls_options'])) {
                 return [$name, $encodeJson($value)];
             }

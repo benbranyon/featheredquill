@@ -875,13 +875,13 @@ class Stripe extends AbstractPaymentMethod
                 case 'succeeded':
                     return true;
                 case 'pending':
-                    $order->add_note(esc_html__('Refund request is pending', 'profilepress-pro'));
+                    $order->add_note(esc_html__('Refund request is pending', 'wp-user-avatar'));
                     break;
                 case 'failed':
-                    $order->add_note(esc_html__('Refund request failed', 'profilepress-pro'));
+                    $order->add_note(esc_html__('Refund request failed', 'wp-user-avatar'));
                     break;
                 default:
-                    $order->add_note(sprintf(esc_html__('Refund request failed. Status: %s', 'profilepress-pro'), $response->status));
+                    $order->add_note(sprintf(esc_html__('Refund request failed. Status: %s', 'wp-user-avatar'), $response->status));
                     break;
             }
 
@@ -902,7 +902,6 @@ class Stripe extends AbstractPaymentMethod
 
         $payload    = @file_get_contents('php://input');
         $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
-        $event      = null;
 
         try {
 

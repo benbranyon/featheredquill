@@ -40,7 +40,7 @@ use RedisCachePro\Console\Watchers\DigestWatcher;
 use RedisCachePro\Console\Watchers\AggregateWatcher;
 
 /**
- * Enables, disabled, updates, and checks the status of the object cache.
+ * Enables, disabled, flushes, and checks the status of the object cache.
  */
 class Commands extends WP_CLI_Command
 {
@@ -315,11 +315,9 @@ class Commands extends WP_CLI_Command
      * Beware of the performance impact when flushing the object cache in production,
      * when not using asynchronous flushing.
      *
-     * Errors if the object cache can't be flushed.
-     *
      * ## OPTIONS
      *
-     * [<id>...]
+     * [<site-id>...]
      * : One or more IDs of sites to flush.
      *
      * [--async]
@@ -394,6 +392,58 @@ class Commands extends WP_CLI_Command
             } else {
                 WP_CLI::error(WP_CLI::colorize(
                     "Object cache of site [%y{$siteId}%n] could not be flushed."
+                ), false);
+            }
+        }
+    }
+
+    /**
+     * Flushes one or more object cache groups.
+     *
+     * In multisite environments the group is always flushed for all sites.
+     *
+     * ## OPTIONS
+     *
+     * <group>...
+     * : One or more groups to flush.
+     *
+     * ## EXAMPLES
+     *
+     *     # Flush the entire cache.
+     *     $ wp redis flush-group comments
+     *     Success: "Object cache group [comments] was flushed.
+     *
+     *     # Flush multiple groups.
+     *     $ wp redis flush-group posts post_meta
+     *     Success: "Object cache group [posts] was flushed.
+     *     Success: "Object cache group [post_meta] was flushed.
+     *
+     * @subcommand flush-group
+     *
+     * @param  array<int, string>  $arguments
+     * @param  array<mixed>  $options
+     * @return void
+     */
+    public function flushGroup($arguments, $options)
+    {
+        global $wp_object_cache;
+
+        $this->abortIfNotConnected();
+
+        foreach ($arguments as $group) {
+            try {
+                $result = $wp_object_cache->flush_group($group);
+            } catch (Throwable $exception) {
+                WP_CLI::error($exception->getMessage());
+            }
+
+            if ($result) { // @phpstan-ignore-line
+                WP_CLI::success(WP_CLI::colorize(
+                    "Object cache group [%y{$group}%n] was flushed."
+                ));
+            } else {
+                WP_CLI::error(WP_CLI::colorize(
+                    "Object cache group [%y{$group}%n] could not be flushed."
                 ), false);
             }
         }
@@ -754,7 +804,7 @@ class Commands extends WP_CLI_Command
 
         $analytics = new Analytics;
 
-        $defaults = array_map(function ($param) {
+        $defaults = array_map(static function ($param) {
             return $param['default'];
         }, $analytics->get_collection_params());
 
