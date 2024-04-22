@@ -13,6 +13,12 @@ namespace ProfilePressVendor\Carbon;
 class CarbonPeriodImmutable extends CarbonPeriod
 {
     /**
+     * Default date class of iteration items.
+     *
+     * @var string
+     */
+    protected const DEFAULT_DATE_CLASS = CarbonImmutable::class;
+    /**
      * Date class of iteration items.
      *
      * @var string

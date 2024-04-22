@@ -17,8 +17,16 @@ class MembershipShortcodes
         add_shortcode('profilepress-receipt', [$this, 'success_page']);
 
         add_filter('the_content', [$this, 'filter_success_page_content'], 99999);
-    }
 
+        // Avada theme incompatibility fix
+        add_action('awb_remove_third_party_the_content_changes', function () {
+            remove_filter('the_content', [$this, 'filter_success_page_content'], 99999);
+        });
+
+        add_action('awb_readd_third_party_the_content_changes', function () {
+            add_filter('the_content', [$this, 'filter_success_page_content'], 99999);
+        });
+    }
     function filter_success_page_content($content)
     {
         if (isset($_GET['order_key'], $_GET['payment_method']) && ppress_is_success_page()) {
@@ -38,6 +46,15 @@ class MembershipShortcodes
 
     public function checkout_page_wrapper()
     {
+        if (ppress_is_redirect_to_referrer_after_checkout()) {
+
+            $referrer = wp_get_referer();
+
+            if ( ! empty($referrer)) {
+                ppress_session()->set('ppress_checkout_referrer', esc_url_raw($referrer));
+            }
+        }
+
         ob_start();
 
         echo '<div class="ppress-checkout__form">';
@@ -130,7 +147,7 @@ class MembershipShortcodes
 
         if ( ! $planObj->is_active()) {
             do_action('ppress_membership_checkout_invalid_plan');
-            echo '<p>' . esc_html__('Invalid subscription plan.', 'wp-user-avatar') . '</p>';
+            echo '<p>' . esc_html__('Invalid membership plan.', 'wp-user-avatar') . '</p>';
 
             return;
         }

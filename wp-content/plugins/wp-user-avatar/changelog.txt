@@ -1,5 +1,154 @@
 ﻿== Changelog ==
 
+= 4.15.6 =
+* Fixed bug where Stripe sometimes fails to make payment method default.
+* Fixed XSS on registration checkbox field label.
+* Added ppress_content_protection_is_protection_disabled filter.
+
+= 4.15.5 =
+* Added custom field support to account welcome email
+* Improve checkout verbiage when auto-renewal is disabled
+* Fixed bug where customer username is always email during creation from wp-admin.
+* Fixed Stripe bug where payment method not saving for zero amount orders.
+* Fixed XSS on carousel-author-posts shortcode.
+
+= 4.15.4 =
+* Compatibility with upcoming WP 6.5
+
+= 4.15.3 =
+* Fixed bug where user membership subscriptions were not cancelled after account deletion.
+* Fixed bug with tax-inclusive checkout calculation.
+* Fixed bug with custom field not working on order/sub emails.
+* Fixed XSS on checkbox registration field.
+
+= 4.15.2 =
+* Fixed XSS on edit profile form.
+
+= 4.15.1 =
+* Fixed XSS on registration form with user role select field.
+
+= 4.15.0 =
+* Added [Login Redirect](https://profilepress.com/wordpress-user-redirection-after-login-role/#WordPress_Login_Redirect_Based_on_Membership_Level) feature.
+* Security Fix: XSS on forms.
+
+= 4.14.4 =
+* Added account deletion tab to My Account page.
+* Move CC element below billing address when Taxes is enabled.
+* Security Fix: XSS on registration form.
+* Fixed a couple of PHP warnings.
+
+= 4.14.3 =
+* Added ppress_drag_drop_profile_listing_item filter.
+* Ensure subscription is expired on subscription upgrade.
+* Fixed bug with "Already have an account" checkout link not working.
+* Fixed a couple of PHP warnings
+
+= 4.14.2 =
+* Improved Avada theme compatibility.
+* Fixed bug with expired subscription not expiring.
+* Fixed a couple of PHP errors.
+
+= 4.14.1 =
+* Added setting for enabling autologin after checkout.
+* Added ppress_myaccount_edit_profile_custom_form filter.
+* Fixed bug with checkout of free trials via Stripe.
+* Fixed bug with multisite login redirect to wrong network site.
+* Fixed bug where order was 0 when amount was not entered during manual order creation.
+* Bumped stripe api version to 2023-10-16.
+* Improved caching of gravatar API calls.
+* Added more US states: American Samoa, Puerto Rico, Palau.
+* Switch to esc_url_raw in NavigationMenuLinks::Frontend.
+
+= 4.14.0 =
+* Added feature to disable concurrent login by users.
+* Added password strength meter to "change password" myaccount section.
+* Added Allowlist option for restricting registration to specific email addresses.
+* Added Bank Transfer payment method.
+* Added filter to stripe customer metadata array.
+* added ppress_author_post_after_title filter.
+* Fixed fatal error: Uncaught TypeError: array_filter(): Argument 1 ($array) must be of type array.
+
+= 4.13.4 =
+* Pro: [Invite Codes](https://profilepress.com/addons/invite-codes/?ref=changelog) addon.
+* Enhancement: Only add confirm prompt on cancel action button on view subscription page.
+* Fixed bug where material icons weren't showing in form builder.
+
+= 4.13.3 =
+* Fixed Fatal error: Uncaught TypeError: strpos(): Argument #1 must be of type string, array given.
+* Fixed bug where cancelled sub didn’t change to expire after expiration.
+* Fixed bug where inactive membership plan could be purchased.
+* Fixed bug where checkout proration wasn't working.
+* Renamed log file to be unique to avoid public access.
+
+= 4.13.2 =
+* Fixed security issue where user can specify their own non-admin user role.
+* Added filters for the Member Directory search field and button.
+* Fixed bug where country field IDs instead of the name were displayed in user profile.
+* Added filter to implement checkout auto-login.
+* Added nonce check to admin notice dismissal url.
+
+= 4.13.1 =
+* Pro: [LifterLMS](https://profilepress.com/addons/lifterlms/?ref=changelog) integration.
+* Added content protection compatibility with Avada theme.
+* Added "ppress_myaccount_subscription_header_actions" action hook.
+* Check capability before dismissing admin notice.
+* Do not send welcome email if user moderation is active for a registering users.
+
+= 4.13.0 =
+* Pro: [Sensei LMS](https://profilepress.com/addons/sensei-lms/?ref=changelog) integration.
+* Added [Data Export](https://profilepress.com/article/data-export-overview/) feature.
+* Added option to make coupon one-time use.
+* Added setting to disable sending email receipts for free orders.
+* Added Settings tab for enforcing password confirmation as required field.
+* Added filter to redirect to referrer url after checkout.
+* Added filter to conditionally enable user moderation based on registration form.
+* Reverted added "ppress_noaccess_action_message_custom_no_wp_kses_post" filter.
+* Fixed bug with plan switching checkout not working for certain payment methods.
+* Fixed bug where sub cancelled email was sent during upgrade.
+* Fixed bug with invalid "paid on" date on order edit screen.
+
+= 4.12.0 =
+* Added setting for [disabling subscription auto-renewals](https://profilepress.com/article/auto-renewal-settings/).
+* Extended Tutor LMS addon to include [creating custom student](https://profilepress.com/article/custom-tutor-lms-student-registration-form/) and [instructor registration forms](https://profilepress.com/article/custom-tutor-lms-instructor-registration-form/).
+* Added ppress_stripe_disable_maybe_update_webhook filter to disable automatic stripe webhook regeneration.
+* Fixed form preview bug when using a block theme.
+
+= 4.11.0 =
+* Added [Tutor LMS](https://profilepress.com/addons/tutor-lms/) integration.
+* Added [Stripe Tax](https://profilepress.com/article/setting-up-stripe/#Stripe_Tax_Support) support.
+* Security Fix: DOM-based XSS on registration form.
+* Fixed Stripe bug where webhook details are missing after disconnection and reconnection.
+* Fixed Stripe bug where billing details not shown when tax is enabled and is offsite checkout
+* Improved PHP 8 compatibility
+
+= 4.10.3 =
+* Added ppress_myaccount_billing_details_disable_$field_key filter.
+* Added ppress_dpf_default_tab filter.
+* Updated the empty profile state text for visitors.
+* Fixed bug where subscription ID was not set after activation.
+* Updated charting library.
+
+= 4.10.2 =
+* Integrated Stripe Customer Portal for updating payment methods.
+* Fixed bug where stripe checkout might failed if phone field is not present.
+* Fixed bug where subscription expiration and renewal reminder didnt work for trial subscriptions.
+* Fixed bug where some placeholders weren't working for new user admin email notification.
+* Made remember me checkbox for login form unchecked by default.
+* Correct missing filter hook arguments.
+* Hardened security of myaccount subscription actions.
+* Added ppress_subscription_deleted action hook.
+* Added ppress_added_plan_role_to_customer and ppress_removed_plan_role_from_customer filters.
+* Added filter ppress_subscription_formatted_expiration_date.
+
+= 4.10.1 =
+* Fixed bug where stripe checkout doesn't work again on error.
+* Added Plan selection on group checkout as select dropdown.
+
+= 4.10.0 =
+* Migrated Stripe integration from card to payment element.
+* Fixed bug where logout redirect on group checkout goes to individual plan checkout url.
+* Fixed bug with stripe checkout not working when search is disabled in certain countries.
+
 = 4.9.0 =
 * New: [Membership plan group](https://profilepress.com/article/membership-plan-groups/?ref=changelog).
 * Added [Restricted Page Template](https://profilepress.com/article/adding-content-protection-rules/?ref=changelog#rpt) option for content protection.

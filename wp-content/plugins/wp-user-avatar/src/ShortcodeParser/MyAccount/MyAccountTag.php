@@ -16,7 +16,7 @@ class MyAccountTag extends FormProcessor
 
         add_action('init', [$this, 'add_endpoints']);
 
-        add_action('wp', [$this, 'redirect_non_logged_in_users']);
+        add_action('wp', [$this, 'redirect_non_logged_in_users'], 1);
 
         if ( ! is_admin()) {
             add_filter('query_vars', [$this, 'add_query_vars'], 99);
@@ -27,6 +27,7 @@ class MyAccountTag extends FormProcessor
 
             add_action('wp', [$this, 'handle_subscription_actions']);
             add_action('wp', [$this, 'process_myaccount_change_password']);
+            add_action('wp', [$this, 'process_myaccount_delete_account']);
             add_action('wp', [$this, 'process_edit_profile_form'], 999999999);
         }
     }
@@ -49,6 +50,8 @@ class MyAccountTag extends FormProcessor
 
         if ($cache === false) {
 
+            $classInstance = self::get_instance();
+
             $tabs = [
                 'ppmyac-dashboard'   => [
                     'title'    => esc_html__('Dashboard', 'wp-user-avatar'),
@@ -61,7 +64,7 @@ class MyAccountTag extends FormProcessor
                     'endpoint' => esc_html(ppress_settings_by_key('myac_subscriptions_endpoint', 'list-subscriptions', true)),
                     'priority' => 20,
                     'icon'     => 'card_membership',
-                    'callback' => [__CLASS__, 'subscriptions_callback']
+                    'callback' => [$classInstance, 'subscriptions_callback']
                 ],
                 'list-orders'        => [
                     'title'    => esc_html__('Orders', 'wp-user-avatar'),
@@ -69,7 +72,7 @@ class MyAccountTag extends FormProcessor
                     'endpoint' => esc_html(ppress_settings_by_key('myac_orders_endpoint', 'list-orders', true)),
                     'priority' => 30,
                     'icon'     => 'shopping_cart',
-                    'callback' => [__CLASS__, 'orders_callback']
+                    'callback' => [$classInstance, 'orders_callback']
                 ],
                 'list-downloads'     => [
                     'title'    => esc_html__('Downloads', 'wp-user-avatar'),
@@ -77,7 +80,7 @@ class MyAccountTag extends FormProcessor
                     'endpoint' => esc_html(ppress_settings_by_key('myac_downloads_endpoint', 'list-downloads', true)),
                     'priority' => 35,
                     'icon'     => 'file_download',
-                    'callback' => [__CLASS__, 'downloads_callback']
+                    'callback' => [$classInstance, 'downloads_callback']
                 ],
                 'billing-details'    => [
                     'title'    => esc_html__('Billing Address', 'wp-user-avatar'),
@@ -85,27 +88,34 @@ class MyAccountTag extends FormProcessor
                     'endpoint' => esc_html(ppress_settings_by_key('myac_billing_details_endpoint', 'my-billing-address', true)),
                     'priority' => 40,
                     'icon'     => 'map',
-                    'callback' => [__CLASS__, 'billing_details_callback']
+                    'callback' => [$classInstance, 'billing_details_callback']
                 ],
                 'edit-profile'       => [
                     'title'    => esc_html__('Account Details', 'wp-user-avatar'),
                     'endpoint' => esc_html(ppress_settings_by_key('myac_edit_account_endpoint', 'edit-profile', true)),
                     'priority' => 45,
                     'icon'     => 'account_box',
-                    'callback' => [__CLASS__, 'edit_profile_callback']
+                    'callback' => [$classInstance, 'edit_profile_callback']
                 ],
                 'change-password'    => [
                     'title'    => esc_html__('Change Password', 'wp-user-avatar'),
                     'endpoint' => esc_html(ppress_settings_by_key('myac_change_password_endpoint', 'change-password', true)),
                     'priority' => 50,
                     'icon'     => 'vpn_key',
-                    'callback' => [__CLASS__, 'change_password_callback']
+                    'callback' => [$classInstance, 'change_password_callback']
+                ],
+                'delete-account'    => [
+                    'title'    => esc_html__('Delete Account', 'wp-user-avatar'),
+                    'endpoint' => apply_filters('ppress_my_account_dashboard_delete_account_endpoint', 'delete-account'),
+                    'priority' => 60,
+                    'icon'     => 'delete',
+                    'callback' => [$classInstance, 'delete_account_callback']
                 ],
                 'ppmyac-user-logout' => [
                     'title'    => esc_html__('Logout', 'wp-user-avatar'),
                     'priority' => 99,
                     'icon'     => 'exit_to_app'
-                ],
+                ]
             ];
 
             if ( ! empty(self::email_notification_endpoint_content())) {
@@ -115,7 +125,7 @@ class MyAccountTag extends FormProcessor
                     'endpoint' => esc_html(ppress_settings_by_key('myac_email_notifications_endpoint', 'email-notifications', true)),
                     'priority' => 55,
                     'icon'     => 'email',
-                    'callback' => [__CLASS__, 'email_notification_callback']
+                    'callback' => [$classInstance, 'email_notification_callback']
                 ];
             }
 
@@ -126,7 +136,7 @@ class MyAccountTag extends FormProcessor
                     'endpoint' => esc_html(ppress_settings_by_key('myac_account_settings_endpoint', 'account-settings', true)),
                     'priority' => 40,
                     'icon'     => 'settings',
-                    'callback' => [__CLASS__, 'account_settings_callback']
+                    'callback' => [$classInstance, 'account_settings_callback']
                 ];
             }
 
@@ -175,6 +185,11 @@ class MyAccountTag extends FormProcessor
     public function change_password_callback()
     {
         require apply_filters('ppress_my_account_change_password_template', wp_normalize_path(dirname(__FILE__) . '/change-password.tmpl.php'));
+    }
+
+    public function delete_account_callback()
+    {
+        require apply_filters('ppress_my_account_delete_account_template', wp_normalize_path(dirname(__FILE__) . '/delete-account.tmpl.php'));
     }
 
     public function display_name_select_dropdown()
@@ -230,7 +245,7 @@ class MyAccountTag extends FormProcessor
             $sub_id = (int)$_GET['sub_id'];
             $sub    = SubscriptionFactory::fromId((int)$_GET['sub_id']);
 
-            check_admin_referer($sub_id . $action);
+            check_admin_referer($sub_id . $action . $sub->get_customer()->get_user_id());
 
             if ($action == 'cancel') {
                 $sub->cancel(true);
@@ -652,7 +667,7 @@ class MyAccountTag extends FormProcessor
         echo ppress_minify_js(ob_get_clean());
     }
 
-    public static function get_instance()
+    public static function get_instance() : self
     {
         static $instance = false;
 

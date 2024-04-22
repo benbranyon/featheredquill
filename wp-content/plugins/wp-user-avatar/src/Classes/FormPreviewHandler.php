@@ -21,13 +21,29 @@ class FormPreviewHandler
         remove_filter('the_excerpt', 'wpautop');
         add_filter('the_content', array($this, 'the_content'), 9001);
         add_filter('get_the_excerpt', array($this, 'the_content'));
-        add_action('template_redirect', array($this, 'template_include'));
-        add_filter('post_thumbnail_html', array($this, 'post_thumbnail_html'));
+        /**
+         * Since wp_is_block_theme was only added in Wordpress 5.9,
+         * we need to verify it exists before calling it.
+         */
+        if ( ! function_exists('wp_is_block_theme') || ! wp_is_block_theme()) {
+            add_action('template_redirect', array($this, 'template_include'));
+        }
+
+        add_filter('post_thumbnail_html', '__return_empty_string');
+
+        // Avada theme incompatibility fix
+        add_action('awb_remove_third_party_the_content_changes', function () {
+            remove_filter('the_content', [$this, 'the_content'], 9001);
+        });
+
+        add_action('awb_readd_third_party_the_content_changes', function () {
+            add_filter('the_content', [$this, 'the_content'], 9001);
+        });
     }
 
     public function pre_get_posts($query)
     {
-        if ( $query->is_main_query()) {
+        if ($query->is_main_query()) {
             $query->set('posts_per_page', 1);
             $query->set('ignore_sticky_posts', true);
         }

@@ -28,6 +28,15 @@ class PostContent
             }
 
         }, -1);
+
+        // Avada theme incompatibility fix
+        add_action('awb_remove_third_party_the_content_changes', function () {
+            remove_filter('the_content', [$this, 'the_content'], PHP_INT_MAX - 1);
+        });
+
+        add_action('awb_readd_third_party_the_content_changes', function () {
+            add_filter('the_content', [$this, 'the_content'], PHP_INT_MAX - 1);
+        });
     }
 
     /**
@@ -45,6 +54,7 @@ class PostContent
         $path = dirname(__FILE__) . '/restricted-template.php';
         if (file_exists($path)) {
             load_template($path, true, $this->restrictedAccessConditions);
+
             return;
         }
 
@@ -63,7 +73,7 @@ class PostContent
             \Elementor\Plugin::$instance->preview->is_preview_mode(),
         ];
 
-        return in_array(true, $checks, true);
+        return apply_filters('ppress_content_protection_is_protection_disabled', in_array(true, $checks, true));
     }
 
     /**
@@ -170,7 +180,7 @@ class PostContent
 
     public function parse_message($message)
     {
-        return do_shortcode(wpautop($message));
+        return apply_filters('ppress_content_protection_parsed_message', do_shortcode(wpautop($message)), $message);
     }
 
     public function style_paywall_message($message, $style = 'none')
@@ -202,6 +212,11 @@ class PostContent
             $the_excerpt = $post->post_content;
         }
 
+        return apply_filters('ppress_content_protection_excerpt', self::trim_content($the_excerpt, $length, $more), $post, $length);
+    }
+
+    public static function trim_content($the_excerpt = '', $length = 100, $more = false)
+    {
         if ( ! empty($the_excerpt)) {
 
             $tags = apply_filters('ppress_content_protection_excerpt_tags', '<style><a><img><em><i><code><ins><del><strong><blockquote><ul><ol><li><h1><h2><h3><h4><h5><h6><b><div><span>');
@@ -225,10 +240,10 @@ class PostContent
                 }
             }
 
-            $the_excerpt = wpautop($this->close_tags($the_excerpt));
+            $the_excerpt = wpautop(self::close_tags($the_excerpt));
         }
 
-        return apply_filters('ppress_content_protection_excerpt', $the_excerpt, $post, $length);
+        return $the_excerpt;
     }
 
     /**
@@ -238,7 +253,7 @@ class PostContent
      *
      * @return false|mixed|string
      */
-    public function close_tags($content)
+    public static function close_tags($content)
     {
         if ( ! empty($content)) {
             // remove cos it can be unreliable

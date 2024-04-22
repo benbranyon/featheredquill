@@ -42,7 +42,7 @@ class Translator implements TranslatorInterface
     private $functionTranslators = [];
     private $pseudoClassTranslators = [];
     private $attributeMatchingTranslators = [];
-    public function __construct(ParserInterface $parser = null)
+    public function __construct(?ParserInterface $parser = null)
     {
         $this->mainParser = $parser ?? new Parser();
         $this->registerExtension(new Extension\NodeExtension())->registerExtension(new Extension\CombinationExtension())->registerExtension(new Extension\FunctionExtension())->registerExtension(new Extension\PseudoClassExtension())->registerExtension(new Extension\AttributeMatchingExtension());
@@ -165,7 +165,7 @@ class Translator implements TranslatorInterface
     /**
      * @throws ExpressionErrorException
      */
-    public function addAttributeMatching(XPathExpr $xpath, string $operator, string $attribute, $value) : XPathExpr
+    public function addAttributeMatching(XPathExpr $xpath, string $operator, string $attribute, ?string $value) : XPathExpr
     {
         if (!isset($this->attributeMatchingTranslators[$operator])) {
             throw new ExpressionErrorException(\sprintf('Attribute matcher operator "%s" not supported.', $operator));

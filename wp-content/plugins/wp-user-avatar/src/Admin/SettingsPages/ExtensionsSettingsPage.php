@@ -2,7 +2,6 @@
 
 namespace ProfilePress\Core\Admin\SettingsPages;
 
-use ProfilePress\Core\Classes\ExtensionManager;
 use ProfilePress\Core\Classes\ExtensionManager as EM;
 use ProfilePress\Custom_Settings_Page_Api;
 
@@ -17,7 +16,7 @@ class ExtensionsSettingsPage extends AbstractSettingsPage
             add_action('ppress_admin_settings_page_addons', [$this, 'settings_page_function']);
         });
 
-        if ( ! ExtensionManager::is_premium()) {
+        if ( ! EM::is_premium()) {
             add_filter('install_plugins_tabs', [$this, 'add_extension_tab']);
             add_action('install_plugins_ppress_extensions', [$this, 'extension_view']);
         }
@@ -97,7 +96,7 @@ class ExtensionsSettingsPage extends AbstractSettingsPage
                     <div class="notice-content">
                             <span>
                                 <?= sprintf(
-                                    esc_html__('Upgrade to Premium to unlock extensions and other great features. As a valued ProfilePress Lite user, you will %1$sreceive 10%3$s off%2$s your purchase, automatically applied at checkout!', 'wp-user-avatar'),
+                                    esc_html__('Upgrade to unlock premium extensions and other great features. As a valued ProfilePress Lite user, you will %1$sreceive 10%3$s off%2$s your purchase, automatically applied at checkout!', 'wp-user-avatar'),
                                     '<span class="ppress-extensions-upsell-highlight">', '</span>', '%'
                                 ) ?>
                             </span>
@@ -141,7 +140,7 @@ class ExtensionsSettingsPage extends AbstractSettingsPage
                             </div>
                             <div class="ppress-extension-card-footer">
 
-                                <?php if (EM::is_premium() && class_exists($extension_class) && $extension_class::$instance_flag) : ?>
+                                <?php if (class_exists($extension_class) && $extension_class::$instance_flag) : ?>
 
                                     <?php if (true !== $dependency_available) : ?>
                                         <span class="ppress-extension-status">

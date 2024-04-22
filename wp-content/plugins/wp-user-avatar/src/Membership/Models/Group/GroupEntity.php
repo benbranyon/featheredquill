@@ -9,6 +9,7 @@ use ProfilePress\Core\Membership\Repositories\GroupRepository;
 /**
  * @property int $id
  * @property string $name
+ * @property string $plans_display_field
  * @property int[] $plan_ids
  */
 class GroupEntity extends AbstractModel implements ModelInterface
@@ -18,6 +19,8 @@ class GroupEntity extends AbstractModel implements ModelInterface
     protected $name = '';
 
     protected $plan_ids = [];
+
+    protected $plans_display_field = 'radio';
 
     public function __construct($data = [])
     {
@@ -51,6 +54,11 @@ class GroupEntity extends AbstractModel implements ModelInterface
     public function get_name()
     {
         return $this->name;
+    }
+
+    public function get_plans_display_field()
+    {
+        return $this->plans_display_field;
     }
 
     /**

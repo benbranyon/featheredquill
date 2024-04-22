@@ -6,6 +6,9 @@ use ProfilePressVendor\Sabberworm\CSS\OutputFormat;
 use ProfilePressVendor\Sabberworm\CSS\Parsing\ParserState;
 use ProfilePressVendor\Sabberworm\CSS\Parsing\UnexpectedEOFException;
 use ProfilePressVendor\Sabberworm\CSS\Parsing\UnexpectedTokenException;
+/**
+ * A `Size` consists of a numeric `size` value and a unit.
+ */
 class Size extends PrimitiveValue
 {
     /**
@@ -21,7 +24,7 @@ class Size extends PrimitiveValue
     /**
      * @var array<int, string>
      */
-    const NON_SIZE_UNITS = ['deg', 'grad', 'rad', 's', 'ms', 'turns', 'Hz', 'kHz'];
+    const NON_SIZE_UNITS = ['deg', 'grad', 'rad', 's', 'ms', 'turn', 'Hz', 'kHz'];
     /**
      * @var array<int, array<string, string>>|null
      */
@@ -65,9 +68,17 @@ class Size extends PrimitiveValue
         if ($oParserState->comes('-')) {
             $sSize .= $oParserState->consume('-');
         }
-        while (\is_numeric($oParserState->peek()) || $oParserState->comes('.')) {
+        while (\is_numeric($oParserState->peek()) || $oParserState->comes('.') || $oParserState->comes('e', \true)) {
             if ($oParserState->comes('.')) {
                 $sSize .= $oParserState->consume('.');
+            } elseif ($oParserState->comes('e', \true)) {
+                $sLookahead = $oParserState->peek(1, 1);
+                if (\is_numeric($sLookahead) || $sLookahead === '+' || $sLookahead === '-') {
+                    $sSize .= $oParserState->consume(2);
+                } else {
+                    break;
+                    // Reached the unit part of the number like "em" or "ex"
+                }
             } else {
                 $sSize .= $oParserState->consume(1);
             }

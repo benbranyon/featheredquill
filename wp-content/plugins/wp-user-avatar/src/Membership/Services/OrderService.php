@@ -307,11 +307,13 @@ class OrderService
 
                 $gross_amount = Calculator::init($sub_total)->minus($discount_amount)->val();
 
-                $sub_total = Calculator::init($gross_amount)->dividedBy(
+                $tax_calculation_base_total = Calculator::init($gross_amount)->dividedBy(
                     Calculator::init('1')->plus($tax_rate_decimal)->val()
                 )->val();
 
-                $tax_amount = Calculator::init($gross_amount)->minus($sub_total)->val();
+                $tax_amount = Calculator::init($gross_amount)->minus($tax_calculation_base_total)->val();
+
+                $sub_total = Calculator::init($tax_calculation_base_total)->plus($discount_amount)->val();
 
                 if ($planObj->is_recurring()) {
 
@@ -338,6 +340,7 @@ class OrderService
 
         $cart                      = new CartEntity();
         $cart->prorated_price      = $prorated_price;
+        $cart->plan_id             = $planObj->id;
         $cart->change_plan_sub_id  = $change_plan_sub_id;
         $cart->sub_total           = $sub_total;
         $cart->coupon_code         = $coupon_code;

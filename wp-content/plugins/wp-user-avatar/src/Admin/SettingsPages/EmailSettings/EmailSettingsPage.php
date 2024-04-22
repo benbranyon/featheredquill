@@ -132,6 +132,10 @@ class EmailSettingsPage
                     '{{last_name}}'           => esc_html__('Last Name entered by user on registration.', 'wp-user-avatar'),
                     '{{password_reset_link}}' => esc_html__('URL to reset password.', 'wp-user-avatar'),
                     '{{login_link}}'          => esc_html__('URL to login.', 'wp-user-avatar'),
+                    '{{field_key}}'  => sprintf(
+                        esc_html__('Replace "field_key" with the %scustom field key%s or usermeta key.', 'wp-user-avatar'),
+                        '<a href="' . PPRESS_CUSTOM_FIELDS_SETTINGS_PAGE . '" target="_blank">', '</a>'
+                    )
                 ],
             ],
             [
@@ -348,6 +352,15 @@ class EmailSettingsPage
                 ],
             ]
         ];
+
+        if ($key == 'new_order_receipt') {
+            $email_settings[0][$key . '_disable_free_orders'] = [
+                'type'           => 'checkbox',
+                'checkbox_label' => esc_html__('Check to Disable', 'wp-user-avatar'),
+                'label'          => esc_html__('Disable for Free Orders', 'wp-user-avatar'),
+                'description'    => esc_html__('Optionally disable sending email receipts for free orders.', 'wp-user-avatar')
+            ];
+        }
 
         if ($key == 'subscription_renewal_reminder') {
             $email_settings[0][$key . '_reminder_days'] = [

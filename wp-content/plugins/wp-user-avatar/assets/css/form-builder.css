@@ -5,7 +5,7 @@
     src: local('Material Icons'),
     local('MaterialIcons-Regular'),
     url(./material-icons/MaterialIcons-Regular.woff2) format('woff2'),
-    url(./material-icons/MaterialIcons-Regular.woff) format('woff'),
+    url(./material-icons/MaterialIcons-Regular.woff) format('woff')
 }
 
 /* from woo */
@@ -197,6 +197,11 @@ h2 .pp-form-builder-help-tip {
     color: #555;
     position: relative;
     background-color: #eee
+}
+
+.ppress-pro-features-wrap .ppress-pro-features {
+    font-size: 13px;
+    padding: 2px 0;
 }
 
 #pp-form-builder-metabox .inside {

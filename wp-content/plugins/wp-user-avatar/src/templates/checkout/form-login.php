@@ -1,4 +1,11 @@
-<?php use ProfilePress\Core\Classes\ExtensionManager;
+<?php
+
+use ProfilePress\Core\Classes\ExtensionManager;
+use ProfilePress\Core\Membership\Models\Group\GroupEntity;
+use ProfilePress\Core\Membership\Models\Plan\PlanEntity;
+
+/** @var GroupEntity $groupObj */
+/** @var PlanEntity $plan */
 
 if ( ! is_user_logged_in()) : ?>
 
@@ -41,7 +48,14 @@ if ( ! is_user_logged_in()) : ?>
     }
     ?>
 
-<?php else : $user = wp_get_current_user(); ?>
+<?php else :
+    $user = wp_get_current_user();
+    if (is_object($groupObj) && $groupObj->exists()) {
+        $logout_redirect_url = $groupObj->get_checkout_url();
+    } else {
+        $logout_redirect_url = ppress_plan_checkout_url($plan->id);
+    }
+    ?>
 
     <div class="ppress-main-checkout-form__logged_in_text_wrap">
         <div class="ppress-main-checkout-form__block__item">
@@ -50,7 +64,7 @@ if ( ! is_user_logged_in()) : ?>
                 /* Translators: %s display name. */
                 printf(esc_html__('Logged in as %s. Not you?', 'wp-user-avatar'), esc_html($user->display_name));
                 ?>
-                <a href="<?php echo esc_url(wp_logout_url(ppress_plan_checkout_url($plan->id))); ?>">
+                <a href="<?php echo esc_url(wp_logout_url($logout_redirect_url)); ?>">
                     <?php esc_html_e('log out', 'wp-user-avatar'); ?>
                 </a>
             </p>

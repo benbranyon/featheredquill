@@ -23,6 +23,16 @@ $group_details = [
             return $bucket;
         })(),
         'description' => esc_html__('Select membership plans to add to this group so customers can switch between the plans.', 'wp-user-avatar')
+    ],
+    [
+        'id'          => 'plans_display_field',
+        'type'        => 'select',
+        'label'       => esc_html__('Plans Checkout Display', 'wp-user-avatar'),
+        'options'     => [
+            'radio'  => esc_html__('Radio Buttons', 'wp-user-avatar'),
+            'select' => esc_html__('Select Dropdown', 'wp-user-avatar'),
+        ],
+        'description' => esc_html__('Select how you want to display the membership plans for selection on the Group checkout page.', 'wp-user-avatar')
     ]
 ];
 

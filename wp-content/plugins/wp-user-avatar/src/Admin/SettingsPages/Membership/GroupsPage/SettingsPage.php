@@ -54,11 +54,17 @@ class SettingsPage extends AbstractSettingsPage
             }
         }
 
-        $group           = GroupFactory::fromId(absint(ppressGET_var('id')));
-        $group->name     = sanitize_textarea_field($_POST['name']);
-        $group->plan_ids = ppress_clean($_POST['plan_ids']);
+        $group                      = GroupFactory::fromId(absint(ppressGET_var('id')));
+        $group->name                = sanitize_textarea_field($_POST['name']);
+        $group->plan_ids            = ppress_clean($_POST['plan_ids']);
+        $group->plans_display_field = sanitize_text_field($_POST['plans_display_field']);
 
         $group_id = $group->save();
+
+        // doing this because if no change is made and form saved, save() returns false.
+        if ( ! $group_id && $group->exists()) {
+            $group_id = absint(ppressGET_var('id'));
+        }
 
         wp_safe_redirect(add_query_arg(['ppress_group_action' => 'edit', 'id' => $group_id, 'saved' => 'true'], PPRESS_MEMBERSHIP_GROUPS_SETTINGS_PAGE));
         exit;

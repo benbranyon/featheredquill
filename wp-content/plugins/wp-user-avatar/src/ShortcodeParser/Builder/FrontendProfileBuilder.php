@@ -99,7 +99,12 @@ class FrontendProfileBuilder
             $output .= "<ul class='pp-user-post-list'>";
             /** @var \WP_Post $post */
             foreach ($posts as $post) {
-                $output .= sprintf('<li class="pp-user-post-item"><a href="%s"><h3 class="pp-post-item-head">%s</h3></a></li>', get_permalink($post->ID), $post->post_title);
+                $output .= sprintf(
+                    '<li class="pp-user-post-item"><a href="%s"><h3 class="pp-post-item-head">%s</h3></a></li>',
+                    get_permalink($post->ID),
+                    $post->post_title,
+                    apply_filters('ppress_author_post_after_title', '', $post, $user_id, $attributes)
+                );
             }
 
             $output .= "</ul>";
@@ -673,9 +678,9 @@ class FrontendProfileBuilder
                         ?>
                         <li>
                             <a href="<?php echo get_permalink($post->ID); ?>">
-                                <img src="<?php echo $feature_img; ?>" alt="<?php echo $post->post_title; ?>">
+                                <img src="<?php echo esc_url($feature_img); ?>" alt="<?php esc_attr_e($post->post_title); ?>">
 
-                                <div class="jc-title"><?php echo $post->post_title; ?></div>
+                                <div class="jc-title"><?php esc_html_e($post->post_title); ?></div>
                             </a>
                         </li>
                         <?php

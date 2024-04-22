@@ -2,6 +2,7 @@
 
 use ProfilePress\Core\Admin\SettingsPages\Membership\PlanIntegrationsMetabox;
 use ProfilePress\Core\Admin\SettingsPages\Membership\SettingsFieldsParser;
+use ProfilePress\Core\Classes\ExtensionManager;
 use ProfilePress\Core\Membership\Models\Subscription\SubscriptionBillingFrequency;
 use ProfilePress\Core\Membership\Models\Subscription\SubscriptionTrialPeriod;
 
@@ -135,6 +136,46 @@ $meta_box_settings = apply_filters('ppress_admin_membership_plan_metabox_setting
         ]
     ]
 ]);
+
+if ( ! ExtensionManager::is_premium()) {
+    $pro_features = [
+        'LearnDash'        => [
+            esc_html__("Sell access to LearnDash courses, and enroll users after registration to specific courses.", 'wp-user-avatar')
+        ],
+        'Mailchimp'        => [
+            esc_html__("Subscribe members to your Mailchimp audiences when they register or subscribe to a membership and sync membership and profile changes with Mailchimp.", 'wp-user-avatar')
+        ],
+        'Campaign Monitor' => [
+            esc_html__("Subscribe members to your Campaign Monitor lists when they register or subscribe to a membership plan and sync membership and profile changes with Campaign Monitor.", 'wp-user-avatar')
+        ],
+    ];
+    ob_start();
+    ?>
+    <div class="ppress-pro-features-wrap">
+        <?php foreach ($pro_features as $label => $feature): ?>
+            <div class="ppress-pro-features">
+                <strong><?php echo esc_html($label) ?>:</strong> <?php echo esc_html(implode(', ', $feature)) ?>
+            </div>
+        <?php endforeach; ?>
+        <div>
+            <a href="https://profilepress.com/pricing/?utm_source=wp_dashboard&utm_medium=upgrade&utm_campaign=edit_plan_page_integration_metabox" target="__blank" class="button-primary">
+                <?php esc_html_e('Get ProfilePress Pro →', 'wp-user-avatar') ?>
+            </a>
+        </div>
+    </div>
+    <?php
+
+    $content = ob_get_clean();
+
+    $meta_box_settings['pro_upsell'] = [
+        'tab_title' => esc_html__('Pro Integrations', 'wp-user-avatar'),
+        [
+            'label'   => esc_html__('Pro Features', 'wp-user-avatar'),
+            'type'    => 'custom',
+            'content' => $content
+        ]
+    ];
+}
 
 add_action('add_meta_boxes', function () use ($subscription_settings, $plan_details, $plan_data, $plan_extras, $meta_box_settings) {
     add_meta_box(

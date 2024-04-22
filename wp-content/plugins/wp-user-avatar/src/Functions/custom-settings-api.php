@@ -62,6 +62,8 @@ class Custom_Settings_Page_Api
 
     private $remove_nonce_field = false;
 
+    private $remove_page_form_tag = false;
+
     protected function __construct($main_content_config = [], $option_name = '', $page_header = '')
     {
         $this->db_options          = get_option($option_name, []);
@@ -118,6 +120,11 @@ class Custom_Settings_Page_Api
     public function remove_nonce_field()
     {
         $this->remove_nonce_field = true;
+    }
+
+    public function remove_page_form_tag()
+    {
+        $this->remove_page_form_tag = true;
     }
 
     public function remove_white_design()
@@ -289,7 +296,7 @@ class Custom_Settings_Page_Api
             return;
         }
 
-        $sanitize_callable = apply_filters('wp_cspa_sanitize_callback', 'self::sanitize_data');
+        $sanitize_callable = apply_filters('wp_cspa_sanitize_callback', [self::class, 'sanitize_data']);
 
         $sanitized_data = apply_filters(
             'wp_cspa_santized_data',
@@ -838,7 +845,7 @@ class Custom_Settings_Page_Api
         $description = @$args['description'];
         $tr_id       = isset($args['tr_id']) ? $args['tr_id'] : "{$key}_row";
         $option_name = $this->option_name;
-        $value       = ! empty($db_options[$key]) ? stripslashes($db_options[$key]) : @$args['value'];
+        $value       = ! empty($db_options[$key]) ? stripslashes($db_options[$key]) : ($args['value'] ?? '');
         $settings    = ! empty($args['settings']) ? $args['settings'] : ['wpautop'=> false];
 
         $settings = array_replace(['textarea_name' => $option_name . '[' . $key . ']'], $settings);
@@ -1174,12 +1181,16 @@ public function _header($args)
                     <div id="post-body-content">
                         <?php do_action('wp_cspa_before_post_body_content', $this->option_name, $this->db_options); ?>
                         <div class="meta-box-sortables ui-sortable">
+                        <?php if(!$this->remove_page_form_tag) : ?>
                             <form method="<?= $this->form_method ?>" <?php do_action('wp_cspa_form_tag', $this->option_name); ?>>
+                        <?php endif; ?>
                                 <?php ob_start(); ?>
                                 <?php $this->_settings_page_main_content_area(); ?>
                                 <?=apply_filters('wp_cspa_main_content_area', ob_get_clean(), $this->option_name); ?>
                                 <?php $this->nonce_field(); ?>
+                        <?php if(!$this->remove_page_form_tag) : ?>
                             </form>
+                        <?php endif; ?>
                         </div>
                     </div>
                     <?php $this->setting_page_sidebar(); ?>

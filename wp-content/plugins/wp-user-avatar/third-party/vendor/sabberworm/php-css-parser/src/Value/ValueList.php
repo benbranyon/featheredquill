@@ -3,6 +3,12 @@
 namespace ProfilePressVendor\Sabberworm\CSS\Value;
 
 use ProfilePressVendor\Sabberworm\CSS\OutputFormat;
+/**
+ * A `ValueList` represents a lists of `Value`s, separated by some separation character
+ * (mostly `,`, whitespace, or `/`).
+ *
+ * There are two types of `ValueList`s: `RuleValueList` and `CSSFunction`
+ */
 abstract class ValueList extends Value
 {
     /**

@@ -394,7 +394,7 @@ class SubscriptionEntity extends AbstractModel implements ModelInterface
             $date = ppress_format_date($this->expiration_date);
         }
 
-        return $date;
+        return apply_filters('ppress_subscription_formatted_expiration_date', $date, $this);
     }
 
     public function get_notes()
@@ -471,6 +471,8 @@ class SubscriptionEntity extends AbstractModel implements ModelInterface
         if ($user instanceof \WP_User) {
             $user->add_role($plan->user_role);
         }
+
+        do_action('ppress_added_plan_role_to_customer', $this);
     }
 
     public function remove_plan_role_from_customer()
@@ -483,6 +485,8 @@ class SubscriptionEntity extends AbstractModel implements ModelInterface
         if ($user instanceof \WP_User) {
             $user->remove_role($plan->user_role);
         }
+
+        do_action('ppress_removed_plan_role_from_customer', $this);
     }
 
     /**
@@ -502,6 +506,8 @@ class SubscriptionEntity extends AbstractModel implements ModelInterface
         }
 
         $sub_id = $this->save();
+
+        $this->id = $sub_id;
 
         $this->add_plan_role_to_customer();
 
@@ -529,6 +535,8 @@ class SubscriptionEntity extends AbstractModel implements ModelInterface
         }
 
         $sub_id = $this->save();
+
+        $this->id = $sub_id;
 
         $this->add_plan_role_to_customer();
 
@@ -677,9 +685,15 @@ class SubscriptionEntity extends AbstractModel implements ModelInterface
 
         $expiration_date_timestamp = ppress_strtotime_utc($this->expiration_date);
 
-        if ($addBuffer) $expiration_date_timestamp += DAY_IN_SECONDS;
+        if ($addBuffer && $this->billing_frequency == SubscriptionBillingFrequency::DAILY) {
+            $addBuffer = false;
+        }
 
-        // added a day buffer to expiration date to give time for gateway to renew the sub
+        if (apply_filters('ppress_subscription_is_add_buffer', $addBuffer, $this)) {
+            // added a day buffer to expiration date to give time for gateway to renew the sub
+            $expiration_date_timestamp += DAY_IN_SECONDS;
+        }
+
         if ($check_expiration && time() <= $expiration_date_timestamp) {
             return false; // Do not mark as expired since real expiration date is in the future
         }

@@ -94,7 +94,19 @@ class PlanEntity extends AbstractModel implements ModelInterface
 
     public function is_recurring()
     {
-        return ! empty($this->billing_frequency) && $this->billing_frequency != 'lifetime';
+        return ! empty($this->billing_frequency) && $this->billing_frequency != SubscriptionBillingFrequency::LIFETIME;
+    }
+
+    /**
+     * If subscription plan, do we want to setup payment gateway subscription for automatic renewal / recurring payments?
+     *
+     * @return bool
+     */
+    public function is_auto_renew(): bool
+    {
+        $result = $this->is_recurring() && ppress_settings_by_key('disable_auto_renew') != 'true';
+
+        return apply_filters('ppress_subscription_is_auto_renew', $result, $this);
     }
 
     public function is_lifetime()

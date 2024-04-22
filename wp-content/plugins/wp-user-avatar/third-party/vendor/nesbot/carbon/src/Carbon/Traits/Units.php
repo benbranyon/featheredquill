@@ -16,6 +16,7 @@ use ProfilePressVendor\Carbon\CarbonInterval;
 use ProfilePressVendor\Carbon\Exceptions\UnitException;
 use Closure;
 use DateInterval;
+use ProfilePressVendor\DateMalformedStringException;
 use ReturnTypeWillChange;
 /**
  * Trait Units.
@@ -163,7 +164,7 @@ trait Units
     public function add($unit, $value = 1, $overflow = null)
     {
         if (\is_string($unit) && \func_num_args() === 1) {
-            $unit = CarbonInterval::make($unit);
+            $unit = CarbonInterval::make($unit, [], \true);
         }
         if ($unit instanceof CarbonConverterInterface) {
             return $this->resolveCarbon($unit->convertDate($this, \false));
@@ -239,11 +240,17 @@ trait Units
             $unit = 'second';
             $value = $second;
         }
-        $date = $date->modify("{$value} {$unit}");
-        if (isset($timeString)) {
-            $date = $date->setTimeFromTimeString($timeString);
-        } elseif (isset($canOverflow, $day) && $canOverflow && $day !== $date->day) {
-            $date = $date->modify('last day of previous month');
+        try {
+            $date = $date->modify("{$value} {$unit}");
+            if (isset($timeString)) {
+                $date = $date->setTimeFromTimeString($timeString);
+            } elseif (isset($canOverflow, $day) && $canOverflow && $day !== $date->day) {
+                $date = $date->modify('last day of previous month');
+            }
+        } catch (DateMalformedStringException $ignoredException) {
+            // @codeCoverageIgnore
+            $date = null;
+            // @codeCoverageIgnore
         }
         if (!$date) {
             throw new UnitException('Unable to add unit ' . \var_export($originalArgs, \true));
@@ -291,7 +298,7 @@ trait Units
     public function sub($unit, $value = 1, $overflow = null)
     {
         if (\is_string($unit) && \func_num_args() === 1) {
-            $unit = CarbonInterval::make($unit);
+            $unit = CarbonInterval::make($unit, [], \true);
         }
         if ($unit instanceof CarbonConverterInterface) {
             return $this->resolveCarbon($unit->convertDate($this, \true));
@@ -321,7 +328,7 @@ trait Units
     public function subtract($unit, $value = 1, $overflow = null)
     {
         if (\is_string($unit) && \func_num_args() === 1) {
-            $unit = CarbonInterval::make($unit);
+            $unit = CarbonInterval::make($unit, [], \true);
         }
         return $this->sub($unit, $value, $overflow);
     }

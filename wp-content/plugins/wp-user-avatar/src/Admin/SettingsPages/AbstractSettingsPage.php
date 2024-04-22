@@ -29,7 +29,7 @@ abstract class AbstractSettingsPage
             PPRESS_DASHBOARD_SETTINGS_SLUG,
             '',
             $this->getMenuIcon(),
-            '80.0015'
+            '45.0015'
         );
 
         do_action('ppress_register_menu_page_' . $this->active_menu_tab() . '_' . $this->active_submenu_tab());
@@ -273,7 +273,7 @@ abstract class AbstractSettingsPage
         return $content;
     }
 
-    protected function page_dropdown($id, $appends = [], $args = ['skip_append_default_select' => false])
+    public static function page_dropdown($id, $appends = [], $args = ['skip_append_default_select' => false])
     {
         $default_args = [
             'name'             => PPRESS_SETTINGS_DB_OPTION_NAME . "[$id]",

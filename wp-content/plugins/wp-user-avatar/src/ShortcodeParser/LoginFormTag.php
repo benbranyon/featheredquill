@@ -19,6 +19,8 @@ class LoginFormTag extends FormProcessor
 
         $id = absint($atts['id']);
 
+        do_action('ppress_login_form_before', $id, $atts);
+
         $login_error = '';
 
         if (is_string($this->login_form_error) && ! empty($this->login_form_error)) {
@@ -51,7 +53,7 @@ class LoginFormTag extends FormProcessor
 
             return apply_filters(
                 'ppress_login_form_already_loggedin_message',
-                wpautop(esc_html__('You are already logged in.', 'wp-user-avatar')),
+                wpautop('<div class="ppress-already-logged-in-message">' . esc_html__('You are already logged in.', 'wp-user-avatar') . '</div>'),
                 $login_form,
                 $id
             );
@@ -82,7 +84,7 @@ class LoginFormTag extends FormProcessor
 
         $login_structure = do_shortcode($login_structure);
 
-        $referrer_url = wp_get_referer() ? wp_get_referer() : '';
+        $referrer_url = wp_get_referer() ?: '';
 
         if ( ! empty($_REQUEST['redirect_to'])) {
             $redirect = rawurldecode($_REQUEST['redirect_to']);
@@ -95,6 +97,8 @@ class LoginFormTag extends FormProcessor
         $login_structure .= "<input type='hidden' name='login_form_id' value='$id'>";
         $login_structure .= '<input type="hidden" name="pp_current_url" value="' . esc_attr(ppress_get_current_url_query_string()) . '">';
         $login_structure .= '<input type="hidden" name="login_referrer_page" value="' . esc_attr($referrer_url) . '">';
+
+        $login_structure = apply_filters('ppress_login_form_field_structure', $login_structure, $id);
 
         $form_tag = "<form data-pp-form-submit=\"login\" id='pp_login_$id' method=\"post\"" . apply_filters('ppress_login_form_tag', '', $id) . ">";
 

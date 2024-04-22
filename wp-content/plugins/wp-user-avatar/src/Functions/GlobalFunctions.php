@@ -1,7 +1,6 @@
 <?php
 
 use ProfilePress\Core\Admin\SettingsPages\MailOptin;
-use ProfilePress\Core\Admin\ProfileCustomFields;
 use ProfilePress\Core\Base;
 use ProfilePress\Core\Classes\ExtensionManager as EM;
 use ProfilePress\Core\Classes\FormRepository as FR;
@@ -234,11 +233,11 @@ function ppress_login_redirect()
         } elseif ( ! empty($login_redirect) && is_numeric($login_redirect)) {
             $redirect = get_permalink($login_redirect);
         } else {
-            $redirect = network_site_url('/wp-admin');
+            $redirect = admin_url();
         }
     }
 
-    return wp_validate_redirect($redirect);
+    return wp_validate_redirect(apply_filters('ppress_core_login_redirect', $redirect));
 }
 
 /**
@@ -567,21 +566,39 @@ function ppress_other_field_atts($atts)
 {
     if ( ! is_array($atts)) return $atts;
 
-    $official_atts = array('name', 'class', 'id', 'value', 'title', 'required', 'placeholder', 'key', 'field_key', 'limit', 'options', 'checkbox_text', 'processing_label');
+    $official_atts = array(
+        'name',
+        'class',
+        'id',
+        'value',
+        'title',
+        'required',
+        'placeholder',
+        'key',
+        'field_key',
+        'limit',
+        'options',
+        'checkbox_text',
+        'processing_label'
+    );
 
     $other_atts = array();
 
     foreach ($atts as $key => $value) {
-        if ( ! in_array($key, $official_atts)) {
+        if ( ! in_array($key, $official_atts) && strpos($key, 'on') !== 0) {
             $other_atts[esc_attr($key)] = esc_attr($value);
         }
     }
 
     $other_atts_html = '';
 
-    foreach ($other_atts as $key => $value) {
-        if ( ! empty($value)) {
-            $other_atts_html .= "$key=\"$value\" ";
+    if (is_array($other_atts) && ! empty($other_atts)) {
+
+        foreach ($other_atts as $key => $value) {
+
+            if ( ! empty($value)) {
+                $other_atts_html = sprintf('%s="%s" ', esc_attr($key), esc_attr($value));
+            }
         }
     }
 
@@ -598,8 +615,10 @@ function ppress_create_index_file($location)
 {
     $content = "You are not allowed here!";
     $fp      = fopen($location . "/index.php", "wb");
-    fwrite($fp, $content);
-    fclose($fp);
+    if ($fp) {
+        fwrite($fp, $content);
+        fclose($fp);
+    }
 }
 
 /**
@@ -736,29 +755,6 @@ function ppress_wp_new_user_notification($user_id, $deprecated = null, $notify =
 
             $title = ppress_get_setting('new_user_admin_email_email_subject', sprintf(__('[%s] New User Registration'), $blogname), true);
 
-            // handle support for custom fields placeholder.
-            preg_match_all('#({{[a-z_-]+}})#', $message, $matches);
-
-            if (isset($matches[1]) && ! empty($matches[1])) {
-
-                foreach ($matches[1] as $match) {
-                    $key = str_replace(['{', '}'], '', $match);
-
-                    $value = '';
-
-                    if (isset($user->{$key})) {
-
-                        $value = $user->{$key};
-
-                        if (is_array($value)) {
-                            $value = implode(', ', $value);
-                        }
-                    }
-
-                    $message = str_replace($match, $value, $message);
-                }
-            }
-
             $search = array(
                 '{{username}}',
                 '{{user_email}}',
@@ -788,6 +784,8 @@ function ppress_wp_new_user_notification($user_id, $deprecated = null, $notify =
                 str_replace($search, $replace, $title),
                 $user
             );
+
+            $message = ppress_custom_profile_field_search_replace($message, $user);
 
             $admin_email = apply_filters('ppress_signup_notification_admin_email', ppress_get_admin_notification_emails());
 
@@ -1126,9 +1124,45 @@ function ppress_get_admin_notification_emails()
     return ppress_get_setting('admin_email_addresses', ppress_admin_email(), true);
 }
 
+/**
+ * @return WP_Filesystem_Base|false
+ */
+function ppress_file_system()
+{
+    global $wp_filesystem;
+
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+
+    // If for some reason the include doesn't work as expected just return false.
+    if ( ! function_exists('\WP_Filesystem')) {
+        return false;
+    }
+
+    $writable = WP_Filesystem(false, '', true);
+
+    // We consider the directory as writable if it uses the direct transport,
+    // otherwise credentials would be needed.
+    return ($writable && 'direct' === $wp_filesystem->method) ? $wp_filesystem : false;
+}
+
+function ppress_get_file($file)
+{
+    $content = '';
+
+    $fs = ppress_file_system();
+
+    if ($fs && $fs->exists($file)) {
+        $content = $fs->get_contents($file);
+    }
+
+    return $content;
+}
+
 function ppress_get_error_log($type = 'debug')
 {
-    $log_file = PPRESS_ERROR_LOG_FOLDER . $type . '.log';
+    $file_token = get_option('ppress_debug_log_token');
+
+    $log_file = PPRESS_ERROR_LOG_FOLDER . "{$type}-{$file_token}.log";
 
     $file_contents = '';
 
@@ -1152,14 +1186,43 @@ function ppress_log_error($message, $type = 'debug')
         ppress_create_index_file(PPRESS_ERROR_LOG_FOLDER);
     }
 
+    //
+    $fs = ppress_file_system();
+
+    $file_token = get_option('ppress_debug_log_token');
+    if (false === $file_token) {
+        $file_token = uniqid(wp_rand(), true);
+        update_option('ppress_debug_log_token', $file_token);
+    }
+
+    $filename = "{$type}-{$file_token}.log"; // ex. debug-5c2f6a9b9b5a3.log.
+    $file     = $log_folder . $filename;
+    $old_file = $log_folder . "{$type}.log";
+
+    // If old file exists, move it.
+    if ($fs && $fs->exists($old_file)) {
+        $old_content = ppress_get_file($old_file);
+        $fs->put_contents($file, $old_content, FS_CHMOD_FILE);
+
+        // Move old file to new location.
+        $fs->move($old_file, $file);
+
+        if ($fs->exists($old_file)) {
+            $fs->delete($old_file);
+        }
+    }
+    //
+
     $message = current_time('mysql') . ' - ' . $message . "\r\n\r\n";
 
-    error_log($message, 3, "{$log_folder}{$type}.log");
+    error_log($message, 3, "{$log_folder}{$filename}");
 }
 
 function ppress_clear_error_log($type = 'debug')
 {
-    return @unlink(PPRESS_ERROR_LOG_FOLDER . $type . '.log');
+    $file_token = get_option('ppress_debug_log_token');
+    @unlink(PPRESS_ERROR_LOG_FOLDER . "{$type}-{$file_token}.log");
+    @unlink(PPRESS_ERROR_LOG_FOLDER . $type . '.log');
 }
 
 function ppressPOST_var($key, $default = false, $empty = false, $bucket = false)
@@ -1231,10 +1294,33 @@ function ppress_dnd_field_key_description()
 function ppress_reserved_field_keys()
 {
     return [
-        'ID', 'id', 'user_pass', 'user_login', 'user_nicename', 'user_url', 'user_email', 'display_name', 'nickname',
-        'first_name', 'last_name', 'description', 'rich_editing', 'syntax_highlighting', 'comment_shortcuts', 'admin_color',
-        'use_ssl', 'user_registered', 'user_activation_key', 'spam', 'show_admin_bar_front', 'role', 'locale', 'deleted', 'user_level',
-        'user_status', 'user_description'
+        'ID',
+        'id',
+        'user_pass',
+        'user_login',
+        'user_nicename',
+        'user_url',
+        'user_email',
+        'display_name',
+        'nickname',
+        'first_name',
+        'last_name',
+        'description',
+        'rich_editing',
+        'syntax_highlighting',
+        'comment_shortcuts',
+        'admin_color',
+        'use_ssl',
+        'user_registered',
+        'user_activation_key',
+        'spam',
+        'show_admin_bar_front',
+        'role',
+        'locale',
+        'deleted',
+        'user_level',
+        'user_status',
+        'user_description'
     ];
 }
 
@@ -1266,6 +1352,8 @@ function ppress_is_boolean($maybe_bool)
 
 function ppress_filter_empty_array($values)
 {
+    if ( ! is_array($values)) return $values;
+
     return array_filter($values, function ($value) {
         return ppress_is_boolean($value) || is_int($value) || ! empty($value);
     });
@@ -1684,4 +1772,72 @@ function ppress_maybe_define_constant($name, $value)
 function ppress_upgrade_urls_affilify($url)
 {
     return apply_filters('ppress_pro_upgrade_url', $url);
+}
+
+function ppress_cache_transform($cache_key, $callback)
+{
+    static $ppress_cache_transform_bucket = [];
+
+    $result = ppress_var($ppress_cache_transform_bucket, $cache_key, false);
+
+    if ( ! $result) {
+
+        $result = $callback();
+
+        $ppress_cache_transform_bucket[$cache_key] = $result;
+    }
+
+    return $result;
+}
+
+function ppress_form_has_field($form_id, $form_type, $field_shortcode_tag)
+{
+    if (FR::is_drag_drop($form_id, $form_type)) {
+
+        $settings = FR::form_builder_fields_settings($form_id, $form_type);
+
+        $found_field = wp_list_filter($settings, ['fieldType' => $field_shortcode_tag]);
+
+        if ( ! empty($found_field)) return true;
+
+    } else {
+
+        $registration_structure = FR::get_form_meta($form_id, $form_type, FR::FORM_STRUCTURE);
+
+        // find the first occurrence of reg-select-role shortcode.
+        preg_match('/\[' . $field_shortcode_tag . '.*\]/', $registration_structure, $matches);
+
+        if ( ! empty($matches[0])) return true;
+    }
+
+    return false;
+}
+
+function ppress_custom_profile_field_search_replace($message, $user)
+{
+    // handle support for custom fields placeholder.
+    preg_match_all('#({{[a-z_-]+}})#', $message, $matches);
+
+    if (isset($matches[1]) && ! empty($matches[1])) {
+
+        foreach ($matches[1] as $match) {
+
+            $key = str_replace(['{', '}'], '', $match);
+
+            $value = '';
+
+            if (isset($user->{$key})) {
+
+                $value = $user->{$key};
+
+                if (is_array($value)) {
+                    $value = implode(', ', $value);
+                }
+            }
+
+            $message = str_replace($match, $value, $message);
+        }
+    }
+
+    return $message;
 }

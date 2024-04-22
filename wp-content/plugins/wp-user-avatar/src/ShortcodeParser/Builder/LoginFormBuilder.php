@@ -96,7 +96,7 @@ class LoginFormBuilder
 
         $id       = ! empty($atts['id']) ? 'id="' . esc_attr($atts['id']) . '"' : null;
         $value    = ! empty($atts['value']) ? 'value="' . esc_attr($atts['value']) . '"' : 'value="' . esc_attr(ppressPOST_var('login_password')) . '"';
-        $title    = 'title="' . $atts['title'] . '"';
+        $title    = 'title="' . esc_attr($atts['title']) . '"';
         $required = isset($atts['required']) && ($atts['required'] === true || $atts['required'] == 'true') ? 'required="required"' : null;
 
         $html = "<input name='login_password' type='password' $title $value $class $placeholder $id $other_atts_html $required>";
@@ -127,7 +127,7 @@ class LoginFormBuilder
         $title = 'title="' . esc_attr($atts['title']) . '"';
 
         $html = "<input name='login_remember' value='false' type='hidden'>";
-        $html .= "<input name='login_remember' value='true' type='checkbox' $title $class $id $other_atts_html checked='checked'>";
+        $html .= "<input name='login_remember' value='true' type='checkbox' $title $class $id $other_atts_html>";
 
         return apply_filters('ppress_login_remember_field', $html, $atts);
     }

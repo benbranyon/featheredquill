@@ -43,10 +43,6 @@ $payment_method = PaymentMethods::get_instance()->get_by_id($sub->get_payment_me
                 $actions['cancel'] = esc_html__('Cancel', 'wp-user-avatar');
             }
 
-            /**
-             * When plan group launches, we do not want to show resubscribe button if expired/cancelled plan belongs to
-             * a plan group where the customer has an active plan
-             */
             if ( ! $customer->has_active_group_subscription($plan_group_id) && ! $sub->is_active()) {
                 $actions['resubscribe'] = esc_html__('Resubscribe', 'wp-user-avatar');
             }
@@ -54,6 +50,8 @@ $payment_method = PaymentMethods::get_instance()->get_by_id($sub->get_payment_me
             if ($plan_group_id && ! $sub->is_pending()) {
                 $actions['change_plan'] = esc_html__('Change Plan', 'wp-user-avatar');
             }
+
+            $actions = apply_filters('ppress_myaccount_subscription_actions', $actions, $sub, $payment_method, $customer);
 
             do_action('ppress_myaccount_subscription_action_status', $sub, ppressGET_var('ppress-myac-sub-message'));
             ?>
@@ -96,12 +94,12 @@ $payment_method = PaymentMethods::get_instance()->get_by_id($sub->get_payment_me
                             <tr>
                                 <td><?php esc_html_e('Actions', 'wp-user-avatar'); ?></td>
                                 <td>
-                                    <?php foreach ($actions as $action => $label) :
+                                    <?php foreach ($actions as $action => $label) : $attr = $action == 'cancel' ? ' ppress-confirm-delete' : '';
                                         $url = wp_nonce_url(
                                             remove_query_arg('ppress-myac-sub-message', add_query_arg(['ppress_myac_sub_action' => $action, 'sub_id' => $sub->id])),
-                                            $sub->id . $action
+                                            $sub->id . $action . get_current_user_id()
                                         ); ?>
-                                        <a href="<?php echo esc_url($url); ?>" class="ppress-myac-action ppress-<?php echo sanitize_html_class($action) ?> ppress-confirm-delete"><?php echo esc_html($label); ?></a>
+                                        <a href="<?php echo esc_url($url); ?>" class="ppress-myac-action ppress-<?php echo sanitize_html_class($action) ?><?php echo $attr ?>"><?php echo esc_html($label); ?></a>
                                     <?php endforeach; ?>
                                 </td>
                             </tr>

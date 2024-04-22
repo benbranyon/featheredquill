@@ -22,8 +22,9 @@ class GroupRepository extends BaseRepository
         $result = PROFILEPRESS_sql::add_meta_data(
             self::DB_KEY,
             [
-                'name'     => $data->name,
-                'plan_ids' => $data->plan_ids,
+                'name'                => $data->name,
+                'plan_ids'            => $data->plan_ids,
+                'plans_display_field' => $data->plans_display_field,
             ]
         );
 
@@ -41,8 +42,9 @@ class GroupRepository extends BaseRepository
             $data->id,
             self::DB_KEY,
             [
-                'name'     => $data->name,
-                'plan_ids' => $data->plan_ids,
+                'name'                => $data->name,
+                'plan_ids'            => $data->plan_ids,
+                'plans_display_field' => $data->plans_display_field
             ]
         );
 
@@ -121,7 +123,7 @@ class GroupRepository extends BaseRepository
 
             $result = (int)$this->wpdb()->get_var($sql);
 
-            wp_cache_set($cache_key, $result, '',MINUTE_IN_SECONDS);
+            wp_cache_set($cache_key, $result, '', MINUTE_IN_SECONDS);
 
             return $result;
         }
