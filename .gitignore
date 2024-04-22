@@ -26,6 +26,7 @@ wp-content/backupwordpress-f4f29d2874-backups/
 sitemap.xml
 sitemap.xml.gz
 wp-config.php
+gd-config.php
 /.htaccess
 wpps-backups/
 
