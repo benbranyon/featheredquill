@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+    'WPEC_Admin_User_Feedback' => $baseDir . '/admin/includes/class-admin-user-feedback.php',
     'WP_Express_Checkout\\Admin\\Admin' => $baseDir . '/admin/class-admin.php',
     'WP_Express_Checkout\\Admin\\Admin_Order_Summary_Table' => $baseDir . '/admin/includes/class-admin-order-summary-table.php',
     'WP_Express_Checkout\\Admin\\Coupons_List' => $baseDir . '/admin/includes/class-coupons-list.php',
@@ -37,6 +38,7 @@ return array(
     'WP_Express_Checkout\\Orders' => $baseDir . '/includes/class-orders.php',
     'WP_Express_Checkout\\PayPal\\Client' => $baseDir . '/includes/paypal-client/class-client.php',
     'WP_Express_Checkout\\PayPal\\Request' => $baseDir . '/includes/paypal-client/class-request.php',
+    'WP_Express_Checkout\\PayPal_Payment_Button_Ajax_Handler' => $baseDir . '/includes/class-paypal-button-ajax-handler.php',
     'WP_Express_Checkout\\Payment_Processor' => $baseDir . '/includes/class-payment-processor.php',
     'WP_Express_Checkout\\Payment_Processor_Free' => $baseDir . '/includes/class-payment-processor-free.php',
     'WP_Express_Checkout\\Post_Type_Content_Handler' => $baseDir . '/includes/class-post-type-content-handler.php',
@@ -48,6 +50,7 @@ return array(
     'WP_Express_Checkout\\Shortcodes' => $baseDir . '/public/includes/class-shortcodes.php',
     'WP_Express_Checkout\\Tags' => $baseDir . '/includes/class-tags.php',
     'WP_Express_Checkout\\Utils' => $baseDir . '/includes/class-utils.php',
+    'WP_Express_Checkout\\Utils_Downloads' => $baseDir . '/includes/class-utils-downloads.php',
     'WP_Express_Checkout\\Variations' => $baseDir . '/includes/class-variations.php',
     'WP_Express_Checkout\\View_Downloads' => $baseDir . '/includes/class-view-downloads.php',
 );

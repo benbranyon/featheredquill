@@ -72,7 +72,7 @@ class Order_Tags_Html {
 	 * @return string
 	 */
 	public function transaction_id() {
-		return $this->order->get_resource_id();
+		return $this->order->get_capture_id();
 	}
 
 	/**
@@ -91,6 +91,14 @@ class Order_Tags_Html {
 	 */
 	public function purchase_date() {
 		return get_post_time( 'F j, Y, g:i a', false, $this->order->get_id() );
+	}
+
+	public function quantity_ordered() {
+		return $this->order->get_quantity_ordered();
+	}
+
+	public function selected_variations() {
+		return $this->order->get_selected_variations_string();
 	}
 
 	/**

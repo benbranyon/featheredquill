@@ -4,6 +4,7 @@ namespace WP_Express_Checkout\Admin;
 
 use WP_Express_Checkout\Main;
 use WP_Express_Checkout\Products;
+use WP_Express_Checkout\Orders;
 use WP_Express_Checkout\Utils;
 
 class Admin {
@@ -116,8 +117,7 @@ class Admin {
 	 * @since     1.0.0
 	 */
 	public function enqueue_admin_styles() {
-		$min = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ? '' : '.min';
-		wp_enqueue_style( $this->plugin_slug . '-admin-styles', WPEC_PLUGIN_URL . "/assets/css/admin{$min}.css", array(), WPEC_PLUGIN_VER );
+		wp_enqueue_style( $this->plugin_slug . '-admin-styles', WPEC_PLUGIN_URL . "/assets/css/admin.css", array(), WPEC_PLUGIN_VER );
 	}
 
 	/**
@@ -148,6 +148,12 @@ class Admin {
 		//Scripts for the product add/edit interface.
 		if ( Products::$products_slug === $screen->id ) {
 			wp_enqueue_script( 'wpec-admin-edit-product-js',  WPEC_PLUGIN_URL . '/assets/js/edit-product.js', array( 'jquery' ), WPEC_PLUGIN_VER, true );
+		}
+
+		//scripts & style for order export feature / datepicker		
+		if ( "edit-".Orders::PTYPE === $screen->id ) {
+			wp_enqueue_style( 'jquery-ui', '//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.min.css', array(), '1.11.4' );
+			wp_enqueue_script( 'jquery-ui-datepicker' );
 		}
 	}
 
@@ -212,6 +218,7 @@ class Admin {
 		add_settings_section( 'ppdg-tos-section', __( 'Terms and Conditions', 'wp-express-checkout' ), array( $this, 'tos_description' ), $this->plugin_slug . '-advanced' );
 
 		add_settings_section( 'ppdg-link-expiry-section', __( 'Download Link Expiry', 'wp-express-checkout' ), null, $this->plugin_slug . '-advanced' );
+		add_settings_section( 'ppdg-dl-manager-section', __( 'Download Manager (Force Download)', 'wp-express-checkout' ), array( $this, 'dl_manager_description' ), $this->plugin_slug . '-advanced' );
 		add_settings_section( 'wpec-access-section', __( 'Admin Dashboard Access Permission', 'wp-express-checkout' ), array( $this, 'access_description' ), $this->plugin_slug . '-advanced' );
 
 		/* Add the settings fields */
@@ -320,8 +327,17 @@ class Admin {
 		add_settings_field( 'disabled_funding', __( 'Disabled Funding Options', 'wp-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-disable-funding-section', array( 'field' => 'disabled_funding', 'type' => 'checkboxes', 'desc' => '', 'vals' => array( 'card', 'credit', 'venmo'/*, 'sepa'*/ ), 'texts' => array( __( 'Credit or debit cards', 'wp-express-checkout' ), __( 'PayPal Credit', 'wp-express-checkout' ), 'Venmo'/*, __( 'SEPA-Lastschrift', 'wp-express-checkout' )*/ ) ) );
 		//add_settings_field( 'disabled_cards', __( 'Disabled Cards', 'wp-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-disable-funding-section', array( 'field' => 'disabled_cards', 'type' => 'checkboxes', 'desc' => '', 'vals' => array( 'visa', 'mastercard', 'amex', 'discover', 'jcb', 'elo', 'hiper' ), 'texts' => array( __( 'Visa', 'wp-express-checkout' ), __( 'Mastercard', 'wp-express-checkout' ), __( 'American Express', 'wp-express-checkout' ), __( 'Discover', 'wp-express-checkout' ), __( 'JCB', 'wp-express-checkout' ), __( 'Elo', 'wp-express-checkout' ), __( 'Hiper', 'wp-express-checkout' ) ) ) );
 
-		// Shipping & Tax.
-		add_settings_field( 'shipping', __( 'Shipping Cost', 'wp-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-shipping-tax-section', array( 'field' => 'shipping', 'type' => 'number', 'step' => 0.01, 'class' => 'wp-ppdg-shipping', 'desc' => __( 'Enter numbers only. Example: 5.50', 'wp-express-checkout' ) . '<br>' . __( 'Leave it empty if you are not charging shipping cost. You can also set shipping cost on a per product basis.', 'wp-express-checkout' ), 'size' => 10 ) );
+		// Shipping & Tax section.
+		add_settings_field( 'shipping', __( 'Shipping Cost', 'wp-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-shipping-tax-section', 
+			array( 
+				'field' => 'shipping', 
+				'type' => 'number', 
+				'step' => 0.01, 
+				'class' => 'wp-ppdg-shipping', 
+				'desc' => __( 'Enter numbers only. Example: 5.50', 'wp-express-checkout' ) . '<br>' . __( 'Leave it empty if you are not charging shipping cost. You can also set shipping cost on a per product basis.', 'wp-express-checkout' ) . '<br />' . sprintf( __( '<a href="%s" target="_blank">Read this documentation</a> to learn how to configure shipping.', 'wp-express-checkout' ), 'https://wp-express-checkout.com/configuring-shipping-options/' ), 
+				'size' => 10 
+				) 
+		);
 		add_settings_field( 'tax', __( 'Tax (%)', 'wp-express-checkout' ), array( $this, 'settings_field_callback' ), $this->plugin_slug, 'ppdg-shipping-tax-section', array( 'field' => 'tax', 'type' => 'number', 'step' => 0.01, 'class' => 'wp-ppdg-tax', 'desc' => __( 'Enter tax (in percent) which will be added to the product price.', 'wp-express-checkout' ) . '<br>' . __( 'Leave it empty if you don\'t want to apply tax.', 'wp-express-checkout' ), 'size' => 10 ) );
 
 		// debug logging section.
@@ -496,6 +512,46 @@ class Admin {
 				'desc' => __( 'Number of times an item can be downloaded before the link expires. Example value: 3. Leave empty or set to 0 if you do not want to limit downloads by download count.', 'wp-express-checkout' ),
 			)
 		);
+		
+		add_settings_field(
+			'download_method',
+			__( 'Download Method', 'wp-express-checkout' ),
+			array( $this, 'settings_field_callback' ),
+			$this->plugin_slug . '-advanced',
+			'ppdg-dl-manager-section',
+			array(
+				'field' => 'download_method',
+				'type' => 'select',
+				'vals'  => array( '1', '2', '3', '4', '5' ),
+				'texts' => array(
+					__( '(Default) Method 1, Fopen-8K', 'wp-express-checkout' ),
+					__( 'Method 2, Fopen-1M', 'wp-express-checkout' ),
+					__( 'Method 3, Readfile-1M-SessionWriteClose', 'wp-express-checkout' ),
+					__( 'Method 4, cURL', 'wp-express-checkout' ),
+					__( 'Method 5, Mod X-Sendfile', 'wp-express-checkout' ),
+				),
+				'desc' => __( "Note: cURL requires the 'Do Not Convert' URL preference and fully qualified URLs for all product download files, not file paths.", 'wp-express-checkout' ),
+			)
+		);
+
+		add_settings_field(
+			'download_url_conversion_preference',
+			__( 'URL Conversion Preference', 'wp-express-checkout' ),
+			array( $this, 'settings_field_callback' ),
+			$this->plugin_slug . '-advanced',
+			'ppdg-dl-manager-section',
+			array(
+				'field' => 'download_url_conversion_preference',
+				'type' => 'select',
+				'vals'  => array( 'absolute', 'do_not_convert'),
+				'texts' => array(
+					__( '(Default) Absolute', 'wp-express-checkout' ),
+					__( 'Do not convert', 'wp-express-checkout' ),
+				),
+				'desc' => __( 'By default, the plugin attempts to convert product download URLs into absolute file paths.', 'wp-express-checkout' ),
+			)
+		);
+		
 		add_settings_field(
 			'access_permission',
 			__( 'Admin Dashboard Access Permission', 'wp-express-checkout' ),
@@ -543,6 +599,14 @@ class Admin {
 		echo '</p></i>';
 	}
 
+	public function dl_manager_description() {
+		echo '<p>';
+		_e( 'The default settings for the ', 'wp-express-checkout');
+		echo '<a href="https://wp-express-checkout.com/force-download-option-for-digital-products/" target="_blank">'. __('force download option', 'wp-express-checkout') . '</a>';
+		_e (' should work on most sites/servers. If you encounter issues, consider trying one of the following available methods.', 'wp-express-checkout' );
+		echo '</p>';
+	}
+
 	/**
 	 * The section `wpec-access-section` callback.
 	 */
@@ -567,7 +631,7 @@ class Admin {
 		return Main::get_defaults();
 	}
 
-		/**
+	/**
 	 * Settings HTML
 	 *
 	 * @param array $args Field arguments passed into the add_settings_field().

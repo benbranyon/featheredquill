@@ -20,7 +20,7 @@
 
 		$wp_scripts->print_scripts( "jquery" );
 
-		$min = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ? '' : '.min';
+		$min = ( defined( 'WPEC_LOAD_NON_MINIFIED' ) && WPEC_LOAD_NON_MINIFIED ) ? '' : '.min';
 
 		$scriptFrontEnd = WPEC_PLUGIN_URL . "/assets/js/public{$min}.js";
 		$styleFrontEnd = WPEC_PLUGIN_URL . "/assets/css/public{$min}.css";
@@ -40,13 +40,27 @@
 			),
 			'ajaxUrl' => get_admin_url() . 'admin-ajax.php',
 		);
+		//Allow other plugins to add their own local vars
+		$localVars = apply_filters('wpec_url_payment_box_script_local_vars', $localVars );
+
+		$wpec_create_order_vars = array(
+			'nonce' => wp_create_nonce('wpec-create-order-js-ajax-nonce'),
+		);
+		$wpec_on_approve_vars = array(
+			'nonce' => wp_create_nonce('wpec-onapprove-js-ajax-nonce'),
+			'return_url' => $this->get_setting( 'thank_you_url' ),
+			'txn_success_message' => __('Transaction completed successfully!', 'wp-express-checkout'),
+			'txn_success_extra_msg' => __('Feel free to browse our site further for your next purchase.', 'wp-express-checkout'),
+		);
+
 		?>
         <link rel="stylesheet" href="<?php echo $styleFrontEnd ?>" />
 
         <script type="text/javascript">
-			var ppecFrontVars = <?php echo json_encode( $localVars ) ?>
+			var ppecFrontVars = <?php echo json_encode( $localVars ) ?>;
+			const wpec_create_order_vars = <?php echo json_encode( $wpec_create_order_vars ) ?>;
+			const wpec_on_approve_vars = <?php echo json_encode( $wpec_on_approve_vars ) ?>;
         </script>
-
         <script src="<?php echo $scriptFrontEnd ?>"></script>
 
         <style>
@@ -57,9 +71,16 @@
                 pointer-events: auto !important;
             }
         </style>
+		<?php 
+		//Trigger action to allow other plugins to load their scripts
+		do_action( 'wpec_url_payment_box_before_head_close', $product_id );
+		?>
 	</head>
 	<body>
 		<?php
+		//Trigger action hook
+		do_action( 'wpec_url_payment_box_after_body_open', $product_id );
+
 		$class_main_inst = WP_Express_Checkout\Main::get_instance();
 		//$wpec_shortcode = WP_Express_Checkout\Shortcodes::get_instance();
 
@@ -89,6 +110,7 @@
 			'name' => get_the_title( $post_id ),
 			'price' => $product->get_price(),
 			'shipping' => $product->get_shipping(),
+			'shipping_per_quantity' => $product->get_shipping_per_quantity(),
 			'shipping_enable' => $product->is_physical(),
 			'tax' => $product->get_tax(),
 			'custom_amount' => 'donation' === $product->get_type(), // Temporary, until we remove custom_amount parameter.
@@ -106,6 +128,7 @@
 			'name' => 'Item Name',
 			'price' => 0,
 			'shipping' => 0,
+			'shipping_per_quantity' => 0,
 			'shipping_enable' => 0,
 			'tax' => 0,
 			'quantity' => 1,
@@ -149,6 +172,7 @@
 			'quantity' => $quantity,
 			'tax' => $tax,
 			'shipping' => $shipping,
+			'shipping_per_quantity' => $shipping_per_quantity,
 			'shipping_enable' => $shipping_enable,
 			'url' => $url,
 			'custom_quantity' => $custom_quantity,
@@ -226,6 +250,7 @@
 			'tax' => $tax,
 			'shipping' => $shipping,
 			'shipping_enable' => $shipping_enable,
+			'shipping_per_quantity' => $shipping_per_quantity,
 			'dec_num' => intval( $class_main_inst->get_setting( 'price_decimals_num' ) ),
 			'thousand_sep' => $class_main_inst->get_setting( 'price_thousand_sep' ),
 			'dec_sep' => $class_main_inst->get_setting( 'price_decimal_sep' ),
@@ -253,6 +278,9 @@
 		echo '<script type="text/javascript">var wpec_' . esc_attr( $button_id ) . '_data=' . json_encode( $data ) . ';jQuery( function( $ ) {$( document ).on( "wpec_paypal_sdk_loaded", function() { new ppecHandler(wpec_' . esc_attr( $button_id ) . '_data) } );} );</script>';
 
 		WP_Express_Checkout\Main::get_instance()->load_paypal_sdk();
+
+		//Trigger action hook
+		do_action( 'wpec_url_payment_box_before_body_close', $product_id );
 		?>
 	</body>
 </html>

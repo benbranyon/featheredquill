@@ -9,6 +9,8 @@
 namespace WP_Express_Checkout;
 
 use Exception;
+use WP_Express_Checkout\Debug\Logger;
+use WP_Express_Checkout\Utils_Downloads;
 
 /**
  * Download request class.
@@ -252,7 +254,6 @@ class View_Downloads {
 		}
 
 		// Trigger the action hook (product object is also passed).
-		// It can be used to override the download handling via an addon.
 		do_action( 'wpec_process_download_request', $product, $order_id );
 
 		if ( isset( $_GET['var_id'] ) && isset( $_GET['grp_id'] ) ) {
@@ -274,6 +275,10 @@ class View_Downloads {
 		}
 
 		$counter = $order->get_data( 'downloads_counter' );
+		if(!is_array($counter)){
+			//if it's not an array, reset it to an empty array.
+			$counter = array();
+		}
 
 		if ( empty( $counter[ $file_name ] ) ) {
 			$counter[ $file_name ] = 0;
@@ -281,18 +286,150 @@ class View_Downloads {
 
 		$counter[ $file_name ]++;
 		$order->add_data( 'downloads_counter', $counter );
+		//Logger::log( 'Process download - updating download counter.', true);
 
 		// Clean the file URL.
 		$file_url = stripslashes( trim( $file_url ) );
 
-		if($product->wpec_force_download)
-		{
-			Utils::force_download_file($file_url);
+		// Trigger action hook (file_url, product object is also passed).
+		// It can be used to override the download handling via an addon.
+		do_action( 'wpec_before_file_download', $file_url, $product, $order_id );		
+
+		if($product->wpec_force_download) {
+			View_Downloads::handle_force_download_file($file_url);
 		}
-		else{
+		else {
 			Utils::redirect_to_url( $file_url );					
 		}
 
 	}
 
+	public static function handle_force_download_file( $file_url )
+	{
+		$download_method = Main::get_instance()->get_setting( 'download_method' );
+		$download_url_conversion_preference = Main::get_instance()->get_setting( 'download_url_conversion_preference' );
+		
+		Logger::log("Force download option is enabled. Using download method: ". $download_method .". URL conversion preference is set to: ". $download_url_conversion_preference );
+
+		//Stores the file download function's return value.
+		$result = true; 
+
+		// If the download method is set to default, use the default method.
+		if ($download_method == '1' && $download_url_conversion_preference === 'absolute') {
+			// The default method (good for most cases).
+			$result = self::handle_download_method_default( $file_url );
+		}else{
+			// Handle download method according to the user preferences set in the settings.
+			$result = self::handle_download_method( $file_url, $download_method, $download_url_conversion_preference );
+		}
+
+		// If the download process fails, display the error message.
+		if ($result !== true) {
+			$error_msg = __( 'Error occurred when trying to download the file.', 'wp-express-checkout' );
+			Logger::log( $error_msg . $result, false);
+			wp_die($error_msg . $result);
+		}
+
+		Logger::log("Download completed successfully with no server-side errors.");
+	}
+
+	/**
+	 * Download file using default process. Assumed that the following procedure will work most of 
+	 * the cases, so user don't need to change default settings.
+	 *
+	 * @param string $file_url
+	 * 
+	 * @return string|bool Error messages if any.
+	 */
+	public static function handle_download_method_default($file_url) {
+		$is_local_file = Utils_Downloads::is_local_file($file_url);
+		if( $is_local_file ) {
+			// If the file is locally available, use the default file download method.
+			$file_path = Utils_Downloads::absolute_path_from_url($file_url);
+			return Utils_Downloads::download_using_fopen($file_path);
+		}
+
+		// The file URI is not local, so use the curl method as default.
+		return Utils_Downloads::download_using_curl( $file_url );
+	}
+
+	/**
+	 * Download file according to the user preferences. If any server have special config, user can
+	 * change the settings however they want.
+	 * 
+	 * * NOTE: If url to path conversion fails, the download url will remain unchanged.
+	 *
+	 * @param string $file_url The file URL
+	 * @param string $download_method The preferred download method.
+	 * @param string $path_type The preferred file path type.
+	 * 
+	 * @return string|bool Error messages if any.
+	 */
+	public static function handle_download_method($file_url, $download_method, $path_type){
+		// Try to convert to target path type. If conversion fails, keep the url unchanged. 
+		$file_url = Utils_Downloads::url_to_path_converter($file_url, $path_type);
+		Logger::log("Download file path/url after conversion: $file_url");
+		switch($download_method) {
+			case 2:
+				// Method 2, Fopen-1M.
+				return Utils_Downloads::download_using_fopen($file_url, 1024);
+			case 3:
+				// Method 3, Readfile-1M-SessionWriteClose.
+				return Utils_Downloads::download_using_fopen($file_url, 1024, TRUE);
+			case 4:
+				// Method 4, cURL.
+				return Utils_Downloads::download_using_curl($file_url);
+			case 5:
+				// Method 5, Mod X-Sendfile (only if your server have this library installed)
+				return Utils_Downloads::download_using_xsend_file($file_url);       			
+			default:	
+				// (Default) Method 1, Fopen-8K.
+				return Utils_Downloads::download_using_fopen($file_url);
+		}
+	}
+
+	/**
+	 * Verify if the file URL is accessible. If not, it will use wp_die() to display the error message.
+	 * It will also return the file size if available. If not, it will return 0.
+	 */
+	public static function verify_file_url_accessible( $file_url ){
+		//Uses wp_remote_get() to check if the file exists and the response code is 200.
+		$remote_get_args = array(
+			'method'      => 'HEAD',
+			'timeout'     => 30,
+			'redirection' => 5,
+			'sslverify'   => false,
+		);
+
+		$data = wp_remote_get( $file_url, $remote_get_args );
+
+		if ( is_wp_error( $data ) ) {
+			$err = $data->get_error_message();
+			wp_die( __( 'Error occurred when trying to fetch the file using wp_remote_get().', 'wp-express-checkout' ) . ' ' . $err );
+		}
+
+		// Check if the file exists and the response code is 200.
+		if ( $data['response']['code'] !== 200 ) {
+			if ( $data['response']['code'] === 404 ) {
+				status_header( 404 );
+				$err_msg = ( __( "Requested file could not be found (error code 404). Verify the file URL specified in the product configuration.", 'wp-express-checkout' ) );
+				Logger::log( $err_msg, false );
+				wp_die( $err_msg );
+			} else {
+				status_header( $data['response']['code'] );
+				$err_msg = sprintf( __( 'An HTTP error occurred during file retrieval. Error Code: %s', 'wp-express-checkout' ), $data['response']['code'] );
+				Logger::log( $err_msg, false );
+				wp_die( $err_msg );
+			}
+		}
+
+		//Check if the file size is available.
+		if( isset( $data['headers']['content-length'] ) ) {
+			$file_size = intval( $data['headers']['content-length'] );
+		} else {
+			$file_size = 0;
+		}
+
+		return $file_size;
+	}
 }

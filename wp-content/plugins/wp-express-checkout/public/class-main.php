@@ -74,11 +74,22 @@ class Main {
 		//This function will be called from the front-end side.
 		//Refer to the enqueue_admin_scripts() in the 'admin/class-admin.php' file for admin side related scripts.
 
-		// Minimize prod or show expanded in dev.
-		$min = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ? '' : '.min';
+		// Minimized or full version
+		$min = ( defined( 'WPEC_LOAD_NON_MINIFIED' ) && WPEC_LOAD_NON_MINIFIED ) ? '' : '.min';
 
+		// Enqueue public.js
 		wp_enqueue_script( 'wp-ppec-frontend-script', WPEC_PLUGIN_URL . "/assets/js/public{$min}.js", array( 'jquery' ), WPEC_PLUGIN_VER, true );
+		wp_localize_script( 'wp-ppec-frontend-script', 'wpec_create_order_vars', array(
+			'nonce' => wp_create_nonce('wpec-create-order-js-ajax-nonce'),
+		));
+		wp_localize_script( 'wp-ppec-frontend-script', 'wpec_on_approve_vars', array(
+			'nonce' => wp_create_nonce('wpec-onapprove-js-ajax-nonce'),
+			'return_url' => $this->get_setting( 'thank_you_url' ),
+			'txn_success_message' => __('Transaction completed successfully!', 'wp-express-checkout'),
+    		'txn_success_extra_msg' => __('Feel free to browse our site further for your next purchase.', 'wp-express-checkout'),
+		));
 
+		// Enqueue public.css
 		wp_enqueue_style( 'wp-ppec-frontend-style', WPEC_PLUGIN_URL . "/assets/css/public{$min}.css", array(), WPEC_PLUGIN_VER );
 		wp_style_add_data( 'wp-ppec-frontend-style', 'rtl', 'replace' );
 		wp_style_add_data( 'wp-ppec-frontend-style', 'suffix', $min );
@@ -369,6 +380,8 @@ class Main {
 			'tos_text'             => __( 'I accept the <a href="https://example.com/terms-and-conditions/" target="_blank">Terms and Conditions</a>', 'wp-express-checkout' ),
 			'download_duration'    => '',
 			'download_count'       => '',
+			'download_method'       => '1',
+			'download_url_conversion_preference' => 'absolute',
 			'access_permission'    => 'manage_options',
 		);
 

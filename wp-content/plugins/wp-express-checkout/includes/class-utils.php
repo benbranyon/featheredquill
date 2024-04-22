@@ -3,7 +3,7 @@
 namespace WP_Express_Checkout;
 
 use Exception;
-
+use WP_Express_Checkout\Debug\Logger;
 class Utils {
 
 	/**
@@ -73,6 +73,47 @@ class Utils {
 		} else {
 			return 0;
 		}
+	}
+
+	/**
+	 * Calculates the total shipping amount from provided product arguments.
+	 * It calculates the total per quantity shipping cost (if specified) and 
+	 * adds that to the base shipping cost. If the base shipping cose is not
+	 * specified, it returns zero.
+	 * 
+	 * @param array $product_args The product shipping costs data.
+	 * @return float Total shipping cost
+	 */
+	public static function get_total_shipping_cost($product_args){
+		$total = 0;
+		$quantity = 1;
+		$base_shipping = 0;
+		$shipping_per_quantity = 0;
+	
+		if ( isset($product_args['shipping_per_quantity']) && ! empty( $product_args['shipping_per_quantity'] )) {
+			$shipping_per_quantity = floatval( esc_attr($product_args['shipping_per_quantity']));
+
+			// To calculate total shipping per quantity cost.
+			if ( isset($product_args['quantity']) && ! empty( $product_args['quantity'] )) {
+				$quantity = intval($product_args['quantity']);
+			}
+		}
+		
+		// Check if product specific shipping cost is specified or not.
+		if (isset($product_args['shipping']) && !empty( $product_args['shipping'] )){
+			// Get the base shipping cost specified for a particular product.
+			$base_shipping = floatval(esc_attr( $product_args['shipping'] ));
+		} else {
+			// Use global base shipping settings only if the base shipping is explicitly set to '' (empty) in the product add/edit page.
+			$global_settings = get_option( 'ppdg-settings');
+			if ( isset( $global_settings->shipping ) && !empty( isset( $global_settings->shipping ) ) ) {
+				$base_shipping = floatval(esc_attr($global_settings->shipping));
+			}
+		}
+		
+		$total = $base_shipping + ($shipping_per_quantity * $quantity);
+		
+		return $total;
 	}
 
 	public static function round_price( $price ) {
@@ -172,9 +213,13 @@ class Utils {
 			'purchase_amt' => __( 'The amount paid for the current transaction', 'wp-express-checkout' ),
 			'purchase_date' => __( 'The date of the purchase', 'wp-express-checkout' ),
 			'coupon_code' => __( 'Coupon code applied to the purchase', 'wp-express-checkout' ),
-			'currency_code' => __( 'Order currency code', 'wp-express-checkout' ),
+			'currency_code' => __( 'Order currency code', 'wp-express-checkout' ),			
 			'product_id' => __( 'Product ID', 'wp-express-checkout' ),
 			'product_name' => __( 'Product Name', 'wp-express-checkout' ),
+			'quantity_ordered' => __( 'Quantity ordered', 'wp-express-checkout' ),
+			'download_link' => __( 'Download link of the product (if any)', 'wp-express-checkout' ),
+			'download_link_url_only' => __( 'Download link that contains the URL only, omitting any associated product name (if any).', 'wp-express-checkout' ),
+			'selected_variations' => __( 'Selected variations of the order', 'wp-express-checkout' ),
 		) );
 
 		return $tags;
@@ -200,38 +245,6 @@ class Utils {
 		if ( $exit == '1' ) {//exit
 			exit;
 		}
-	}
-
-	public static function force_download_file($file_url)
-	{		
-		$file_size = intval(get_headers($file_url, true)['Content-Length']);
-		
-		header('Content-Type: application/octet-stream');
-		header('Content-Disposition: attachment; filename="' . basename($file_url) . '"');
-		header('Content-Length: ' . $file_size);
-		
-		// Clear any output that may have already been sent
-		ob_end_clean();
-		
-		// Open the file for reading
-		$fp = fopen($file_url, 'rb');
-		
-		// Set the time limit to 0 to prevent the script from timing out
-		set_time_limit(0);
-		
-		// Send the file in 8KB chunks
-		$chunk_size = 8192;
-		while (!feof($fp) && ($p = ftell($fp)) <= $file_size) {
-			if ($p + $chunk_size > $file_size) {
-				// Last chunk
-				$chunk_size = $file_size - $p;
-			}
-			echo fread($fp, $chunk_size);
-			flush(); // flush the output buffer
-		}
-		
-		// Close the file pointer
-		fclose($fp);
 	}
 	
 	// There is no need in untranslated countries list currently, so let's use

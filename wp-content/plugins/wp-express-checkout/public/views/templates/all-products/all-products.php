@@ -1,4 +1,6 @@
 <?php
+// The all-products template for shop/products page. Used in the shortcode [wpec_show_all_products]
+
 wp_enqueue_style('dashicons');
 wp_enqueue_style('wpec-all-products-css');
 
@@ -24,7 +26,8 @@ $strViewItem    = __('View Item', 'wp-express-checkout');
 <form method="GET" id="wpec-sort-by-form">
 <select id="wpec-sort-by" name="wpec-sortby">
 	<option <?php echo ("id-desc"==$sort_by?"selected='selected'":"")?> value="id-desc">Sort by latest</option>
-	<option <?php echo "title-asc"==$sort_by?"selected='selected'":""?> value="title-asc">Sort by title</option>
+	<option <?php echo ("id-asc"==$sort_by?"selected='selected'":"")?> value="id-asc">Sort by chronological order</option>
+	<option <?php echo ("title-asc"==$sort_by?"selected='selected'":"")?> value="title-asc">Sort by title</option>
 	<option <?php echo ("price-asc"==$sort_by?"selected='selected'":"")?> value="price-asc">Sort by price (low to high)</option>
 	<option <?php echo ("price-desc"==$sort_by?"selected='selected'":"")?> value="price-desc">Sort by price(high to low)</option>
 </select>
@@ -49,9 +52,9 @@ ob_start();
 ?>
 
 <div class="wpec-grid-item wpec-product-id-%[product_id]%">
-	<div class="wpec-product-thumb"><img src="%[product_thumb]%"></div>
-	<div class="wpec-product-price">%[product_price]%</div>
-	<div class="wpec-product-name">%[product_name]%</div>
+	<div class="wpec-tpl-ap-product-thumb"><img src="%[product_thumb]%"></div>
+	<div class="wpec-tpl-ap-product-price">%[product_price]%</div>
+	<div class="wpec-tpl-ap-product-name">%[product_name]%</div>
 	%[view_product_btn]%
 </div>
 

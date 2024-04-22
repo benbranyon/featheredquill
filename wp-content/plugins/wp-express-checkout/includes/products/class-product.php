@@ -13,6 +13,8 @@ use WP_Post;
  */
 abstract class Product {
 
+	protected $item_name = '';
+
 	/**
 	 * Product type (one_time, donation, subscription, etc.)
 	 * @var  string
@@ -40,8 +42,17 @@ abstract class Product {
 	 */
 	public function __construct( $post ) {
 		$this->post = $post;
+		$this->item_name = $post->post_title;
 		$this->wpec = Main::get_instance();
 	}
+
+	/**
+	 * Retrieves the product name.
+	 */
+	public function get_item_name() {
+		$item_name = isset( $this->item_name ) ? $this->item_name : '';
+		return $item_name;
+	}	
 
 	/**
 	 * Retrieves the product type.
@@ -195,12 +206,36 @@ abstract class Product {
 	}
 
 	/**
+	 * Retrieves the shipping cost per quantity.
+	 *
+	 * @return string
+	 */
+	public function get_shipping_per_quantity() {
+		return $this->post->wpec_product_shipping_per_quantity;
+	}
+
+	/**
 	 * Whether product type is physical.
 	 *
 	 * @return bool
 	 */
 	public function is_physical() {
 		return (bool) $this->post->wpec_product_shipping_enable;
+	}
+
+	public function is_digital_product(){
+		$base_shipping = $this->get_shipping();
+		$shipping_per_quantity = $this->get_shipping_per_quantity();
+		if ( isset( $base_shipping ) && !empty( $base_shipping ) ){
+			return false;
+		}
+		if ( isset( $shipping_per_quantity ) && !empty( $shipping_per_quantity ) ){
+			return false;
+		}
+		if ( $this->post->wpec_product_shipping_enable ){
+			return false;
+		}
+		return true;
 	}
 
 	/**

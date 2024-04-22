@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       WP Express Checkout
  * Description:       This plugin allows you to create a customizable PayPal payment button that lets the customers pay quickly in a popup via PayPal.
- * Version:           2.3.0
+ * Version:           2.3.10
  * Author:            Tips and Tricks HQ
  * Author URI:        https://www.tipsandtricks-hq.com/
  * Plugin URI:        https://wp-express-checkout.com/
@@ -17,10 +17,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 //Define constants
-define( 'WPEC_PLUGIN_VER', '2.3.0' );
+define( 'WPEC_PLUGIN_VER', '2.3.10' );
 define( 'WPEC_PLUGIN_URL', plugins_url( '', __FILE__ ) );
 define( 'WPEC_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WPEC_PLUGIN_FILE', __FILE__ );
+define( 'WPEC_PRODUCT_POST_TYPE_SLUG', 'ppec-products' );//Slowy use this constant instead of hardcoding the slug in the code.
+define( 'WPEC_LOAD_NON_MINIFIED', true );//Set to true to load the non-minified version.
 
 /* ----------------------------------------------------------------------------*
  * Includes
@@ -44,6 +46,7 @@ function wpec_load_classes() {
 	new WP_Express_Checkout\Payment_Processor_Free();
 	new WP_Express_Checkout\Init();
 	new WP_Express_Checkout\Integrations();
+	new WP_Express_Checkout\PayPal_Payment_Button_Ajax_Handler();
 
 	// Load admin side class
 	if ( is_admin() ) {
@@ -70,3 +73,13 @@ function wpec_add_settings_link($links, $file) {
     return $links;
 }
 add_filter('plugin_action_links', 'wpec_add_settings_link', 10, 2);
+
+//Manage admin user feedback
+function wpec_manage_admin_feedback(){
+	if( !class_exists( 'WPEC_Admin_User_Feedback' ) ) {
+		include_once WPEC_PLUGIN_PATH . 'admin/includes/class-admin-user-feedback.php';
+	}
+	$user_feedback = new WPEC_Admin_User_Feedback();
+	$user_feedback->init();
+}
+add_action( 'admin_init', 'wpec_manage_admin_feedback' );

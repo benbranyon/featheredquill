@@ -3,8 +3,8 @@ Contributors: Tips and Tricks HQ, dikiy_forester, mbrsolution, Ivy2120, chanelst
 Donate link: https://wp-express-checkout.com/
 Tags: paypal, payment, woocommerce, digital store, e-commerce, checkout
 Requires at least: 5.6
-Tested up to: 6.2
-Stable tag: 2.3.0
+Tested up to: 6.5
+Stable tag: 2.3.10
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,6 +15,8 @@ Allows you to accept payments quickly for products and services via a payment po
 The WP Express Checkout plugin allows you to sell any type of products and services from your WordPress powered site easily using the new PayPal Checkout option. Install the plugin, configure some basic settings, create a few products and you are ready to sell products and services from your site. The checkout process is quick and easy.
 
 This plugin gives you shortcodes to generate customizable PayPal payment buttons that allow customers to pay for items instantly via a payment popup window. Customers can pay using PayPal or a credit card. It uses PayPal's newest/latest Checkout API/Gateway.
+
+Additionally, this plugin provides a product block that seamlessly integrates with the WordPress block editor, enabling you to easily incorporate products into your website.
 
 The full checkout takes place in a payment popup window and the customer never leaves your site. It creates a fast and elegant checkout experience.
 
@@ -30,7 +32,9 @@ If you want to sell digital products using PayPal then you will love the simplic
 
 = Optional WooCommerce Integration =
 
-There is also an option for WooCommerce. So you can use this plugin to add the new PayPal Express Checkout gateway to WooCommerce.
+There is also an option for WooCommerce. So you can use this plugin to add the new PayPal Express Checkout gateway to WooCommerce. 
+
+Please note that the integration with WooCommerce is entirely optional. It is important to highlight that this plugin is primarily designed for standalone use and does not depend on WooCommerce.
 
 = Works with PayPal's Buy Now Pay Later Feature =
 
@@ -70,13 +74,16 @@ View configuration and usage details on the [WP Express Checkout](https://wp-exp
 * Option to charge shipping for your items. Ability to set a shipping cost for each item separately.
 * Option to charge tax for your items.
 * Option to configure discount coupon codes.
+* Option to give a free product using 100% discount coupon code (offer complimentary product).
 * Option to configure terms and conditions before checkout.
 * You can see all the orders within your WordPress admin dashboard.
 * Option to customize the Thank You page.
 * Option to create product categories and apply it to some products. 
 * Option to create product tags and apply it to certain products.
+* Option to export the orders data to a CSV file.
 * Ability to configure the download links to expire after X number of hours.
 * Ability to configure the download links to expire after X number of clicks.
+* Option to test it on PayPal Sandbox mode before going Live.
 * Option to [Integrate it with WooCommerce](https://wp-express-checkout.com/woocommerce-paypal-express-checkout/) to offer product checkout via PayPal's express checkout system.
 
 The setup is very easy. Once you have installed the plugin, all you need to do is enter your PayPal Express Checkout API credentials in the plugin settings and your website will be ready to accept PayPal and credit card payments.
@@ -93,7 +100,7 @@ Or use the following shortcode to output product details and the express checkou
 
 [wp_express_checkout id="123" template="1"]
 
-You can also test it on PayPal Sandbox mode before going Live.
+Additionally, you have the option to utilize the product block for adding a product into the post or page editor.
 
 == Usage ==
 
@@ -156,6 +163,57 @@ https://wp-express-checkout.com/
 None
 
 == Changelog ==
+
+= 2.3.10 =
+- Added a new action hook 'before_wpec_thank_you_page_shortcode_execution' that can be used to redirect from the thank you page shortcode.
+- Fixed an issue with item names having special characters.
+
+= 2.3.9 =
+- For 100% discount coupon checkout, the billing address fields will be hidden for digital products.
+- Added a new filter 'wpec_hide_billing_address_fields' to hide billing address fields for digital products for the 100% discount coupon checkout.
+- Taxonomy page's 404 error fixed.
+- Fixed the URL payment feature's issue with the newly added validation.
+
+= 2.3.8 =
+- Added new action hooks that is triggered after the output of download headers (for force download feature).
+- The PayPal create-order and the capture-order API calls have been moved to the server side.
+- Added a new function to handle the server side payment processing.
+- The Transaction ID section in the order status meta box displays the capture ID.
+- API pre-submission validation added.
+
+= 2.3.7 = 
+- Added a new action hook - wpec_before_file_download.
+- Added new action and filter hooks to the URL payment feature.
+- Added a new settings option in the advanced settings menu to allow configuration of force download manager.
+- Enhanced the force download feature to check if the file is accessible before trying to dispatch it for cURL method.
+
+= 2.3.6 =
+- New option to configure additional shipping cost per quantity in the product add/edit interface. [Shipping Documentation](https://wp-express-checkout.com/configuring-shipping-options/)
+- New free extension to reset plugin settings and data to start over. [Download the extension here](https://wp-express-checkout.com/wp-express-checkout-reset-settings-and-data/)
+
+= 2.3.5 =
+- Resolved an issue where product quantities with fractional pricing caused an error with PayPal.
+- Added a new option to 'sort by chronological order' to the products/shop page.
+
+= 2.3.4 =
+- Added a new email merge tag {download_link_url_only}. It outputs the download link URL only, omitting any associated product name.
+- The shipping enabled option uses the "shipping_preference" parameter of the PayPal API.
+- PHP 8.0 compatibility related fix for the wpec_ty shortcode.
+- Product block's dependency issue fixed.
+- Fixed a css issue for the shop/products page in the small screen devices.
+
+= 2.3.3 =
+- Added a new feature: ability to add order notes in the admin order edit interface.
+- The orders menu will show the Capture ID (instead of the Resource ID) in the Transaction ID field.
+- WP eMember integration update for subscription payment addon.
+- Added new email merge tags: {quantity_ordered} and {selected_variations}
+
+= 2.3.2 =
+- Added quantity, unit price and total amount columns to the CSV export feature.
+- The order summary table now shows the unit price of the item also.
+
+= 2.3.1 =
+- New feature in the orders menu to export the orders data to a CSV file.
 
 = 2.3.0 =
 - Added a confirmation dialogue option to the order action items.
