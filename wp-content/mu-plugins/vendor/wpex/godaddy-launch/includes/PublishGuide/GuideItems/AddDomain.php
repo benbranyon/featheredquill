@@ -10,7 +10,7 @@ namespace GoDaddy\WordPress\Plugins\Launch\PublishGuide\GuideItems;
 /**
  * The AddDomain class.
  */
-class AddDomain implements GuideItemInterface {
+class AddDomain extends GuideItemAbstract {
 	/**
 	 * Determines if the guide item should be enabled.
 	 *
@@ -51,6 +51,15 @@ class AddDomain implements GuideItemInterface {
 	 */
 	public function option_name() {
 		return 'gdl_pgi_add_domain';
+	}
+
+	/**
+	 * Returns the milestone name of the GuideItem used in the nux api.
+	 *
+	 * @return string
+	 */
+	public function milestone_name() {
+		return 'add-domain';
 	}
 
 	/**

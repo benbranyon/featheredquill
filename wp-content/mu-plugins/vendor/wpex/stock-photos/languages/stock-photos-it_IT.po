@@ -79,7 +79,7 @@ msgstr "Matrimonio"
 
 #: includes/class-scripts.php:53
 msgid "Generic"
-msgstr "Generale"
+msgstr "Generici"
 
 #: includes/class-scripts.php:68
 #, php-format

@@ -150,28 +150,28 @@
         },
         {
             "name": "gdcorp-wordpress/limit-login-attempts-reloaded",
-            "version": "2.25.15",
-            "version_normalized": "2.25.15.0",
+            "version": "2.26.4",
+            "version_normalized": "2.26.4.0",
             "source": {
                 "type": "git",
                 "url": "git@github.com:gdcorp-wordpress/limit-login-attempts-reloaded.git",
-                "reference": "ba25addb01f34027999a4d8f4f71bd85c85916a7"
+                "reference": "bb70eea30cb8139aabf97b4d5503d363305f4f6c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gdcorp-wordpress/limit-login-attempts-reloaded/zipball/ba25addb01f34027999a4d8f4f71bd85c85916a7",
-                "reference": "ba25addb01f34027999a4d8f4f71bd85c85916a7",
+                "url": "https://api.github.com/repos/gdcorp-wordpress/limit-login-attempts-reloaded/zipball/bb70eea30cb8139aabf97b4d5503d363305f4f6c",
+                "reference": "bb70eea30cb8139aabf97b4d5503d363305f4f6c",
                 "shasum": ""
             },
             "require": {
                 "composer/installers": "~v2.2.0"
             },
-            "time": "2023-04-10T10:42:37+00:00",
+            "time": "2024-02-13T00:17:14+00:00",
             "type": "wordpress-plugin",
-            "installation-source": "dist",
+            "installation-source": "source",
             "description": "A WordPress plugin for limiting login attempts and improving security on login forms",
             "support": {
-                "source": "https://github.com/gdcorp-wordpress/limit-login-attempts-reloaded/tree/2.25.15",
+                "source": "https://github.com/gdcorp-wordpress/limit-login-attempts-reloaded/tree/2.26.4",
                 "issues": "https://github.com/gdcorp-wordpress/limit-login-attempts-reloaded/issues"
             },
             "install-path": "../gdcorp-wordpress/limit-login-attempts-reloaded"
@@ -196,7 +196,7 @@
             },
             "time": "2023-02-22T12:52:04+00:00",
             "type": "wordpress-plugin",
-            "installation-source": "dist",
+            "installation-source": "source",
             "description": "A WordPress plugin for managing cron jobs",
             "support": {
                 "source": "https://github.com/gdcorp-wordpress/mwp-cron/tree/v1.1",
@@ -206,28 +206,28 @@
         },
         {
             "name": "gdcorp-wordpress/system-plugin-worker",
-            "version": "4.9.17",
-            "version_normalized": "4.9.17.0",
+            "version": "4.9.19",
+            "version_normalized": "4.9.19.0",
             "source": {
                 "type": "git",
                 "url": "git@github.com:gdcorp-wordpress/system-plugin-worker.git",
-                "reference": "d47d388bb37eddbbf7b596ed9476af2c5cc2bf9a"
+                "reference": "013f75380e05a48d07e79dcedc00ad9af385fd0f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gdcorp-wordpress/system-plugin-worker/zipball/d47d388bb37eddbbf7b596ed9476af2c5cc2bf9a",
-                "reference": "d47d388bb37eddbbf7b596ed9476af2c5cc2bf9a",
+                "url": "https://api.github.com/repos/gdcorp-wordpress/system-plugin-worker/zipball/013f75380e05a48d07e79dcedc00ad9af385fd0f",
+                "reference": "013f75380e05a48d07e79dcedc00ad9af385fd0f",
                 "shasum": ""
             },
             "require": {
                 "composer/installers": "~v2.2.0"
             },
-            "time": "2023-04-05T11:06:05+00:00",
+            "time": "2024-01-10T00:13:59+00:00",
             "type": "wordpress-plugin",
-            "installation-source": "dist",
+            "installation-source": "source",
             "description": "A pre-built ManageWP worker WordPress plugin",
             "support": {
-                "source": "https://github.com/gdcorp-wordpress/system-plugin-worker/tree/4.9.17",
+                "source": "https://github.com/gdcorp-wordpress/system-plugin-worker/tree/4.9.19",
                 "issues": "https://github.com/gdcorp-wordpress/system-plugin-worker/issues"
             },
             "install-path": "../gdcorp-wordpress/system-plugin-worker"
@@ -287,39 +287,39 @@
         },
         {
             "name": "godaddy/mwc-core",
-            "version": "3.12.3",
-            "version_normalized": "3.12.3.0",
+            "version": "4.2.0",
+            "version_normalized": "4.2.0.0",
             "source": {
                 "type": "git",
                 "url": "git@github.com:gdcorp-wordpress/mwc-core.git",
-                "reference": "0dc8d3b9946dfa0febe087ea834a20792acce15b"
+                "reference": "6444c37af206e620f540bbc1a1d6f9fa12e8bba3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gdcorp-wordpress/mwc-core/zipball/0dc8d3b9946dfa0febe087ea834a20792acce15b",
-                "reference": "0dc8d3b9946dfa0febe087ea834a20792acce15b",
+                "url": "https://api.github.com/repos/gdcorp-wordpress/mwc-core/zipball/6444c37af206e620f540bbc1a1d6f9fa12e8bba3",
+                "reference": "6444c37af206e620f540bbc1a1d6f9fa12e8bba3",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.4 <8.3"
             },
-            "time": "2023-05-11T18:52:55+00:00",
+            "time": "2024-04-11T16:02:22+00:00",
             "type": "wordpress-plugin",
-            "installation-source": "dist",
+            "installation-source": "source",
             "license": [
                 "GPL-2.0"
             ],
             "description": "Simplified eCommerce for WordPress by GoDaddy.",
             "support": {
-                "source": "https://github.com/gdcorp-wordpress/mwc-core/tree/3.12.3",
+                "source": "https://github.com/gdcorp-wordpress/mwc-core/tree/4.2.0",
                 "issues": "https://github.com/gdcorp-wordpress/mwc-core/issues"
             },
             "install-path": "../godaddy/mwc-core"
         },
         {
             "name": "illuminate/container",
-            "version": "v9.52.7",
-            "version_normalized": "9.52.7.0",
+            "version": "v9.52.16",
+            "version_normalized": "9.52.16.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/container.git",
@@ -372,8 +372,8 @@
         },
         {
             "name": "illuminate/contracts",
-            "version": "v9.52.7",
-            "version_normalized": "9.52.7.0",
+            "version": "v9.52.16",
+            "version_normalized": "9.52.16.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/contracts.git",
@@ -533,17 +533,17 @@
         },
         {
             "name": "rhubarbgroup/object-cache-pro",
-            "version": "1.18.0",
-            "version_normalized": "1.18.0.0",
+            "version": "1.18.2",
+            "version_normalized": "1.18.2.0",
             "source": {
                 "type": "git",
                 "url": "git@github.com:gdcorp-wordpress/mwp-object-cache-pro.git",
-                "reference": "298f003f121ee8170689c5da512e0bcf2609b3c6"
+                "reference": "bb676e0519952ce3ed4418c1f0eaa576bc1526c9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gdcorp-wordpress/mwp-object-cache-pro/zipball/298f003f121ee8170689c5da512e0bcf2609b3c6",
-                "reference": "298f003f121ee8170689c5da512e0bcf2609b3c6",
+                "url": "https://api.github.com/repos/gdcorp-wordpress/mwp-object-cache-pro/zipball/bb676e0519952ce3ed4418c1f0eaa576bc1526c9",
+                "reference": "bb676e0519952ce3ed4418c1f0eaa576bc1526c9",
                 "shasum": ""
             },
             "require": {
@@ -566,9 +566,9 @@
                 "ext-redis": "Required to use PhpRedis as the object cache backend.",
                 "ext-relay": "Required to use Relay as the object cache backend."
             },
-            "time": "2023-03-21T14:17:46+00:00",
+            "time": "2023-05-19T09:16:22+00:00",
             "type": "wordpress-plugin",
-            "installation-source": "dist",
+            "installation-source": "source",
             "autoload": {
                 "psr-4": {
                     "RedisCachePro\\": "src/"
@@ -622,7 +622,7 @@
             "description": "A business class Redis object cache backend for WordPress.",
             "homepage": "https://objectcache.pro",
             "support": {
-                "source": "https://github.com/gdcorp-wordpress/mwp-object-cache-pro/tree/1.18.0",
+                "source": "https://github.com/gdcorp-wordpress/mwp-object-cache-pro/tree/1.18.2",
                 "issues": "https://github.com/gdcorp-wordpress/mwp-object-cache-pro/issues"
             },
             "install-path": "../../object-cache-pro"
@@ -644,7 +644,7 @@
             },
             "time": "2023-03-24T16:02:27+00:00",
             "type": "wordpress-plugin",
-            "installation-source": "dist",
+            "installation-source": "source",
             "scripts": {
                 "prepare-release": [
                     "bash bin/prepare-release.sh"
@@ -668,17 +668,17 @@
         },
         {
             "name": "wpex/godaddy-launch",
-            "version": "2.2.2",
-            "version_normalized": "2.2.2.0",
+            "version": "2.10.0",
+            "version_normalized": "2.10.0.0",
             "source": {
                 "type": "git",
                 "url": "git@github.com:gdcorp-wordpress/godaddy-launch.git",
-                "reference": "5f7206da54d6efce7690be9378b0a1e78d268b56"
+                "reference": "5646df6dc3589782d59df6abca4daab44d7f0bc4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gdcorp-wordpress/godaddy-launch/zipball/5f7206da54d6efce7690be9378b0a1e78d268b56",
-                "reference": "5f7206da54d6efce7690be9378b0a1e78d268b56",
+                "url": "https://api.github.com/repos/gdcorp-wordpress/godaddy-launch/zipball/5646df6dc3589782d59df6abca4daab44d7f0bc4",
+                "reference": "5646df6dc3589782d59df6abca4daab44d7f0bc4",
                 "shasum": ""
             },
             "require": {
@@ -691,13 +691,13 @@
                 "dealerdirect/phpcodesniffer-composer-installer": "^0.7.2",
                 "godaddy-wordpress/json2po": "^1.0",
                 "godaddy-wordpress/pot2json": "^1.0",
-                "johnpbloch/wordpress-core": "^5.9",
+                "johnpbloch/wordpress-core": "^6.3",
                 "phpcompatibility/phpcompatibility-wp": "^2.1",
                 "wp-coding-standards/wpcs": "^2.3",
                 "wp-phpunit/wp-phpunit": "^6.1",
                 "yoast/phpunit-polyfills": "^1.0"
             },
-            "time": "2023-05-12T11:48:56+00:00",
+            "time": "2024-04-15T22:11:16+00:00",
             "type": "wordpress-plugin",
             "extra": {
                 "mozart": {
@@ -707,7 +707,7 @@
                     "classmap_prefix": "GDL_"
                 }
             },
-            "installation-source": "dist",
+            "installation-source": "source",
             "autoload": {
                 "psr-4": {
                     "GoDaddy\\WordPress\\Plugins\\Launch\\": "includes"
@@ -715,10 +715,13 @@
             },
             "scripts": {
                 "lint": [
-                    "@php ./vendor/bin/phpcs --runtime-set ignore_warnings_on_exit 1"
+                    "phpcs --standard=phpcs.xml"
+                ],
+                "format": [
+                    "phpcbf --standard=phpcs.xml --report-summary --report-source"
                 ],
                 "test": [
-                    "@php ./vendor/bin/phpunit"
+                    "phpunit"
                 ],
                 "prepare-release": [
                     "bash .dev/bin/prepare-release.sh"
@@ -750,33 +753,33 @@
                 }
             ],
             "support": {
-                "source": "https://github.com/gdcorp-wordpress/godaddy-launch/tree/2.2.2",
+                "source": "https://github.com/gdcorp-wordpress/godaddy-launch/tree/2.10.0",
                 "issues": "https://github.com/gdcorp-wordpress/godaddy-launch/issues"
             },
             "install-path": "../wpex/godaddy-launch"
         },
         {
             "name": "wpex/stock-photos",
-            "version": "1.2.0",
-            "version_normalized": "1.2.0.0",
+            "version": "v1.2.1",
+            "version_normalized": "1.2.1.0",
             "source": {
                 "type": "git",
                 "url": "git@github.com:gdcorp-wordpress/stock-photos.git",
-                "reference": "e48c7a309b0c8f523e6259126fc98b7a00cae1b9"
+                "reference": "283be0d9080843eecd8c70c3e1722e617be55025"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gdcorp-wordpress/stock-photos/zipball/e48c7a309b0c8f523e6259126fc98b7a00cae1b9",
-                "reference": "e48c7a309b0c8f523e6259126fc98b7a00cae1b9",
+                "url": "https://api.github.com/repos/gdcorp-wordpress/stock-photos/zipball/283be0d9080843eecd8c70c3e1722e617be55025",
+                "reference": "283be0d9080843eecd8c70c3e1722e617be55025",
                 "shasum": ""
             },
             "require-dev": {
-                "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
+                "dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",
                 "phpcompatibility/phpcompatibility-wp": "^2.1",
                 "squizlabs/php_codesniffer": "^3.5",
                 "wp-coding-standards/wpcs": "^2.1"
             },
-            "time": "2023-01-20T18:51:18+00:00",
+            "time": "2023-09-07T02:17:20+00:00",
             "type": "wordpress-plugin",
             "extra": {
                 "installer-paths": {
@@ -785,7 +788,7 @@
                     ]
                 }
             },
-            "installation-source": "dist",
+            "installation-source": "source",
             "scripts": {
                 "post-install-cmd": [
                     "npm install"
@@ -802,7 +805,7 @@
             ],
             "description": "Import beautiful, curated stock photos for your website.",
             "support": {
-                "source": "https://github.com/gdcorp-wordpress/stock-photos/tree/1.2.0"
+                "source": "https://github.com/gdcorp-wordpress/stock-photos/tree/v1.2.1"
             },
             "install-path": "../wpex/stock-photos"
         },
@@ -835,7 +838,7 @@
             },
             "time": "2022-12-26T13:07:25+00:00",
             "type": "wordpress-plugin",
-            "installation-source": "dist",
+            "installation-source": "source",
             "autoload": {
                 "psr-4": {
                     "Wpsec\\twofa\\": "src/"
@@ -904,7 +907,7 @@
             },
             "time": "2022-12-09T15:09:14+00:00",
             "type": "wordpress-plugin",
-            "installation-source": "dist",
+            "installation-source": "source",
             "autoload": {
                 "psr-4": {
                     "Wpsec\\captcha\\": "src/"
@@ -947,17 +950,17 @@
         },
         {
             "name": "wptool/wp-admin-dash",
-            "version": "v1.0.9",
-            "version_normalized": "1.0.9.0",
+            "version": "v1.0.14",
+            "version_normalized": "1.0.14.0",
             "source": {
                 "type": "git",
                 "url": "git@github.com:gdcorp-wordpress/wptool-wp-admin-dash.git",
-                "reference": "9869ec8c6455434c26571b8ec11307cfbfceb13e"
+                "reference": "f682c38481681cfb63a5264d67662b8a1ae5e6d6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gdcorp-wordpress/wptool-wp-admin-dash/zipball/9869ec8c6455434c26571b8ec11307cfbfceb13e",
-                "reference": "9869ec8c6455434c26571b8ec11307cfbfceb13e",
+                "url": "https://api.github.com/repos/gdcorp-wordpress/wptool-wp-admin-dash/zipball/f682c38481681cfb63a5264d67662b8a1ae5e6d6",
+                "reference": "f682c38481681cfb63a5264d67662b8a1ae5e6d6",
                 "shasum": ""
             },
             "require": {
@@ -971,9 +974,9 @@
                 "wp-coding-standards/wpcs": "^2.3.0",
                 "wpsec/wp-mock-test-abstraction": "dev-main"
             },
-            "time": "2023-03-15T09:59:17+00:00",
+            "time": "2023-07-19T12:38:55+00:00",
             "type": "wordpress-plugin",
-            "installation-source": "dist",
+            "installation-source": "source",
             "autoload": {
                 "psr-4": {
                     "Wptool\\": "src/"
@@ -1009,7 +1012,7 @@
             },
             "description": "WPTOOL - WordPress Admin Dashboard Plugin",
             "support": {
-                "source": "https://github.com/gdcorp-wordpress/wptool-wp-admin-dash/tree/v1.0.9",
+                "source": "https://github.com/gdcorp-wordpress/wptool-wp-admin-dash/tree/v1.0.14",
                 "issues": "https://github.com/gdcorp-wordpress/wptool-wp-admin-dash/issues"
             },
             "install-path": "../wptool/wp-admin-dash"

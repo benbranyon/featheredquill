@@ -21,6 +21,15 @@ class PublishGuideServiceProvider extends ServiceProvider {
 	const INTERACTED_SETTINGS_KEY = 'gdl_publish_guide_interacted';
 	const OPTOUT_SETTINGS_KEY     = 'gdl_publish_guide_opt_out';
 
+	const GUIDE_ITEMS = array(
+		GuideItems\SiteInfo::class,
+		GuideItems\SiteMedia::class,
+		GuideItems\SiteContent::class,
+		GuideItems\SEO::class,
+		GuideItems\SiteDesign::class,
+		GuideItems\AddDomain::class,
+	);
+
 	/**
 	 * This method will be used for hooking into WordPress with actions/filters.
 	 *
@@ -31,7 +40,7 @@ class PublishGuideServiceProvider extends ServiceProvider {
 		if (
 			! current_user_can( 'activate_plugins' ) ||
 			$this->is_excluded_admin_page() ||
-			$this->has_migrated_constant()
+			! $this->has_export_uid()
 		) {
 			return;
 		}
@@ -53,7 +62,22 @@ class PublishGuideServiceProvider extends ServiceProvider {
 		add_action(
 			is_admin() ? 'admin_enqueue_scripts' : 'wp_enqueue_scripts',
 			function( $hook_suffix ) use ( $build_file_slug, $asset_file, $enqueue_handle ) {
+				/*
+				 * When the publish guide is loaded on theme-install.php the theme previewer doesn't work.
+				 * @see https://godaddy.slack.com/archives/C033XGA8FK7/p1693263843042239
+				 */
+				if ( 'theme-install.php' === $hook_suffix ) {
+					return;
+				}
+
 				wp_enqueue_media();
+
+				$is_migrated = defined( 'GD_MIGRATED_SITE' ) ? constant( 'GD_MIGRATED_SITE' ) : false;
+
+				$edit_post_script_index = array_search( 'wp-edit-post', $asset_file['dependencies'], true );
+				if ( ! is_admin() && false !== $edit_post_script_index && true === $is_migrated ) {
+					unset( $asset_file['dependencies'][ $edit_post_script_index ] );
+				};
 
 				wp_enqueue_script(
 					$enqueue_handle . '-script',
@@ -76,12 +100,13 @@ class PublishGuideServiceProvider extends ServiceProvider {
 					'gdvPublishGuideDefaults',
 					array_merge(
 						array(
-							'appContainerClass' => self::APP_CONTAINER_CLASS,
-							'page'              => $hook_suffix,
-							'userId'            => get_current_user_id(),
-							'optionInteracted'  => self::INTERACTED_SETTINGS_KEY,
-							'optionOptOut'      => self::OPTOUT_SETTINGS_KEY,
-							'isOptOut'          => get_option( self::OPTOUT_SETTINGS_KEY ),
+							'appContainerClass'      => self::APP_CONTAINER_CLASS,
+							'page'                   => $hook_suffix,
+							'userId'                 => get_current_user_id(),
+							'optionInteracted'       => self::INTERACTED_SETTINGS_KEY,
+							'optionOptOut'           => self::OPTOUT_SETTINGS_KEY,
+							'isOptOut'               => get_option( self::OPTOUT_SETTINGS_KEY ),
+							'shouldUseReact18Syntax' => is_wp_version_compatible( '6.2' ) ? 'true' : 'false',
 						)
 					)
 				);
@@ -96,6 +121,7 @@ class PublishGuideServiceProvider extends ServiceProvider {
 							'admin'             => get_admin_url(),
 							'changeDomain'      => $this->get_change_domain_uri(),
 							'editorRedirectUrl' => $this->editor_redirect_url(),
+							'seoRedirectUrl'    => $this->yoast_seo_redirect_url(),
 						)
 					)
 				);
@@ -107,7 +133,7 @@ class PublishGuideServiceProvider extends ServiceProvider {
 				);
 
 				add_action(
-					'admin_footer',
+					is_admin() ? 'admin_footer' : 'wp_footer',
 					function() {
 						printf( '<div id="%s"></div>', esc_attr( self::APP_CONTAINER_CLASS ) );
 					}
@@ -116,13 +142,7 @@ class PublishGuideServiceProvider extends ServiceProvider {
 		);
 
 		// Register PublishGuide/GuideItems and their completed state.
-		$guide_items           = array(
-			GuideItems\SiteInfo::class,
-			GuideItems\SiteMedia::class,
-			GuideItems\SiteContent::class,
-			GuideItems\SiteDesign::class,
-			GuideItems\AddDomain::class,
-		);
+		$guide_items           = self::GUIDE_ITEMS;
 		$guide_items_localized = array();
 
 		foreach ( $guide_items as $guide_item ) {
@@ -132,11 +152,20 @@ class PublishGuideServiceProvider extends ServiceProvider {
 			$option_value = ! empty( get_option( $guide_item_object->option_name() ) );
 			$is_complete  = $option_value ? $option_value : $guide_item_object->is_complete();
 
+			// send publish guide step status to NUX API only once.
+			if ( empty( get_option( $guide_item_object->option_name() . '_nux_reported' ) ) && $guide_item_object->is_complete() ) {
+				$this->publish_guide_step_notify_nux_api(
+					$guide_item_object,
+					get_option( $guide_item_object->option_name() )
+				);
+			}
+
 			$class_name_parts                                  = explode( '\\', $guide_item );
 			$guide_items_localized[ end( $class_name_parts ) ] = array(
-				'default'  => $is_complete,
-				'enabled'  => $guide_item_object->is_enabled(),
-				'propName' => $guide_item_object->option_name(),
+				'default'       => $is_complete,
+				'enabled'       => $guide_item_object->is_enabled(),
+				'propName'      => $guide_item_object->option_name(),
+				'milestoneName' => $guide_item_object->milestone_name(),
 			);
 
 			// Register the setting so we can use useEntityProps.
@@ -148,8 +177,8 @@ class PublishGuideServiceProvider extends ServiceProvider {
 						$guide_item_object->option_name(),
 						array(
 							'show_in_rest' => true,
-							'default'      => false,
-							'type'         => 'boolean',
+							'default'      => '',
+							'type'         => 'string',
 						)
 					);
 
@@ -172,7 +201,7 @@ class PublishGuideServiceProvider extends ServiceProvider {
 			// When pulling the value, convert back to boolean true.
 			add_filter(
 				"option_{$guide_item_object->option_name()}",
-				array( Helper::class, 'get_option_convert_timestamp_to_true' )
+				array( Helper::class, 'get_skipped_or_boolean_as_string' )
 			);
 		}
 
@@ -223,6 +252,44 @@ class PublishGuideServiceProvider extends ServiceProvider {
 		add_action( 'rest_api_init', array( $this, 'register_site_logo_setting' ), 10 );
 		add_action( 'rest_api_init', array( $this, 'register_publish_guide_interacted' ) );
 		add_action( 'rest_api_init', array( $this, 'register_publish_guide_optout' ) );
+		add_action(
+			'rest_api_init',
+			function() use ( $guide_items ) {
+				register_rest_route(
+					'gdl/v1',
+					'/milestone/(?P<milestone_name>[a-zA-Z0-9_-]+)',
+					array(
+						'methods'             => \WP_REST_Server::EDITABLE,
+						'permission_callback' => function () {
+							// See https://wordpress.org/support/article/roles-and-capabilities/#activate_plugins.
+							return current_user_can( 'activate_plugins' );
+						},
+						'show_in_index'       => false,
+						'callback'            => array( $this, 'publish_guide_step_status_update' ),
+						'args'                => array(
+							'status'         => array(
+								'required' => true,
+							),
+							'milestone_name' => array(
+								'validate_callback' => function( $param ) use ( $guide_items ) {
+									return in_array(
+										$param,
+										array_map(
+											function( $guide_item ) {
+												$guide_item_object = $this->app->make( $guide_item );
+												return $guide_item_object->milestone_name();
+											},
+											$guide_items,
+										),
+										true
+									);
+								},
+							),
+						),
+					)
+				);
+			}
+		);
 	}
 
 	/**
@@ -231,6 +298,70 @@ class PublishGuideServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	public function register() {}
+
+	/**
+	 * Update the status of a milestone step.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function publish_guide_step_status_update( $request ) {
+		$milestone_name    = $request->get_param( 'milestone_name' );
+		$guide_item_object = $this->get_guide_item_by_milestone_name( $milestone_name );
+		$status            = $request->get_param( 'status' );
+		$response          = $this->publish_guide_step_notify_nux_api( $guide_item_object, $status );
+
+		return $response;
+	}
+
+	/**
+	 * Publish milestone step to nux api
+	 *
+	 * @param object $guide_item_object The name of the milestone.
+	 * @param string $status The status of the milestone.
+	 * @return WP_REST_Response
+	 */
+	public function publish_guide_step_notify_nux_api( $guide_item_object, $status ) {
+		$option_name = $guide_item_object->option_name();
+
+		if ( ! empty( get_option( $option_name . '_nux_reported' ) ) ) {
+			return;
+		}
+
+		$domain = defined( 'GD_TEMP_DOMAIN' ) ? GD_TEMP_DOMAIN : Helper::domain();
+		$url    = Helper::wpnux_api_base() . '/milestones/' . $guide_item_object->milestone_name();
+
+		$body = Helper::get_default_nux_api_request_body();
+
+		$body['domain'] = $domain;
+		$body['status'] = 'skipped' === $status ? 'skipped' : 'complete';
+
+		$remote_post_raw = $this->perform_remote_api_post( $url, $body );
+		$post_response   = $this->format_remote_post_response( $remote_post_raw );
+
+		add_option( $option_name . '_nux_reported', time() );
+
+		return $post_response;
+	}
+
+	/**
+	 * Does the site have a export uid?
+	 *
+	 * @return bool
+	 */
+	public function has_export_uid() {
+		return $this->is_local_env() ? true : ! empty( get_option( 'wpnux_export_uid', false ) );
+	}
+
+	/**
+	 * Is the site in a local environment (and not a phpunit test environment)?
+	 *
+	 * @return bool
+	 */
+	public function is_local_env() {
+		return 'local' === wp_get_environment_type() && empty( $_ENV['WP_PHPUNIT__TESTS_CONFIG'] );
+	}
 
 	/**
 	 * Excluded admin pages on which the guide is not loaded.
@@ -251,6 +382,11 @@ class PublishGuideServiceProvider extends ServiceProvider {
 
 		if ( empty( $pagenow ) ) {
 			return false;
+		}
+
+		// Exclude Avada theme live site builder.
+		if ( filter_input( INPUT_GET, 'fb-edit', FILTER_VALIDATE_BOOLEAN ) ) {
+			return true;
 		}
 
 		// Pages specific to WooCommerce.
@@ -443,6 +579,39 @@ class PublishGuideServiceProvider extends ServiceProvider {
 
 		// Return create new page url by default.
 		return admin_url( '/post-new.php?post_type=page' );
+	}
+
+	/**
+	 * Determine how to redirect to the Yoast SEO screen to perform various tasks.
+	 *
+	 * @return string
+	 */
+	private function yoast_seo_redirect_url() {
+		return admin_url( '/admin.php?page=wpseo_dashboard#top#first-time-configuration' );
+	}
+
+	/**
+	 * Get the guide item by milestone name
+	 *
+	 * @param string $milestone_name The name of the milestone.
+	 * @return object
+	 */
+	private function get_guide_item_by_milestone_name( $milestone_name ) {
+		$guide_items = self::GUIDE_ITEMS;
+
+		$found_guide_item = null;
+
+		foreach ( $guide_items as $guide_item ) {
+			$guide_item_object = $this->app->make( $guide_item );
+
+			$guide_item_milestone_name = $guide_item_object->milestone_name();
+
+			if ( $guide_item_milestone_name === $milestone_name ) {
+				$found_guide_item = $guide_item_object;
+			}
+		}
+
+		return $found_guide_item;
 	}
 
 	/**

@@ -10,7 +10,7 @@ namespace GoDaddy\WordPress\Plugins\Launch\PublishGuide\GuideItems;
 /**
  * The SiteDesign class.
  */
-class SiteDesign implements GuideItemInterface {
+class SiteDesign extends GuideItemAbstract {
 	/**
 	 * Determins if the guide item should be enabled.
 	 *
@@ -51,6 +51,15 @@ class SiteDesign implements GuideItemInterface {
 	 */
 	public function option_name() {
 		return 'gdl_pgi_site_design';
+	}
+
+	/**
+	 * Returns the milestone name of the GuideItem used in the nux api.
+	 *
+	 * @return string
+	 */
+	public function milestone_name() {
+		return 'site-design';
 	}
 
 	/**
@@ -99,7 +108,10 @@ class SiteDesign implements GuideItemInterface {
 
 			$filtered_template_theme_mods = $this->filter_ignored_keys( $template_nux_data, $default_ignored_keys );
 
-			$theme_mods = array_diff( array_values( $theme_mods ), array_values( $filtered_template_theme_mods ) );
+			$theme_mods = array_diff(
+				array_values( array_map( 'wp_json_encode', $theme_mods ) ),
+				array_values( array_map( 'wp_json_encode', $filtered_template_theme_mods ) )
+			);
 		}
 
 		return ! empty( $theme_mods );

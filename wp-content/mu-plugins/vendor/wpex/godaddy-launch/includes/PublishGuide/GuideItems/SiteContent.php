@@ -10,7 +10,7 @@ namespace GoDaddy\WordPress\Plugins\Launch\PublishGuide\GuideItems;
 /**
  * The SiteContent class.
  */
-class SiteContent implements GuideItemInterface {
+class SiteContent extends GuideItemAbstract {
 	/**
 	 * Determines if the guide item should be enabled.
 	 *
@@ -51,6 +51,15 @@ class SiteContent implements GuideItemInterface {
 	 */
 	public function option_name() {
 		return 'gdl_pgi_site_content';
+	}
+
+	/**
+	 * Returns the milestone name of the GuideItem used in the nux api.
+	 *
+	 * @return string
+	 */
+	public function milestone_name() {
+		return 'site-content';
 	}
 
 	/**

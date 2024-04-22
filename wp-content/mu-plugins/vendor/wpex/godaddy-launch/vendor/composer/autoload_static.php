@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit87e8ec2a52a49ecd75e1b0400dc6c1f4
+class ComposerStaticInite729b2b2bb5d29ff0ce4255c7be0ea11
 {
     public static $prefixLengthsPsr4 = array (
         'G' => 
@@ -37,10 +37,13 @@ class ComposerStaticInit87e8ec2a52a49ecd75e1b0400dc6c1f4
         'GoDaddy\\WordPress\\Plugins\\Launch\\Dependencies\\Psr\\Container\\ContainerExceptionInterface' => __DIR__ . '/../..' . '/includes/Dependencies/Psr/Container/ContainerExceptionInterface.php',
         'GoDaddy\\WordPress\\Plugins\\Launch\\Dependencies\\Psr\\Container\\ContainerInterface' => __DIR__ . '/../..' . '/includes/Dependencies/Psr/Container/ContainerInterface.php',
         'GoDaddy\\WordPress\\Plugins\\Launch\\Dependencies\\Psr\\Container\\NotFoundExceptionInterface' => __DIR__ . '/../..' . '/includes/Dependencies/Psr/Container/NotFoundExceptionInterface.php',
+        'GoDaddy\\WordPress\\Plugins\\Launch\\GoDaddyStylesServiceProvider' => __DIR__ . '/../..' . '/includes/GoDaddyStylesServiceProvider.php',
         'GoDaddy\\WordPress\\Plugins\\Launch\\Helper' => __DIR__ . '/../..' . '/includes/Helper.php',
         'GoDaddy\\WordPress\\Plugins\\Launch\\LiveSiteControl\\LiveSiteControlProvider' => __DIR__ . '/../..' . '/includes/LiveSiteControl/LiveSiteControlProvider.php',
         'GoDaddy\\WordPress\\Plugins\\Launch\\PublishGuide\\GuideItems\\AddDomain' => __DIR__ . '/../..' . '/includes/PublishGuide/GuideItems/AddDomain.php',
+        'GoDaddy\\WordPress\\Plugins\\Launch\\PublishGuide\\GuideItems\\GuideItemAbstract' => __DIR__ . '/../..' . '/includes/PublishGuide/GuideItems/GuideItemAbstract.php',
         'GoDaddy\\WordPress\\Plugins\\Launch\\PublishGuide\\GuideItems\\GuideItemInterface' => __DIR__ . '/../..' . '/includes/PublishGuide/GuideItems/GuideItemInterface.php',
+        'GoDaddy\\WordPress\\Plugins\\Launch\\PublishGuide\\GuideItems\\SEO' => __DIR__ . '/../..' . '/includes/PublishGuide/GuideItems/SEO.php',
         'GoDaddy\\WordPress\\Plugins\\Launch\\PublishGuide\\GuideItems\\SiteContent' => __DIR__ . '/../..' . '/includes/PublishGuide/GuideItems/SiteContent.php',
         'GoDaddy\\WordPress\\Plugins\\Launch\\PublishGuide\\GuideItems\\SiteDesign' => __DIR__ . '/../..' . '/includes/PublishGuide/GuideItems/SiteDesign.php',
         'GoDaddy\\WordPress\\Plugins\\Launch\\PublishGuide\\GuideItems\\SiteInfo' => __DIR__ . '/../..' . '/includes/PublishGuide/GuideItems/SiteInfo.php',
@@ -52,9 +55,9 @@ class ComposerStaticInit87e8ec2a52a49ecd75e1b0400dc6c1f4
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit87e8ec2a52a49ecd75e1b0400dc6c1f4::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit87e8ec2a52a49ecd75e1b0400dc6c1f4::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit87e8ec2a52a49ecd75e1b0400dc6c1f4::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInite729b2b2bb5d29ff0ce4255c7be0ea11::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInite729b2b2bb5d29ff0ce4255c7be0ea11::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInite729b2b2bb5d29ff0ce4255c7be0ea11::$classMap;
 
         }, null, ClassLoader::class);
     }

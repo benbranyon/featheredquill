@@ -3,7 +3,7 @@
  * Plugin Name: GoDaddy Launch
  * Plugin URI: https://godaddy.com/
  * Description: GoDaddy Launch Description
- * Version: 2.2.2
+ * Version: 2.10.0
  * Requires at least: 5.9
  * Requires PHP: 8.0
  * Author: GoDaddy
@@ -53,6 +53,7 @@ gdl()->setBasePath( __FILE__ );
  * Autoloaded Service Providers.
  */
 $gdl_providers = array(
+	GoDaddyStylesServiceProvider::class,
 	LiveSiteControl\LiveSiteControlProvider::class,
 	PublishGuide\PublishGuideServiceProvider::class,
 );
@@ -67,9 +68,3 @@ register_deactivation_hook( __FILE__, array( gdl(), 'deactivation' ) );
 add_action( 'plugins_loaded', array( gdl(), 'boot' ) );
 add_action( 'plugins_loaded', array( gdl(), 'loadTextDomain' ) );
 add_filter( 'load_textdomain_mofile', array( gdl(), 'loadMoFiles' ), 10, 2 );
-
-
-// Global Styles.
-Dependencies\GoDaddy\Styles\StylesLoader::getInstance()->setBasePath( gdl()->basePath( 'includes/Dependencies/GoDaddy/Styles/' ) );
-Dependencies\GoDaddy\Styles\StylesLoader::getInstance()->setBaseUrl( gdl()->baseUrl( 'includes/Dependencies/GoDaddy/Styles/' ) );
-add_action( 'plugins_loaded', array( Dependencies\GoDaddy\Styles\StylesLoader::getInstance(), 'boot' ) );

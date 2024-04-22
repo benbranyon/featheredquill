@@ -109,7 +109,7 @@ msgstr ""
 
 #: includes/class-scripts.php:92
 msgid "Stock Photos"
-msgstr "Fotos de archivo"
+msgstr "Fotos Almacenadas"
 
 #: includes/class-scripts.php:93
 msgid "Change category"

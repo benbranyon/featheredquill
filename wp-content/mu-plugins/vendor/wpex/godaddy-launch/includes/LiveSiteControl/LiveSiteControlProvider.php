@@ -24,68 +24,16 @@ class LiveSiteControlProvider extends ServiceProvider {
 
 	const SETTINGS = array(
 		'publishState'    => 'gdl_site_published',
-		'liveSiteDismiss' => 'gdl_live_site_dismiss',
 		'blogPublic'      => 'blog_public',
+		'liveSiteDismiss' => 'gdl_live_site_dismiss',
 	);
 
 	const SETTINGS_OVERRIDE = array(
-		'publishState'    => array(
-			'default'           => false,
-			'true_as_timestamp' => true,
-		),
-		'liveSiteDismiss' => array(
+		'publishState' => array(
 			'default'           => false,
 			'true_as_timestamp' => true,
 		),
 	);
-
-	/**
-	 * Take in raw json data from API and format into usable WP response here.
-	 *
-	 * Example raw response
-	 * {{"headers":[],"body":"","response":{"code":true,"message":"sample",},"cookies":[],"http_response":null}}
-	 *
-	 * @param Array $remote_request The raw remote request data.
-	 * @return \WP_Error|\WP_Rest_Response Error if invalid or typical REST response otherwise.
-	 */
-	protected function format_remote_post_response( $remote_request ) {
-
-		if ( ! is_array( $remote_request ) || is_wp_error( $remote_request ) ) {
-			return rest_ensure_response( $remote_request );
-		}
-
-		// Retrieve information.
-		$response_code    = wp_remote_retrieve_response_code( $remote_request );
-		$response_message = wp_remote_retrieve_response_message( $remote_request );
-		$response_body    = wp_remote_retrieve_body( $remote_request );
-
-		return new \WP_REST_Response(
-			array(
-				'status'        => $response_code,
-				'response'      => $response_message,
-				'body_response' => json_decode( $response_body ),
-			),
-			$response_code
-		);
-	}
-
-	/**
-	 * Function takes in $url and $body variables and performs wp_remote_post call
-	 * to NUX api and return the response.
-	 *
-	 * @param String $url String representing the external URI of the NUX API.
-	 * @param Array  $body Contains the content sent to NUX API.
-	 * @return Array Raw response object from NUX API.
-	 */
-	protected function perform_remote_api_post( $url, $body ) {
-		return wp_remote_post(
-			$url,
-			array(
-				'headers' => array( 'Content-Type' => 'application/json' ),
-				'body'    => wp_json_encode( $body ),
-			)
-		);
-	}
 
 	/**
 	 * This should only be sent ONCE when the `publishState` option is
@@ -96,11 +44,11 @@ class LiveSiteControlProvider extends ServiceProvider {
 	 * @return \WP_Error|\WP_Rest_Response Processed response object from NUX API.
 	 */
 	public function milestone_published_nux_api() {
-		$domain = defined( 'GD_TEMP_DOMAIN' ) ? GD_TEMP_DOMAIN : Helper::domain();
-		$url    = Helper::wpnux_api_base() . '/milestones/site-publish?domain=' . $domain;
+		$domain           = defined( 'GD_TEMP_DOMAIN' ) ? GD_TEMP_DOMAIN : Helper::domain();
+		$is_migrated_site = defined( 'GD_MIGRATED_SITE' ) ? GD_MIGRATED_SITE : false;
+		$url              = Helper::wpnux_api_base() . '/milestones/site-publish?domain=' . $domain;
 
 		// Remove option filters so we get the raw option value.
-		remove_filter( 'option_' . self::SETTINGS['liveSiteDismiss'], array( Helper::class, 'get_option_convert_timestamp_to_true' ) );
 		remove_filter( 'option_' . self::SETTINGS['publishState'], array( Helper::class, 'get_option_convert_timestamp_to_true' ) );
 
 		$body = Helper::get_default_nux_api_request_body();
@@ -112,25 +60,26 @@ class LiveSiteControlProvider extends ServiceProvider {
 		$body['is_launch_now']   = empty( $launch_later_at );
 		$body['launch_later_at'] = $launch_later_at ? (int) $launch_later_at : null;
 
-		if ( $launch_later_at ) {
-			list( $enabled, $complete, $complete_timestamps, $incomplete, $disabled ) = $this->get_guide_items_state();
+		list( $enabled, $complete, $complete_timestamps, $incomplete, $skipped, $disabled ) = $this->get_guide_items_state();
 
-			$body['guide_items']                    = $enabled;
-			$body['guide_items_count']              = count( $enabled );
-			$body['guide_items_complete']           = $complete;
-			$body['guide_items_complete_count']     = count( $complete );
-			$body['guide_items_complete_percent']   = $enabled ? (int) round( count( $complete ) / count( $enabled ) * 100 ) : 0;
-			$body['guide_items_incomplete']         = $incomplete;
-			$body['guide_items_incomplete_count']   = count( $incomplete );
-			$body['guide_items_incomplete_percent'] = $enabled ? (int) round( count( $incomplete ) / count( $enabled ) * 100 ) : 0;
-			$body['guide_items_disabled']           = $disabled;
-			$body['guide_items_disabled_count']     = count( $disabled );
-			$body['guide_items_disabled_method']    = $this->get_guide_items_disabled_method( $disabled );
+		$body['guide_items']                    = $enabled;
+		$body['guide_items_count']              = count( $enabled );
+		$body['guide_items_complete']           = $complete;
+		$body['guide_items_skipped']            = $skipped;
+		$body['guide_items_skipped_count']      = count( $skipped );
+		$body['guide_items_complete_count']     = count( $complete );
+		$body['guide_items_complete_percent']   = $enabled ? (int) round( count( $complete ) / count( $enabled ) * 100 ) : 0;
+		$body['guide_items_incomplete']         = $incomplete;
+		$body['guide_items_incomplete_count']   = count( $incomplete );
+		$body['guide_items_incomplete_percent'] = $enabled ? (int) round( count( $incomplete ) / count( $enabled ) * 100 ) : 0;
+		$body['guide_items_disabled']           = $disabled;
+		$body['guide_items_disabled_count']     = count( $disabled );
+		$body['guide_items_disabled_method']    = $this->get_guide_items_disabled_method( $disabled );
+		$body['is_migrated_site']               = $is_migrated_site;
 
-			foreach ( $complete_timestamps as $item => $timestamp ) {
-				if ( $timestamp ) {
-					$body[ $item . '_completed_at' ] = (int) $timestamp;
-				}
+		foreach ( $complete_timestamps as $item => $timestamp ) {
+			if ( $timestamp ) {
+				$body[ $item . '_completed_at' ] = (int) $timestamp;
 			}
 		}
 
@@ -140,7 +89,6 @@ class LiveSiteControlProvider extends ServiceProvider {
 		$remote_post     = $this->format_remote_post_response( $remote_post_raw );
 
 		// Restore the option filters.
-		add_filter( 'option_' . self::SETTINGS['liveSiteDismiss'], array( Helper::class, 'get_option_convert_timestamp_to_true' ) );
 		add_filter( 'option_' . self::SETTINGS['publishState'], array( Helper::class, 'get_option_convert_timestamp_to_true' ) );
 
 		return $remote_post;
@@ -218,7 +166,6 @@ class LiveSiteControlProvider extends ServiceProvider {
 		 * @param mixed  $value  The new, unserialized option value.
 		 */
 		add_filter( 'pre_update_option_' . self::SETTINGS['publishState'], $do_action_on_option_update );
-		add_filter( 'pre_update_option_' . self::SETTINGS['liveSiteDismiss'], $do_action_on_option_update );
 
 		add_action(
 			'rest_api_init',
@@ -266,6 +213,8 @@ class LiveSiteControlProvider extends ServiceProvider {
 			function( $hook_suffix ) {
 				$build_file_path = $this->app->basePath( 'build/' . self::ASSET_SLUG . '.asset.php' );
 
+				$wpnux_export_data = json_decode( get_option( 'wpnux_export_data', '{}' ), true );
+
 				$asset_file = file_exists( $build_file_path )
 					? include $build_file_path
 					: array(
@@ -285,6 +234,8 @@ class LiveSiteControlProvider extends ServiceProvider {
 					self::ASSET_SLUG,
 					'gdlLiveSiteControlData',
 					array(
+						'WPEX_3590_active'       => isset( $GLOBALS['wpaas_feature_flag'] ) && $GLOBALS['wpaas_feature_flag']->get_feature_flag_value( 'wpex-3590-enhance_publish_guide', false ),
+						'WPEX_3258_active'       => isset( $GLOBALS['wpaas_feature_flag'] ) && $GLOBALS['wpaas_feature_flag']->get_feature_flag_value( 'wpex-3258-post-publish-CTA', false ),
 						'page'                   => $hook_suffix,
 						'appContainerClass'      => self::APP_CONTAINER_CLASS,
 						'portalContainerClass'   => self::PORTAL_CONTAINER_CLASS,
@@ -293,6 +244,10 @@ class LiveSiteControlProvider extends ServiceProvider {
 						'eventName'              => self::LIVE_CONTROL_EVENT_NAME,
 						'isReseller'             => defined( 'GD_RESELLER' ) ? GD_RESELLER : null,
 						'shouldUseReact18Syntax' => is_wp_version_compatible( '6.2' ) ? 'true' : 'false',
+						'isCaaSGenerated'        => isset( $wpnux_export_data['_meta']['content_id'] ) ? 'true' : 'false',
+						'siteUrl'                => Helper::domain(),
+						'isMigratedSite'         => defined( 'GD_MIGRATED_SITE' ) ? constant( 'GD_MIGRATED_SITE' ) : false,
+						'siteId'                 => defined( 'GD_ACCOUNT_UID' ) ? GD_ACCOUNT_UID : null,
 					)
 				);
 
@@ -358,13 +313,78 @@ class LiveSiteControlProvider extends ServiceProvider {
 		add_action( 'wp_before_admin_bar_render', array( $this, 'wp_before_admin_bar_render' ) );
 
 		add_action( 'admin_notices', array( $this, 'gdl_launch_site_notice' ) );
+
+		add_action( 'admin_notices', array( $this, 'gdl_experiment_2894__notice' ) );
+		add_action( 'admin_init', array( $this, 'gdl_experiment_2894_dismissed' ) );
+	}
+
+	/**
+	 * Function producing the admin screen notice that site is not live.
+	 */
+	public function gdl_experiment_2894__notice() {
+		$user_id = get_current_user_id();
+		$site_id = defined( 'GD_ACCOUNT_UID' ) ? GD_ACCOUNT_UID : null;
+
+		$notice_class = 'notice notice-success gdl-notice-inline';
+		$text_class   = 'gdl-notice-title';
+
+		$button_class = 'components-button components-notice__action is-link is-secondary gdl-notice-button';
+		$button_text  = __( 'Update your domain', 'godaddy-launch' );
+		$button_url   = 'https://host.godaddy.com/mwp/site/' . $site_id . '/settings';
+
+		$experiment_active = isset( $GLOBALS['wpaas_feature_flag'] ) && $GLOBALS['wpaas_feature_flag']->get_feature_flag_value( 'WPEX2894_domain_attach_wp_admin', false );
+		$message           = $experiment_active ? __(
+			'<strong>Get up to 15 times more visitors</strong> by connecting a custom domain to your site.',
+			'godaddy-launch'
+		) : __(
+			'Look more professional and help people find your website with a custom domain.',
+			'godaddy-launch'
+		);
+
+		$domain_attach_cta_eid = $experiment_active ? 'wp.admin.test-notice.attach.click' : 'wp.admin.control-notice.attach.click';
+		$notice_dismiss_eid    = $experiment_active ? 'wp.admin.test-notice.attach.dismiss' : 'wp.admin.control-notice.attach.dismiss';
+
+		if ( ! get_user_meta( $user_id, 'gdl_experiment_2894_dismissed' ) ) {
+			wp_add_inline_script(
+				self::ASSET_SLUG,
+				"jQuery( document ).ready( () => {
+					const noticeDismiss = jQuery( \"#2894-dismissed\" );
+					noticeDismiss.on( 'click', () => {
+						const noticeContainer = jQuery( \".gdl-notice-inline\" );
+	
+						noticeContainer.hide();
+					} );
+	
+					const noticeButton = jQuery( \".gdl-notice-inline .gdl-notice-button\" );
+	
+					noticeButton.on( 'click', () => {
+						window.open( \"$button_url\", \"_blank\");
+					});
+				} );"
+			);
+
+			printf( '<div class="%1$s"><span class="dashicons dashicons-admin-site-alt3"></span><p class="%2$s">%3$s</p><button data-eid="%4$s" class="%5$s">%6$s</button><form method="GET"><button data-eid="%7$s" name="gdl-experiment-2894-dismissed" value="true" id="2894-dismissed" class="notice-dismiss" /></form></div>', esc_attr( $notice_class ), esc_attr( $text_class ), wp_kses( $message, array( 'strong' => array() ) ), esc_html( $domain_attach_cta_eid ), esc_html( $button_class ), esc_html( $button_text ), esc_html( $notice_dismiss_eid ) );
+		}
+	}
+
+	/**
+	 * Function returning the user meta if gdl_experiment_2894 notice was dismissed
+	 */
+	public function gdl_experiment_2894_dismissed() {
+		$user_id = get_current_user_id();
+
+		// This is to remove the notice when the user clicks the dismiss button.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['gdl-experiment-2894-dismissed'] ) ) {
+			add_user_meta( $user_id, 'gdl_experiment_2894_dismissed', 'true', true );
+		}
 	}
 
 	/**
 	 * Function producing the admin screen notice that site is not live.
 	 */
 	public function gdl_launch_site_notice() {
-		$notice_class         = 'notice notice-warning is-dismissible gdl-notice';
+		$notice_class         = 'notice notice-warning gdl-notice';
 		$button_class         = 'components-button components-notice__action is-link is-secondary gdl-notice-button';
 		$message              = __(
 			'Your site is not launched yet. Visitors will see a temporary Coming Soon page until you launch your site.
@@ -378,7 +398,7 @@ class LiveSiteControlProvider extends ServiceProvider {
 		wp_add_inline_script(
 			self::ASSET_SLUG,
 			"jQuery( document ).ready( () => {
-			const notice = jQuery( \".notice.is-dismissible\" );
+			const notice = jQuery( \".gdl-notice .gdl-notice-button\" );
 			notice.on( 'click', () => {
 				window.dispatchEvent( new Event( \"$publish_state_string\" ) );
 				const launchButton = jQuery( \".live-site-confirm-modal-success\" );
@@ -402,7 +422,12 @@ class LiveSiteControlProvider extends ServiceProvider {
 	 * @return bool
 	 */
 	public function is_restricted() {
-		return ! get_option( self::SETTINGS['publishState'], false );
+		$is_published = get_option( self::SETTINGS['publishState'], false );
+
+		$export_uid       = get_option( 'wpnux_export_uid', false );
+		$export_uid_param = \sanitize_key( $_GET['wpnux_export_uid'] ?? null ); // phpcs:ignore WordPress.Security.NonceVerification
+
+		return ! ( $is_published || $export_uid_param === $export_uid );
 	}
 
 	/**
@@ -456,9 +481,9 @@ class LiveSiteControlProvider extends ServiceProvider {
 
 		$wp_admin_bar->add_menu(
 			array(
-				'parent' => 'top-secondary',
 				'id'     => 'gdl-live-site',
-				'title'  => __( 'Your website is in Coming Soon mode ', 'godaddy-launch' ),
+				'parent' => 'top-secondary',
+				'title'  => sprintf( '<div class="launch-now-admin-bar-banner"><div class="banner-content"><p>%1$s</p><div class="launch-now-cta-container"><a data-eid="live-site-banner-launch-now-cta" href="/wp-admin/?gdl_action=launch-now">%2$s</a><span class="ab-icon dashicons dashicons-arrow-right-alt"></span></div></div></div>', __( 'Your website is in <b style="font-weight: 700;">Coming Soon</b> mode', 'godaddy-launch' ), __( 'Launch Now', 'godaddy-launch' ) ),
 			)
 		);
 	}
@@ -475,12 +500,14 @@ class LiveSiteControlProvider extends ServiceProvider {
 			GuideItems\SiteDesign::class,
 			GuideItems\SiteInfo::class,
 			GuideItems\SiteMedia::class,
+			GuideItems\SEO::class,
 		);
 
 		$enabled             = array();
 		$complete            = array();
 		$complete_timestamps = array();
 		$incomplete          = array();
+		$skipped             = array();
 		$disabled            = array();
 
 		foreach ( $items as $item ) {
@@ -490,19 +517,24 @@ class LiveSiteControlProvider extends ServiceProvider {
 			if ( $item_object->is_enabled() ) {
 				$enabled[] = $item_slug;
 
+				if ( $item_object->is_skipped() ) {
+					$skipped[] = $item_slug;
+					continue;
+				}
+
 				if ( $item_object->is_complete() ) {
 					$complete[] = $item_slug;
 
 					remove_filter(
 						"option_{$item_object->option_name()}",
-						array( Helper::class, 'get_option_convert_timestamp_to_true' )
+						array( Helper::class, 'get_skipped_or_boolean_as_string' )
 					);
 
 					$complete_timestamps[ $item_slug ] = get_option( $item_object->option_name() );
 
 					add_filter(
 						"option_{$item_object->option_name()}",
-						array( Helper::class, 'get_option_convert_timestamp_to_true' )
+						array( Helper::class, 'get_skipped_or_boolean_as_string' )
 					);
 				} else {
 					$incomplete[] = $item_slug;
@@ -517,6 +549,7 @@ class LiveSiteControlProvider extends ServiceProvider {
 			$complete,
 			$complete_timestamps,
 			$incomplete,
+			$skipped,
 			$disabled,
 		);
 	}

@@ -27,7 +27,7 @@ msgstr "การออกแบบ / ศิลปะ / ผลงาน"
 
 #: includes/class-api.php:160
 msgid "Education"
-msgstr "การเรียนรู้"
+msgstr "การศึกษา"
 
 #: includes/class-api.php:161
 msgid "Health / Beauty"

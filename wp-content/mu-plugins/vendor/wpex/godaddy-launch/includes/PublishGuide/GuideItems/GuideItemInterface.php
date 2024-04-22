@@ -13,6 +13,13 @@ namespace GoDaddy\WordPress\Plugins\Launch\PublishGuide\GuideItems;
 interface GuideItemInterface {
 
 	/**
+	 * Determins if the guide item has been skipped.
+	 *
+	 * @return bool
+	 */
+	public function is_skipped();
+
+	/**
 	 * Determins if the guide item should be enabled.
 	 *
 	 * @return bool
@@ -32,4 +39,11 @@ interface GuideItemInterface {
 	 * @return string
 	 */
 	public function option_name();
+
+	/**
+	 * Returns the milestone name of the GuideItem used in the nux api.
+	 *
+	 * @return string
+	 */
+	public function milestone_name();
 }

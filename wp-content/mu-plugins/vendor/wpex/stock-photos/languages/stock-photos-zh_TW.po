@@ -79,7 +79,7 @@ msgstr "合併"
 
 #: includes/class-scripts.php:53
 msgid "Generic"
-msgstr "一般"
+msgstr "通用類"
 
 #: includes/class-scripts.php:68
 #, php-format

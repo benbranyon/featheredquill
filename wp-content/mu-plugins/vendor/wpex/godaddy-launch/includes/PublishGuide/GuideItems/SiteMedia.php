@@ -10,7 +10,7 @@ namespace GoDaddy\WordPress\Plugins\Launch\PublishGuide\GuideItems;
 /**
  * The SiteMedia class.
  */
-class SiteMedia implements GuideItemInterface {
+class SiteMedia extends GuideItemAbstract {
 	/**
 	 * Determins if the guide item should be enabled.
 	 *
@@ -51,6 +51,15 @@ class SiteMedia implements GuideItemInterface {
 	 */
 	public function option_name() {
 		return 'gdl_pgi_site_media';
+	}
+
+	/**
+	 * Returns the milestone name of the GuideItem used in the nux api.
+	 *
+	 * @return string
+	 */
+	public function milestone_name() {
+		return 'site-media';
 	}
 
 	/**

@@ -1,15 +1,15 @@
 <?php
 /**
- * Copyright © Rhubarb Tech Inc. All Rights Reserved.
+ * Copyright © 2019-2023 Rhubarb Tech Inc. All Rights Reserved.
  *
- * All information contained herein is, and remains the property of Rhubarb Tech Incorporated.
- * The intellectual and technical concepts contained herein are proprietary to Rhubarb Tech Incorporated and
- * are protected by trade secret or copyright law. Dissemination and modification of this information or
- * reproduction of this material is strictly forbidden unless prior written permission is obtained from
- * Rhubarb Tech Incorporated.
+ * The Object Cache Pro Software and its related materials are property and confidential
+ * information of Rhubarb Tech Inc. Any reproduction, use, distribution, or exploitation
+ * of the Object Cache Pro Software and its related materials, in whole or in part,
+ * is strictly forbidden unless prior permission is obtained from Rhubarb Tech Inc.
  *
- * You should have received a copy of the `LICENSE` with this file. If not, please visit:
- * https://objectcache.pro/license.txt
+ * In addition, any reproduction, use, distribution, or exploitation of the Object Cache Pro
+ * Software and its related materials, in whole or in part, is subject to the End-User License
+ * Agreement accessible in the included `LICENSE` file, or at: https://objectcache.pro/eula
  */
 
 declare(strict_types=1);
@@ -672,7 +672,7 @@ class Diagnostics implements ArrayAccess
             return $diagnostic->error($version)->comment('Unsupported');
         }
 
-        if (version_compare($version, '5.3.5', '<')) {
+        if (version_compare($version, '5.3.7', '<')) {
             return $diagnostic->warning($version)->comment('Outdated');
         }
 
@@ -696,6 +696,10 @@ class Diagnostics implements ArrayAccess
 
         if (version_compare($version, RelayConnector::RequiredVersion, '<')) {
             return $diagnostic->error($version)->comment('Unsupported');
+        }
+
+        if (version_compare($version, '0.6.1', '<')) {
+            return $diagnostic->warning($version)->comment('Outdated');
         }
 
         return $diagnostic->value($version);
@@ -826,7 +830,7 @@ class Diagnostics implements ArrayAccess
             return $diagnostic->warning($version)->comment('Outdated');
         }
 
-        if ($this->usingRelayCache() && version_compare($version, '6.2.8', '<')) {
+        if ($this->usingRelayCache() && version_compare($version, '6.2.7', '<')) {
             return $diagnostic->error($version)->comment('Unsupported');
         }
 
@@ -896,11 +900,11 @@ class Diagnostics implements ArrayAccess
     {
         $enabled = $this->config->relay->cache;
 
-        if (method_exists(Relay::class, 'maxMemory')) {
+        if (method_exists(Relay::class, 'maxMemory')) { // @phpstan-ignore-line
             return $enabled && Relay::maxMemory() > 0;
         }
 
-        if (method_exists(Relay::class, 'memory')) {
+        if (method_exists(Relay::class, 'memory')) { // @phpstan-ignore-line
             return $enabled && Relay::memory() > 0;
         }
 
@@ -1095,7 +1099,7 @@ class Diagnostics implements ArrayAccess
             return new WP_Error('fs', 'Size of copied test file does not match');
         }
 
-        if (! $wp_filesystem->delete($temp)) { // @phpstan-ignore-line
+        if (! $wp_filesystem->delete($temp)) {
             return new WP_Error('fs', 'Unable to delete copied test file');
         }
 

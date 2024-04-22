@@ -17,7 +17,8 @@ final class Scripts {
 		$this->api = $api;
 
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ], PHP_INT_MAX );
-		add_action( 'wp_enqueue_scripts',    [ $this, 'enqueue_scripts' ], PHP_INT_MAX );
+		add_action( 'wp_enqueue_media', [ $this, 'enqueue_scripts' ], PHP_INT_MAX );
+
 	}
 
 	public function enqueue_scripts() {

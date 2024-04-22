@@ -18,7 +18,7 @@ class Application extends Container {
 	 *
 	 * @var string
 	 */
-	const VERSION = '2.2.2';
+	const VERSION = '2.10.0';
 
 	/**
 	 * The base path for the plugin.

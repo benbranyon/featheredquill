@@ -9,7 +9,10 @@ namespace GoDaddy\WordPress\Plugins\Launch;
 
 defined( 'ABSPATH' ) || exit;
 
-trait Helper {
+/**
+ * The Helper class.
+ */
+class Helper {
 	/**
 	 * Retrieve the correct URL of the NUX API depending on the environment
 	 *
@@ -36,7 +39,7 @@ trait Helper {
 	 * @return bool
 	 */
 	public static function is_rum_enabled() {
-		return (bool) apply_filters( 'wpaas_rum_enabled', defined( 'GD_RUM_ENABLED' ) ? GD_RUM_ENABLED : false );
+		return (bool) apply_filters( 'wpaas_rum_enabled', defined( 'GD_RUM_ENABLED' ) ? GD_RUM_ENABLED : true );
 	}
 
 	/**
@@ -56,7 +59,18 @@ trait Helper {
 	 * @return mixed
 	 */
 	public static function update_option_convert_true_to_timestamp( $value ) {
-		return ( true === $value ) ? time() : $value;
+		return ( 'true' === $value || true === $value ) ? time() : $value;
+	}
+
+	/**
+	 * Get skipped or boolean as string.
+	 *
+	 * @param string $value passed from filter.
+	 *
+	 * @return bool
+	 */
+	public static function get_skipped_or_boolean_as_string( $value ) {
+		return ( 'skipped' === $value ) ? $value : (string) self::get_option_convert_timestamp_to_true( $value );
 	}
 
 	/**
@@ -76,13 +90,22 @@ trait Helper {
 	 * @return array
 	 */
 	public static function get_default_nux_api_request_body() {
+		$parent_theme = get_option( 'template' );
+		$parent_theme = is_string( $parent_theme ) ? strtolower( $parent_theme ) : null;
+
 		return array(
 			'coblocks_version'      => defined( 'COBLOCKS_VERSION' ) ? COBLOCKS_VERSION : null,
+			'current_theme'         => $parent_theme,
+			'customer_id'           => defined( 'GD_CUSTOMER_ID' ) ? GD_CUSTOMER_ID : null,
 			'gdl_version'           => gdl()->version(),
 			'go_theme_version'      => defined( 'GO_VERSION' ) ? GO_VERSION : null,
 			'hostname'              => gethostname(),
+			'is_coblocks_active'    => is_plugin_active( 'coblocks/class-coblocks.php' ),
+			'is_go_theme_active'    => 'go' === $parent_theme,
 			'language'              => get_user_locale(),
+			'pl_id'                 => defined( 'GD_RESELLER' ) ? (int) GD_RESELLER : null,
 			'site_created_at'       => defined( 'GD_SITE_CREATED' ) ? GD_SITE_CREATED : null,
+			'site_domain'           => parse_url( home_url(), PHP_URL_HOST ),
 			'system_plugin_version' => is_callable( array( '\WPaaS\Plugin', 'version' ) ) ? \WPaaS\Plugin::version() : null,
 			'website_id'            => defined( 'GD_ACCOUNT_UID' ) ? GD_ACCOUNT_UID : null,
 			'wp_user_id'            => get_current_user_id(),

@@ -27,7 +27,7 @@ msgstr "Thiết kế / Nghệ thuật / Danh mục đầu tư"
 
 #: includes/class-api.php:160
 msgid "Education"
-msgstr "Theo học"
+msgstr "Giáo dục"
 
 #: includes/class-api.php:161
 msgid "Health / Beauty"
