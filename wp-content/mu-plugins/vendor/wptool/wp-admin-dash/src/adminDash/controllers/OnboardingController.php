@@ -2,6 +2,7 @@
 
 namespace Wptool\adminDash\controllers;
 
+use Exception;
 use Wptool\adminDash\constants\ErrorCodes;
 use Wptool\adminDash\services\container\ServiceContainer;
 use Wptool\adminDash\services\OnboardingService;

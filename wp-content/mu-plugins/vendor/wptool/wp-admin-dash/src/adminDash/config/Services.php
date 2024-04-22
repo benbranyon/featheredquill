@@ -6,6 +6,7 @@ use Wptool\adminDash\clients\ga\GAClient;
 use Wptool\adminDash\services\AutoUpdateService;
 use Wptool\adminDash\services\CacheService;
 use Wptool\adminDash\services\GDLoginService;
+use Wptool\adminDash\services\MinificationService;
 use Wptool\adminDash\services\OnboardingService;
 use Wptool\adminDash\services\SiteHealthService;
 use Wptool\adminDash\services\SupportService;
@@ -13,6 +14,7 @@ use Wptool\adminDash\services\ChangeDomainService;
 use Wptool\adminDash\services\CaptchaService;
 use Wptool\adminDash\services\CourseService;
 use Wptool\adminDash\services\TrackingService;
+use Wptool\adminDash\services\SiteTrafficDataService;
 
 class Services {
 
@@ -62,6 +64,14 @@ class Services {
 
 		$services['gd_login_service'] = function () {
 			return new GDLoginService();
+		};
+
+		$services['site_traffic_data_service'] = function () {
+			return new SiteTrafficDataService();
+		};
+
+		$services['minification_service'] = function () {
+			return new MinificationService();
 		};
 
 		return $services;

@@ -9,6 +9,7 @@ use Wptool\adminDash\services\CaptchaService;
 use Wptool\adminDash\services\container\ServiceContainer;
 use Wptool\adminDash\services\ChangeDomainService;
 use Wptool\adminDash\services\GDLoginService;
+use Wptool\adminDash\services\MinificationService;
 use Wptool\adminDash\services\OnboardingService;
 use Wptool\adminDash\utils\BundlesPath;
 use Wptool\adminDash\utils\SiteUtils;
@@ -35,6 +36,9 @@ class GlobalInfoController extends BaseController {
 	/** @var $gd_login_service GDLoginService */
 	private $gd_login_service;
 
+	/** @var $minification_service MinificationService */
+	private $minification_service;
+
 	/**
 	 * @param ServiceContainer $container
 	 */
@@ -48,6 +52,7 @@ class GlobalInfoController extends BaseController {
 		$this->captcha_service       = $this->container->get( 'captcha_service' );
 		$this->onboarding_service    = $this->container->get( 'onboarding_service' );
 		$this->gd_login_service      = $this->container->get( 'gd_login_service' );
+		$this->minification_service  = $this->container->get( 'minification_service' );
 	}
 
 	/**
@@ -91,6 +96,10 @@ class GlobalInfoController extends BaseController {
 		$onboarding_completed          = $this->onboarding_service->is_user_onboarded();
 		$login_with_gd_enabled         = $this->gd_login_service->is_gd_login_enabled();
 		$locale_lang                   = str_replace( '_', '-', get_locale() );
+		$plan                          = $this->minification_service->get_account_plan();
+		$minified_values               = $this->minification_service->get_minified_flags();
+		$cdn_enabled                   = defined( 'GD_CDN_ENABLED' ) ? GD_CDN_ENABLED : false;
+		$cdn_fullpage                  = defined( 'GD_CDN_FULLPAGE' ) ? GD_CDN_FULLPAGE : false;
 
 		return new \WP_REST_Response(
 			array(
@@ -110,6 +119,10 @@ class GlobalInfoController extends BaseController {
 					'onboarding_completed'            => $onboarding_completed,
 					'login_with_gd_enabled'           => $login_with_gd_enabled,
 					'locale_lng'                      => $locale_lang,
+					'plan'                            => $plan,
+					'minifications'                   => $minified_values,
+					'cdn_enabled'                     => $cdn_enabled,
+					'cdn_fullpage'                    => $cdn_fullpage,
 				),
 			),
 			200

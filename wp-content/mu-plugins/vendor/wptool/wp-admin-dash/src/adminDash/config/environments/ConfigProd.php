@@ -17,6 +17,7 @@ class ConfigProd extends Config {
 				'measurement_id' => '',
 				'api_secret'     => '',
 			),
+			'public_api_url'  => 'https://wp-api.wpsecurity.godaddy.com/api/v1',
 		);
 	}
 }

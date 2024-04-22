@@ -8,12 +8,13 @@ use Wptool\adminDash\controllers\CaptchaController;
 use Wptool\adminDash\controllers\CourseController;
 use Wptool\adminDash\controllers\GDLoginController;
 use Wptool\adminDash\controllers\GlobalInfoController;
+use Wptool\adminDash\controllers\MinificationController;
 use Wptool\adminDash\controllers\OnboardingController;
+use Wptool\adminDash\controllers\SiteTrafficDataController;
 use Wptool\adminDash\controllers\SupportController;
 use Wptool\adminDash\controllers\TrackingController;
 use Wptool\adminDash\services\container\ServiceContainer;
 use Wptool\adminDash\controllers\SiteHealthController;
-use Wptool\adminDash\services\GDLoginService;
 use Wptool\adminDash\utils\Configuration;
 
 class WPJsonAPI {
@@ -52,6 +53,8 @@ class WPJsonAPI {
 			new TrackingController( $container ),
 			new OnboardingController( $container ),
 			new GDLoginController( $container ),
+			new SiteTrafficDataController( $container ),
+			new MinificationController( $container ),
 		);
 	}
 

@@ -17,6 +17,7 @@ class ConfigTest extends Config {
 				'measurement_id' => 'G-8P206XBG4B',
 				'api_secret'     => 'Vte7UP_QS1CKMXlrpu5pBQ',
 			),
+			'public_api_url'  => 'https://wp-api.wpsecurity.test-godaddy.com/api/v1',
 		);
 	}
 }
