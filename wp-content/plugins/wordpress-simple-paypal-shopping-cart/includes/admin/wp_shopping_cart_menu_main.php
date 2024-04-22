@@ -39,10 +39,13 @@ function wspsc_settings_interface() {
     $wpspc_plugin_tabs = array(
         'wspsc-menu-main' => __('General Settings', 'wordpress-simple-paypal-shopping-cart'),
         'wspsc-menu-main&action=email-settings' => __('Email Settings', 'wordpress-simple-paypal-shopping-cart'),
-        'wspsc-menu-main&action=adv-settings' => __('Advanced Settings', 'wordpress-simple-paypal-shopping-cart'),
+        'wspsc-menu-main&action=shipping-settings' => __('Shipping Settings', 'wordpress-simple-paypal-shopping-cart'),
+        'wspsc-menu-main&action=ppcp-settings' => __('PayPal PPCP (New API)', 'wordpress-simple-paypal-shopping-cart'),
+        'wspsc-menu-main&action=adv-settings' => __('PayPal Smart Checkout', 'wordpress-simple-paypal-shopping-cart'),        
+        'wspsc-menu-main&action=stripe-settings' => __('Stripe Settings', 'wordpress-simple-paypal-shopping-cart'),
     );
     echo '<div class="wrap">';
-    echo '<h1>' . (__("WP Paypal Shopping Cart Options", "wordpress-simple-paypal-shopping-cart")) . ' v'.WP_CART_VERSION . '</h1>';
+    echo '<h1>' . (__("WP Simple Shopping Cart Settings", "wordpress-simple-paypal-shopping-cart")) . ' (v'.WP_CART_VERSION .')' . '</h1>';
 
     $current = "";
     if (isset($_GET['page'])) {
@@ -70,9 +73,22 @@ function wspsc_settings_interface() {
                 include_once (WP_CART_PATH . 'includes/admin/wp_shopping_cart_menu_email_settings.php');
                 show_wp_cart_email_settings_page();
                 break;
-	    case 'adv-settings':
+            case 'shipping-settings':
+                include_once (WP_CART_PATH . 'includes/admin/wp_shopping_cart_menu_shipping_settings.php');
+                show_wp_cart_shipping_settings_page();
+                break;
+	        case 'adv-settings':
                 include_once (WP_CART_PATH . 'includes/admin/wp_shopping_cart_menu_adv_settings.php');
                 show_wp_cart_adv_settings_page();
+                break;
+            case 'ppcp-settings':
+                include_once (WP_CART_PATH . 'includes/admin/wp_shopping_cart_menu_ppcp_settings.php');
+                // show_wp_cart_adv_settings_page();
+                new WPSC_PPCP_settings_page();
+                break;
+            case 'stripe-settings':
+                include_once (WP_CART_PATH . 'includes/admin/wp_shopping_cart_menu_stripe_settings.php');
+                show_wp_cart_stripe_settings_page();
                 break;
         }
     } else {
@@ -83,3 +99,27 @@ function wspsc_settings_interface() {
     echo '</div>';
 }
 
+
+/*******************************************************************
+ * Admin Notice to prompt users to switch to the new PayPal settings
+ *******************************************************************/
+function wpsc_dashboard_admin_notices(){
+	//Smart Checkout
+	$enable_smart_checkout = get_option( 'wpspc_enable_pp_smart_checkout' );
+
+	if( $enable_smart_checkout ){
+		//The site has the old smart PayPal checkout enabled. Prompt the user to switch to the new PayPal PPCP settings.
+		?>
+		<div class="notice notice-warning is-dismissible">
+			<p><?php _e('You are using the old PayPal Smart Checkout option in the "Simple Shopping Cart" plugin. Please switch to the new PayPal PPCP option for better security and functionaliy.', 'wordpress-simple-paypal-shopping-cart'); ?></p>
+			<p><a href="<?php echo admin_url('admin.php?page=wspsc-menu-main&action=ppcp-settings'); ?>"><?php _e('Switch to the new PayPal Commerce Platform API by configuring the API credentials', 'wordpress-simple-paypal-shopping-cart'); ?></a></p>
+		</div>
+		<?php
+	}
+
+}
+
+if( is_admin() ) {
+	// Add the admin notices hook
+	add_filter('admin_notices', 'wpsc_dashboard_admin_notices');
+}

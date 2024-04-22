@@ -6,15 +6,13 @@ function wspsc_show_tools_menu_page() {
     }
 
     echo '<div class="wrap">';
-    echo '<h1>' . (__("Simple Cart Tools", "wordpress-simple-paypal-shopping-cart")) . '</h1>';
+    echo '<h1>' . (__("Simple Shopping Cart Tools", "wordpress-simple-paypal-shopping-cart")) . '</h1>';
     
     echo '<div id="poststuff"><div id="post-body">';
     
+    //Show the documentation message
+    wpspsc_settings_menu_documentation_msg();    
     ?>
-    <div class="wspsc_yellow_box">
-        <p><?php _e("For more information, updates, detailed documentation and video tutorial, please visit:", "wordpress-simple-paypal-shopping-cart"); ?><br />
-            <a href="https://www.tipsandtricks-hq.com/wordpress-simple-paypal-shopping-cart-plugin-768" target="_blank"><?php _e("WP Simple Cart Homepage", "wordpress-simple-paypal-shopping-cart"); ?></a></p>
-    </div>
 
     <div class="postbox">
         <h3 class="hndle"><label for="title"><?php _e("Export Cart Orders Data", "wordpress-simple-paypal-shopping-cart"); ?></label></h3>

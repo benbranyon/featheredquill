@@ -10,27 +10,37 @@ add_shortcode('wp_compact_cart2', 'wspsc_compact_cart2_handler');
 function wp_cart_button_handler($atts){
 	extract(shortcode_atts(array(
 		'name' => '',
-                'item_number' =>'',
+        'item_number' =>'',
 		'price' => '',
 		'shipping' => '0',
 		'var1' => '',
 		'var2' => '',
 		'var3' => '',
-                'thumbnail' => '',
-                'button_text' => '',
-                'button_image' => '',
-                'file_url' => '',
-                'stamp_pdf' => '',
+        'thumbnail' => '',
+        'button_text' => '',
+        'button_image' => '',
+        'file_url' => '',
+        'digital' => '',
+        'stamp_pdf' => '',
 	), $atts));
 
+    // Check if the name is empty
 	if(empty($name)){
-            return '<div style="color:red;">'.(__("Error! You must specify a product name in the shortcode.", "wordpress-simple-paypal-shopping-cart")).'</div>';
+        return '<div style="color:red;">'.(__("Error! You must specify a product name in the shortcode.", "wordpress-simple-paypal-shopping-cart")).'</div>';
 	}
+
+    // The 'name' parameter value coming from the block inserter is already htmlentitied. So we need to decode it (otherwise it may cause issues in the hashing process).
+	$name = html_entity_decode($name); 
+	if( wpsc_contains_special_char($name) ){
+		return '<div style="color:red;">'.(__("Error! Special characters like [, ], <, > are not supported in the product name.", "wordpress-simple-paypal-shopping-cart")).'</div>';
+	}
+
+    // Check if the price is empty
 	if(empty($price)){
             return '<div style="color:red;">'.(__("Error! You must specify a price for your product in the shortcode.", "wordpress-simple-paypal-shopping-cart")).'</div>';
 	}
-        $price = wspsc_strip_char_from_price_amount($price);
-        $shipping = wspsc_strip_char_from_price_amount($shipping);
+    $price = wspsc_strip_char_from_price_amount($price);
+    $shipping = wspsc_strip_char_from_price_amount($shipping);
 
 	return print_wp_cart_button_for_product($name, $price, $shipping, $var1, $var2, $var3, $atts);
 }
@@ -52,12 +62,22 @@ function wp_cart_display_product_handler($atts)
         'button_text' => '',
         'button_image' => '',
         'file_url' => '',
+        'digital' => '',
         'stamp_pdf' => '',
     ), $atts));
 
+    // Check if the name is empty
     if(empty($name)){
         return '<div style="color:red;">'.(__("Error! You must specify a product name in the shortcode.", "wordpress-simple-paypal-shopping-cart")).'</div>';
     }
+
+	// The 'name' parameter value coming from the block inserter is already htmlentitied. So we need to decode it (otherwise it may cause issues in the hashing process).
+	$name = html_entity_decode($name);
+	if( wpsc_contains_special_char($name) ){
+		return '<div style="color:red;">'.(__("Error! Special characters like [, ], <, > are not supported in the product name.", "wordpress-simple-paypal-shopping-cart")).'</div>';
+	}
+
+    // Check if the price is empty
     if(empty($price)){
         return '<div style="color:red;">'.(__("Error! You must specify a price for your product in the shortcode.", "wordpress-simple-paypal-shopping-cart")).'</div>';
     }
@@ -81,6 +101,7 @@ function wp_cart_display_product_handler($atts)
     $button_code = print_wp_cart_button_for_product($name, $price, $shipping, $var1, $var2, $var3, $atts);
 
     $display_code = <<<EOT
+    <div class="wp_cart_product_display_box_wrapper">
     <div class="wp_cart_product_display_box">
         <div class="wp_cart_product_thumbnail">
             $thumbnail_code
@@ -100,13 +121,15 @@ function wp_cart_display_product_handler($atts)
                 </div>
             </div>
     </div>
+    </div>
 EOT;
     return $display_code;
 }
 
 function wspsc_compact_cart_handler($args)
 {
-    $num_items = wpspc_get_total_cart_qty();
+    $wspsc_cart = WSPSC_Cart::get_instance();
+    $num_items = $wspsc_cart->get_total_cart_qty();
     $curSymbol = WP_CART_CURRENCY_SYMBOL;
     $checkout_url = get_option('cart_checkout_page_url');
 
@@ -114,12 +137,13 @@ function wspsc_compact_cart_handler($args)
     $output .= '<div class="wpsps_compact_cart wpsps-cart-wrapper">';
     $output .= '<div class="wpsps_compact_cart_container">';
     if($num_items>0){
-            $cart_total = wpspc_get_total_cart_sub_total();
-            $item_message = ($num_items <= 1) ? __("Item", "wordpress-simple-paypal-shopping-cart") : __("Items", "wordpress-simple-paypal-shopping-cart");
+            $cart_total = $wspsc_cart->get_total_cart_sub_total();
+            //Shows "Item" for 1.  Shows "Items" for 0 or more than 1.
+            $item_message = ($num_items == 1) ? __("Item", "wordpress-simple-paypal-shopping-cart") : __("Items", "wordpress-simple-paypal-shopping-cart");
             $output .= $num_items . " " . $item_message;
             $output .= '<span class="wpsps_compact_cart_price"> '. print_payment_currency($cart_total,$curSymbol).'</span>';
             if(!empty($checkout_url)){
-                $output .= '<a class="wpsps_compact_cart_co_btn" href="'.$checkout_url.'">'.__("View Cart", "wordpress-simple-paypal-shopping-cart").'</a>';
+                $output .= '<a class="wpsps_compact_cart_co_btn" href="'.esc_url_raw($checkout_url).'">'.__("View Cart", "wordpress-simple-paypal-shopping-cart").'</a>';
             }
     }
     else{
@@ -134,20 +158,20 @@ function wspsc_compact_cart_handler($args)
 
 function wspsc_compact_cart2_handler($args)
 {
-    $num_items = wpspc_get_total_cart_qty();
+    $wspsc_cart = WSPSC_Cart::get_instance();
+    $num_items = $wspsc_cart->get_total_cart_qty();
     $checkout_url = get_option('cart_checkout_page_url');
-    //$curSymbol = WP_CART_CURRENCY_SYMBOL;
-    //$cart_total = wpspc_get_total_cart_sub_total();
 
     $output = "";
     $output .= '<div class="wspsc_compact_cart2 wpsps-cart-wrapper">';
     $output .= '<div class="wspsc_compact_cart2_container">';
 
     $output .= '<div class="wspsc_compact_cart2_inside">';
-    $item_message = ($num_items <= 1) ? __("Item", "wordpress-simple-paypal-shopping-cart") : __("Items", "wordpress-simple-paypal-shopping-cart");
+    //Shows "Item" for 1.  Shows "Items" for 0 or more than 1.
+    $item_message = ($num_items == 1) ? __("Item", "wordpress-simple-paypal-shopping-cart") : __("Items", "wordpress-simple-paypal-shopping-cart");
 
     if(!empty($checkout_url)){
-        $output .= '<a class="wspsc_compact_cart2_view_cart_link" href="'.$checkout_url.'">'.$num_items . " " . $item_message . '</a>';
+        $output .= '<a class="wspsc_compact_cart2_view_cart_link" href="'.esc_url_raw($checkout_url).'">'.$num_items . " " . $item_message . '</a>';
     }else{
         $output .= $num_items . " " . $item_message;
     }

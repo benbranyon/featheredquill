@@ -368,7 +368,7 @@ msgstr "Hacer pagos con PayPal - ¡es rápido, gratis y seguro!"
 #, php-format
 msgid ""
 "PayPal Smart Checkout error: %s client ID is not set. Please set it on the "
-"Advanced Settings tab."
+"PayPal Smart Checkout Settings tab."
 msgstr ""
 "Error de pago inteligente de PayPal: %s ID de cliente no está establecido. "
 "Por favor, configúralo en la pestaña de Ajustes avanzados."
@@ -576,7 +576,7 @@ msgid "Update Options &raquo;"
 msgstr "Actualización de opciones &raquo;"
 
 #: includes/admin/wp_shopping_cart_menu_discounts.php:10
-msgid "Simple Cart Coupons/Discounts"
+msgid "Simple Shopping Cart Coupons/Discounts"
 msgstr "Cupones / descuentos de carrito simple"
 
 #: includes/admin/wp_shopping_cart_menu_discounts.php:70
@@ -1209,7 +1209,7 @@ msgid "Email Settings"
 msgstr "Ajustes de correo electrónico"
 
 #: includes/admin/wp_shopping_cart_menu_main.php:42
-msgid "Advanced Settings"
+msgid "PayPal Smart Checkout"
 msgstr "Ajustes avanzados"
 
 #: includes/admin/wp_shopping_cart_menu_main.php:45
@@ -1217,7 +1217,7 @@ msgid "WP Paypal Shopping Cart Options"
 msgstr "Opciones de WP Paypal Shopping Cart"
 
 #: includes/admin/wp_shopping_cart_menu_tools.php:9
-msgid "Simple Cart Tools"
+msgid "Simple Shopping Cart Tools"
 msgstr "Herramientas simples de carrito"
 
 #: includes/admin/wp_shopping_cart_menu_tools.php:33
@@ -1353,7 +1353,7 @@ msgstr "Artículos"
 #~ msgid "Collect Customer Input"
 #~ msgstr "Recopilar información del cliente"
 
-#~ msgid "Simple Cart Add-ons"
+#~ msgid "Simple Shopping Cart Add-ons"
 #~ msgstr "Extensiones de Simple Cart"
 
 #~ msgid " Example: Short, Full"

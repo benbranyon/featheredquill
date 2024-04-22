@@ -1,41 +1,44 @@
 === WordPress Simple Shopping Cart ===
 Contributors: Tips and Tricks HQ, Ruhul Amin, wptipsntricks, mbrsolution, mra13
 Donate link: https://www.tipsandtricks-hq.com
-Tags: cart, shopping cart, WordPress shopping cart, Paypal shopping cart, sell, selling, sell products, online shop, shop, e-commerce, wordpress ecommerce, wordpress store, store, PayPal cart widget, sell digital products, sell service, digital downloads, paypal, paypal cart, e-shop, compact cart, coupon, discount
+Tags: cart, shopping cart, WordPress shopping cart, Paypal shopping cart, sell, sell products, stripe, shop, e-commerce, wordpress ecommerce, wordpress store, store, PayPal cart widget, sell digital products, sell service, digital downloads, paypal, paypal cart,
 Requires at least: 5.5
-Tested up to: 6.2
-Stable tag: 4.6.4
+Tested up to: 6.5
+Stable tag: 5.0.5
 License: GPLv2 or later
 
-Very easy to use Simple WordPress PayPal Shopping Cart Plugin. Great for selling products online in one click from your WordPress site.
+Very easy to use Simple WordPress Shopping Cart Plugin. Great for selling products online in one click from your WordPress site.
 
 == Description ==
 
-WordPress Simple PayPal Shopping Cart allows you to create 'Add to Cart' buttons for your products or services on your site. This simple shopping cart plugin lets you sell products and services directly from your own WordPress site and turns your WP blog into an e-commerce site.
+The WordPress Simple Shopping Cart plugin allows you to create 'Add to Cart' buttons for your products or services on your site. This simple shopping cart plugin lets you sell products and services directly from your own WordPress site and turns your WP blog into an e-commerce site.
 
-It also allows you to add/display the shopping cart on any post, page or sidebar easily. The shopping cart shows the user what they currently have in the cart and allows them to change quantity or remove the items. 
+With this plugin, your customers have the convenience of paying for their selected items using popular payment gateways such as PayPal and/or Stripe.
+
+It allows you to add/display the shopping cart on any post, page or sidebar easily. The shopping cart shows the user what they currently have in the cart and allows them to change quantity or remove the items. 
 
 https://www.youtube.com/watch?v=dJgGdD-tZW4
 
 You will be able to create products by using shortcodes dynamically.
 
-The shopping cart output will be responsive if you are using it with a responsive theme.
+If you have a responsive theme, the shopping cart's output will adapt seamlessly to ensure a mobile-friendly shopping experience.
 
-You can sell digital products via this plugin easily too. The following video shows how you can sell your digital media files using the simple cart plugin:
+Furthermore, this plugin provides a simple solution for selling digital products. To see a demonstration of how you can effectively sell your digital media files using the simple cart plugin, please refer to the following video:
 
 https://www.youtube.com/watch?v=gPvXac_j_lI
 
-This plugin is a lightweight solution (with minimal number of lines of code and minimal options) so it doesn't slow down your site.
+Designed as a lightweight solution with minimal lines of code and a streamlined set of options, this plugin ensures optimal site performance. Moreover, it is designed to be a low maintenance solution, minimizing the likelihood of frequent site disruptions caused by upgrades. With this plugin, you can enjoy a stable and hassle-free shopping cart functionality while maintaining the overall stability of your website.
 
-The plugin also has an option to use the smart PayPal payment buttons. You can enable the PayPal smart button option in the settings menu of the plugin. The following video shows a checkout demo using PayPal smart button.
+It offers the newest/latest PayPal Commerce Platform (PPCP) checkout option. You can enable it in the settings menu of the plugin.
+
+The plugin also has an option to use the smart PayPal payment buttons. The following video shows a checkout demo using PayPal smart button.
 
 https://www.youtube.com/watch?v=m0yDWDmtpKI
 
-It can be integrated with the NextGen Photo Gallery plugin to accommodate the selling of photographs from your gallery.
-
-WP simple PayPal Cart Plugin, interfaces with the PayPal sandbox to allow for testing.
+WP Simple Cart Plugin, interfaces with the PayPal sandbox and Stripe testmode to allow for testing.
 
 For video tutorial, screenshots, detailed documentation, support and updates, please visit:
+
 [WP Simple Cart Details Page](https://www.tipsandtricks-hq.com/wordpress-simple-paypal-shopping-cart-plugin-768)
 or
 [WP Simple Cart Documentation](https://www.tipsandtricks-hq.com/ecommerce/wp-shopping-cart)
@@ -50,11 +53,15 @@ or
 * Sell any type of media file that you upload to your WordPress site. For example: you can sell ebooks (PDF), music files (MP3), audio files, videos, photos, images etc.
 * Your customers will automatically get an email with the media file that they paid for.
 * Show a nicely formatted product display box on the fly using a simple shortcode.
-* You can use PayPal sandbox to do testing if needed (before you go live).
-* Option to use the smart payment buttons of PayPal. Allows the customers to checkout in a popup window (using a credit card, paypal or paypal credit).
+* Option to enable terms and conditions for your customers to agree to before they checkout.
 * Uses the newest/latest PayPal checkout option.
+* Option to use the PayPal Commerce Platform Checkout option. You can enable it from the settings menu of the plugin.
+* Option to use the smart payment buttons of PayPal. Allows the customers to checkout in a popup window (using a credit card, paypal or paypal credit).
 * Your customers will be able to use the PayPal' Pay in 4 payment option (Buy Now Pay Later).
 * Collect special instructions from your customers on the PayPal checkout page.
+* You can use PayPal sandbox to do testing if needed (before you go live).
+* Ability to offer the Stripe checkout option. Your customers can conveniently make credit card payments through the secure Stripe payment gateway.
+* You can use Stripe testmode to do testing if needed (before going live).
 * The orders menu will show you all the orders that you have received from your site.
 * Ability to configure an email that will get sent to your buyers after they purchase your product.
 * Ability to configure a sale notification email that gets sent to the site admin when a customer purchase your item(s).
@@ -69,17 +76,17 @@ or
 * Ability to add a compact shopping cart to your site using a shortcode.
 * Ability to show shopping cart with product image thumbnails.
 * Ability to use a custom checkout page style.
-* Ability to open checkout page in a new browser tab/window.
-* Ability to use TinyMCE shortcode inserter to add shortcodes to your posts/pages.
+* Ability to configure region based shipping additions.
+* Ability to use blocks to add the 'add to cart' button and the 'shopping cart' to your posts/pages/sidebar.
 * Works nicely with responsive WordPress themes.
 * Can be translated into any language.
 * and more...
 
 = Shopping Cart Setup Video Tutorials =
 
-There is a series of video tutorials to show you how to setup the shopping cart on your site. 
+There is a series of video tutorials to show you how to set up the shopping cart plugin on your site. 
 
-Check the video tutorials [here](https://www.tipsandtricks-hq.com/wordpress-simple-paypal-shopping-cart-plugin-768).
+Check the [video tutorials here](https://www.tipsandtricks-hq.com/ecommerce/wordpress-simple-shopping-cart-video-tutorial-969).
 
 = Language Translations =
 
@@ -108,23 +115,24 @@ You can translate the plugin using [this documentation](https://www.tipsandtrick
 * If you are a developer and you need some extra hooks or filters for this plugin please let us know.
 * Github repository - https://github.com/Arsenal21/simple-wp-shopping-cart
 
-= Note =
-
-There are a few exact duplicate copies of this plugin that other people made. We have a few users who are getting confused as to which one is the original simple shopping cart plugin. This is the original simple PayPal shopping cart and you can verify it with the following information:
-
-* Check the stats tab of the plugin and you will be able to see a history of when this plugin was first added to WordPress.
-* Check the number of downloads on the sidebar. The original plugin always gets more downloads than the copycats.
-* Check the number of ratings. The original plugin should have more votes.
-* Check the developer's site.
-
 == Usage ==
-1. To add an 'Add to Cart' button for a product, simply add the shortcode [wp_cart_button name="PRODUCT-NAME" price="PRODUCT-PRICE"] to a post or page next to the product. Replace PRODUCT-NAME and PRODUCT-PRICE with the actual name and price.
+#1) To add an 'Add to Cart' button for a product, simply add the following shortcode to a post or page next to the product. Replace PRODUCT-NAME and PRODUCT-PRICE with the actual name and price.
 
-2. To add the 'Add to Cart' button on the sidebar or from other template files use the following function:
-<?php echo print_wp_cart_button_for_product('PRODUCT-NAME', PRODUCT-PRICE); ?>
+ [wp_cart_button name="PRODUCT-NAME" price="PRODUCT-PRICE"]
+
+#2) To add the shopping cart to a post or page (eg. checkout page) add the following shortcode to a post or page or use the sidebar widget to add the shopping cart to the sidebar. The shopping cart will only be visible in a post or page when a customer adds a product.
+
+[show_wp_shopping_cart]
+
+#3) Alternatively, you have the option to utilize the Gutenberg editor blocks provided by this plugin to conveniently insert the add to cart button and shopping cart in desired locations within your content.
+
+Read the [documentation for using the blocks](https://www.tipsandtricks-hq.com/ecommerce/simple-shopping-cart-blocks)
+
+#4) To insert the 'Add to Cart' button from a template or PHP file, you can utilize the following PHP function:
+
+&lt;?php echo print_wp_cart_button_for_product('PRODUCT-NAME', PRODUCT-PRICE); ?&gt;
+
 Replace PRODUCT-NAME and PRODUCT-PRICE with the actual name and price.
-
-3. To add the shopping cart to a post or page (eg. checkout page) simply add the shortcode [show_wp_shopping_cart] to a post or page or use the sidebar widget to add the shopping cart to the sidebar. The shopping cart will only be visible in a post or page when a customer adds a product.
 
 = Using Product Display Box =
 
@@ -148,6 +156,8 @@ Add the following shortcode where you want to show the compact shopping cart:
 or use the following php function from your wordpress template files
 <?php echo print_wp_cart_button_for_product('product name',price,shipping cost); ?>
 
+Visit the [shipping setup documentation page](https://www.tipsandtricks-hq.com/ecommerce/wordpress-shopping-cart-how-the-shipping-cost-calculation-works-297) for more details.
+
 = Using Variation Control =
 
 1. To use variation control use the variation parameter in the shortcode:
@@ -169,21 +179,22 @@ example usage: [wp_cart_button name="Test Product" price="29.95" var1="Size|smal
 4. Use the shortcode to add a product to a post or page where you want it to appear.
 
 == Frequently Asked Questions ==
+
+= Where can I find the documentation for this pluign? =
+Visit the [documentation page here](https://www.tipsandtricks-hq.com/ecommerce/wp-shopping-cart) 
+
 = Can this plugin be used to accept paypal payment for a service or a product? =
 Yes
-
+= Can this plugin be used to sell products and services using the Stripe payment gateway? =
+Yes
 = Does this plugin have shopping cart =
 Yes
-
 = Does this plugin have the option to use the new PayPal checkout option =
 Yes. you can enable the new PayPal checkout option in the settings menu of the plugin.
-
+= Can I enable terms and conditions for my customers to agree to before they checkout? =
+Yes. you can enable terms and conditions in the settings menu of the plugin.
 = Can the shopping cart be added to a checkout page? =
 Yes
-
-= Does this plugin has multiple currency support? =
-Yes
-
 = Is the 'Add to Cart' button customizable? =
 Yes
 = Does this plugin use a return URL to redirect customers to a specified page after PayPal has processed the payment? =
@@ -202,6 +213,8 @@ Yes.
 Yes.
 = Can the customers be sent to a cancel URL when they click "cancel" from the PayPal checkout page? =
 Yes.
+= Does this plugin have a Stripe Checkout option? =
+Yes, you can configure the Stripe checkout option in the settings menu of the plugin.
 
 == Screenshots ==
 Visit the plugin site at https://www.tipsandtricks-hq.com/wordpress-simple-paypal-shopping-cart-plugin-768 for screenshots.
@@ -211,6 +224,85 @@ Visit the plugin site at https://www.tipsandtricks-hq.com/wordpress-simple-paypa
 None
 
 == Changelog ==
+
+= 5.0.5 =
+- New option in the settings menu to force collect customer's shipping address for stripe checkout.
+- Fixed an issue with the quote character in the shipping variation settings.
+- Updated the language POT file.
+- Added blueprint.json file to enable plugin preview feature of WordPress.
+
+= 5.0.4 =
+- Updated the PPCP JavaScript SDK loading code to improve the race condition that may occur on some sites.
+- Language translation POT file updated.
+- The shipping region based shipping amount feature now list the countries in alphabetical order.
+- Added a notice in the admin interface to inform the users about switching from PayPal Smart checkout to the PayPal PPCP checkout.
+
+= 5.0.3 =
+- Added a new shipping amount additions by region feature.
+- The shipping related settings have been moved to a new tab in the settings menu.
+- Added more error logging messages for the PayPal Commerce Platform Checkout option.
+- Updated the reset_wp_cart query after checkout redirection.
+- Fixed a price calculation issue with the stripe checkout.
+
+= 5.0.2 =
+- Added the 'category' parameter in the PPCP API call.
+- Fixed an issue with the variations not working with the product name character support enhancement that we added in the previous version.
+
+= 5.0.1 =
+- Added a 'digital' parameter in the shortcode to specify a digital product.
+- The shipping preference is set based on the 'digital' parameter in the PayPal Commerce Platform Checkout option.
+- The product name will support more special characters and foreign characters.
+- Added a utility function to check for special characters in the product name.
+
+= 5.0.0 =
+- Added the New PayPal Commerce Platform Checkout option. You can enable it from the settings menu of the plugin.
+- Added a feature to enable Terms and conditions in the shopping cart.
+- Renamed the 'Advanced Settings' tab to 'PayPal Smart Checkout'.
+- PayPal has deprecated the Smart Checkout option and replaced it with the new PayPal Commerce Platform Checkout option. The new checkout option is now available in the plugin.
+- New utility function added for logging debug array.
+- The 'payment gateway' that is used for a transaction is also displayed in the order details page.
+- Reorganized some of the files in the plugin.
+
+= 4.7.2 =
+- Output escaping & sanitization added to checkout page redirection url.
+
+= 4.7.1 =
+- Shows the string "Item" for 1. Show the string "Items" for 0 or more than 1.
+- Updated the help text for the sandbox mode option to include Stripe testmode.
+- PHP8 related update for the shipping calculation in the cart.
+- Added a new option to enable shopping cart anchor.
+- Added CSS class to the shopping cart title.
+
+= 4.7.0 =
+- Unique names for debug log file name.
+- Updated the translation POT file.
+- Added a CSS wrapper class to the product box shortcode output.
+- Added documentation for using the blocks in the new WordPress editor.
+
+= 4.6.9 =
+- Shopping Cart block inserter related: fixed a rendering issue when both a shortcode and a block inserter is used with the smart checkout option.
+- Issue with "Collect Customer Input" addon's form validation and smart PayPal checkout button fixed.
+- Jquery loading issue fixed.
+
+= 4.6.8 =
+- Stripe payment gateway: fixed a rounding issue with the base shipping amount.
+
+= 4.6.7 =
+- The general settings menu items have been reorganized into two separate sections: PayPal Settings and Shopping Cart Settings.
+- Issue using quotes in the block attribute fields has fixed.
+- Moved the 'Disable Standard PayPal Checkout' option to the general settings so it can work in combination with the Stripe checkout settings.
+- Fixed the per checkout shipping amount issue with the newly added Stripe checkout option
+
+= 4.6.6 =
+- Added Stripe payment gateway checkout option. The Stripe checkout option can be enabled in the settings menu.
+- Improvements to stop a hash error when the product name contains a special character.
+- Three new gutenberg blocks (Add-to-Cart, Product Box and Shopping Cart) added.
+
+= 4.6.5 =
+- Reworked the main cart function to use a class instead of PHP session. This is part of a series of improvements that we are making to the plugin.
+- Optimized the saving of the cart to the order post meta.
+- The custom field values are saved to the order post meta instead of session.
+- Although the upgrade is designed to be seamless and compatible with older versions, significant changes have been made in this version. Therefore, it is advisable to back up your site before proceeding with the upgrade.
 
 = 4.6.4 =
 - The CSV export now directly streams the CSV file to the browser so you can save/download the exported orders data directly to your PC.
@@ -290,14 +382,14 @@ None
 - Added more filter hooks so the customer Input addon fields are now exported to CSV as well.
 
 = 4.4.3 =
-- Added button customization options (in the advanced settings) for the smart paypal checkout button.
+- Added button customization options (in the PayPal Smart Checkout Settings) for the smart paypal checkout button.
 
 = 4.4.2 =
 - Added PayPal smart button configuration documentation
   https://www.tipsandtricks-hq.com/ecommerce/enabling-smart-button-checkout-setup-and-configuration-4568
 
 = 4.4.1 =
-- Added a new checkout option that uses the smart PayPal payment button. You can enable it from the advanced settings menu.
+- Added a new checkout option that uses the smart PayPal payment button. You can enable it from the PayPal Smart Checkout Settings menu.
 - Added Breton language files. Thanks to Florian for submitting the language files.
 
 = 4.4.0 =
