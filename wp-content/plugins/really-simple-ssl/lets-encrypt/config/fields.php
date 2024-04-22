@@ -162,7 +162,7 @@ function rsssl_le_add_fields($fields) {
 				'menu_id'  => 'le-hosting',
 				'group_id'  => 'le-hosting',
 				'type'     => 'host',
-				'options'  => RSSSL_LE()->hosts->supported_hosts,
+				//options loaded in data store
 				'help'     => [
 					'label' => 'default',
 					'title' => __( "Hosting Provider", "really-simple-ssl" ),
@@ -420,15 +420,6 @@ function rsssl_le_add_fields($fields) {
 				],
 				'required'          => false,
 				'disabled'          => false,
-				'react_conditions' => [
-					'relation' => 'OR',
-					[
-						'!plesk_password' => 'EMPTY',
-						'!cloudways_api_key' => 'EMPTY',
-						'!directadmin_password' => 'EMPTY',
-						'!cpanel_password' => 'EMPTY',
-					]
-				],
 				'server_conditions' => [
 					'relation' => 'AND',
 					[

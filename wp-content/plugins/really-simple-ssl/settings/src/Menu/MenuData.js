@@ -8,16 +8,20 @@ const useMenu = create(( set, get ) => ({
     nextMenuItem:false,
     selectedMainMenuItem:false,
     selectedSubMenuItem:false,
+    selectedFilter: false,
+    activeGroupId: false,
     hasPremiumItems:false,
     subMenu:{title:' ',menu_items:[]},
     setSelectedSubMenuItem: async (selectedSubMenuItem) => {
         let selectedMainMenuItem = getMainMenuForSubMenu(selectedSubMenuItem);
         set(state => ({ selectedSubMenuItem,selectedMainMenuItem }))
-        window.location.href=rsssl_settings.dashboard_url+'#'+selectedMainMenuItem+'/'+selectedSubMenuItem;
+        // window.location.href=rsssl_settings.dashboard_url+'#'+selectedMainMenuItem+'/'+selectedSubMenuItem;
+        window.location.hash = selectedMainMenuItem+'/'+selectedSubMenuItem;
     },
     setSelectedMainMenuItem: (selectedMainMenuItem) => {
         set(state => ({ selectedMainMenuItem }))
-        window.location.href=rsssl_settings.dashboard_url+'#'+selectedMainMenuItem;
+        // window.location.href=rsssl_settings.dashboard_url+'#'+selectedMainMenuItem;
+        window.location.hash = selectedMainMenuItem;
     },
     //we need to get the main menu item directly from the anchor, otherwise we have to wait for the menu to load in page.js
     fetchSelectedMainMenuItem: () => {
@@ -82,8 +86,6 @@ const menuItemParser = (parsedMenuItems, menuItems, fields) => {
     return parsedMenuItems;
 }
 
-
-
 const getPreviousAndNextMenuItems = (menu, selectedSubMenuItem, fields) => {
     let previousMenuItem;
     let nextMenuItem;
@@ -106,6 +108,11 @@ const getPreviousAndNextMenuItems = (menu, selectedSubMenuItem, fields) => {
 }
 
 const dropEmptyMenuItems = (menuItems, fields) => {
+
+    if (!Array.isArray(fields)) {
+        return menuItems;  // return the original menuItems unchanged
+    }
+
     const newMenuItems = menuItems;
     for (const [index, menuItem] of menuItems.entries()) {
         let menuItemFields = fields.filter((field) => {
@@ -116,9 +123,13 @@ const dropEmptyMenuItems = (menuItems, fields) => {
             return ( field.visible )
         });
         if ( menuItemFields.length === 0 && !menuItem.hasOwnProperty('menu_items') )  {
-            newMenuItems[index].visible = false;
+            if (typeof newMenuItems[index] === 'object' && newMenuItems[index] !== null) {
+                newMenuItems[index].visible = false;
+            }
         } else {
-            newMenuItems[index].visible = true;
+            if (typeof newMenuItems[index] === 'object' && newMenuItems[index] !== null) {
+                newMenuItems[index].visible = true;
+            }
             if( menuItem.hasOwnProperty('menu_items') ) {
                 newMenuItems[index].menu_items = dropEmptyMenuItems(menuItem.menu_items, fields);
             }
@@ -133,12 +144,14 @@ const dropEmptyMenuItems = (menuItems, fields) => {
 * filter sidebar menu from complete menu structure
 */
 const getSubMenu = (menu, selectedMainMenuItem) => {
+
     let subMenu = [];
     for (const key in menu) {
         if ( menu.hasOwnProperty(key) && menu[key].id === selectedMainMenuItem ){
             subMenu = menu[key];
         }
     }
+
     subMenu = addVisibleToMenuItems(subMenu);
     return subMenu;
 }
@@ -217,13 +230,17 @@ const getMenuItemByName = (name, menuItems) => {
 }
 
 const addVisibleToMenuItems = (menu) => {
-    let newMenuItems = menu.menu_items;
-    for (let [index, menuItem] of menu.menu_items.entries()) {
-        menuItem.visible = true;
-        if( menuItem.hasOwnProperty('menu_items') ) {
-            menuItem = addVisibleToMenuItems(menuItem);
+
+    let newMenuItems = Array.isArray(menu.menu_items) ? menu.menu_items : Object.values(menu.menu_items);
+
+    for (let [index, menuItem] of newMenuItems.entries()) {
+        if (typeof menuItem === 'object' && menuItem !== null) {
+            menuItem.visible = true;
+            if (menuItem.hasOwnProperty('menu_items')) {
+                menuItem = addVisibleToMenuItems(menuItem);
+            }
+            newMenuItems[index] = menuItem;
         }
-        newMenuItems[index] = menuItem;
     }
     menu.menu_items = newMenuItems;
     menu.visible = true;
