@@ -2,80 +2,69 @@
 
 jQuery( function ( $ ) {
 	// Stretch all the full width rows
-	var stretchFullWidthRows = function () {
-		if ( ! panelsStyles.stretchRows ) {
-			return;
-		}
-		var fullContainer = $( panelsStyles.fullContainer );
+	const stretchFullWidthRows = function () {
+		let fullContainer = $( panelsStyles.fullContainer );
 		if ( fullContainer.length === 0 ) {
 			fullContainer = $( 'body' );
 		}
 
-		var $panelsRow = $( '.siteorigin-panels-stretch.panel-row-style' );
+		const $panelsRow = $( '.siteorigin-panels-stretch.panel-row-style' );
+		// Are there any rows to stretch?
+		if ( ! $panelsRow.length ) {
+			return;
+		}
+
 		$panelsRow.each( function () {
-			var $$ = $( this );
-			
-			var stretchType = $$.data( 'stretch-type' );
-			var defaultSidePadding = stretchType === 'full-stretched-padded' ? '' : 0;
-			
+			const $$ = $( this );
+			const stretchType = $$.data( 'stretch-type' );
+
 			// Reset all the styles associated with row stretching
 			$$.css( {
 				'margin-left': 0,
 				'margin-right': 0,
-				'padding-left': defaultSidePadding,
-				'padding-right': defaultSidePadding
 			} );
 
-			var leftSpace = $$.offset().left - fullContainer.offset().left,
-				rightSpace = fullContainer.outerWidth() - leftSpace - $$.parent().outerWidth();
+			const leftSpace = $$.offset().left - fullContainer.offset().left;
+			const rightSpace = fullContainer.outerWidth() - leftSpace - $$.parent().outerWidth();
 
 			$$.css( {
 				'margin-left': - leftSpace + 'px',
 				'margin-right': - rightSpace + 'px',
-				'padding-left': stretchType === 'full' ? leftSpace + 'px' : defaultSidePadding,
-				'padding-right': stretchType === 'full' ? rightSpace + 'px': defaultSidePadding
 			} );
 
-			var cells = $$.find( '> .panel-grid-cell' );
-
-			if ( stretchType === 'full-stretched' && cells.length === 1 ) {
-				cells.css( {
-					'padding-left': 0,
-					'padding-right': 0
+			// If Row Layout is Full Width, apply content container.
+			if ( stretchType === 'full' ) {
+				$$.css( {
+					'padding-left': leftSpace + 'px',
+					'padding-right': rightSpace + 'px'
 				} );
 			}
-
-			$$.css( {
-				'border-left': defaultSidePadding,
-				'border-right': defaultSidePadding
-			} );
 		} );
 
-		if ( $panelsRow.length ) {
-			$( window ).trigger( 'panelsStretchRows' );
-		}
+		$( window ).trigger( 'panelsStretchRows' );
 	}
-	stretchFullWidthRows();
+
+	if ( panelsStyles.stretchRows ) {
+		$( window ).on( 'resize load', stretchFullWidthRows ).trigger( 'resize' );
+	}
 
 	if (
-		typeof parallaxStyles != 'undefined' &&
-		typeof simpleParallax != 'undefined' &&
-		(
-			! parallaxStyles['disable-parallax-mobile'] ||
-			! window.matchMedia( '(max-width: ' + parallaxStyles['mobile-breakpoint'] + ')' ).matches
-		)
+		typeof parallaxStyles !== 'undefined' &&
+		typeof simpleParallax !== 'undefined'
 	) {
-		new simpleParallax( document.querySelectorAll( '[data-siteorigin-parallax], .sow-slider-image-parallax .sow-slider-background-image' ), {
-			delay: parallaxStyles['delay'],
-			scale: parallaxStyles['scale'] < 1.1 ? 1.1 : parallaxStyles['scale'],
-		} );
-	}
+		const { 'disable-parallax-mobile': disableParallaxMobile, 'mobile-breakpoint': mobileBreakpoint, delay, scale } = parallaxStyles;
 
-	$( window ).on( 'resize load', function() {
-		stretchFullWidthRows();
-	} );
+		if (
+			! disableParallaxMobile ||
+			! window.matchMedia( `(max-width: ${ mobileBreakpoint })` ).matches
+		) {
+			new simpleParallax( document.querySelectorAll( '[data-siteorigin-parallax], .sow-slider-image-parallax .sow-slider-background-image' ), {
+				delay,
+				scale: scale < 1.1 ? 1.1 : scale,
+			} );
+		}
+	}
 
 	// This should have been done in the footer, but run it here just incase.
 	$( 'body' ).removeClass( 'siteorigin-panels-before-js' );
-
 } );

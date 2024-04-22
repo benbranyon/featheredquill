@@ -858,7 +858,30 @@ module.exports = panels.view.dialog.extend({
 		},
 
 		// Toolbar buttons
+		'click .so-close': 'saveHandler',
+		'click .so-toolbar .so-saveinline': function( e ) {
+			this.saveHandler( true );
+		},
+		'click .so-mode': 'switchModeShow',
+		'keyup .so-mode': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
+		'click .so-saveinline-mode': function() {
+			this.switchMode( true );
+		},
+		'keyup .so-mode-list li': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
+		'click .so-close-mode': function() {
+			this.switchMode( false );
+		},
+		'keyup .so-close-mode': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 		'click .so-toolbar .so-save': 'saveHandler',
+		'click .so-toolbar .so-saveinline': function( e ) {
+			this.saveHandler( true );
+		},
 		'click .so-toolbar .so-insert': 'insertHandler',
 		'click .so-toolbar .so-delete': 'deleteHandler',
 		'keyup .so-toolbar .so-delete': function( e ) {
@@ -869,15 +892,36 @@ module.exports = panels.view.dialog.extend({
 			panels.helpers.accessibility.triggerClickOnEnter( e );
 		},
 
-		// Changing the row
-		'change .row-set-form > *': 'setCellsFromForm',
-		'click .row-set-form button.set-row': 'setCellsFromForm',
+		// Changing the row.
+		'click .row-set-form .so-row-field': 'changeCellTotal',
+		'click .cell-resize-sizing span': 'changeCellRatio',
+		'click .cell-resize-direction ': 'changeSizeDirection',
+
+		// If user clicks the column size indicator, focus the field.
+		'click .preview-cell-unit ': function( e ) {
+			$( e.target ).next().trigger( 'focus' );
+		},
+
+		'keyup .cell-resize-direction': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e, true );
+		},
+		'keyup .cell-resize-sizing': function( e ) {
+			if ( e.which == 13 ) {
+				var size = $( e.target ).index();
+				var parent = $( e.target ).parent();
+				$( e.target ).find( 'span' ).trigger( 'click' );
+
+				// Refocus on the selected size to prevent focus loss.
+				parent.find( '.cell-resize-sizing' ).eq( size ).trigger( 'focus' );
+			}
+		},
 	},
 
 	rowView: null,
 	dialogIcon: 'add-row',
 	dialogClass: 'so-panels-dialog-row-edit',
 	styleType: 'row',
+	columnResizeData: [],
 
 	dialogType: 'edit',
 
@@ -901,7 +945,10 @@ module.exports = panels.view.dialog.extend({
 				this.setRowModel(null);
 			}
 
+			this.columnResizeData = this.$( '.cell-resize').data( 'resize' );
 			this.regenerateRowPreview();
+			this.drawCellResizers();
+			this.updateActiveCellClass();
 			this.renderStyles();
 			this.openSelectedCellStyles();
 		}, this);
@@ -980,12 +1027,6 @@ module.exports = panels.view.dialog.extend({
 		if ( ! _.isUndefined( this.model ) && this.dialogType == 'edit' ) {
 			// Set the initial value of the
 			this.$( 'input[name="cells"].so-row-field' ).val( this.model.get( 'cells' ).length );
-			if ( this.model.has( 'ratio' ) ) {
-				this.$( 'select[name="ratio"].so-row-field' ).val( this.model.get( 'ratio' ) );
-			}
-			if ( this.model.has( 'ratio_direction' ) ) {
-				this.$( 'select[name="ratio_direction"].so-row-field' ).val( this.model.get( 'ratio_direction' ) );
-			}
 		}
 
 		this.$( 'input.so-row-field' ).on( 'keyup', function() {
@@ -994,13 +1035,13 @@ module.exports = panels.view.dialog.extend({
 
 		return this;
 	},
-	
+
 	renderStyles: function () {
 		if ( this.styles ) {
 			this.styles.off( 'styles_loaded' );
 			this.styles.remove();
 		}
-		
+
 		// Now we need to attach the style window
 		this.styles = new panels.view.styles();
 		this.styles.model = this.model;
@@ -1008,16 +1049,16 @@ module.exports = panels.view.dialog.extend({
 			builderType: this.builder.config.builderType,
 			dialog: this
 		});
-		
+
 		var $rightSidebar = this.$('.so-sidebar.so-right-sidebar');
 		this.styles.attach( $rightSidebar );
-		
+
 		// Handle the loading class
 		this.styles.on('styles_loaded', function (hasStyles) {
 			if ( ! hasStyles ) {
 				// If we don't have styles remove the view.
 				this.styles.remove();
-				
+
 				// If the sidebar is empty, hide it.
 				if ( $rightSidebar.children().length === 0 ) {
 					$rightSidebar.closest('.so-panels-dialog').removeClass('so-panels-dialog-has-right-sidebar');
@@ -1043,19 +1084,11 @@ module.exports = panels.view.dialog.extend({
 		this.row = {
 			cells: this.model.get('cells').clone(),
 			style: {},
-			ratio: this.model.get('ratio'),
-			ratio_direction: this.model.get('ratio_direction'),
 		};
 
 		// Set the initial value of the cell field.
 		if ( this.dialogType == 'edit' ) {
 			this.$( 'input[name="cells"].so-row-field' ).val( this.model.get( 'cells' ).length );
-			if ( this.model.has( 'ratio' ) ) {
-				this.$( 'select[name="ratio"].so-row-field' ).val( this.model.get( 'ratio' ) );
-			}
-			if ( this.model.has( 'ratio_direction' ) ) {
-				this.$( 'select[name="ratio_direction"].so-row-field' ).val( this.model.get( 'ratio_direction' ) );
-			}
 		}
 
 		this.clearCellStylesCache();
@@ -1150,8 +1183,6 @@ module.exports = panels.view.dialog.extend({
 								) / rowPreview.width()
 							);
 
-						var helperLeft = ui.helper.offset().left - rowPreview.offset().left - 6;
-
 						$( this ).data( 'newCellClone' ).css( 'width', rowPreview.width() * ncw + 'px' )
 							.find('.preview-cell-weight').html(Math.round(ncw * 1000) / 10);
 
@@ -1199,138 +1230,159 @@ module.exports = panels.view.dialog.extend({
 
 			}.bind(this));
 
-			// Make this row weight click editable
 			newCell.find( '.preview-cell-weight' ).on( 'click', function( ci ) {
 
-				// Disable the draggable while entering values
-				thisDialog.$('.resize-handle').css('pointer-event', 'none').draggable('disable');
+				// Disable the draggable while entering values.
+				thisDialog.$( '.resize-handle' ).css( 'pointer-event', 'none' ).draggable( 'disable' );
 
-				rowPreview.find('.preview-cell-weight').each(function () {
-					var $$ = jQuery(this).hide();
-					$('<input type="text" class="preview-cell-weight-input no-user-interacted" />')
-						.val(parseFloat($$.html())).insertAfter($$)
-						.on( 'focus', function() {
-							clearTimeout(timeout);
-						})
-						.on( 'keyup', function( e ) {
-							if (e.keyCode !== 9) {
-								// Only register the interaction if the user didn't press tab
-								$(this).removeClass('no-user-interacted');
+				var resizeCells = function( refocusIndex = false ) {
+					timeout = setTimeout( function() {
+						var rowPreviewInputs = rowPreview.find( '.preview-cell-weight-input' );
+						// If there are no weight inputs, then skip this.
+						if ( rowPreviewInputs.length === 0 ) {
+							return false;
+						}
+
+						var rowWeights = [],
+							rowChanged = [],
+							changedSum = 0,
+							unchangedSum = 0;
+
+						rowPreviewInputs.each( function( i, el ) {
+							var val = parseFloat( $( el ).val() );
+							if ( isNaN( val ) ) {
+								val = 1 / thisDialog.row.cells.length;
+							} else {
+								val = Math.round( val * 10 ) / 1000;
 							}
 
-							// Enter is clicked
-							if (e.keyCode === 13) {
-								e.preventDefault();
-								$( this ).trigger( 'blur' );
+							// Check within 3 decimal points.
+							var changed = ! $( el ).hasClass( 'no-user-interacted' );
+
+							rowWeights.push( val );
+							rowChanged.push( changed );
+
+							if ( changed ) {
+								changedSum += val;
+							} else {
+								unchangedSum += val;
 							}
-						})
-						.on( 'keydown', function( e ) {
-							if (e.keyCode === 9) {
-								e.preventDefault();
+						} );
 
-								// Tab will always cycle around the row inputs
-								var inputs = rowPreview.find('.preview-cell-weight-input');
-								var i = inputs.index($(this));
-								if (i === inputs.length - 1) {
-									inputs.eq( 0 ).trigger( 'focus' ).trigger( 'select' );
-								} else {
-									inputs.eq( i + 1 ).trigger( 'focus' ).trigger( 'select' );
+						if ( changedSum > 0 && unchangedSum > 0 && 1 - changedSum > 0 ) {
+							// Balance out the unchanged rows to occupy the weight left over by the changed sum.
+							for ( var i = 0; i < rowWeights.length; i++ ) {
+								if ( ! rowChanged[ i ] ) {
+									rowWeights[ i ] = (
+											rowWeights[ i ] / unchangedSum
+										) * (
+											1 - changedSum
+										);
 								}
 							}
-						})
-						.on( 'blur', function() {
-							rowPreview.find('.preview-cell-weight-input').each(function (i, el) {
-								if (isNaN(parseFloat($(el).val()))) {
-									$(el).val(Math.floor(thisDialog.row.cells.at(i).get('weight') * 1000) / 10);
-								}
-							});
+						}
 
-							timeout = setTimeout(function () {
-								// If there are no weight inputs, then skip this
-								if (rowPreview.find('.preview-cell-weight-input').length === 0) {
-									return false;
-								}
+						// Last check to ensure total weight is 1.
+						var sum = _.reduce( rowWeights, function ( memo, num ) {
+							return memo + num;
+						} );
 
-								// Go through all the inputs
-								var rowWeights = [],
-									rowChanged = [],
-									changedSum = 0,
-									unchangedSum = 0;
+						rowWeights = rowWeights.map( function( w ) {
+							return w / sum;
+						} );
 
-								rowPreview.find('.preview-cell-weight-input').each(function (i, el) {
-									var val = parseFloat($(el).val());
-									if (isNaN(val)) {
-										val = 1 / thisDialog.row.cells.length;
-									} else {
-										val = Math.round(val * 10) / 1000;
-									}
+						// Set the new cell weights and regenerate the preview.
+						if ( Math.min.apply( Math, rowWeights ) > 0.01 ) {
+							thisDialog.row.cells.each( function( cell, i ) {
+								cell.set( 'weight', rowWeights[ i ] );
+							} );
+						}
 
-									// Check within 3 decimal points
-									var changed = !$(el).hasClass('no-user-interacted');
-
-									rowWeights.push(val);
-									rowChanged.push(changed);
-
-									if (changed) {
-										changedSum += val;
-									} else {
-										unchangedSum += val;
-									}
-								});
-
-								if (changedSum > 0 && unchangedSum > 0 && (
-										1 - changedSum
-									) > 0) {
-									// Balance out the unchanged rows to occupy the weight left over by the changed sum
-									for (var i = 0; i < rowWeights.length; i++) {
-										if (!rowChanged[i]) {
-											rowWeights[i] = (
-													rowWeights[i] / unchangedSum
-												) * (
-													1 - changedSum
-												);
-										}
-									}
-								}
-
-								// Last check to ensure total weight is 1
-								var sum = _.reduce(rowWeights, function (memo, num) {
-									return memo + num;
-								});
-								rowWeights = rowWeights.map(function (w) {
-									return w / sum;
-								});
-
-								// Set the new cell weights and regenerate the preview.
-								if (Math.min.apply(Math, rowWeights) > 0.01) {
-									thisDialog.row.cells.each(function (cell, i) {
-										cell.set('weight', rowWeights[i]);
-									});
-								}
-
-								// Now lets animate the cells into their new widths
-								rowPreview.find('.preview-cell').each(function (i, el) {
-									var cellWeight = thisDialog.row.cells.at(i).get('weight');
-									$(el).animate({'width': Math.round(cellWeight * 1000) / 10 + "%"}, 250);
-									$(el).find('.preview-cell-weight-input').val(Math.round(cellWeight * 1000) / 10);
-								});
-
-								// So the draggable handle is not hidden.
-								rowPreview.find('.preview-cell').css('overflow', 'visible');
-								setTimeout(thisDialog.regenerateRowPreview.bind(thisDialog), 260);
-
-							}, 100);
-						})
-						.on( 'click', function () {
-							$( this ).trigger( 'select' );
+						// Now lets animate the cells into their new widths.
+						rowPreview.find( '.preview-cell' ).each( function ( i, el ) {
+							var cellWeight = thisDialog.row.cells.at( i ).get( 'weight');
+							$( el ).animate( { 'width': Math.round( cellWeight * 1000 ) / 10 + "%" }, 250 );
+							$( el ).find( '.preview-cell-weight-input' ).val( Math.round( cellWeight * 1000 ) / 10 );
 						});
-				});
 
-				$(this).siblings( '.preview-cell-weight-input' ).trigger( 'select');
+						setTimeout( function() {
+							if ( typeof refocusIndex === 'number' ) {
+								rowPreviewInputs.get( refocusIndex ).focus();
+							}
 
-			});
+							// So the draggable handle is not hidden.
+							thisDialog.regenerateRowPreview.bind( thisDialog )
+						}, 260 );
+
+					}, 100 );
+				}
+
+				rowPreview.find( '.preview-cell-weight' ).each( function( ci ) {
+					var columnId = ci + 1;
+					var $$ = jQuery( this ).hide();
+					var maxSize = 100 - ( thisDialog.row.cells.length - 1 );
+					var label = panelsOptions.loc.row.cellInput.replace( '%s', columnId );
+
+					$( `<input
+						type="number"
+						class="preview-cell-weight-input no-user-interacted"
+						id="column-${ columnId }"
+						min="1"
+						max="${ maxSize }"
+						aria-label="${ label }"
+					/>` )
+						.val( parseFloat( $$.html() ) ).insertAfter( $$ )
+						.on( 'focus', function() {
+							clearTimeout( timeout );
+							$( this ).attr( 'type', 'number' );
+						} )
+						.on( 'keyup', function( e ) {
+							if ( e.keyCode !== 9 ) {
+								// Only register the interaction if the user didn't press tab.
+								$( this ).removeClass( 'no-user-interacted' );
+							}
+
+							// Enter is pressed.
+							if ( e.keyCode === 13 ) {
+								e.preventDefault();
+								resizeCells();
+							}
+
+							// Up or down is pressed.
+							if ( e.keyCode === 38 || e.keyCode === 40 ) {
+								e.preventDefault();
+								// During the row regeneration, the inputs are removed and re-added so we need the id to refocus.
+								var parent = $( e.target ).parents( '.preview-cell' ).index();
+
+								resizeCells( parent );
+							}
+						} )
+						.on( 'blur', resizeCells )
+						.on( 'click', function () {
+							// If the input is already focused, the user has clicked a step.
+							if ( $( this ).is( ':focus' ) ) {
+								resizeCells();
+							}
+							$( this ).trigger( 'select' );
+						} );
+				} );
+
+				$( this ).siblings( '.preview-cell-weight-input' ).trigger( 'select' );
+
+				// When the field blurs, we convert the inputs to text to prevent an overlap with the step counter with the percentage.
+				rowPreview.find( '.preview-cell-weight-input' ).on( 'blur', function() {
+					rowPreview.find( '.preview-cell-weight-input' ).attr( 'type', 'text' );
+				} );
+			} );
+
+			// When a user tabs to  one of the column previews, switch all of them to inputs.
+			newCell.find( '.preview-cell-weight' ).on( 'focus', function( e ) {
+				$( e.target ).trigger( 'click' );
+			} );
 
 		}, this);
+
+		this.updateActiveCellClass();
 
 		this.trigger('form_loaded', this);
 	},
@@ -1416,106 +1468,175 @@ module.exports = panels.view.dialog.extend({
 		});
 	},
 
-	/**
-	 * Get the weights from the
-	 */
-	setCellsFromForm: function () {
+	drawCellResizers: function() {
+		this.$( '.cell-resize' ).empty();
+		var cellsCount = this.getCurrentCellCount();
+		var currentCellSizes = this.columnResizeData[ cellsCount ];
 
-		try {
-			var f = {
-				'cells': parseInt(this.$('.row-set-form input[name="cells"]').val()),
-				'ratio': parseFloat(this.$('.row-set-form select[name="ratio"]').val()),
-				'direction': this.$('.row-set-form select[name="ratio_direction"]').val()
-			};
+		// Certain sizes may require some additional CSS spacing.
+		this.$( '.row-set-form' ).attr( 'data-cells', cellsCount );
 
-			if (_.isNaN(f.cells)) {
-				f.cells = 1;
+		if ( cellsCount > 1 && typeof currentCellSizes !== 'undefined' ) {
+			this.$( '.cell-resize-container, .cell-resize-direction-container' ).show();
+			for ( ci = 0; ci < currentCellSizes.length; ci++ ) {
+				this.$( '.cell-resize' ).append( '<span class="cell-resize-sizing" tabindex="0"></span>' );
+				var $lastCell = this.$( '.cell-resize' ).find( '.cell-resize-sizing' ).last();
+				$lastCell.data( 'cells', currentCellSizes[ ci ] );
+				for ( cs = 0; cs < currentCellSizes[ ci ].length; cs++ ) {
+					$lastCell.append( '<span style="width: ' + currentCellSizes[ ci ][ cs ] + '%;">' + currentCellSizes[ ci ][ cs ] + '%</span>' );
+				}
 			}
-			if (isNaN(f.ratio)) {
-				f.ratio = 1;
-			}
-			if (f.cells < 1) {
-				f.cells = 1;
-				this.$('.row-set-form input[name="cells"]').val(f.cells);
-			}
-			else if (f.cells > 12) {
-				f.cells = 12;
-				this.$('.row-set-form input[name="cells"]').val(f.cells);
-			}
+		} else {
+			this.$( '.cell-resize-container, .cell-resize-direction-container' ).hide();
+		}
+	},
 
-			this.$('.row-set-form select[name="ratio"]').val(f.ratio);
+	updateActiveCellClass: function() {
+		$( '.so-active-ratio' ).removeClass( 'so-active-ratio' );
+		var activeCellRatio = this.$( '.preview-cell-weight' ).map( function() {
+			return Math.trunc( Number( $( this ).text() ) );
+		} ).get();
+
+		var cellsCount = this.getCurrentCellCount();
+		$.each( this.columnResizeData[ cellsCount ], function( i, ratio ) {
+			if ( ratio.toString() === activeCellRatio.toString() ) {
+				activeCellRatio = i;
+				return false;
+			}
+		} );
+
+		if ( typeof activeCellRatio == 'number' ) {
+			$( $( '.cell-resize-sizing' ).get( activeCellRatio ) ).addClass( 'so-active-ratio' );
+		}
+	},
+
+	changeSizeDirection: function( e ) {
+		var $current = $( e.target );
+		var currentDirection = $current.attr( 'data-direction' );
+		var newDirection = currentDirection == 'left' ? 'right' : 'left';
+		var label = panelsOptions.loc.row.direction.replace( '%s', panelsOptions.loc.row[ newDirection ] );
+
+		$current
+			.removeClass( 'dashicons-arrow-' + currentDirection )
+			.addClass( 'dashicons-arrow-' + newDirection )
+			.attr( 'data-direction', newDirection )
+			.attr( 'aria-label', label );
+
+		// Reverse all sizes.
+		for ( var columnCount in this.columnResizeData ) {
+			this.columnResizeData[ columnCount ] = this.columnResizeData[ columnCount ].map( function( size ) {
+				return size.reverse();
+			} );
+		}
+
+		this.drawCellResizers();
+	},
+
+	changeCellRatio: function( e ) {
+		var $current = $( e.target );
+		if ( ! $current.hasClass( 'cell-resize-sizing' ) ) {
+			$current = $current.parent();
+		}
+
+		if ( ! $current.hasClass( 'so-active-ratio' ) ) {
+			$( '.so-active-ratio' ).removeClass( 'so-active-ratio' );
+			$current.addClass( 'so-active-ratio' );
+			this.changeCellTotal( $current.data('cells' ) )
+		}
+	},
+
+	getCurrentCellCount: function() {
+		return parseInt( this.$('.row-set-form input[name="cells"]').val() );
+	},
+
+	changeCellTotal: function ( cellRatio = 0 ) {
+		var thisDialog = this;
+		 try {
+			var cellsCount = this.getCurrentCellCount();
+			this.drawCellResizers();
+
+			if (_.isNaN( cellsCount )) {
+				cellsCount = 1;
+			} else {
+				if ( cellsCount < 1 ) {
+					cellsCount = 1;
+				} else if ( cellsCount > 12 ) {
+					cellsCount = 12;
+				}
+			}
+			this.$( '.row-set-form input[name="cells"]' ).val( cellsCount );
 
 			var cells = [];
 			var cellCountChanged = (
-				this.row.cells.length !== f.cells
+				this.row.cells.length !== cellsCount
 			);
 
-			// Now, lets create some cells
-			var currentWeight = 1;
-			for (var i = 0; i < f.cells; i++) {
-				cells.push(currentWeight);
-				currentWeight *= f.ratio;
+			// Create some cells
+			for ( var i = 0; i < cellsCount; i++ ) {
+				cells.push( 1 );
 			}
 
-			// Now lets make sure that the row weights add up to 1
-
-			var totalRowWeight = _.reduce(cells, function (memo, weight) {
+			// Lets make sure that the row weights add up to 1.
+			var totalRowWeight = _.reduce( cells, function( memo, weight ) {
 				return memo + weight;
-			});
-			cells = _.map(cells, function (cell) {
+			} );
+
+			cells = _.map( cells, function( cell ) {
 				return cell / totalRowWeight;
-			});
+			} );
 
 			// Don't return cells that are too small
-			cells = _.filter(cells, function (cell) {
+			cells = _.filter( cells, function( cell ) {
 				return cell > 0.01;
-			});
-
-			if (f.direction === 'left') {
-				cells = cells.reverse();
-			}
+			} );
 
 			// Discard deleted cells.
-			this.row.cells = new panels.collection.cells(this.row.cells.first(cells.length));
+			this.row.cells = new panels.collection.cells( this.row.cells.first( cells.length ) );
 
-			_.each(cells, function (cellWeight, index) {
-				var cell = this.row.cells.at(index);
-				if (!cell) {
-					cell = new panels.model.cell({weight: cellWeight, row: this.model});
-					this.row.cells.add(cell);
+			_.each( cells, function( cellWeight, index ) {
+				var cell = this.row.cells.at( index );
+				if ( ! cell ) {
+					cell = new panels.model.cell( {
+						weight: cellWeight,
+						row: this.model
+					} );
+
+					setTimeout( thisDialog.regenerateRowPreview.bind( thisDialog ), 260 );
+					this.row.cells.add( cell );
 				} else {
-					cell.set('weight', cellWeight);
+					cell.set(
+						'weight',
+						cellRatio.length ? cellRatio[ index ] / 100 : cellWeight
+					);
 				}
-			}.bind(this));
-			
-			this.row.ratio = f.ratio;
-			this.row.ratio_direction = f.direction;
+			}.bind( this ) );
 
-			if (cellCountChanged) {
+			if ( cellCountChanged ) {
 				this.regenerateRowPreview();
 			} else {
-				var thisDialog = this;
-
-				// Now lets animate the cells into their new widths
-				this.$('.preview-cell').each(function (i, el) {
-					var cellWeight = thisDialog.row.cells.at(i).get('weight');
-					$(el).animate({'width': Math.round(cellWeight * 1000) / 10 + "%"}, 250);
-					$(el).find('.preview-cell-weight').html(Math.round(cellWeight * 1000) / 10);
-				});
+				// // Now lets animate the cells into their new widths
+				this.$( '.preview-cell' ).each( function( i, el ) {
+					var width = Math.round( thisDialog.row.cells.at( i ).get( 'weight' ) * 1000 ) / 10;
+					var $previewCellWeight = $( el ).find( '.preview-cell-weight' );
+					// To prevent a jump, don't animate cells that haven't changed size.
+					if ( parseInt( $previewCellWeight.text() ) != width ) {
+						$( el ).animate( { 'width': width + "%" }, 250 );
+						$previewCellWeight.html( width );
+					}
+				} );
 
 				// So the draggable handle is not hidden.
-				this.$('.preview-cell').css('overflow', 'visible');
+				this.$( '.preview-cell' ).css( 'overflow', 'visible' );
 
-				setTimeout(thisDialog.regenerateRowPreview.bind(thisDialog), 260);
+				setTimeout( thisDialog.regenerateRowPreview.bind( thisDialog ), 260 );
 			}
 		}
-		catch (err) {
-			console.log('Error setting cells - ' + err.message);
+		catch ( err ) {
+			console.log( 'Error setting cells - ' + err.message );
 		}
 
-
 		// Remove the button primary class
-		this.$('.row-set-form .so-button-row-set').removeClass('button-primary');
+		this.$( '.row-set-form .so-button-row-set' ).removeClass( 'button-primary' );
 	},
 
 	/**
@@ -1542,7 +1663,6 @@ module.exports = panels.view.dialog.extend({
 		if (!_.isEmpty(this.model)) {
 			this.model.setCells( this.row.cells );
 			this.model.set( 'ratio', this.row.ratio );
-			this.model.set( 'ratio_direction', this.row.ratio_direction );
 		}
 
 		// Update the row styles if they've loaded
@@ -1619,12 +1739,15 @@ module.exports = panels.view.dialog.extend({
 	/**
 	 * We'll just save this model and close the dialog
 	 */
-	saveHandler: function () {
-		this.builder.addHistoryEntry('row_edited');
+	saveHandler: function( savePage = false, e ) {
+		this.builder.addHistoryEntry( 'row_edited' );
 		this.updateModel();
-		this.closeDialog();
-
-		this.builder.model.refreshPanelsData();
+		if ( typeof savePage == 'boolean' ) {
+			panels.helpers.utils.saveHeartbeat( this );
+		} else {
+			this.builder.model.refreshPanelsData();
+			this.closeDialog();
+		}
 
 		return false;
 	},
@@ -1664,7 +1787,42 @@ module.exports = panels.view.dialog.extend({
 		}
 	},
 
-});
+	switchModeShow: function() {
+		const list = this.$( '.so-toolbar .so-mode-list' );
+		const toolbar = this.$( '.so-toolbar' );
+		list.show();
+		list.find( 'li:first-of-type' ).trigger( 'focus' );
+		toolbar.find( '.button-primary:visible' ).addClass( 'so-active-mode' );
+		toolbar.find( '.button-primary' ).hide();
+
+		setTimeout( function() {
+			$( document ).one( 'click', function( e ) {
+				var $$ = $( e.target );
+
+				if ( ! $$.hasClass( 'so-saveinline-mode' ) && ! $$.hasClass( 'so-close-mode' ) ) {
+					list.hide();
+					toolbar.find( '.so-active-mode' ).show()
+				}
+			} );
+		}, 100 );
+	},
+
+	switchMode: function( inline = false ) {
+		const toolbar = this.$( '.so-toolbar' );
+		toolbar.find( '.so-mode-list' ).hide();
+		toolbar.find( '.button-primary' ).removeClass( 'so-active-mode' );
+		if ( inline ) {
+			toolbar.find( '.so-saveinline' ).show();
+		} else {
+			toolbar.find( '.so-save' ).show();
+		}
+
+		window.panelsMode = inline ? 'inline' : 'dialog';
+
+		this.$( '.so-mode' ).trigger( 'focus' );
+	},
+
+} );
 
 },{}],9:[function(require,module,exports){
 var panels = window.panels, $ = jQuery;
@@ -1676,7 +1834,7 @@ module.exports = panels.view.dialog.extend( {
 	sidebarWidgetTemplate: _.template( panels.helpers.utils.processTemplate( $( '#siteorigin-panels-dialog-widget-sidebar-widget' ).html() ) ),
 
 	dialogClass: 'so-panels-dialog-edit-widget',
-    dialogIcon: 'add-widget',
+	dialogIcon: 'add-widget',
 
 	widgetView: false,
 	savingWidget: false,
@@ -1684,6 +1842,25 @@ module.exports = panels.view.dialog.extend( {
 
 	events: {
 		'click .so-close': 'saveHandler',
+		'click .so-toolbar .so-saveinline': function( e ) {
+			this.saveHandler( true );
+		},
+		'click .so-mode': 'switchModeShow',
+		'keyup .so-mode': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
+		'click .so-saveinline-mode': function() {
+			this.switchMode( true );
+		},
+		'keyup .so-mode-list li': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
+		'click .so-close-mode': function() {
+			this.switchMode( false );
+		},
+		'keyup .so-close-mode': function( e ) {
+			panels.helpers.accessibility.triggerClickOnEnter( e );
+		},
 		'keyup .so-close': function( e ) {
 			panels.helpers.accessibility.triggerClickOnEnter( e );
 		},
@@ -1967,9 +2144,14 @@ module.exports = panels.view.dialog.extend( {
 	/**
 	 * Save a history entry for this widget. Called when the dialog is closed.
 	 */
-	saveHandler: function () {
+	saveHandler: function( savePage = false, e ) {
 		this.builder.addHistoryEntry( 'widget_edited' );
-		this.closeDialog();
+		if ( typeof savePage == 'boolean' ) {
+			this.updateModel();
+			panels.helpers.utils.saveHeartbeat( this );
+		} else {
+			this.closeDialog();
+		}
 	},
 
 	/**
@@ -1993,7 +2175,42 @@ module.exports = panels.view.dialog.extend( {
 		this.builder.model.refreshPanelsData();
 
 		return false;
-	}
+	},
+
+	switchModeShow: function() {
+		const list = this.$( '.so-toolbar .so-mode-list' );
+		const toolbar = this.$( '.so-toolbar' );
+		list.show();
+		list.find( 'li:first-of-type' ).trigger( 'focus' );
+		toolbar.find( '.button-primary:visible' ).addClass( 'so-active-mode' );
+		toolbar.find( '.button-primary' ).hide();
+
+		setTimeout( function() {
+			$( document ).one( 'click', function( e ) {
+				var $$ = $( e.target );
+
+				if ( ! $$.hasClass( 'so-saveinline-mode' ) && ! $$.hasClass( 'so-close-mode' ) ) {
+					list.hide();
+					toolbar.find( '.so-active-mode' ).show()
+				}
+			} );
+		}, 100 );
+	},
+
+	switchMode: function( inline = false ) {
+		const toolbar = this.$( '.so-toolbar' );
+		toolbar.find( '.so-mode-list' ).hide();
+		toolbar.find( '.button-primary' ).removeClass( 'so-active-mode' );
+		if ( inline ) {
+			toolbar.find( '.so-saveinline' ).show();
+		} else {
+			toolbar.find( '.so-close' ).show();
+		}
+
+		window.panelsMode = inline ? 'inline' : 'dialog';
+
+		this.$( '.so-mode' ).trigger( 'focus' );
+	},
 
 } );
 
@@ -2250,9 +2467,14 @@ module.exports = {
 	/**
 	 * Trigger click on valid enter key press.
 	 */
-	triggerClickOnEnter: function( e ) {
+	triggerClickOnEnter: function( e, refocus = false ) {
 		if ( e.which == 13 ) {
 			$( e.target ).trigger( 'click' );
+			if ( refocus ) {
+				setTimeout( function() {
+					$( e.target ).trigger( 'focus' );
+				}, 100 );
+			}
 		}
 	},
 
@@ -2281,6 +2503,14 @@ module.exports = {
 			serial.thingType = 'row-model';
 		} else if( model instanceof  panels.model.widget ) {
 			serial.thingType = 'widget-model';
+		}
+
+		// Can Page Builder cross domain copy paste?
+		if (
+			typeof SiteOriginPremium == 'object' &&
+			typeof SiteOriginPremium.CrossDomainCopyPasteAddon == 'function'
+		) {
+			SiteOriginPremium.CrossDomainCopyPasteAddon().copy( serial );
 		}
 
 		// Store this in local storage
@@ -2527,6 +2757,21 @@ module.exports = {
 		var sel = window.getSelection();
 		sel.removeAllRanges();
 		sel.addRange( range );
+	},
+
+	saveHeartbeat: function( thisDialog ) {
+		jQuery( '.so-saveinline' ).attr( 'disabled', 'disabled' )
+		jQuery( document ).one( 'heartbeat-send', function( event, data ) {
+			data.panels = JSON.stringify( {
+				data: thisDialog.builder.model.getPanelsData(),
+				nonce: jQuery( '#_sopanels_nonce' ).val(),
+				id: thisDialog.builder.config.postId
+			} );
+		} );
+		jQuery( document ).one( 'heartbeat-tick', function( event, data ) {
+			jQuery( '.so-saveinline' ).removeAttr( 'disabled' )
+		} );
+		wp.autosave.server.triggerSave()
 	},
 
 }
@@ -2919,14 +3164,6 @@ module.exports = Backbone.Model.extend({
 					rowAttrs.style = data.grids[i].style;
 				}
 
-				if ( ! _.isUndefined( data.grids[i].ratio) ) {
-					rowAttrs.ratio = data.grids[i].ratio;
-				}
-
-				if ( ! _.isUndefined( data.grids[i].ratio_direction) ) {
-					rowAttrs.ratio_direction = data.grids[i].ratio_direction
-				}
-
 				if ( ! _.isUndefined( data.grids[i].color_label) ) {
 					rowAttrs.color_label = data.grids[i].color_label;
 				}
@@ -3098,8 +3335,6 @@ module.exports = Backbone.Model.extend({
 			data.grids.push( {
 				cells: row.get('cells').length,
 				style: row.get( 'style' ),
-				ratio: row.get('ratio'),
-				ratio_direction: row.get('ratio_direction'),
 				color_label: row.get( 'color_label' ),
 				label: row.get( 'label' ),
 			} );
@@ -3223,8 +3458,6 @@ module.exports = Backbone.Model.extend({
 				panels_data.grids.push( {
 					cells: $cells.length,
 					style: $row.data( 'style' ),
-					ratio: $row.data( 'ratio' ),
-					ratio_direction: $row.data( 'ratio-direction' ),
 					color_label: $row.data( 'color-label' ),
 					label: $row.data( 'label' ),
 				} );
@@ -4231,9 +4464,9 @@ module.exports = Backbone.View.extend( {
 
 		
 		// Check if we have preview markup available.
-		$panelsMetabox = $( '#siteorigin-panels-metabox' );
-		if ( $panelsMetabox.length ) {
-			this.contentPreview = $.parseHTML( $panelsMetabox.data( 'preview-markup' ) );
+		$previewContent = $( '.siteorigin-panels-preview-content' );
+		if ( $previewContent.length ) {
+			this.contentPreview = $previewContent.val();
 		}
 
 		// Set the builder for each dialog and render it.
@@ -5920,6 +6153,16 @@ module.exports = Backbone.View.extend( {
 
 		this.onResize();
 
+		if ( typeof window.panelsMode == 'string' ) {
+			if ( window.panelsMode == 'inline' ) {
+				this.$( '.so-toolbar .so-close, .so-toolbar .so-save' ).hide();
+				this.$( '.so-toolbar .so-saveinline' ).show().addClass( 'so-active-mode' );
+			} else {
+				this.$( '.so-toolbar .so-saveinline' ).hide();
+				this.$( '.so-toolbar .so-close, .so-toolbar .so-save' ).show().addClass( 'so-active-mode' );
+			}
+		}
+
 		this.$el.show();
 
 		if ( ! options.silent ) {
@@ -6101,7 +6344,11 @@ module.exports = Backbone.View.extend( {
 				}
 
 				// Is this field an ACF Repeater?
-				if ( $$.parents( '.acf-repeater' ).length ) {
+				if (
+					$$.parents( '.acf-repeater' ).length ||
+					$$.parents( '.acf-field-checkbox' ).length ||
+					$$.parents( '.acf-gallery' ).length
+				) {
 					// If field is empty, skip it - this is to avoid indexes which are admin only.
 					if ( fieldValue == '' ) {
 						return;
@@ -7264,20 +7511,35 @@ module.exports = Backbone.View.extend( {
 
 		// Set up the color fields
 		if ( ! _.isUndefined( $.fn.wpColorPicker ) ) {
-			if ( _.isObject( panelsOptions.wpColorPickerOptions.palettes ) && ! $.isArray( panelsOptions.wpColorPickerOptions.palettes ) ) {
+			if ( typeof panelsOptions.wpColorPickerOptions.palettes === 'object' && ! Array.isArray( panelsOptions.wpColorPickerOptions.palettes ) ) {
 				panelsOptions.wpColorPickerOptions.palettes = $.map( panelsOptions.wpColorPickerOptions.palettes, function ( el ) {
 					return el;
 				} );
 			}
 
+			$.fn.handleAlphaDefault = function() {
+				var $parent = $( this ).parents( '.wp-picker-container' );
+				var $colorResult = $parent.find( '.wp-color-result' );
+				if ( $parent.find( '.wp-color-picker[data-alpha-enabled]' ).length ) {
+					$colorResult.css( 'background-image', $( this ).val() == '' ? 'none' : alphaImage );
+				} else {
+					$colorResult.css( 'background-image', 'none' );
+				}
+			}
+
 			// Trigger a change event when user selects a color.
 			panelsOptions.wpColorPickerOptions.change = function( e, ui ) {
 				setTimeout( function() {
+					$( e.target ).handleAlphaDefault();
 					$( e.target ).trigger( 'change' );
 				}, 100 );
 			};
 
 			this.$( '.so-wp-color-field' ).wpColorPicker( panelsOptions.wpColorPickerOptions );
+			var alphaImage = this.$( '.wp-color-picker[data-alpha-enabled]' ).parents( '.wp-picker-container' ).find( '.wp-color-result' ).css( 'background-image' );
+			this.$( '.wp-color-picker[data-alpha-enabled]' ).on( 'change', function() {
+				$( this ).handleAlphaDefault();
+			} ).trigger( 'change' );
 		}
 
 		// Set up the image select fields
@@ -7302,10 +7564,20 @@ module.exports = Backbone.View.extend( {
 						// Customize the submit button.
 						button: {
 							// Set the text of the button.
-							text: 'Done',
+							text: panelsOptions.add_media_done,
 							close: true
 						}
 					} );
+
+					// If there's a selected image, highlight it. 
+					frame.on( 'open', function() {
+						var selection = frame.state().get( 'selection' );
+						var selectedImage = $s.find( '.so-image-selector > input' ).val();
+						if ( selectedImage ) {
+							selection.add( wp.media.attachment( selectedImage ) );
+						}
+					} );
+
 
 					frame.on( 'select', function () {
 						var attachment = frame.state().get( 'selection' ).first().attributes;
@@ -7461,9 +7733,22 @@ module.exports = Backbone.View.extend( {
 
 		// Set up all the toggle fields
 		this.$( '.style-field-toggle' ).each( function () {
-			var $$ = $( this );
-			var checkbox = $$.find( '.so-toggle-switch-input' );
-			var settings = $$.find( '.so-toggle-fields' );
+			const $$ = $( this );
+			const checkbox = $$.find( '.so-toggle-switch-input' );
+			const label = checkbox.next();
+			const settings = $$.find( '.so-toggle-fields' );
+
+			const changeLabel = function() {
+				if ( checkbox.prop( 'checked' ) ) {
+					label.attr( 'aria-checked', 'true' )
+					.attr( 'aria-label', label.data( 'on' ) );
+				} else {
+					label.attr( 'aria-checked', 'false' )
+					.attr( 'aria-label', label.data( 'off' ) );
+				}
+			};
+
+			changeLabel();
 
 			checkbox.on( 'change', function() {
 				if ( $( this ).prop( 'checked' ) ) {
@@ -7471,20 +7756,57 @@ module.exports = Backbone.View.extend( {
 				} else {
 					settings.slideUp();
 				}
+
+				changeLabel();
+			} );
+
+			label.on( 'keyup', function( e ) {
+				if ( e.key == 'Enter' ) {
+					const isChecked = checkbox.prop( 'checked' );
+					checkbox.prop( 'checked', ! isChecked )
+						.trigger( 'change' );
+				}
 			} );
 		} );
 		this.$( '.style-field-toggle .so-toggle-switch-input' ).trigger( 'change' );
+
+		// Set up all the Slider fields.
+		this.$( '.style-field-slider' ).each( function() {
+			var $$ = $( this );
+			var $input = $$.find( '.so-wp-input-slider' );
+			var $c = $$.find( '.so-wp-value-slider' );
+
+			$c.slider( {
+				max: parseFloat( $input.attr( 'max' ) ),
+				min: parseFloat( $input.attr( 'min' ) ),
+				step: parseFloat( $input.attr( 'step' ) ),
+				value: parseFloat( $input.val() ),
+				slide: function( e, ui ) {
+					$input.val( parseFloat( ui.value ) );
+					$input.trigger( 'change' );
+					$$.find( '.so-wp-slider-value' ).html( ui.value );
+				},
+			});
+			$input.on( 'change', function( event, data ) {
+				if ( ! ( data && data.silent ) ) {
+					$c.slider( 'value', parseFloat( $input.val() ) );
+					$$.find('.so-wp-slider-value').html( $input.val() );
+				}
+			} );
+		} );
 
 		// Conditionally show Background related settings.
 		var $background_image = this.$( '.so-field-background_image_attachment' ),
 			$background_image_display = this.$( '.so-field-background_display' ),
 			$background_image_size = this.$( '.so-field-background_image_size' );
+			$background_image_opacity = this.$( '.so-field-background_image_opacity' );
 
 		if (
 			$background_image.length &&
 			(
 				$background_image_display.length ||
-				$background_image_size.length
+				$background_image_size.length ||
+				$background_image_opacity.length
 			)
 		) {
 			var soBackgroundImageVisibility = function() {
@@ -7497,9 +7819,11 @@ module.exports = Backbone.View.extend( {
 				if ( hasImage.val() && hasImage.val() != 0 ) {
 					$background_image_display.show();
 					$background_image_size.show();
+					$background_image_opacity.show();
 				} else {
 					$background_image_display.hide();
 					$background_image_size.hide();
+					$background_image_opacity.hide();
 				}
 			}
 			soBackgroundImageVisibility();
