@@ -59,9 +59,10 @@ add_action(
 
 function wpcf7_enqueue_block_editor_assets() {
 	$contact_forms = array_map(
-		function ( $contact_form ) {
+		static function ( $contact_form ) {
 			return array(
 				'id' => $contact_form->id(),
+				'hash' => $contact_form->hash(),
 				'slug' => $contact_form->name(),
 				'title' => $contact_form->title(),
 				'locale' => $contact_form->locale(),
@@ -78,7 +79,7 @@ function wpcf7_enqueue_block_editor_assets() {
 		'contact-form-7-block-editor',
 		sprintf(
 			'window.wpcf7 = {contactForms:%s};',
-			json_encode( $contact_forms )
+			wp_json_encode( $contact_forms )
 		),
 		'before'
 	);
