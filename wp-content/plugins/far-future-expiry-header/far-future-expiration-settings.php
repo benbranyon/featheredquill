@@ -167,7 +167,7 @@ that haven't changed (this reduces the number of HTTP requests) and hence the pe
 </form>
 
 <div style="background: #D7E7F5; border: 1px solid #1166BB; color: #333333; margin: 20px 0; padding: 10px;">
-    Check out our other plugins: <a href="https://wordpress.org/plugins/wp-express-checkout/" target="_blank">WP Express Checkout</a> | <a href="https://wordpress.org/plugins/stripe-payments/" target="_blank">Stripe Payments Plugin</a>.
+    Take a look at our following lightweight plugins that can be used to sell products and services easily: <a href="https://wordpress.org/plugins/wp-express-checkout/" target="_blank">WP Express Checkout</a> | <a href="https://wordpress.org/plugins/stripe-payments/" target="_blank">Stripe Payments Plugin</a>.
 </div>
 
 </div></div><!-- end of poststuff -->

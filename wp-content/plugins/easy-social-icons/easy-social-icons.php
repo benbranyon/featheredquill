@@ -3,7 +3,7 @@
 Plugin Name: Easy Social Icons
 Plugin URI: http://www.cybernetikz.com
 Description: You can upload your own social icon, set your social URL, choose weather you want to display vertical or horizontal. You can use the shortcode <strong>[cn-social-icon]</strong> in page/post, template tag for php file <strong>&lt;?php if ( function_exists('cn_social_icon') ) echo cn_social_icon(); ?&gt;</strong> also you can use the widget <strong>"Easy Social Icons"</strong> for sidebar.
-Version: 3.2.4
+Version: 3.2.6
 Author: cybernetikz
 Author URI: http://www.cybernetikz.com
 License: GPL2
@@ -121,7 +121,8 @@ function cnss_admin_enqueue() {
 function cnss_get_all_icons($where_sql = '') {
 	global $wpdb;
 	$table_name = $wpdb->prefix . "cn_social_icon";
-	$sql = $wpdb->prepare("SELECT `id`, `title`, `url`, `image_url`, `sortorder`, `target` FROM {$table_name} WHERE `url` != '' AND `image_url` != '' ORDER BY `sortorder`");
+	// $sql = $wpdb->prepare("SELECT `id`, `title`, `url`, `image_url`, `sortorder`, `target` FROM {$table_name} WHERE `url` != '' AND `image_url` != '' ORDER BY `sortorder`");
+	$sql = "SELECT `id`, `title`, `url`, `image_url`, `sortorder`, `target` FROM {$table_name} WHERE `url` != '' AND `image_url` != '' ORDER BY `sortorder`";
 
 	$social_icons = $wpdb->get_results($sql);
 	if (count($social_icons)>0) {
@@ -594,7 +595,7 @@ function cnss_process_post() {
 				$results = $wpdb->insert(
 					$table_name,
 					array(
-						'title' => sanitize_title($_POST['title']),
+						'title' => sanitize_text_field($_POST['title']),
 						'url' => esc_url_raw($_POST['url']),
 						'image_url' => sanitize_text_field($_POST['image_file']),
 						'sortorder' => sanitize_sql_orderby($_POST['sortorder']),
@@ -661,7 +662,7 @@ function cnss_process_post() {
 				$result3 = $wpdb->update(
 					$table_name,
 					array(
-						'title' => sanitize_title($_POST['title']),
+						'title' => sanitize_text_field($_POST['title']),
 						'url' => esc_url_raw($_POST['url']),
 						'image_url' => sanitize_text_field($_POST['image_file']),
 						'sortorder' => sanitize_sql_orderby($_POST['sortorder']),
@@ -748,9 +749,16 @@ function cnss_social_icon_sort_fn() {
 				});
 				jQuery("#sortable").disableSelection();
 				jQuery("#save-order").bind( "click", function() {
-					jQuery.post( ajaxurl, { action:'update-social-icon-order', order:jQuery("#sortable").sortable("serialize") }, function(response) {
-						jQuery("#ajax-response").html('<div class="message updated fade"><p>Items Order Updated</p></div>');
+					jQuery.post( ajaxurl, {
+						_ajax_nonce: '<?php echo wp_create_nonce( 'cn_esi_sort_icons' ); ?>',
+						action:'update-social-icon-order',
+						order:jQuery("#sortable").sortable("serialize")
+					}, function(response) {
+						jQuery("#ajax-response")
+							.html('<div class="message updated fade"><p>Items Order Updated</p></div>');
 						jQuery("#ajax-response div").delay(1000).hide("slow");
+					}).fail(function () {
+						alert('Sorry, ajax requset failed.');
 					});
 				});
 			});
@@ -766,6 +774,8 @@ function cnss_social_icon_sort_fn() {
 }
 
 function cnss_save_ajax_order() {
+	check_ajax_referer( 'cn_esi_sort_icons' );
+	if ( !current_user_can( 'manage_options' ) ) wp_die( 'CVE-2023-33998 fix' );
 	global $wpdb;
 	$table_name = $wpdb->prefix . "cn_social_icon";
 	parse_str(sanitize_text_field($_POST['order']), $data);
@@ -1174,7 +1184,8 @@ function cnss_social_icon_table() {
 	global $wpdb,$cnssBaseURL;
 	$table_name = $wpdb->prefix . "cn_social_icon";
 	$image_file_path = $cnssBaseURL;
-	$sql = $wpdb->prepare("SELECT * FROM `{$table_name}` WHERE `image_url` != '' AND `url` != '' ORDER BY `sortorder`");
+	// $sql = $wpdb->prepare("SELECT * FROM `{$table_name}` WHERE `image_url` != '' AND `url` != '' ORDER BY `sortorder`");
+	$sql = "SELECT * FROM `{$table_name}` WHERE `image_url` != '' AND `url` != '' ORDER BY `sortorder`";
 	$icons = $wpdb->get_results($sql);
 	$icon_count = count($icons);
 
@@ -1220,8 +1231,8 @@ function cn_social_icon($attr = array(), $call_from_widget = NULL) {
 
 	global $wpdb, $cnssBaseURL;
 	$image_file_path = $cnssBaseURL;
-	$attr_id = isset($attr['attr_id'])?$attr['attr_id']:'';
-	$attr_class = isset($attr['attr_class'])?$attr['attr_class']:'';
+	$attr_id = isset($attr['attr_id']) ? $attr['attr_id'] : '';
+	$attr_class = isset($attr['attr_class']) ? $attr['attr_class'] : '';
 	$where_sql = "";
 
 	if(isset($attr['selected_icons']))
@@ -1237,12 +1248,27 @@ function cn_social_icon($attr = array(), $call_from_widget = NULL) {
 		}
 	}
 
-	$cnss_width = isset($attr['width'])?$attr['width']:esc_attr(get_option('cnss-width'));
-	$cnss_height = isset($attr['height'])?$attr['height']:esc_attr(get_option('cnss-height'));
-	$cnss_margin = isset($attr['margin'])?$attr['margin']:esc_attr(get_option('cnss-margin'));
+	$cnss_width = isset($attr['width']) ?
+					esc_attr($attr['width']) :
+					esc_attr(get_option('cnss-width'));
+
+	$cnss_height = isset($attr['height']) ?
+					esc_attr($attr['height']) :
+					esc_attr(get_option('cnss-height'));
+
+	$cnss_margin = isset($attr['margin']) ?
+					esc_attr($attr['margin']) :
+					esc_attr(get_option('cnss-margin'));
+
 	$cnss_rows = esc_attr(get_option('cnss-row-count'));
-	$vorh = isset($attr['display'])?$attr['display']:esc_attr(get_option('cnss-vertical-horizontal'));
-	$text_align = isset($attr['alignment'])?$attr['alignment']:esc_attr(get_option('cnss-text-align'));
+
+	$vorh = isset($attr['display']) ?
+			esc_attr($attr['display']) :
+			esc_attr(get_option('cnss-vertical-horizontal'));
+
+	$text_align = isset($attr['alignment']) ?
+					esc_attr($attr['alignment']) :
+					esc_attr(get_option('cnss-text-align'));
 
 	// settings for font-awesome icons
 	$icon_bg_color = cnss_get_option('cnss-icon-bg-color');
@@ -1252,7 +1278,8 @@ function cn_social_icon($attr = array(), $call_from_widget = NULL) {
 	$cnss_original_icon_color = cnss_get_option('cnss-original-icon-color');
 
 	$table_name = $wpdb->prefix . "cn_social_icon";
-	$sql = $wpdb->prepare("SELECT * FROM `{$table_name}` WHERE `image_url` != '' AND `url` != '' $where_sql ORDER BY `sortorder`");
+	// $sql = $wpdb->prepare("SELECT * FROM `{$table_name}` WHERE `image_url` != '' AND `url` != '' $where_sql ORDER BY `sortorder`");
+	$sql = "SELECT * FROM `{$table_name}` WHERE `image_url` != '' AND `url` != '' $where_sql ORDER BY `sortorder`";
 	$icons = $wpdb->get_results($sql);
 	$icon_count = count($icons);
 	$li_margin = round($cnss_margin/2);

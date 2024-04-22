@@ -1,0 +1,66 @@
+07-11-2023 22:46:58 - INFO  - 8.0.3 - 12.6 MB/1 GB - blackjack > Start upgrade from 8.0.2
+07-11-2023 22:46:58 - INFO  - 8.0.3 - 12.8 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_emails`] => Created table `wp_newsletter_emails`
+)
+
+07-11-2023 22:46:58 - INFO  - 8.0.3 - 12.8 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_sent`] => Created table `wp_newsletter_sent`
+)
+
+07-11-2023 22:46:58 - INFO  - 8.0.3 - 12.8 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter`] => Created table `wp_newsletter`
+)
+
+07-11-2023 22:46:58 - INFO  - 8.0.3 - 12.8 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_logs`] => Created table `wp_newsletter_user_logs`
+)
+
+07-11-2023 22:46:58 - INFO  - 8.0.3 - 12.8 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_meta`] => Created table `wp_newsletter_user_meta`
+)
+
+07-11-2023 22:46:58 - INFO  - 8.0.3 - 12.8 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_stats`] => Created table `wp_newsletter_stats`
+)
+
+07-11-2023 22:46:58 - INFO  - 8.0.3 - 12.8 MB/1 GB - blackjack > Backing up options of 8.0.2
+07-11-2023 22:46:58 - INFO  - 8.0.3 - 12.9 MB/1 GB - blackjack > End
+15-11-2023 17:08:46 - INFO  - 8.0.4 - 10.7 MB/1 GB -  > Start upgrade from 8.0.3
+15-11-2023 17:08:46 - INFO  - 8.0.4 - 11.1 MB/1 GB -  > Array
+(
+    [`wp_newsletter_emails`] => Created table `wp_newsletter_emails`
+)
+
+15-11-2023 17:08:46 - INFO  - 8.0.4 - 11.1 MB/1 GB -  > Array
+(
+    [`wp_newsletter_sent`] => Created table `wp_newsletter_sent`
+)
+
+15-11-2023 17:08:46 - INFO  - 8.0.4 - 11.1 MB/1 GB -  > Array
+(
+    [`wp_newsletter`] => Created table `wp_newsletter`
+)
+
+15-11-2023 17:08:46 - INFO  - 8.0.4 - 11.1 MB/1 GB -  > Array
+(
+    [`wp_newsletter_user_logs`] => Created table `wp_newsletter_user_logs`
+)
+
+15-11-2023 17:08:46 - INFO  - 8.0.4 - 11.1 MB/1 GB -  > Array
+(
+    [`wp_newsletter_user_meta`] => Created table `wp_newsletter_user_meta`
+)
+
+15-11-2023 17:08:46 - INFO  - 8.0.4 - 11.1 MB/1 GB -  > Array
+(
+    [`wp_newsletter_stats`] => Created table `wp_newsletter_stats`
+)
+
+15-11-2023 17:08:46 - INFO  - 8.0.4 - 11.1 MB/1 GB -  > Backing up options of 8.0.3
+15-11-2023 17:08:46 - INFO  - 8.0.4 - 11.2 MB/1 GB -  > End

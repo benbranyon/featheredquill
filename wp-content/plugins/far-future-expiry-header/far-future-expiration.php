@@ -1,10 +1,10 @@
 <?php
 /*
 Plugin Name: Far Future Expiration Plugin
-Plugin URI: http://www.tipsandtricks-hq.com/wordpress-far-future-expiration-plugin-5980
+Plugin URI: https://www.tipsandtricks-hq.com/wordpress-far-future-expiration-plugin-5980
 Description: This plugin will add a "far future expiration" date for various file types to improve site performance.
 Author: Tips and Tricks HQ
-Version: 1.5
+Version: 1.6
 Author URI: https://www.tipsandtricks-hq.com/
 License: GPLv2 or later
 */
@@ -22,6 +22,7 @@ if(!class_exists('farFutureExpiration'))
 		private $edit_ffe_settings_page_key = 'edit_ffe_settings_page';
 		private $ffe_options_key = 'ffe_plugin_options';
 		private $ffe_settings_tabs = array();
+                private $edit_ffe_settings_page = array();
 
 		function __construct() {
 			$this->define_constants();
@@ -331,3 +332,14 @@ if(!class_exists('farFutureExpiration'))
 	} //end class
 }
 $GLOBALS['ffe_plugin'] = new farFutureExpiration();
+
+// Add the settings link
+function ffep_add_settings_link( $links, $file ) {
+    if ( $file == plugin_basename( __FILE__ ) ) {
+	$settings_link = '<a href="options-general.php?page=ffe_plugin_options">' . (__( "Settings", "compact-audio-player" )) . '</a>';
+	array_unshift( $links, $settings_link );
+    }
+    return $links;
+}
+add_filter( 'plugin_action_links', 'ffep_add_settings_link', 10, 2 );
+

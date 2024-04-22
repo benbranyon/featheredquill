@@ -1,3 +1,13 @@
+
+# BEGIN Far Future Expiration Plugin
+<IfModule mod_expires.c>
+ExpiresActive on
+<FilesMatch "\.(jpeg|jpg|png|css)$">
+ExpiresDefault "access plus 14 days"
+</FilesMatch>
+</IfModule>
+# END Far Future Expiration Plugin
+
 # BEGIN Website Firewall Bypass Prevention
 RewriteEngine On
 RewriteCond %{HTTP_HOST} ^(www.)?featheredquill.com$
@@ -8,15 +18,15 @@ ErrorDocument 403 Forbidden
 # END Website Firewall Bypass Prevention
 # BEGIN GD-SSL
 <IfModule mod_rewrite.c>
-	Options +FollowSymLinks
-	RewriteEngine On
-	RewriteCond %{HTTPS} !=on
-	RewriteCond %{HTTP_USER_AGENT} ^(.+)$
-	RewriteCond %{SERVER_NAME} ^featheredquill\.com$ [OR]
-	RewriteCond %{SERVER_NAME} ^abs\.f0a\.myftpupload\.com$
-	RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [R=301,L]
-	Header add Strict-Transport-Security "max-age=300"
-	Header always set Content-Security-Policy "upgrade-insecure-requests"
+Options +FollowSymLinks
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP_USER_AGENT} ^(.+)$
+RewriteCond %{SERVER_NAME} ^featheredquill\.com$ [OR]
+RewriteCond %{SERVER_NAME} ^abs\.f0a\.myftpupload\.com$
+RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [R=301,L]
+Header add Strict-Transport-Security "max-age=300"
+Header always set Content-Security-Policy "upgrade-insecure-requests"
 </IfModule>
 # END GD-SSL
 # BEGIN WordPress
@@ -135,7 +145,7 @@ FileETag None
     </FilesMatch>
     <FilesMatch "\.(html|htm|rtf|rtx|txt|xsd|xsl|xml)$">
         <IfModule mod_headers.c>
-            Header set X-Powered-By "WP Performance Score Booster/2.0"
+            Header set X-Powered-By "WP Performance Score Booster/2.2"
             Header unset Pragma
             Header append Cache-Control "public"
             Header unset Last-Modified

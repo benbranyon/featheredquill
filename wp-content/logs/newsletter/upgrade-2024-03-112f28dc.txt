@@ -1,0 +1,517 @@
+01-03-2024 16:18:00 - INFO  - 8.1.9 - 11.3 MB/1 GB -  > Start upgrade from 8.1.6
+01-03-2024 16:18:00 - INFO  - 8.1.9 - 11.8 MB/1 GB -  > Array
+(
+    [`wp_newsletter_emails`] => Created table `wp_newsletter_emails`
+)
+
+01-03-2024 16:18:00 - INFO  - 8.1.9 - 11.8 MB/1 GB -  > Array
+(
+    [`wp_newsletter_sent`] => Created table `wp_newsletter_sent`
+)
+
+01-03-2024 16:18:00 - INFO  - 8.1.9 - 11.8 MB/1 GB -  > Array
+(
+    [`wp_newsletter`] => Created table `wp_newsletter`
+)
+
+01-03-2024 16:18:00 - INFO  - 8.1.9 - 11.8 MB/1 GB -  > Array
+(
+    [`wp_newsletter_user_logs`] => Created table `wp_newsletter_user_logs`
+)
+
+01-03-2024 16:18:00 - INFO  - 8.1.9 - 11.8 MB/1 GB -  > Array
+(
+    [`wp_newsletter_user_meta`] => Created table `wp_newsletter_user_meta`
+)
+
+01-03-2024 16:18:00 - INFO  - 8.1.9 - 11.8 MB/1 GB -  > Array
+(
+    [`wp_newsletter_stats`] => Created table `wp_newsletter_stats`
+)
+
+01-03-2024 16:18:00 - INFO  - 8.1.9 - 11.8 MB/1 GB -  > Deleting settings backup newsletter_backup_8.1.2
+01-03-2024 16:18:00 - INFO  - 8.1.9 - 11.8 MB/1 GB -  > Backing up options of 8.1.6
+01-03-2024 16:18:00 - INFO  - 8.1.9 - 11.9 MB/1 GB -  > End
+01-03-2024 16:18:00 - INFO  - 8.1.6 - 11.2 MB/1 GB -  > Start upgrade from 8.1.9
+01-03-2024 16:18:00 - INFO  - 8.1.6 - 11.7 MB/1 GB -  > Array
+(
+    [`wp_newsletter_emails`] => Created table `wp_newsletter_emails`
+)
+
+01-03-2024 16:18:00 - INFO  - 8.1.6 - 11.7 MB/1 GB -  > Array
+(
+    [`wp_newsletter_sent`] => Created table `wp_newsletter_sent`
+)
+
+01-03-2024 16:18:00 - INFO  - 8.1.6 - 11.7 MB/1 GB -  > Array
+(
+    [`wp_newsletter`] => Created table `wp_newsletter`
+)
+
+01-03-2024 16:18:00 - INFO  - 8.1.6 - 11.7 MB/1 GB -  > Array
+(
+    [`wp_newsletter_user_logs`] => Created table `wp_newsletter_user_logs`
+)
+
+01-03-2024 16:18:00 - INFO  - 8.1.6 - 11.7 MB/1 GB -  > Array
+(
+    [`wp_newsletter_user_meta`] => Created table `wp_newsletter_user_meta`
+)
+
+01-03-2024 16:18:00 - INFO  - 8.1.6 - 11.7 MB/1 GB -  > Array
+(
+    [`wp_newsletter_stats`] => Created table `wp_newsletter_stats`
+)
+
+01-03-2024 16:18:00 - INFO  - 8.1.6 - 11.7 MB/1 GB -  > Deleting settings backup newsletter_backup_8.1.3
+01-03-2024 16:18:00 - INFO  - 8.1.6 - 11.7 MB/1 GB -  > Backing up options of 8.1.9
+01-03-2024 16:18:01 - INFO  - 8.1.6 - 11.8 MB/1 GB -  > End
+01-03-2024 16:18:02 - INFO  - 8.1.9 - 11.3 MB/1 GB -  > Start upgrade from 8.1.6
+01-03-2024 16:18:02 - INFO  - 8.1.9 - 11.8 MB/1 GB -  > Array
+(
+    [`wp_newsletter_emails`] => Created table `wp_newsletter_emails`
+)
+
+01-03-2024 16:18:02 - INFO  - 8.1.9 - 11.8 MB/1 GB -  > Array
+(
+    [`wp_newsletter_sent`] => Created table `wp_newsletter_sent`
+)
+
+01-03-2024 16:18:02 - INFO  - 8.1.9 - 11.8 MB/1 GB -  > Array
+(
+    [`wp_newsletter`] => Created table `wp_newsletter`
+)
+
+01-03-2024 16:18:02 - INFO  - 8.1.9 - 11.8 MB/1 GB -  > Array
+(
+    [`wp_newsletter_user_logs`] => Created table `wp_newsletter_user_logs`
+)
+
+01-03-2024 16:18:02 - INFO  - 8.1.9 - 11.8 MB/1 GB -  > Array
+(
+    [`wp_newsletter_user_meta`] => Created table `wp_newsletter_user_meta`
+)
+
+01-03-2024 16:18:02 - INFO  - 8.1.9 - 11.8 MB/1 GB -  > Array
+(
+    [`wp_newsletter_stats`] => Created table `wp_newsletter_stats`
+)
+
+01-03-2024 16:18:02 - INFO  - 8.1.9 - 11.8 MB/1 GB -  > Deleting settings backup newsletter_backup_8.1.4
+01-03-2024 16:18:02 - INFO  - 8.1.9 - 11.8 MB/1 GB -  > End
+06-03-2024 15:20:10 - INFO  - 8.2.0 - 15.8 MB/1 GB - blackjack > Start upgrade from 8.1.9
+06-03-2024 15:20:10 - INFO  - 8.2.0 - 18.7 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_emails`] => Created table `wp_newsletter_emails`
+)
+
+06-03-2024 15:20:10 - INFO  - 8.2.0 - 18.7 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_sent`] => Created table `wp_newsletter_sent`
+)
+
+06-03-2024 15:20:10 - INFO  - 8.2.0 - 17.9 MB/1 GB - blackjack > Start upgrade from 8.1.9
+06-03-2024 15:20:10 - INFO  - 8.2.0 - 18.7 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter`] => Created table `wp_newsletter`
+)
+
+06-03-2024 15:20:10 - INFO  - 8.2.0 - 18.6 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_emails`] => Created table `wp_newsletter_emails`
+)
+
+06-03-2024 15:20:10 - INFO  - 8.2.0 - 18.7 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_logs`] => Created table `wp_newsletter_user_logs`
+)
+
+06-03-2024 15:20:10 - INFO  - 8.2.0 - 18.6 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_sent`] => Created table `wp_newsletter_sent`
+)
+
+06-03-2024 15:20:10 - INFO  - 8.2.0 - 18.6 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter`] => Created table `wp_newsletter`
+)
+
+06-03-2024 15:20:10 - INFO  - 8.2.0 - 18.7 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_meta`] => Created table `wp_newsletter_user_meta`
+)
+
+06-03-2024 15:20:10 - INFO  - 8.2.0 - 18.6 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_logs`] => Created table `wp_newsletter_user_logs`
+)
+
+06-03-2024 15:20:10 - INFO  - 8.2.0 - 18.6 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_meta`] => Created table `wp_newsletter_user_meta`
+)
+
+06-03-2024 15:20:10 - INFO  - 8.2.0 - 18.7 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_stats`] => Created table `wp_newsletter_stats`
+)
+
+06-03-2024 15:20:10 - INFO  - 8.2.0 - 18.6 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_stats`] => Created table `wp_newsletter_stats`
+)
+
+06-03-2024 15:20:10 - INFO  - 8.2.0 - 18.6 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_logs`] => Created table `wp_newsletter_logs`
+)
+
+06-03-2024 15:20:10 - INFO  - 8.2.0 - 18.6 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_logs`] => Created table `wp_newsletter_logs`
+)
+
+06-03-2024 15:20:10 - INFO  - 8.2.0 - 18.7 MB/1 GB - blackjack > End
+06-03-2024 15:20:10 - INFO  - 8.2.0 - 18.6 MB/1 GB - blackjack > End
+07-03-2024 20:40:08 - INFO  - 8.2.1 - 11.9 MB/1 GB - blackjack > Start upgrade from 8.2.0
+07-03-2024 20:40:08 - INFO  - 8.2.1 - 12.3 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_emails`] => Created table `wp_newsletter_emails`
+)
+
+07-03-2024 20:40:08 - INFO  - 8.2.1 - 12.3 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_sent`] => Created table `wp_newsletter_sent`
+)
+
+07-03-2024 20:40:08 - INFO  - 8.2.1 - 12.3 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter`] => Created table `wp_newsletter`
+)
+
+07-03-2024 20:40:08 - INFO  - 8.2.1 - 12.3 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_logs`] => Created table `wp_newsletter_user_logs`
+)
+
+07-03-2024 20:40:08 - INFO  - 8.2.1 - 12.3 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_meta`] => Created table `wp_newsletter_user_meta`
+)
+
+07-03-2024 20:40:08 - INFO  - 8.2.1 - 12.3 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_stats`] => Created table `wp_newsletter_stats`
+)
+
+07-03-2024 20:40:08 - INFO  - 8.2.1 - 12.3 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_logs`] => Created table `wp_newsletter_logs`
+)
+
+07-03-2024 20:40:08 - INFO  - 8.2.1 - 12.3 MB/1 GB - blackjack > Backing up options of 8.2.0
+07-03-2024 20:40:08 - INFO  - 8.2.1 - 12.4 MB/1 GB - blackjack > End
+07-03-2024 20:40:10 - INFO  - 8.2.0 - 11.3 MB/1 GB - blackjack > Start upgrade from 8.2.1
+07-03-2024 20:40:10 - INFO  - 8.2.0 - 11.8 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_emails`] => Created table `wp_newsletter_emails`
+)
+
+07-03-2024 20:40:10 - INFO  - 8.2.0 - 11.8 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_sent`] => Created table `wp_newsletter_sent`
+)
+
+07-03-2024 20:40:10 - INFO  - 8.2.0 - 11.8 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter`] => Created table `wp_newsletter`
+)
+
+07-03-2024 20:40:10 - INFO  - 8.2.0 - 11.8 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_logs`] => Created table `wp_newsletter_user_logs`
+)
+
+07-03-2024 20:40:10 - INFO  - 8.2.0 - 11.8 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_meta`] => Created table `wp_newsletter_user_meta`
+)
+
+07-03-2024 20:40:10 - INFO  - 8.2.0 - 11.8 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_stats`] => Created table `wp_newsletter_stats`
+)
+
+07-03-2024 20:40:10 - INFO  - 8.2.0 - 11.8 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_logs`] => Created table `wp_newsletter_logs`
+)
+
+07-03-2024 20:40:10 - INFO  - 8.2.0 - 11.8 MB/1 GB - blackjack > Deleting settings backup newsletter_backup_8.1.5
+07-03-2024 20:40:10 - INFO  - 8.2.0 - 11.8 MB/1 GB - blackjack > Backing up options of 8.2.1
+07-03-2024 20:40:10 - INFO  - 8.2.0 - 11.9 MB/1 GB - blackjack > End
+07-03-2024 20:40:12 - INFO  - 8.2.1 - 12.1 MB/1 GB - blackjack > Start upgrade from 8.2.0
+07-03-2024 20:40:12 - INFO  - 8.2.1 - 12.4 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_emails`] => Created table `wp_newsletter_emails`
+)
+
+07-03-2024 20:40:12 - INFO  - 8.2.1 - 12.4 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_sent`] => Created table `wp_newsletter_sent`
+)
+
+07-03-2024 20:40:12 - INFO  - 8.2.1 - 12.4 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter`] => Created table `wp_newsletter`
+)
+
+07-03-2024 20:40:12 - INFO  - 8.2.1 - 12.4 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_logs`] => Created table `wp_newsletter_user_logs`
+)
+
+07-03-2024 20:40:12 - INFO  - 8.2.1 - 12.4 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_meta`] => Created table `wp_newsletter_user_meta`
+)
+
+07-03-2024 20:40:12 - INFO  - 8.2.1 - 12.4 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_stats`] => Created table `wp_newsletter_stats`
+)
+
+07-03-2024 20:40:12 - INFO  - 8.2.1 - 12.4 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_logs`] => Created table `wp_newsletter_logs`
+)
+
+07-03-2024 20:40:12 - INFO  - 8.2.1 - 12.4 MB/1 GB - blackjack > Deleting settings backup newsletter_backup_8.1.6
+07-03-2024 20:40:12 - INFO  - 8.2.1 - 12.5 MB/1 GB - blackjack > End
+07-03-2024 20:40:15 - INFO  - 8.2.0 - 11.9 MB/1 GB - blackjack > Start upgrade from 8.2.1
+07-03-2024 20:40:15 - INFO  - 8.2.0 - 12.3 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_emails`] => Created table `wp_newsletter_emails`
+)
+
+07-03-2024 20:40:15 - INFO  - 8.2.0 - 12.3 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_sent`] => Created table `wp_newsletter_sent`
+)
+
+07-03-2024 20:40:15 - INFO  - 8.2.0 - 12.3 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter`] => Created table `wp_newsletter`
+)
+
+07-03-2024 20:40:15 - INFO  - 8.2.0 - 12.3 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_logs`] => Created table `wp_newsletter_user_logs`
+)
+
+07-03-2024 20:40:15 - INFO  - 8.2.0 - 12.3 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_meta`] => Created table `wp_newsletter_user_meta`
+)
+
+07-03-2024 20:40:15 - INFO  - 8.2.0 - 12.3 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_stats`] => Created table `wp_newsletter_stats`
+)
+
+07-03-2024 20:40:15 - INFO  - 8.2.0 - 12.3 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_logs`] => Created table `wp_newsletter_logs`
+)
+
+07-03-2024 20:40:15 - INFO  - 8.2.0 - 12.3 MB/1 GB - blackjack > End
+07-03-2024 20:40:16 - INFO  - 8.2.1 - 11.4 MB/1 GB - blackjack > Start upgrade from 8.2.0
+07-03-2024 20:40:16 - INFO  - 8.2.1 - 11.9 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_emails`] => Created table `wp_newsletter_emails`
+)
+
+07-03-2024 20:40:16 - INFO  - 8.2.1 - 11.9 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_sent`] => Created table `wp_newsletter_sent`
+)
+
+07-03-2024 20:40:16 - INFO  - 8.2.1 - 11.9 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter`] => Created table `wp_newsletter`
+)
+
+07-03-2024 20:40:16 - INFO  - 8.2.1 - 11.9 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_logs`] => Created table `wp_newsletter_user_logs`
+)
+
+07-03-2024 20:40:16 - INFO  - 8.2.1 - 11.9 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_meta`] => Created table `wp_newsletter_user_meta`
+)
+
+07-03-2024 20:40:16 - INFO  - 8.2.1 - 11.9 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_stats`] => Created table `wp_newsletter_stats`
+)
+
+07-03-2024 20:40:16 - INFO  - 8.2.1 - 11.9 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_logs`] => Created table `wp_newsletter_logs`
+)
+
+07-03-2024 20:40:16 - INFO  - 8.2.1 - 11.9 MB/1 GB - blackjack > End
+14-03-2024 16:06:37 - INFO  - 8.2.2 - 11.6 MB/1 GB -  > Start upgrade from 8.2.1
+14-03-2024 16:06:37 - INFO  - 8.2.2 - 12.0 MB/1 GB -  > Array
+(
+    [`wp_newsletter_emails`] => Created table `wp_newsletter_emails`
+)
+
+14-03-2024 16:06:37 - INFO  - 8.2.2 - 12.0 MB/1 GB -  > Array
+(
+    [`wp_newsletter_sent`] => Created table `wp_newsletter_sent`
+)
+
+14-03-2024 16:06:37 - INFO  - 8.2.2 - 12.0 MB/1 GB -  > Array
+(
+    [`wp_newsletter`] => Created table `wp_newsletter`
+)
+
+14-03-2024 16:06:37 - INFO  - 8.2.2 - 12.0 MB/1 GB -  > Array
+(
+    [`wp_newsletter_user_logs`] => Created table `wp_newsletter_user_logs`
+)
+
+14-03-2024 16:06:37 - INFO  - 8.2.2 - 12.0 MB/1 GB -  > Array
+(
+    [`wp_newsletter_user_meta`] => Created table `wp_newsletter_user_meta`
+)
+
+14-03-2024 16:06:37 - INFO  - 8.2.2 - 12.0 MB/1 GB -  > Array
+(
+    [`wp_newsletter_stats`] => Created table `wp_newsletter_stats`
+)
+
+14-03-2024 16:06:37 - INFO  - 8.2.2 - 12.0 MB/1 GB -  > Array
+(
+    [`wp_newsletter_logs`] => Created table `wp_newsletter_logs`
+)
+
+14-03-2024 16:06:37 - INFO  - 8.2.2 - 12.0 MB/1 GB -  > End
+15-03-2024 13:56:59 - INFO  - 8.2.3 - 11.9 MB/1 GB - blackjack > Start upgrade from 8.2.2
+15-03-2024 13:56:59 - INFO  - 8.2.3 - 12.0 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_emails`] => Created table `wp_newsletter_emails`
+)
+
+15-03-2024 13:56:59 - INFO  - 8.2.3 - 12.0 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_sent`] => Created table `wp_newsletter_sent`
+)
+
+15-03-2024 13:56:59 - INFO  - 8.2.3 - 12.0 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter`] => Created table `wp_newsletter`
+)
+
+15-03-2024 13:56:59 - INFO  - 8.2.3 - 12.0 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_logs`] => Created table `wp_newsletter_user_logs`
+)
+
+15-03-2024 13:56:59 - INFO  - 8.2.3 - 12.0 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_meta`] => Created table `wp_newsletter_user_meta`
+)
+
+15-03-2024 13:56:59 - INFO  - 8.2.3 - 12.0 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_stats`] => Created table `wp_newsletter_stats`
+)
+
+15-03-2024 13:56:59 - INFO  - 8.2.3 - 12.0 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_logs`] => Created table `wp_newsletter_logs`
+)
+
+15-03-2024 13:56:59 - INFO  - 8.2.3 - 12.0 MB/1 GB - blackjack > Backing up options of 8.2.2
+15-03-2024 13:56:59 - INFO  - 8.2.3 - 12.1 MB/1 GB - blackjack > End
+25-03-2024 14:45:26 - INFO  - 8.2.4 - 11.6 MB/1 GB - blackjack > Start upgrade from 8.2.3
+25-03-2024 14:45:26 - INFO  - 8.2.4 - 12.1 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_emails`] => Created table `wp_newsletter_emails`
+)
+
+25-03-2024 14:45:26 - INFO  - 8.2.4 - 12.1 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_sent`] => Created table `wp_newsletter_sent`
+)
+
+25-03-2024 14:45:26 - INFO  - 8.2.4 - 12.1 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter`] => Created table `wp_newsletter`
+)
+
+25-03-2024 14:45:26 - INFO  - 8.2.4 - 12.1 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_logs`] => Created table `wp_newsletter_user_logs`
+)
+
+25-03-2024 14:45:26 - INFO  - 8.2.4 - 12.1 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_user_meta`] => Created table `wp_newsletter_user_meta`
+)
+
+25-03-2024 14:45:26 - INFO  - 8.2.4 - 12.1 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_stats`] => Created table `wp_newsletter_stats`
+)
+
+25-03-2024 14:45:26 - INFO  - 8.2.4 - 12.1 MB/1 GB - blackjack > Array
+(
+    [`wp_newsletter_logs`] => Created table `wp_newsletter_logs`
+)
+
+25-03-2024 14:45:26 - INFO  - 8.2.4 - 12.1 MB/1 GB - blackjack > Deleting settings backup newsletter_backup_8.1.9
+25-03-2024 14:45:26 - INFO  - 8.2.4 - 12.1 MB/1 GB - blackjack > Backing up options of 8.2.3
+25-03-2024 14:45:26 - INFO  - 8.2.4 - 12.2 MB/1 GB - blackjack > End
+27-03-2024 18:42:00 - INFO  - 8.2.5 - 11.5 MB/1 GB -  > Start upgrade from 8.2.4
+27-03-2024 18:42:00 - INFO  - 8.2.5 - 12.1 MB/1 GB -  > Array
+(
+    [`wp_newsletter_emails`] => Created table `wp_newsletter_emails`
+)
+
+27-03-2024 18:42:00 - INFO  - 8.2.5 - 12.1 MB/1 GB -  > Array
+(
+    [`wp_newsletter_sent`] => Created table `wp_newsletter_sent`
+)
+
+27-03-2024 18:42:00 - INFO  - 8.2.5 - 12.1 MB/1 GB -  > Array
+(
+    [`wp_newsletter`] => Created table `wp_newsletter`
+)
+
+27-03-2024 18:42:00 - INFO  - 8.2.5 - 12.1 MB/1 GB -  > Array
+(
+    [`wp_newsletter_user_logs`] => Created table `wp_newsletter_user_logs`
+)
+
+27-03-2024 18:42:00 - INFO  - 8.2.5 - 12.1 MB/1 GB -  > Array
+(
+    [`wp_newsletter_user_meta`] => Created table `wp_newsletter_user_meta`
+)
+
+27-03-2024 18:42:00 - INFO  - 8.2.5 - 12.1 MB/1 GB -  > Array
+(
+    [`wp_newsletter_stats`] => Created table `wp_newsletter_stats`
+)
+
+27-03-2024 18:42:00 - INFO  - 8.2.5 - 12.1 MB/1 GB -  > Array
+(
+    [`wp_newsletter_logs`] => Created table `wp_newsletter_logs`
+)
+
+27-03-2024 18:42:00 - INFO  - 8.2.5 - 12.1 MB/1 GB -  > Deleting settings backup newsletter_backup_8.2.0
+27-03-2024 18:42:00 - INFO  - 8.2.5 - 12.1 MB/1 GB -  > Backing up options of 8.2.4
+27-03-2024 18:42:00 - INFO  - 8.2.5 - 12.2 MB/1 GB -  > End

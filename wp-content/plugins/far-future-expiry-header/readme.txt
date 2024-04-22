@@ -3,8 +3,8 @@ Contributors: Tips and Tricks HQ
 Donate link: https://www.tipsandtricks-hq.com/wordpress-far-future-expiration-plugin-5980
 Tags: cache, expiry, expiry header, far future expiration, expires header, wp-cache, minify, gzip, javascript, css, compression, speed,
 Requires at least: 5.5
-Tested up to: 5.8
-Stable tag: 1.5
+Tested up to: 6.2
+Stable tag: 1.6
 License: GPLv2 or later
 
 This plugin will add a far future expiry header for various file types to improve page load speed of your site
@@ -60,6 +60,9 @@ Yes
 yes
  
 == Changelog ==
+
+= 1.6 =
+* PHP 8.2 compatibility related update.
 
 = 1.5 =
 * Added nonce to the settings menu.
