@@ -51,3 +51,72 @@ function cf7pp_get_instalation_timestamp(){
 	$dir = dirname(dirname(__FILE__));
 	return filectime($dir);
 }
+
+/**
+ * Convert numeric currency code to ISO 4217
+ * @since 1.9.4
+ * @return string
+ */
+function cf7pp_free_currency_code_to_iso( $code ) {
+	$currencies = [
+		'1' => 'AUD',
+		'2' => 'BRL',
+		'3' => 'CAD',
+		'4' => 'CZK',
+		'5' => 'DKK',
+		'6' => 'EUR',
+		'7' => 'HKD',
+		'8' => 'HUF',
+		'9' => 'ILS',
+		'10' => 'JPY',
+		'11' => 'MYR',
+		'12' => 'MXN',
+		'13' => 'NOK',
+		'14' => 'NZD',
+		'15' => 'PHP',
+		'16' => 'PLN',
+		'17' => 'GBP',
+		'18' => 'RUB',
+		'19' => 'SGD',
+		'20' => 'SEK',
+		'21' => 'CHF',
+		'22' => 'TWD',
+		'23' => 'THB',
+		'24' => 'TRY',
+		'25' => 'USD'
+	];
+
+	return !empty( $currencies[$code] ) ? $currencies[$code] : 'USD';
+}
+
+/**
+ * Convert numeric language code to locale code
+ * @since 1.9.4
+ * @return string
+ */
+function cf7pp_free_language_code_to_locale( $code ) {
+	$languages = [
+		'1' => 'da_DK',
+		'2' => 'nl_BE',
+		'3' => 'en_US',
+		'4' => 'fr_CA',
+		'5' => 'de_DE',
+		'6' => 'he_IL',
+		'7' => 'it_IT',
+		'8' => 'ja_JP',
+		'9' => 'no_NO',
+		'10' => 'pl_PL',
+		'11' => 'pt_BR',
+		'12' => 'ru_RU',
+		'13' => 'es_ES',
+		'14' => 'sv_SE',
+		'15' => 'zh_CN',
+		'16' => 'zh_HK',
+		'17' => 'zh_TW',
+		'18' => 'tr_TR',
+		'19' => 'th_TH',
+		'20' => 'en_GB'
+	];
+
+	return !empty( $languages[$code] ) ? $languages[$code] : 'default';
+}

@@ -1,16 +1,13 @@
 <?php
 if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
-
-define('CF7PP_STRIPE_CONNECT_ENDPOINT', 'https://wpplugin.org/stripe/connect.php');
-
 function cf7pp_stripe_connection_status() {
 	global $stripeConnectionStatus;
 
 	if ( !isset($stripeConnectionStatus) ) {
 		$stripeConnectionStatus = false;
 
-		$options = get_option('cf7pp_options');
+		$options = cf7pp_free_options();
 
 		if (!isset($options['mode_stripe']) || $options['mode_stripe'] == "2") {
 			$account_id_key = 'acct_id_live';
@@ -21,10 +18,10 @@ function cf7pp_stripe_connection_status() {
 			$stripe_connect_token_key = 'stripe_connect_token_test';
 			$mode = 'sandbox';
 		}
-		
+
 		$account_id = isset($options[$account_id_key]) ? $options[$account_id_key] : '';
 		$token = isset($options[$stripe_connect_token_key]) ? $options[$stripe_connect_token_key] : '';
-		
+
 		if (!empty($account_id)) {
 			$url = CF7PP_STRIPE_CONNECT_ENDPOINT . '?' . http_build_query(
 				array(
@@ -34,20 +31,11 @@ function cf7pp_stripe_connection_status() {
 					'token'			=> $token
 				)
 			);
-			
-			$opts = array(
-				'http' => array(
-					'header' => "Referer: " . site_url($_SERVER['REQUEST_URI'])
-				)
-			);
-			$context = stream_context_create($opts);
-			
-			// changed to wp_remote_get instead of file_get_contents since many hosting companies have this blocked
-			
-			$account = wp_remote_post($url);
-			
-			$account = json_decode($account['body'], true);
-			
+
+			$account = wp_remote_get($url);
+
+			$account = !empty( $account['body'] ) ? json_decode($account['body'], true) : [];
+
 			if (!empty($account['payouts_enabled']) && intval($account['payouts_enabled']) === 1) {
 				$stripeConnectionStatus['email'] = $account['email'];
 				$stripeConnectionStatus['display_name'] = $account['display_name'];
@@ -91,7 +79,7 @@ function cf7pp_stripe_connection_status_html() {
 
 function cf7pp_stripe_connect_url($mode = false) {
 	if ( $mode === false ) {
-		$options = get_option('cf7pp_options');
+		$options = cf7pp_free_options();
 		
 		if (isset($options['mode_stripe'])) {
 			$mode = $options['mode_stripe'] == "2" ? 'live' : 'sandbox';
@@ -113,7 +101,7 @@ function cf7pp_stripe_connect_url($mode = false) {
 }
 
 function cf7pp_stripe_disconnect_url($account_id, $token) {
-	$options = get_option('cf7pp_options');
+	$options = cf7pp_free_options();
 
 	$stripe_connect_url = CF7PP_STRIPE_CONNECT_ENDPOINT . '?' . http_build_query(
 		array(
@@ -132,7 +120,8 @@ function cf7pp_stripe_connect_tab_url() {
 	return add_query_arg(
 		array(
 			'page'	=> 'cf7pp_admin_table',
-			'tab'	=> '5'
+			'tab'	=> '5',
+			'cf7pp_free_nonce' 	=> wp_create_nonce('cf7pp_free_stripe')
 		),
 		admin_url('admin.php')
 	);
@@ -141,12 +130,17 @@ function cf7pp_stripe_connect_tab_url() {
 add_action('plugins_loaded', 'cf7pp_stripe_connect_completion');
 function cf7pp_stripe_connect_completion() {
 	if (empty($_GET['cf7pp_stripe_connect_completion']) || intval($_GET['cf7pp_stripe_connect_completion']) !== 1 || empty($_GET['mode']) || empty($_GET['account_id']) || empty($_GET['token'])) return;
+	
+	// nonce check
+	if (!isset($_GET['cf7pp_free_nonce']) || !wp_verify_nonce($_GET['cf7pp_free_nonce'], 'cf7pp_free_stripe')) {
+		wp_die('Security check failed');
+	}
 
 	if (!current_user_can('manage_options')) {
 		return;
 	}
 
-	$options = get_option('cf7pp_options');
+	$options = cf7pp_free_options();
 
 	if ($_GET['mode'] == 'live') {
 		$account_id_key = 'acct_id_live';
@@ -168,9 +162,9 @@ function cf7pp_stripe_connect_completion() {
 	if (isset($options['sec_key_test'])) { unset($options['sec_key_test']); }
 	if (isset($options['webhook_data_live'])) { unset($options['webhook_data_live']); }
 	if (isset($options['webhook_data_test'])) { unset($options['webhook_data_test']); }
-	if (isset($options['stripe_connect_notice_dismissed'])) { unset($options['stripe_connect_notice_dismissed']); }
+	$options['stripe_connect_notice_dismissed'] = 0;
 
-	update_option('cf7pp_options', $options);
+	cf7pp_free_options_update( $options );
 
 	$return_url = cf7pp_stripe_connect_tab_url();
 
@@ -190,15 +184,20 @@ add_action('plugins_loaded', 'cf7pp_stripe_disconnected');
 function cf7pp_stripe_disconnected() {
 	if (empty($_GET['cf7pp_stripe_disconnected']) || intval($_GET['cf7pp_stripe_disconnected']) !== 1 || empty($_GET['mode']) || empty($_GET['account_id'])) return;
 
+	// nonce check
+	if (!isset($_GET['cf7pp_free_nonce']) || !wp_verify_nonce($_GET['cf7pp_free_nonce'], 'cf7pp_free_stripe')) {
+		wp_die('Security check failed');
+	}
+	
 	if (!current_user_can('manage_options')) {
 		return;
 	}
 
-	$options = get_option('cf7pp_options');
+	$options = cf7pp_free_options();
 	$acct_id_key = $_GET['mode'] == 'live' ? 'acct_id_live' : 'acct_id_test';
 	if ($options[$acct_id_key] == $_GET['account_id']) {
 		$options[$acct_id_key] = '';
-		update_option('cf7pp_options', $options);
+		cf7pp_free_options_update( $options );
 	}
 
 	$return_url = cf7pp_stripe_connect_tab_url();

@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 function cf7pp_admin_table() {
 
 	// get options
-	$options = get_option('cf7pp_options');
+	$options = cf7pp_free_options();
 
 	if ( !current_user_can( "manage_options" ) )  {
 	wp_die( __( "You do not have sufficient permissions to access this page." ) );
@@ -17,26 +17,16 @@ function cf7pp_admin_table() {
 
 	// save and update options
 	if (isset($_POST['update'])) {
-		
+
 		if ( empty( $_POST['cf7pp_nonce_field'] ) || !wp_verify_nonce( $_POST['cf7pp_nonce_field'], 'cf7pp_save_settings') ) {
-		
 			wp_die( __( "You do not have sufficient permissions to access this page." ) );
-		
 		}
-		
-		
-		
+
 		$options['currency'] = 					sanitize_text_field($_POST['currency']);
 		if (empty($options['currency'])) { 		$options['currency'] = ''; }
 
 		$options['language'] = 					sanitize_text_field($_POST['language']);
 		if (empty($options['language'])) { 		$options['language'] = ''; }
-
-		$options['liveaccount'] = 				sanitize_text_field($_POST['liveaccount']);
-		if (empty($options['liveaccount'])) { 	$options['liveaccount'] = ''; }
-
-		$options['sandboxaccount'] = 			sanitize_text_field($_POST['sandboxaccount']);
-		if (empty($options['sandboxaccount'])) { $options['sandboxaccount'] = ''; }
 
 		$options['mode'] = 						sanitize_text_field($_POST['mode']);
 		if (empty($options['mode'])) { 			$options['mode'] = '2'; }
@@ -64,12 +54,8 @@ function cf7pp_admin_table() {
 		
 		$options['failed'] = 					sanitize_text_field($_POST['failed']);
 		if (empty($options['failed'])) { 		$options['failed'] = 'Payment Failed'; }
-		
-		$options_old = $options;
-		
-		array_merge($options, $options_old);
-		
-		update_option("cf7pp_options", $options);
+
+		cf7pp_free_options_update( $options );
 
 		echo "<br /><div class='updated'><p><strong>"; _e("Settings Updated."); echo "</strong></p></div>";
 
@@ -77,47 +63,15 @@ function cf7pp_admin_table() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	if (empty($options['currency'])) { 					$options['currency'] = ''; }
-	if (empty($options['language'])) { 					$options['language'] = ''; }
-	if (empty($options['liveaccount'])) { 				$options['liveaccount'] = ''; }
-	if (empty($options['sandboxaccount'])) { 			$options['sandboxaccount'] = ''; }
-	if (empty($options['mode'])) { 						$options['mode'] = '2'; }
-	if (empty($options['mode_stripe'])) { 				$options['mode_stripe'] = '2'; }
-	if (empty($options['cancel'])) { 					$options['cancel'] = ''; }
-	if (empty($options['return'])) { 					$options['return'] = ''; }
-	if (empty($options['redirect'])) { 					$options['redirect'] = '1'; }
-	if (empty($options['session'])) { 					$options['session'] = '1'; }
-	if (empty($options['stripe_return'])) { 			$options['stripe_return'] = ''; }
-	if (empty($options['success'])) { 					$options['success'] = 'Payment Successful'; }
-	if (empty($options['failed'])) { 					$options['failed'] = 'Payment Failed'; }
-
-	$siteurl = get_site_url();
-
 	if (isset($_POST['hidden_tab_value'])) {
-		$active_tab =  $_POST['hidden_tab_value'];
+		$active_tab =  (int) $_POST['hidden_tab_value'];
 	} else {
 		$active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : '1';
+		$active_tab = (int) $active_tab;
+	}
+	
+	if ($active_tab == 0) {
+		$active_tab = 1;
 	}
 
 	?>
@@ -136,11 +90,12 @@ function cf7pp_admin_table() {
 
 
 		<h2 class="nav-tab-wrapper">
-			<a onclick='closetabs("1,3,4,5,6");newtab("1");' href="#" id="id1" class="nav-tab <?php echo $active_tab == '1' ? 'nav-tab-active' : ''; ?>">Getting Started</a>
-			<a onclick='closetabs("1,3,4,5,6");newtab("3");' href="#" id="id3" class="nav-tab <?php echo $active_tab == '3' ? 'nav-tab-active' : ''; ?>">Language & Currency</a>
-			<a onclick='closetabs("1,3,4,5,6");newtab("4");' href="#" id="id4" class="nav-tab <?php echo $active_tab == '4' ? 'nav-tab-active' : ''; ?>">PayPal</a>
-			<a onclick='closetabs("1,3,4,5,6");newtab("5");' href="#" id="id5" class="nav-tab <?php echo $active_tab == '5' ? 'nav-tab-active' : ''; ?>">Stripe</a>
-			<a onclick='closetabs("1,3,4,5,6");newtab("6");' href="#" id="id6" class="nav-tab <?php echo $active_tab == '6' ? 'nav-tab-active' : ''; ?>">Other</a>
+			<a onclick='closetabs("1,3,4,5,6,7");newtab("1");' href="#" id="id1" class="nav-tab <?php echo $active_tab == '1' ? 'nav-tab-active' : ''; ?>">Getting Started</a>
+			<a onclick='closetabs("1,3,4,5,6,7");newtab("3");' href="#" id="id3" class="nav-tab <?php echo $active_tab == '3' ? 'nav-tab-active' : ''; ?>">Language & Currency</a>
+			<a onclick='closetabs("1,3,4,5,6,7");newtab("4");' href="#" id="id4" class="nav-tab <?php echo $active_tab == '4' ? 'nav-tab-active' : ''; ?>">PayPal</a>
+			<a onclick='closetabs("1,3,4,5,6,7");newtab("5");' href="#" id="id5" class="nav-tab <?php echo $active_tab == '5' ? 'nav-tab-active' : ''; ?>">Stripe</a>
+			<a onclick='closetabs("1,3,4,5,6,7");newtab("6");' href="#" id="id6" class="nav-tab <?php echo $active_tab == '6' ? 'nav-tab-active' : ''; ?>">Other</a>
+			<a onclick='closetabs("1,3,4,5,6,7");newtab("7");' href="#" id="id7" class="nav-tab <?php echo $active_tab == '7' ? 'nav-tab-active' : ''; ?>">Extensions</a>
 		</h2>
 		<br />
 
@@ -279,10 +234,14 @@ function cf7pp_admin_table() {
 		</div>
 		<div style="background-color:#fff;padding:8px;">
 
-			<table width='100%'>
+            <?php echo cf7pp_free_ppcp_status_markup(); ?>
 
+			<table width='100%'>
+                <tr><td colspan='2'><br /></td></tr>
+
+                <?php if ( !empty( $options['liveaccount'] ) ) { ?>
 				<tr><td class='cf7pp_width'>
-				<b>Live Account: </b></td><td><input type='text' size=40 name='liveaccount' value='<?php echo $options['liveaccount']; ?>'> Required to use PayPal
+				<b>Live Account: </b></td><td><input type='text' size=40 name='liveaccount' value='<?php echo $options['liveaccount']; ?>' readonly />
 				</td></tr>
 
 				<tr><td class='cf7pp_width'></td><td>
@@ -291,9 +250,11 @@ function cf7pp_admin_table() {
 
 				<br /><br />If you don't have a PayPal account, you can sign up for free at <a target='_blank' href='https://paypal.com'>PayPal</a>. <br /><br />
 				</td></tr>
+                <?php } ?>
 
+	            <?php if ( !empty( $options['sandboxaccount'] ) ) { ?>
 				<tr><td class='cf7pp_width'>
-				<b>Sandbox Account: </b></td><td><input type='text' size=40 name='sandboxaccount' value='<?php echo $options['sandboxaccount']; ?>'> Optional
+				<b>Sandbox Account: </b></td><td><input type='text' size=40 name='sandboxaccount' value='<?php echo $options['sandboxaccount']; ?>' readonly />
 				</td></tr>
 
 				<tr><td class='cf7pp_width'></td><td>
@@ -303,6 +264,7 @@ function cf7pp_admin_table() {
 				Once you have made an account, create a Sandbox Business and Personal Account <a target='_blank' href='https://developer.paypal.com/webapps/developer/applications/accounts'>here</a>. Enter the Business acount email on this page and use the Personal account username and password to buy something on your site as a customer.
 				<br /><br />
 				</td></tr>
+	            <?php } ?>
 
 				<tr><td class='cf7pp_width'>
 				<b>Sandbox Mode:</b></td><td>
@@ -413,14 +375,31 @@ function cf7pp_admin_table() {
 
 		</div>
 	</div>
+	
+	
+	<div id="7" style="display:none;border: 1px solid #CCCCCC;<?php echo $active_tab == '7' ? 'display:block;' : ''; ?>">
+		<div style="background-color:#E4E4E4;padding:8px;font-size:15px;color:#464646;font-weight: 700;border-bottom: 1px solid #CCCCCC;">
+			&nbsp; Extensions
+		</div>
+		<div style="background-color:#fff;padding:8px;">
+			
+			<table style="width: 100%;">
+				
+				<?php
+				cf7pp_extensions_page();
+				?>
+				
+			</table>
+			
+		</div>
+	</div>
 
 
 
 
 	<input type='hidden' name='update' value='1'>
 	<input type='hidden' name='hidden_tab_value' id="hidden_tab_value" value="<?php echo $active_tab; ?>">
-	
-	<?php wp_nonce_field( 'cf7pp_save_settings','cf7pp_nonce_field' ); ?>
+    <?php wp_nonce_field( 'cf7pp_save_settings','cf7pp_nonce_field' ); ?>
 
 </form>
 
@@ -452,7 +431,8 @@ function cf7pp_admin_table() {
 		<br />
 		
 		<br />
-		<div class="dashicons dashicons-yes" style="margin-bottom: 6px;"></div> Only send email if PayPal / Stripe payment is successful <br />
+		<div class="dashicons dashicons-yes" style="margin-bottom: 6px;"></div> Only send email if PayPal / Stripe payment is Successful <br />
+		<div class="dashicons dashicons-yes" style="margin-bottom: 6px;"></div> No 2% PayPal per transaction application fee <br />
 		<div class="dashicons dashicons-yes" style="margin-bottom: 6px;"></div> No 2% Stripe per transaction application fee <br />
 		<div class="dashicons dashicons-yes" style="margin-bottom: 6px;"></div> Link any form item to price, quantity, or description <br />
 		<div class="dashicons dashicons-yes" style="margin-bottom: 6px;"></div> Sell up to 5 items per form  <br />
@@ -460,12 +440,12 @@ function cf7pp_admin_table() {
 		<div class="dashicons dashicons-yes" style="margin-bottom: 6px;"></div> Separate PayPal & Stripe account per form <br />
 		<div class="dashicons dashicons-yes" style="margin-bottom: 6px;"></div> Skip redirecting based upon form elements<br />
 		<div class="dashicons dashicons-yes" style="margin-bottom: 6px;"></div> Accept recurring payments with our <a target='_blank' href='https://wpplugin.org/downloads/contact-form-7-recurring-payments-pro/'>Recurring Add-on</a><br />
-		<div class="dashicons dashicons-yes" style="margin-bottom: 6px;"></div> Amazing plugin support agents from California and Colorado<br />
+		<div class="dashicons dashicons-yes" style="margin-bottom: 6px;"></div> Amazing plugin support agents from USA<br />
 		<div class="dashicons dashicons-yes" style="margin-bottom: 6px;"></div> No risk, 30 day return policy <br />
 		<div class="dashicons dashicons-yes" style="margin-bottom: 6px;"></div> Many more features! <br />
 		
 		<br />
-		<b><center>Over 3,100 Happy Customers</center></b>
+		<b><center>Over 4,200 happy Pro version customers</center></b>
 		
 		<br />
 		<center><a target='_blank' href="https://wpplugin.org/downloads/contact-form-7-paypal-add-on/" class='button-primary' style='font-size: 17px;line-height: 28px;height: 32px;'>Get the Pro Version</a></center>
@@ -482,4 +462,165 @@ function cf7pp_admin_table() {
 
 	<?php
 
+}
+
+function cf7pp_free_ppcp_status_markup() {
+	ob_start();
+
+	$options = cf7pp_free_options();
+	$status = cf7pp_free_ppcp_status();
+	if ( !empty( $status ) ) {
+		if ( empty( $status['errors'] ) ) {
+			$notice_type = 'success';
+			$show_links = false;
+		} else {
+			$notice_type = 'error';
+			$show_links = true;
+		}
+		?>
+        <div id="cf7pp-ppcp-status-table">
+            <table>
+                <tr>
+                    <td class="cf7pp-cell-left">
+                        <b>Connection status: </b>
+                    </td>
+                    <td>
+                        <div class="notice inline cf7pp-ppcp-connect notice-<?php echo $notice_type; ?>">
+                            <p>
+								<?php if ( !empty( $status['legal_name'] ) ) { ?>
+                                    <strong><?php echo $status['legal_name']; ?></strong>
+                                    <br>
+								<?php } ?>
+								<?php echo !empty( $status['primary_email'] ) ? $status['primary_email'] . ' — ' : ''; ?>Administrator (Owner)</p>
+								<p>Pay as you go pricing: 2% per-transaction fee + PayPal fees.</p>
+                        </div>
+                        <div>
+							<?php $reconnect_mode = $status['env'] === 'live' ? 'sandbox' : 'live'; ?>
+                            Your PayPal account is connected in <strong><?php echo $status['env']; ?></strong> mode.
+							<?php
+							$query_args = [
+								'action' => 'cf7pp-ppcp-onboarding-start',
+								'nonce' => wp_create_nonce( 'cf7pp-ppcp-onboarding-start' )
+							];
+							if ( $reconnect_mode === 'sandbox' ) {
+								$query_args['sandbox'] = 1;
+							}
+							?>
+                            <a
+                                class="cf7pp-ppcp-onboarding-start"
+                                data-paypal-button="true"
+                                href="<?php echo add_query_arg( $query_args, admin_url( 'admin-ajax.php' ) ); ?>"
+                                target="PPFrame"
+                            >Connect in <strong><?php echo $reconnect_mode; ?></strong> mode</a> or <a href="#" id="cf7pp-ppcp-disconnect">disconnect this account</a>.
+                        </div>
+
+						<?php if ( !empty( $status['errors'] ) ) { ?>
+                            <p>
+                                <strong>There were errors connecting your PayPal account. Resolve them in your account settings, by contacting support or by reconnecting your PayPal account.</strong>
+                            </p>
+                            <p>
+                                <strong>See below for more details.</strong>
+                            </p>
+                            <ul class="cf7pp-ppcp-list cf7pp-ppcp-list-error">
+								<?php foreach ( $status['errors'] as $error ) { ?>
+                                    <li><?php echo $error; ?></li>
+								<?php } ?>
+                            </ul>
+						<?php } ?>
+
+						<?php if ( $show_links ) { ?>
+                            <ul class="cf7pp-ppcp-list">
+                                <li><a href="https://www.paypal.com/myaccount/settings/">PayPal account settings</a></li>
+                                <li><a href="https://www.paypal.com/us/smarthelp/contact-us">PayPal support</a></li>
+                            </ul>
+						<?php } ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <br />
+                    </td>
+                </tr>
+            </table>
+        </div>
+		<?php
+	} else { ?>
+        <table id="cf7pp-ppcp-status-table" class="cf7pp-ppcp-initial-view-table">
+            <tr>
+                <td>
+                    <img class="cf7pp-ppcp-paypal-logo" src="<?php echo CF7PP_FREE_URL; ?>imgs/paypal-logo.png" alt="paypal-logo" />
+                </td>
+                <td class="cf7pp-ppcp-align-right cf7pp-ppcp-icons">
+                    <img class="cf7pp-ppcp-paypal-methods" src="<?php echo CF7PP_FREE_URL; ?>imgs/paypal-express.png" alt="paypal-expresss" />
+                    <img class="cf7pp-ppcp-paypal-methods" src="<?php echo CF7PP_FREE_URL; ?>imgs/paypal-advanced.png" alt="paypal-advanced" />
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <h3 class="cf7pp-ppcp-title">PayPal: The all-in-one checkout solution</h3>
+                    <ul class="cf7pp-ppcp-list">
+                        <li>Help drive conversion by offering customers a seamless checkout experience</li>
+                        <li>Securely accepts all major credit/debit cards and local payment methods with the strength of the PayPal network</li>
+                        <li>You only pay the standard PayPal fees + 2%.</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td>
+					<?php
+					$mode = intval( $options['mode'] );
+					$query_args = [
+						'action' => 'cf7pp-ppcp-onboarding-start',
+						'nonce' => wp_create_nonce( 'cf7pp-ppcp-onboarding-start' )
+					];
+					if ( $mode === 1 ) {
+						$query_args['sandbox'] = 1;
+					}
+					?>
+                    <a
+                        id="cf7pp-ppcp-onboarding-start-btn"
+                        class="cf7pp-ppcp-button cf7pp-ppcp-onboarding-start"
+                        data-paypal-button="true"
+                        href="<?php echo add_query_arg( $query_args, admin_url( 'admin-ajax.php' ) ); ?>"
+                        target="PPFrame"
+                    >Get started</a>
+                </td>
+                <td class="cf7pp-ppcp-align-right">
+                    <a href="https://www.paypal.com/us/webapps/mpp/merchant-fees#statement-2" class="cf7pp-ppcp-link" target="_blank">View our simple and transparent pricing</a>
+                </td>
+            </tr>
+			<?php if ( !empty( $_GET['error'] ) && in_array( $_GET['error'], ['security', 'api'] ) ) { ?>
+                <tr>
+                    <td colspan="2">
+                        <ul class="cf7pp-ppcp-list cf7pp-ppcp-list-error">
+                            <li>
+								<?php
+								if ( $_GET['error'] === 'security' ) {
+									_e( 'The request has not been authenticated. Please reload the page and try again.' );
+								} else {
+									_e( 'The request ended with an error. Please reload the page and try again.' );
+								}
+								?>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+			<?php } ?>
+        </table>
+		<?php
+	}
+
+	if ( !wp_doing_ajax() ) { ?>
+        <script>
+            (function(d, s, id){
+                var js, ref = d.getElementsByTagName(s)[0]; if (!d.getElementById(id)){
+                    js = d.createElement(s); js.id = id; js.async = true;
+                    js.src =
+                        "https://www.paypal.com/webapps/merchantboarding/js/lib/lightbox/partner.js";
+                    ref.parentNode.insertBefore(js, ref); }
+            }(document, "script", "paypal-js"));
+        </script>
+	<?php }
+
+	return ob_get_clean();
 }

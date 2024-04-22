@@ -17,7 +17,7 @@ jQuery(document).ready(function($) {
 			
 			var cf7pp_formid = cf7pp_id_long;
 			var cf7pp_formid = cf7pp_id;
-			
+
 			cf7pp_redirect(cf7pp_formid, cf7pp_id_long);
 		}
 		
@@ -27,29 +27,29 @@ jQuery(document).ready(function($) {
 	
 	
 	// for redirect method 2
-	if (ajax_object_cf7pp.method == 2) {
-	
-		var cf7pp_form_counter = 0;
-		
-		jQuery('.wpcf7-form').bind('DOMSubtreeModified', function(e) {
-			
-			if (cf7pp_form_counter == 0) {
-				if (jQuery('.wpcf7-form').hasClass('sent')) {
-					
-					// get form id
-					var cf7pp_id = jQuery(this).parent().attr('id').substring(7);
-					
-					cf7pp_id = cf7pp_id.split('-')[0];
-					
-					var cf7pp_id_long = jQuery(this).parent().attr('id');
-					
-					cf7pp_redirect(cf7pp_id, cf7pp_id_long);
-					cf7pp_form_counter = 1;
-				}
-			}
-			
-		  });
-	}
+    if (ajax_object_cf7pp.method == 2) {
+        var cf7pp_form_counter = 0;
+        jQuery('.wpcf7-form').bind('DOMSubtreeModified', function(e) {
+            if (cf7pp_form_counter == 0) {
+                var $form = jQuery(this);
+                var interval = setInterval(function(){
+                    if ($form.hasClass('sent')) {
+                        clearInterval(interval);
+
+                        // get form id
+                        var cf7pp_id = $form.parent().attr('id').substring(7);
+
+                        cf7pp_id = cf7pp_id.split('-')[0];
+
+                        var cf7pp_id_long = $form.parent().attr('id');
+
+                        cf7pp_redirect(cf7pp_id, cf7pp_id_long);
+                        cf7pp_form_counter = 1;
+                    }
+                }, 500);
+            }
+        });
+    }
 	
 	
 	// used for redirect method 1 and 2

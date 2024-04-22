@@ -133,7 +133,7 @@ function cf7pp_before_send_mail() {
 		// get form post id
 		$posted_data = $submission_orig->get_posted_data();
 		
-		$options = 			get_option('cf7pp_options');
+		$options = 			cf7pp_free_options();
 		
 		
 		$post_id = 			$wpcf7->id;
@@ -182,7 +182,7 @@ function cf7pp_before_send_mail() {
 
 		// save payment
 		$mode = ((strtolower($gateway) == 'paypal' && $options['mode'] == 1) || (strtolower($gateway) == 'stripe' && $options['mode_stripe'] == 1)) ? 'sandbox' : 'live';
-		$payment_id = cf7pp_insert_payment($gateway, $mode, $amount_total);
+		$payment_id = cf7pp_insert_payment($gateway, $mode, $amount_total, $post_id);
 		
 		
 		if (empty($options['session'])) {
@@ -220,7 +220,7 @@ add_action('wp_ajax_cf7pp_get_form_post', 'cf7pp_get_form_post_callback');
 add_action('wp_ajax_nopriv_cf7pp_get_form_post', 'cf7pp_get_form_post_callback');
 function cf7pp_get_form_post_callback() {
 
-	$options = get_option('cf7pp_options');
+	$options = cf7pp_free_options();
 
 
 	if (empty($options['session'])) {

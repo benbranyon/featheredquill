@@ -62,7 +62,7 @@ function cf7pp_admin_after_additional_settings( $cf7 ) {
 	$admin_table_output .= "<td><input type='text' name='cf7pp_name' value='$name'> </td><td> (Optional)</td></tr>";
 
 	$admin_table_output .= "<tr><td>Item Price: </td>";
-	$admin_table_output .= "<td><input type='text' name='cf7pp_price' value='$price'> </td><td> (PayPal supports 0.00 to allow the customer to enter their own amount, Stripe does not and requires an amount. Format: for $2.99, enter 2.99)</td></tr>";
+	$admin_table_output .= "<td><input type='text' name='cf7pp_price' value='$price'> </td><td> (Format: for $2.99, enter 2.99)</td></tr>";
 
 	$admin_table_output .= "<tr><td>Item ID / SKU: </td>";
 	$admin_table_output .= "<td><input type='text' name='cf7pp_id' value='$id'> </td><td> (Optional)</td></tr>";

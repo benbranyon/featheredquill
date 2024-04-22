@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 function cf7pp_stripe_redirect($post_id,$fid,$return_url,$payment_id) {
 	
-	$options = get_option('cf7pp_options');
+	$options = cf7pp_free_options();
 	
 	
 	// get variables
@@ -39,7 +39,7 @@ function cf7pp_stripe_redirect($post_id,$fid,$return_url,$payment_id) {
 
 	if ($session == '1') {
 		$stripe_return	= isset($_COOKIE['cf7pp_stripe_return']) ? sanitize_text_field($_COOKIE['cf7pp_stripe_return']) : NULL;
-		$stripe_email 	= isset($_COOKIE['cf7pp_stripe_email']) ? sanitize_text_field($_COOKIE['cf7pp_stripe_email']) : NULL;
+		$stripe_email	= isset($_COOKIE['cf7pp_stripe_email']) ? sanitize_text_field($_COOKIE['cf7pp_stripe_email']) : NULL;
 	} else {		
 		$stripe_return 	= isset($_SESSION['cf7pp_stripe_return']) ? sanitize_text_field($_SESSION['cf7pp_stripe_return']) : NULL;
 		$stripe_email 	= isset($_SESSION['cf7pp_stripe_email']) ? sanitize_text_field($_SESSION['cf7pp_stripe_email']) : NULL;
@@ -197,21 +197,10 @@ function cf7pp_stripe_redirect($post_id,$fid,$return_url,$payment_id) {
 		  		'token'					=> $token
 			)
 		);
-		
-		$opts = array(
-			'http' => array(
-				'header' => "Referer: " . site_url($_SERVER['REQUEST_URI'])
-			)
-		);
-		$context = stream_context_create($opts);
-		
-		// changed to wp_remote_get instead of file_get_contents since many hosting companies have this blocked
-		
-		$checkout_session = wp_remote_post($stripe_connect_url);
-		
+
+		$checkout_session = wp_remote_get($stripe_connect_url);
 		$checkout_session = json_decode($checkout_session['body']);
-		
-		
+
 		if (empty($checkout_session->session_id)) {
 			echo "An unexpected error occurred. Please try again.";
 			exit;

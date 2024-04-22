@@ -23,7 +23,7 @@ function cf7pp_ipn_test() {
  * @return string or array
  */
 function cf7pp_get_paypal_notify_url($return = 'str') {
-	$options = get_option('cf7pp_options');
+	$options = cf7pp_free_options();
 	$mode_paypal = $options['mode'] == '1' ? 'sandbox' : 'production';
 
 	$namespace = 'paypalipn/v1';
@@ -76,8 +76,8 @@ function cf7pp_paypal_ipn_handler() {
 	parse_str($payload, $data);
 
 	if (strtolower($data['payment_status']) == 'completed') {
-		$options = get_option('cf7pp_options');
-		$paypal_post_url = 'https://www.' . ($options['mode'] == '1' ? 'sandbox' : '') . '.paypal.com/cgi-bin/webscr';
+		$options = cf7pp_free_options();
+		$paypal_post_url = 'https://www.' . ($options['mode'] == '1' ? 'sandbox.' : '') . 'paypal.com/cgi-bin/webscr';
 
 		$data['cmd'] = '_notify-validate';
 		$args = array(

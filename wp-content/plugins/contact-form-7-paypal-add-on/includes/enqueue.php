@@ -13,7 +13,10 @@ function cf7pp_admin_enqueue() {
 
 	// admin js
 	wp_enqueue_script('cf7pp-admin',plugins_url('/assets/js/admin.js',__DIR__),array('jquery'),CF7PP_VERSION_NUM);
-
+	wp_localize_script( 'cf7pp-admin', 'cf7pp', [
+		'ajaxUrl' => admin_url('admin-ajax.php'),
+		'nonce' => wp_create_nonce( 'cf7pp-free-request' )
+	] );
 }
 add_action('admin_enqueue_scripts','cf7pp_admin_enqueue');
 
@@ -30,15 +33,7 @@ function cf7pp_public_enqueue() {
 	$path_stripe = $site_url.'/?cf7pp_stripe_redirect=';
 
 	// stripe public key
-	$options = get_option('cf7pp_options');
-	
-	
-	// set defaults in case uplugin has been updated without savings the settings page
-	if (!isset($options['failed'])) {
-		$options['failed'] = 		'Payment Failed';
-		$options['pay'] = 			'Pay';
-		$options['processing'] = 	'Processing Payment';
-	}
+	$options = cf7pp_free_options();
 
 	// redirect method js
 	wp_enqueue_script('cf7pp-redirect_method',plugins_url('/assets/js/redirect_method.js',__DIR__),array('jquery'),CF7PP_VERSION_NUM);

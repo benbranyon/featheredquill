@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) exit; // Exit if accessed directly
 add_action('wpcf7_before_send_mail', 'cf7pp_insert_webhook_data_to_plugin_settings');
 function cf7pp_insert_webhook_data_to_plugin_settings() {
 
-	$options = get_option('cf7pp_options');
+	$options = cf7pp_free_options();
 
 	switch ($options['mode_stripe']) {
 		case '1':
@@ -21,7 +21,7 @@ function cf7pp_insert_webhook_data_to_plugin_settings() {
 				
 				if ($webhook_data_test_orig != $options['webhook_data_test']['id']) {
 					array_merge($options, $options['webhook_data_test']);
-					update_option("cf7pp_options", $options);
+					cf7pp_free_options_update( $options );
 				}
 				break;
 			}
@@ -35,7 +35,7 @@ function cf7pp_insert_webhook_data_to_plugin_settings() {
 				
 				if ($webhook_data_live_orig != $options['webhook_data_live']['id']) {
 					array_merge($options, $options['webhook_data_live']);
-					update_option("cf7pp_options", $options);
+					cf7pp_free_options_update( $options );
 				}
 				break;
 			}
@@ -110,7 +110,7 @@ function cf7pp_maybe_create_stripe_webhook($webhook_data, $sk) {
  * @return string or array
  */
 function cf7pp_get_stripe_webhook_url($return = 'str') {
-	$options = get_option('cf7pp_options');
+	$options = cf7pp_free_options();
 	$mode_stripe = $options['mode_stripe'] == '1' ? 'test' : 'live';
 
 	$namespace = 'stripewebhooks/v1';
@@ -156,7 +156,7 @@ function cf7pp_stripe_webhook_auth() {
  * @since 1.8
  */
 function cf7pp_stripe_webhook_handler() {
-	$options = get_option('cf7pp_options');
+	$options = cf7pp_free_options();
 	$mode_stripe = $options['mode_stripe'] == '1' ? 'test' : 'live';
 	$endpoint_secret = $options['webhook_data_' . $mode_stripe]['secret'];
 
@@ -201,15 +201,15 @@ function cf7pp_stripe_webhook_handler() {
  * @return string or array
  */
 function cf7pp_get_stripe_connect_webhook_url($return = 'str') {
-	$namespace = 'stripewebhooks/v1';
-	$route = '/cf7pp_notice';
+	$arg = 'cf7pp_notice';
+	$val = 'stripewebhook';
 
 	if ($return == 'str') {
-		$result = add_query_arg('rest_route', '/' . $namespace . $route, get_site_url());
+		$result = add_query_arg($arg, $val, get_site_url());
 	} else {
 		$result = array(
-			'namespace'	=> $namespace,
-			'route'		=> $route
+			'arg'	=> $arg,
+			'val'	=> $val
 		);
 	}
 
@@ -220,41 +220,26 @@ function cf7pp_get_stripe_connect_webhook_url($return = 'str') {
  * Register Stripe Connect webhook listener.
  * @since 1.8
  */
-add_action('rest_api_init', 'cf7pp_stripe_connect_webhook_listener');
+add_action('plugins_loaded', 'cf7pp_stripe_connect_webhook_listener');
 function cf7pp_stripe_connect_webhook_listener() {
+	// check if webhook endpoint
 	$webhook_url = cf7pp_get_stripe_connect_webhook_url('arr');
-    register_rest_route($webhook_url['namespace'], $webhook_url['route'], array(
-        'methods' 				=> 'POST',
-        'callback' 				=> 'cf7pp_stripe_connect_webhook_handler',
-        'permission_callback'	=> 'cf7pp_stripe_connect_webhook_auth'
-    ));
-}
+	if (!isset($_REQUEST[$webhook_url['arg']]) || $_REQUEST[$webhook_url['arg']] != $webhook_url['val']) return;
 
-/**
- * Stripe Connect webhook permission callback.
- * @since 1.8
- * @return bool
- */
-function cf7pp_stripe_connect_webhook_auth() {
-	if (!isset($_POST['payment_id']) || !isset($_POST['status']) || !isset($_POST['transaction_id']) || !isset($_POST['mode']) || !isset($_POST['token'])) return false;
+	// check required arguments
+	if (!isset($_REQUEST['payment_id']) || !isset($_REQUEST['status']) || !isset($_REQUEST['transaction_id']) || !isset($_REQUEST['mode']) || !isset($_REQUEST['token'])) return;
 
-	$options = get_option('cf7pp_options');
-
-	if ($_POST['mode'] == 'live') {
+	$options = cf7pp_free_options();
+	if ($_REQUEST['mode'] == 'live') {
 		$token = isset($options['stripe_connect_token_live']) ? $options['stripe_connect_token_live'] : '';
 	} else {
 		$token = isset($options['stripe_connect_token_test']) ? $options['stripe_connect_token_test'] : '';
 	}
 
-	return !empty($_POST['token']) && $_POST['token'] == $token;
-}
+	// check token
+	if (empty($_REQUEST['token']) || $_REQUEST['token'] != $token) return;
 
-/**
- * Stripe Connect webhook handler.
- * @since 1.8
- */
-function cf7pp_stripe_connect_webhook_handler() {
-	$result = cf7pp_complete_payment($_POST['payment_id'], $_POST['status'], $_POST['transaction_id']);
+	$result = cf7pp_complete_payment($_REQUEST['payment_id'], $_REQUEST['status'], $_REQUEST['transaction_id']);
 
 	wp_send_json(array(
 		'result'	=> $result ? 'success' : 'fail'

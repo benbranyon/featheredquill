@@ -6,7 +6,7 @@ if (!defined('ABSPATH')) exit; // Exit if accessed directly
  * @since 1.8
  * @return payment_id in wp_posts table
  */
-function cf7pp_insert_payment($gateway, $mode, $amount, $status='cf7pp-pending') {
+function cf7pp_insert_payment($gateway, $mode, $amount, $form_id, $status='cf7pp-pending') {
 	$payment_id = wp_insert_post( array(
 		'post_title'    => 'Order made on ' . date('H:i:s M d, Y'),
 		'post_status'   => $status,
@@ -15,7 +15,8 @@ function cf7pp_insert_payment($gateway, $mode, $amount, $status='cf7pp-pending')
 			'gateway'			=> strtolower($gateway),
 			'mode'				=> $mode,
 			'transaction_id'	=> '',
-			'amount'			=> $amount
+			'amount'			=> $amount,
+			'cf7pp_form_id'     => $form_id
 		)
 	) );
 
@@ -27,12 +28,18 @@ function cf7pp_insert_payment($gateway, $mode, $amount, $status='cf7pp-pending')
  * @since 1.8
  * @return bool
  */
-function cf7pp_complete_payment($payment_id, $status, $transaction_id) {
+function cf7pp_complete_payment($payment_id, $status, $transaction_id = '', $payer_email = '') {
 	$payment_id = (int) $payment_id;
 	if ( empty($payment_id) ) return false;
 
 	$transaction_id = sanitize_text_field($transaction_id);
-	update_post_meta($payment_id, 'transaction_id', $transaction_id);
+	if ( !empty( $transaction_id ) ) {
+		update_post_meta( $payment_id, 'transaction_id', $transaction_id );
+	}
+
+	if ( !empty( $payer_email ) ) {
+		update_post_meta( $payment_id, 'payer_email', sanitize_email( $payer_email ) );
+	}
 
 	$status = 'cf7pp-' . $status;
 	$statuses = cf7pp_get_payment_statuses();

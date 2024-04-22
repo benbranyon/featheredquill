@@ -40,12 +40,13 @@ function cf7pp_payments_init(){
  */
 add_action('edit_form_after_title', 'cf7pp_payments_print_id');
 function cf7pp_payments_print_id($post) {
-	if ($post->post_type != 'cf7pp_payments') return $actions;
-	printf(
-		'<h3>%s %s</h3>',
-		__('Payment:', 'contact-form-7'),
-		$post->ID
-	);
+	if ($post->post_type === 'cf7pp_payments') {
+		printf(
+			'<h3>%s %s</h3>',
+			__('Payment:', 'contact-form-7'),
+			$post->ID
+		);
+    }
 }
 
 /**
@@ -82,7 +83,7 @@ function cf7pp_payments_submit_metabox($post) {
 			<div id="misc-publishing-actions">
 				<div class="misc-pub-section misc-pub-post-status">
 					<?php _e( 'Status:' ); ?>
-					<span id="post-status-display"><?php echo cf7pp_get_payment_status_label($post->post_status); ?></span>			
+					<span id="post-status-display"><?php echo cf7pp_get_payment_status_label($post->post_status); ?></span>
 					<a href="#post_status" class="edit-post-status hide-if-no-js" role="button"><span aria-hidden="true"><?php _e( 'Edit' ); ?></span> <span class="screen-reader-text"><?php _e( 'Edit status' ); ?></span></a>
 					<div id="post-status-select" class="hide-if-js">
 						<input type="hidden" name="hidden_post_status" id="hidden_post_status" value="<?php echo esc_attr( ( 'auto-draft' === $post->post_status ) ? 'draft' : $post->post_status ); ?>" />

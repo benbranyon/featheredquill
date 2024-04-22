@@ -4,9 +4,9 @@ Donate link: https://wpplugin.org/donate/
 Tags: paypal, contact form 7, stripe, contact form, ecommerce
 Author URI: https://wpplugin.org
 Requires at least: 3.0
-Tested up to: 6.2
+Tested up to: 6.4
 Requires PHP: 5.5
-Stable tag: 1.9.4
+Stable tag: 2.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,21 @@ Here is a short video of how the Pro version works:
 
 
 == Changelog ==
+
+= 2.2 =
+* 2/25/24
+* Fix - Security issue fixed.
+
+= 2.1 =
+* 12/6/23
+* Update - Updated Stripe Library - Old library was not compatable with PHP 8.0+.
+* Update - Updated PayPal & Stripe update noficiation bars.
+* Fix - Security issue
+
+= 2.0 =
+* 11/3/23
+* New - Added PayPal Commerce Platform Integration
+
 
 = 1.9.4 =
 * 3/20/23
