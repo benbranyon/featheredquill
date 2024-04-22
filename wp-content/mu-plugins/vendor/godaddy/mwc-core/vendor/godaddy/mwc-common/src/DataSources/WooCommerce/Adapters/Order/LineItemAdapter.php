@@ -5,7 +5,7 @@ namespace GoDaddy\WordPress\MWC\Common\DataSources\WooCommerce\Adapters\Order;
 use GoDaddy\WordPress\MWC\Common\DataSources\Contracts\DataSourceAdapterContract;
 use GoDaddy\WordPress\MWC\Common\Helpers\SanitizationHelper;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\LineItem;
-use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
+use WC_Order;
 use WC_Order_Item_Product;
 use WC_Product;
 
@@ -16,11 +16,10 @@ use WC_Product;
  *
  * @property WC_Order_Item_Product $source
  * @method static static getNewInstance(WC_Order_Item_Product $source)
+ * @method static static for(WC_Order_Item_Product $source, ?WC_Order $sourceOrder = null)
  */
 class LineItemAdapter extends AbstractOrderItemAdapter implements DataSourceAdapterContract
 {
-    use CanGetNewInstanceTrait;
-
     /**
      * Order line item adapter constructor.
      *

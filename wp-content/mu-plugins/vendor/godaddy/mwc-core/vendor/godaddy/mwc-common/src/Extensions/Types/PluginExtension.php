@@ -126,6 +126,26 @@ class PluginExtension extends AbstractExtension
     }
 
     /**
+     * Automatically updates the plugin basename by looking it up via {@see get_plugins()}.
+     *
+     * This will only set a basename value if this extension is currently installed (but not necessarily activated).
+     * It's recommended to call this immediately after a plugin is downloaded {@see static::install()} so that we have
+     * accurate basename information.
+     *
+     * @return void
+     */
+    public function maybeAutoUpdateBasename() : void
+    {
+        if (! $slug = $this->getSlug()) {
+            return;
+        }
+
+        if ($basename = WordPressRepository::getPluginBasenameFromSlug($slug)) {
+            $this->setBasename($basename);
+        }
+    }
+
+    /**
      * Sets the plugin image URLs.
      *
      * @param string[] $urls URLs to set
@@ -242,12 +262,14 @@ class PluginExtension extends AbstractExtension
             throw new ExtensionInstallFailedException($result->get_error_message());
         }
 
+        // make sure to clear out plugins list cache after the plugin successfully installed
+        wp_clean_plugins_cache();
+
+        $this->maybeAutoUpdateBasename();
+
         if (! $this->isInstalled()) {
             throw new ExtensionInstallFailedException(sprintf('%s was not installed successfully.', $this->getName() ?? 'A plugin'));
         }
-
-        // make sure to clear out plugins list cache after the plugin successfully installed
-        wp_clean_plugins_cache();
     }
 
     /**

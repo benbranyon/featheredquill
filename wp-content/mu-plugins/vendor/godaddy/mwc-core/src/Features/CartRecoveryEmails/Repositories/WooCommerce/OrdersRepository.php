@@ -12,16 +12,16 @@ use WC_Order;
 class OrdersRepository extends CommonOrdersRepository
 {
     /** @var string meta key to hold the recovery status of an order */
-    const META_KEY_RECOVERY_STATUS = '_mwc_order_recovery_status';
+    public const META_KEY_RECOVERY_STATUS = '_mwc_order_recovery_status';
 
     /** @var string meta key to hold the checkout ID related to an order in recovery */
-    const META_KEY_RECOVERY_CHECKOUT_ID = '_mwc_order_recoverable_checkout_id';
+    public const META_KEY_RECOVERY_CHECKOUT_ID = '_mwc_order_recoverable_checkout_id';
 
     /** @var string recovery status of an order that is about to be recovered (pending paid order status) */
-    const ORDER_STATUS_PENDING_RECOVERY = 'pending_recovery';
+    public const ORDER_STATUS_PENDING_RECOVERY = 'pending_recovery';
 
     /** @var string recovery status of an order that has been fully recovered */
-    const ORDER_STATUS_RECOVERED = 'recovered';
+    public const ORDER_STATUS_RECOVERED = 'recovered';
 
     /**
      * Gets the recovery status of an order.
@@ -31,12 +31,28 @@ class OrdersRepository extends CommonOrdersRepository
      */
     public static function getOrderRecoveryStatus(int $orderId) : ?string
     {
-        $status = get_post_meta($orderId, self::META_KEY_RECOVERY_STATUS, true);
+        $status = static::getOrderMeta($orderId, self::META_KEY_RECOVERY_STATUS);
 
         /* @TODO confirm if an order that was not placed as the result of a cart recovery campaign should have a different status than `null` {unfulvio 2022-03-23} */
         return ArrayHelper::contains([static::ORDER_STATUS_PENDING_RECOVERY, static::ORDER_STATUS_RECOVERED], $status)
             ? $status
             : null;
+    }
+
+    /**
+     * Gets the value of the specified metadata key for an order identified with the given ID.
+     *
+     * @param int $orderId
+     * @param string $key
+     * @return mixed
+     */
+    protected static function getOrderMeta(int $orderId, string $key)
+    {
+        if (! $wooOrder = static::get($orderId)) {
+            return null;
+        }
+
+        return $wooOrder->get_meta($key);
     }
 
     /**
@@ -98,7 +114,7 @@ class OrdersRepository extends CommonOrdersRepository
      */
     public static function getOrderRecoverableCheckoutId(int $orderId) : ?int
     {
-        $checkoutId = get_post_meta($orderId, self::META_KEY_RECOVERY_CHECKOUT_ID, true);
+        $checkoutId = static::getOrderMeta($orderId, self::META_KEY_RECOVERY_CHECKOUT_ID);
 
         return is_numeric($checkoutId) ? (int) $checkoutId : null;
     }

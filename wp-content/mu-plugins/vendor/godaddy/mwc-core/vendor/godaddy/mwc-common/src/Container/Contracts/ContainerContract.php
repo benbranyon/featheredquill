@@ -3,19 +3,39 @@
 namespace GoDaddy\WordPress\MWC\Common\Container\Contracts;
 
 use Closure;
-use Psr\Container\ContainerInterface;
+use GoDaddy\WordPress\MWC\Common\Container\Exceptions\ContainerException;
+use GoDaddy\WordPress\MWC\Common\Container\Exceptions\EntryNotFoundException;
+use GoDaddy\WordPress\MWC\Common\Vendor\Psr\Container\ContainerInterface;
 
 interface ContainerContract extends ContainerInterface
 {
+    /**
+     * Finds an entry of the container by its identifier and returns it.
+     *
+     * @template T of object
+     * @param class-string<T>|string $id
+     * @return ($id is class-string<T> ? T : mixed)
+     * @throws EntryNotFoundException No entry was found for **this** identifier.
+     * @throws ContainerException
+     */
+    public function get(string $id);
+
     /**
      * Register a binding in the container.
      *
      * @param string $abstract
      * @param class-string|Closure $concrete
-     * @param mixed[]|null $constructorArgs (DEPRECATED) arguments to be passed to $concrete's constructor
      * @return void
      */
-    public function bind(string $abstract, $concrete, ?array $constructorArgs = []) : void;
+    public function bind(string $abstract, $concrete) : void;
+
+    /**
+     * Register a shared binding in the container.
+     *
+     * @param string $abstract
+     * @param class-string|Closure $concrete
+     */
+    public function singleton(string $abstract, $concrete) : void;
 
     /**
      * Adds a container.

@@ -3,91 +3,50 @@
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Operations\Contracts;
 
 use GoDaddy\WordPress\MWC\Common\Contracts\CanConvertToArrayContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Operations\Contracts\ListRemoteResourcesOperationContract;
 
-interface ListProductsOperationContract extends CanConvertToArrayContract
+interface ListProductsOperationContract extends ListRemoteResourcesOperationContract, CanConvertToArrayContract,
+    HasPageSizeContract, HasPageTokenContract, HasSortingContract, HasAltIdFilterContract, HasParentIdContract
 {
-    /**
-     * Set the local IDs.
-     *
-     * @param ?array<int> $ids
-     * @return ListProductsOperationContract
-     */
-    public function setLocalIds(?array $ids) : ListProductsOperationContract;
-
-    /**
-     * Get local IDs.
-     *
-     * @return ?array<int>
-     */
-    public function getLocalIds() : ?array;
-
-    /**
-     * Sets the remote (Commerce) product IDs.
-     *
-     * @param string[]|null $value
-     * @return ListProductsOperationContract
-     */
-    public function setIds(?array $value) : ListProductsOperationContract;
-
-    /**
-     * Gets the remote (Commerce) product IDs.
-     *
-     * @return string[]|null
-     */
-    public function getIds() : ?array;
-
     /**
      * Set the include deleted flag.
      *
+     * @deprecated includeDeleted no longer supported by the Catalog API.
      * @param ?bool $includeDeleted
-     * @return ListProductsOperationContract
+     * @return $this
      */
-    public function setIncludeDeleted(?bool $includeDeleted) : ListProductsOperationContract;
+    public function setIncludeDeleted(?bool $includeDeleted);
 
     /**
      * Get the include deleted flag.
      *
+     * @deprecated includeDeleted no longer supported by the Catalog API.
      * @return ?bool
      */
     public function getIncludeDeleted() : ?bool;
 
     /**
-     * Set the sort by.
+     * Sets the include child products flag.
      *
-     * @param ?string $sortBy
-     * @return ListProductsOperationContract
+     * @param bool|null $includeChildProducts
+     * @return $this
      */
-    public function setSortBy(?string $sortBy) : ListProductsOperationContract;
+    public function setIncludeChildProducts(?bool $includeChildProducts) : ListProductsOperationContract;
 
     /**
-     * Get the sort by.
+     * Gets the include child products flag.
      *
-     * @return ?string
+     * @return bool|null
      */
-    public function getSortBy() : ?string;
-
-    /**
-     * Set the sort order.
-     *
-     * @param ?string $sortOrder
-     * @return ListProductsOperationContract
-     */
-    public function setSortOrder(?string $sortOrder) : ListProductsOperationContract;
-
-    /**
-     * Get the sort order.
-     *
-     * @return ?string
-     */
-    public function getSortOrder() : ?string;
+    public function getIncludeChildProducts() : ?bool;
 
     /**
      * Set the category ID.
      *
      * @param ?int $localCategoryId
-     * @return ListProductsOperationContract
+     * @return $this
      */
-    public function setLocalCategoryId(?int $localCategoryId) : ListProductsOperationContract;
+    public function setLocalCategoryId(?int $localCategoryId);
 
     /**
      * Get the category ID.
@@ -100,9 +59,9 @@ interface ListProductsOperationContract extends CanConvertToArrayContract
      * Set the channel ID.
      *
      * @param ?string $channelId
-     * @return ListProductsOperationContract
+     * @return $this
      */
-    public function setChannelId(?string $channelId) : ListProductsOperationContract;
+    public function setChannelId(?string $channelId);
 
     /**
      * Get the channel ID.
@@ -115,9 +74,9 @@ interface ListProductsOperationContract extends CanConvertToArrayContract
      * Set the SKU.
      *
      * @param ?string $sku
-     * @return ListProductsOperationContract
+     * @return $this
      */
-    public function setSku(?string $sku) : ListProductsOperationContract;
+    public function setSku(?string $sku);
 
     /**
      * Get the SKU.
@@ -127,27 +86,12 @@ interface ListProductsOperationContract extends CanConvertToArrayContract
     public function getSku() : ?string;
 
     /**
-     * Set the alt ID.
-     *
-     * @param ?string $altId
-     * @return ListProductsOperationContract
-     */
-    public function setAltId(?string $altId) : ListProductsOperationContract;
-
-    /**
-     * Get the alt ID.
-     *
-     * @return ?string
-     */
-    public function getAltId() : ?string;
-
-    /**
      * Set the name.
      *
      * @param ?string $name
-     * @return ListProductsOperationContract
+     * @return $this
      */
-    public function setName(?string $name) : ListProductsOperationContract;
+    public function setName(?string $name);
 
     /**
      * Get the name.
@@ -170,34 +114,4 @@ interface ListProductsOperationContract extends CanConvertToArrayContract
      * @return ?string
      */
     public function getType() : ?string;
-
-    /**
-     * Set the page token.
-     *
-     * @param ?string $pageToken
-     * @return ListProductsOperationContract
-     */
-    public function setPageToken(?string $pageToken) : ListProductsOperationContract;
-
-    /**
-     * Get the page token.
-     *
-     * @return ?string
-     */
-    public function getPageToken() : ?string;
-
-    /**
-     * Set the token direction.
-     *
-     * @param ?string $tokenDirection
-     * @return ListProductsOperationContract
-     */
-    public function setTokenDirection(?string $tokenDirection) : ListProductsOperationContract;
-
-    /**
-     * Get the token direction.
-     *
-     * @return ?string
-     */
-    public function getTokenDirection() : ?string;
 }

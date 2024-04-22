@@ -7,7 +7,6 @@ use GoDaddy\WordPress\MWC\Common\API\Response;
 use GoDaddy\WordPress\MWC\Common\Components\Contracts\ComponentContract;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Http\GraphQL\AbstractGraphQLOperation;
-use GoDaddy\WordPress\MWC\Common\Platforms\PlatformRepositoryFactory;
 use GoDaddy\WordPress\MWC\Common\Traits\CanFormatRequestSettingValuesTrait;
 use GoDaddy\WordPress\MWC\Core\Email\Exceptions\EmailSenderTakenException;
 use GoDaddy\WordPress\MWC\Core\Email\Exceptions\EmailsServiceException;
@@ -15,6 +14,7 @@ use GoDaddy\WordPress\MWC\Core\Email\Http\EmailsServiceRequest;
 use GoDaddy\WordPress\MWC\Core\Email\Http\GraphQL\Mutations\SendEmailSenderMailboxVerificationMutation;
 use GoDaddy\WordPress\MWC\Core\Email\Models\EmailSender;
 use GoDaddy\WordPress\MWC\Core\Email\Repositories\EmailSenderRepository;
+use GoDaddy\WordPress\MWC\Core\Email\Repositories\EmailServiceRepository;
 use GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\API\API;
 use GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\Exceptions\RequestException;
 use GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\Traits\CanGetEmailNotificationDataStoreTrait;
@@ -83,12 +83,14 @@ class SendersController extends AbstractController implements ComponentContract
     protected function sendRequest(AbstractGraphQLOperation $query)
     {
         try {
-            $response = (new EmailsServiceRequest())
+            $response = EmailsServiceRequest::getNewInstance()
                 ->setOperation($query)
                 ->send();
 
             if ($response->isError()) {
-                throw new RequestException($response->getErrorMessage(), (int) $response->getStatus());
+                $errorStatus = max((int) $response->getStatus(), 400);
+
+                throw new RequestException((string) $response->getErrorMessage(), $errorStatus);
             }
 
             return $response->getBody();
@@ -253,7 +255,7 @@ class SendersController extends AbstractController implements ComponentContract
     {
         $query = SendEmailSenderMailboxVerificationMutation::getNewInstance()->setVariables([
             'emailAddress'                   => urldecode(TypeHelper::string($request->get_param('email'), '')),
-            'siteId'                         => PlatformRepositoryFactory::getNewInstance()->getPlatformRepository()->getPlatformSiteId(),
+            'siteId'                         => EmailServiceRepository::getSiteId(),
             'mailboxVerificationRedirectUrl' => EmailSenderRepository::getMailboxVerificationRedirectUrl(),
         ]);
 
@@ -285,13 +287,13 @@ class SendersController extends AbstractController implements ComponentContract
                     'readonly'    => true,
                 ],
                 'verifiedAt' => [
-                    'description' => __('Sender verified at.', 'mwc-core'),
+                    'description' => __('The date and time when the sender was verified in our system.', 'mwc-core'),
                     'type'        => 'string',
                     'context'     => ['view', 'edit'],
                     'readonly'    => true,
                 ],
                 'verifiedBy' => [
-                    'description' => __('Sender verified by.', 'mwc-core'),
+                    'description' => __('How the sender was verified.', 'mwc-core'),
                     'type'        => 'string',
                     'context'     => ['view', 'edit'],
                     'readonly'    => true,

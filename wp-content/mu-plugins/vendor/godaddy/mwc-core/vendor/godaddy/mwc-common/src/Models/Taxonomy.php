@@ -12,7 +12,6 @@ use WP_Taxonomy;
 /**
  * Object representation of a taxonomy.
  *
- *
  * @method static static getNewInstance(array $properties = [])
  */
 class Taxonomy implements TaxonomyContract

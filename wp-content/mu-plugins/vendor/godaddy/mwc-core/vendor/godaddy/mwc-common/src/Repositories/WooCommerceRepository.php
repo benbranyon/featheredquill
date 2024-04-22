@@ -2,6 +2,7 @@
 
 namespace GoDaddy\WordPress\MWC\Common\Repositories;
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use GoDaddy\WordPress\MWC\Common\Configuration\Configuration;
 use GoDaddy\WordPress\MWC\Common\DataSources\WooCommerce\Adapters\AddressAdapter;
 use GoDaddy\WordPress\MWC\Common\Exceptions\WooCommerceCartException;
@@ -173,6 +174,18 @@ class WooCommerceRepository
     }
 
     /**
+     * Gets the ID of a WooCommerce order's admin edit screen.
+     *
+     * @return string
+     */
+    public static function getEditOrderPageScreenId() : string
+    {
+        return function_exists('wc_get_page_screen_id')
+            ? wc_get_page_screen_id('shop_order')
+            : 'shop_order';
+    }
+
+    /**
      * Gets the cart page URl.
      *
      * @return string|null
@@ -240,6 +253,18 @@ class WooCommerceRepository
     public static function isOrderReceivedPage() : bool
     {
         return static::isWooCommerceActive() && is_order_received_page();
+    }
+
+    /**
+     * Determines if the custom orders table are enabled (HPOS).
+     *
+     * If not, it means the store is using the default WordPress posts table for orders.
+     *
+     * @return bool
+     */
+    public static function isCustomOrdersTableUsageEnabled() : bool
+    {
+        return class_exists(OrderUtil::class) && OrderUtil::custom_orders_table_usage_is_enabled();
     }
 
     /**

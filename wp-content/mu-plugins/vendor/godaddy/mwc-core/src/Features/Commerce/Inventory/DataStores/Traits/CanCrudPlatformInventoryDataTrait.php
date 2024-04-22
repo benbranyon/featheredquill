@@ -11,16 +11,21 @@ use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerce\ProductsRepository;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Commerce;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\Contracts\CommerceExceptionContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\MissingLevelRemoteIdException;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\MissingProductRemoteIdException;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Events\UpdateLevelFailedEvent;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Events\UpdateProductQuantityConflictEvent;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Exceptions\SummaryNotFoundException;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\InventoryIntegration;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\Contracts\InventoryProviderContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\DataObjects\Level;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\DataObjects\ListSummariesInput;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\DataObjects\Summary;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\DataObjects\UpsertSummaryInput;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services\Contracts\LevelsServiceContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services\Contracts\LevelsServiceWithCacheContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services\Contracts\SummariesServiceContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services\Operations\CreateOrUpdateLevelOperation;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services\Operations\ReadLevelOperation;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services\Operations\ReadSummaryOperation;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Models\Contracts\CommerceContextContract;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Adapters\ProductAdapter;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Models\Products\Product;
@@ -29,6 +34,8 @@ use WC_Product;
 trait CanCrudPlatformInventoryDataTrait
 {
     protected LevelsServiceContract $levelsService;
+    protected LevelsServiceWithCacheContract $levelsServiceWithCache;
+    protected SummariesServiceContract $summariesService;
     protected InventoryProviderContract $inventoryProvider;
     protected CommerceContextContract $commerceContext;
 
@@ -39,26 +46,38 @@ trait CanCrudPlatformInventoryDataTrait
      */
     protected function createOrUpdateProductInPlatform(WC_Product $product) : void
     {
-        // let the Catalog integration's datastore handle its operations
-        parent::createOrUpdateProductInPlatform($product);
-
-        // bail if this product isn't managing stock or writes are disabled
-        if (! InventoryIntegration::hasCommerceCapability(Commerce::CAPABILITY_WRITE) || ! $this->productIsManagingOwnStock($product)) {
-            return;
-        }
-
         // temporarily disable reads so we don't double-increment inventory quantities
         if ($readsEnabled = InventoryIntegration::hasCommerceCapability(Commerce::CAPABILITY_READ)) {
             InventoryIntegration::disableCapability(Commerce::CAPABILITY_READ);
         }
 
-        // perform the updates
-        $this->createOrUpdatePlatformInventoryData($product);
+        try {
+            // let the Catalog integration's datastore handle its operations (this may throw exceptions)
+            parent::createOrUpdateProductInPlatform($product);
+        } finally {
+            // the below will be executed even if exceptions are thrown above
 
-        // restore reads if they were previously enabled
-        if ($readsEnabled) {
-            InventoryIntegration::enableCapability(Commerce::CAPABILITY_READ);
+            // perform the updates if this product is managing stock and writes are enabled
+            if (InventoryIntegration::hasCommerceCapability(Commerce::CAPABILITY_WRITE) && $this->productIsManagingOwnStock($product) && $this->productIncludesInventoryChanges($product)) {
+                $this->createOrUpdatePlatformInventoryData($product);
+            }
+            // restore reads if they were previously enabled
+            if ($readsEnabled) {
+                InventoryIntegration::enableCapability(Commerce::CAPABILITY_READ);
+            }
         }
+    }
+
+    /**
+     * Determines if a given product includes inventory changes.
+     *
+     * @param WC_Product $product
+     */
+    protected function productIncludesInventoryChanges(WC_Product $product) : bool
+    {
+        $changes = $product->get_changes();
+
+        return array_key_exists('backorder', $changes) || array_key_exists('stock_quantity', $changes) || array_key_exists('low_stock_amount', $changes);
     }
 
     /**
@@ -85,40 +104,18 @@ trait CanCrudPlatformInventoryDataTrait
      */
     protected function createOrUpdatePlatformInventoryData(WC_Product $product) : void
     {
+        $nativeProduct = null;
+
         try {
             $nativeProduct = ProductAdapter::getNewInstance($product)->convertFromSource();
 
-            $level = $this->levelsService->createOrUpdateLevel(new CreateOrUpdateLevelOperation($nativeProduct))->getLevel();
+            $level = $this->levelsServiceWithCache->createOrUpdateLevel(new CreateOrUpdateLevelOperation($nativeProduct))->getLevel();
 
             $this->applyPlatformInventoryLevel($product, $level);
-            $this->updatePlatformInventorySummary($product, $level);
         } catch (Exception|CommerceExceptionContract $exception) {
+            Events::broadcast(UpdateLevelFailedEvent::getNewInstance($nativeProduct, $exception->getMessage()));
             SentryException::getNewInstance('An error occurred trying to create or update the remote inventory for a product: '.$exception->getMessage(), $exception);
         }
-    }
-
-    /**
-     * Updates the product's platform inventory summary.
-     *
-     * @param WC_Product $product
-     * @param Level $level
-     *
-     * @throws CommerceExceptionContract|BaseException|Exception
-     */
-    protected function updatePlatformInventorySummary(WC_Product $product, Level $level) : void
-    {
-        $lowStockAmount = $product->get_low_stock_amount();
-
-        $summary = Summary::getNewInstance([
-            'inventorySummaryId'    => $level->inventorySummaryId,
-            'isBackorderable'       => $product->backorders_allowed(),
-            'lowInventoryThreshold' => is_numeric($lowStockAmount) ? TypeHelper::int($lowStockAmount, 0) : null,
-        ]);
-
-        $this->inventoryProvider->summaries()->update(new UpsertSummaryInput([
-            'storeId' => $this->commerceContext->getStoreId(),
-            'summary' => $summary,
-        ]));
     }
 
     /**
@@ -135,12 +132,15 @@ trait CanCrudPlatformInventoryDataTrait
         try {
             $nativeProduct = ProductAdapter::getNewInstance($product)->convertFromSource();
 
-            $level = $this->levelsService->readLevel(new ReadLevelOperation($nativeProduct))->getLevel();
+            // purposefully do not use the levels service with cache so this value is as fresh as possible
+            $level = $this->levelsService->readLevelWithRepair(new ReadLevelOperation($nativeProduct))->getLevel();
 
             $level->quantity = $this->calculateLatestLevelQuantity($product, $level);
 
             $product = $this->applyPlatformInventoryLevel($product, $level);
-        } catch (Exception $exception) {
+        } catch (MissingLevelRemoteIdException|MissingProductRemoteIdException $exception) {
+            // @TODO: Remove this catch block in MWC-12713 {acastro1 2023.06.15}
+        } catch (Exception|CommerceExceptionContract $exception) {
             SentryException::getNewInstance('An error occurred trying to read the remote inventory for a product: '.$exception->getMessage(), $exception);
         }
 
@@ -211,6 +211,11 @@ trait CanCrudPlatformInventoryDataTrait
             return;
         }
 
+        // only if reads are enabled
+        if (! InventoryIntegration::hasCommerceCapability(Commerce::CAPABILITY_READ)) {
+            return;
+        }
+
         // only for products that are managing stock
         if (! $this->productIsManagingOwnStock($product)) {
             return;
@@ -228,9 +233,9 @@ trait CanCrudPlatformInventoryDataTrait
     protected function readPlatformInventoryData(WC_Product $product) : void
     {
         try {
-            $level = $this->readPlatformInventoryLevel($product);
-
-            $this->readPlatformInventorySummary($product, $level);
+            $this->readPlatformInventorySummary($product);
+        } catch (MissingProductRemoteIdException $exception) {
+            // @TODO: Remove this catch block in MWC-12713 {acastro1 2023.06.15}
         } catch (Exception|CommerceExceptionContract $exception) {
             SentryException::getNewInstance('An error occurred trying to read the remote inventory for a product: '.$exception->getMessage(), $exception);
         }
@@ -242,10 +247,11 @@ trait CanCrudPlatformInventoryDataTrait
      * @param WC_Product $product
      *
      * @return Level
+     * @throws CommerceExceptionContract|BaseException|Exception
      */
     protected function readPlatformInventoryLevel(WC_Product $product) : Level
     {
-        $level = $this->levelsService->readLevel(new ReadLevelOperation(Product::getNewInstance()->setId($product->get_id())))->getLevel();
+        $level = $this->levelsServiceWithCache->readLevel(new ReadLevelOperation(Product::getNewInstance()->setId($product->get_id())))->getLevel();
 
         $this->applyPlatformInventoryLevel($product, $level);
 
@@ -256,33 +262,18 @@ trait CanCrudPlatformInventoryDataTrait
      * Read the platform inventory summary for the given product.
      *
      * @param WC_Product $product
-     * @param Level $level
      *
-     * @return Summary|null
-     *
-     * @throws CommerceExceptionContract|BaseException|Exception
+     * @throws MissingProductRemoteIdException|CommerceExceptionContract|Exception
      */
-    protected function readPlatformInventorySummary(WC_Product $product, Level $level) : ?Summary
+    protected function readPlatformInventorySummary(WC_Product $product) : void
     {
-        $summaries = $this->inventoryProvider->summaries()->list(new ListSummariesInput([
-            'storeId' => $this->commerceContext->getStoreId(),
-        ]));
+        try {
+            $foundSummary = $this->summariesService->readSummary(new ReadSummaryOperation($product->get_id()))->getSummary();
 
-        // we currently can't get a specific summary by ID, so we have to list & loop
-        foreach ($summaries as $summary) {
-            if ($summary->inventorySummaryId === $level->inventorySummaryId) {
-                $foundSummary = $summary;
-                break;
-            }
+            $this->applyPlatformInventorySummary($product, $foundSummary);
+        } catch (SummaryNotFoundException $exception) {
+            // we do not need to report missing summaries to Sentry as the product may not be created in Commerce yet
         }
-
-        if (! isset($foundSummary)) {
-            return null;
-        }
-
-        $this->applyPlatformInventorySummary($product, $foundSummary);
-
-        return $foundSummary;
     }
 
     /**
@@ -300,6 +291,7 @@ trait CanCrudPlatformInventoryDataTrait
         }
 
         $product->set_low_stock_amount($lowInventoryThreshold ?? '');
+        $product->set_stock_quantity($summary->totalOnHand ?? null);
 
         $backorders = $product->get_backorders();
 
@@ -348,8 +340,8 @@ trait CanCrudPlatformInventoryDataTrait
             $nativeProduct = ProductAdapter::getNewInstance($wooProduct)->convertFromSource()
                 ->setCurrentStock($quantity);
 
-            $quantity = $this->levelsService->createOrUpdateLevel(new CreateOrUpdateLevelOperation($nativeProduct))->getLevel()->quantity;
-        } catch (Exception $exception) {
+            $quantity = $this->levelsServiceWithCache->createOrUpdateLevel(new CreateOrUpdateLevelOperation($nativeProduct))->getLevel()->quantity;
+        } catch (Exception|CommerceExceptionContract $exception) {
             SentryException::getNewInstance('An error occurred trying to update the remote inventory for a product: '.$exception->getMessage(), $exception);
         }
 

@@ -80,4 +80,15 @@ return [
      * General configuration values that affect all MWC features.
      */
     'allow_native_features_for_resellers' => defined('DISABLE_ACCOUNT_RESTRICTION_FOR_MWC_FEATURES') && DISABLE_ACCOUNT_RESTRICTION_FOR_MWC_FEATURES,
+
+    /*
+     *--------------------------------------------------------------------------
+     * FullStory
+     *--------------------------------------------------------------------------
+     *
+     * Whether to enable and load FullStory tracking.
+     */
+    'fullStory' => [
+        'enabled' => false,
+    ],
 ];

@@ -16,7 +16,7 @@ class LineItemHashService extends AbstractHashService
     {
         return [
             'LineItem',
-            $model->getName(),
+            $model->getLabel(),
             (string) $model->getSku(),
             (string) $model->getQuantity(),
         ];

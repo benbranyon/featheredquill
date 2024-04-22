@@ -2,7 +2,7 @@
 
 namespace GoDaddy\WordPress\MWC\GoogleAnalytics\Tests\Admin;
 
-use GoDaddy\WordPress\MWC\GoogleAnalytics\WC_Google_Analytics_Pro;
+use GoDaddy\WordPress\MWC\GoogleAnalytics\Plugin;
 use SkyVerge\Lumiere\Tests;
 use function GoDaddy\WordPress\MWC\GoogleAnalytics\wc_google_analytics_pro;
 
@@ -15,7 +15,7 @@ class PluginPageLinksCest extends Tests\Admin\PluginPageLinksCest {
 	/**
 	 * Gets the plugin instance.
 	 *
-	 * @return WC_Google_Analytics_Pro
+	 * @return \GoDaddy\WordPress\MWC\GoogleAnalytics\Plugin
 	 */
 	protected function get_plugin() {
 

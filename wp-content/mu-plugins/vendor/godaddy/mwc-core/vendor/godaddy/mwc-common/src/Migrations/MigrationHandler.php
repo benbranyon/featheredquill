@@ -2,7 +2,8 @@
 
 namespace GoDaddy\WordPress\MWC\Common\Migrations;
 
-use DateTime;
+use DateTimeImmutable;
+use DateTimeZone;
 use Exception;
 use GoDaddy\WordPress\MWC\Common\Components\Contracts\ComponentContract;
 use GoDaddy\WordPress\MWC\Common\Components\Traits\HasComponentsTrait;
@@ -94,7 +95,7 @@ class MigrationHandler implements ComponentContract
      */
     protected function getExecutedOnDateTime() : string
     {
-        return (new DateTime('now'))->format('Y-m-d H:m:s');
+        return (new DateTimeImmutable('now', new DateTimeZone('UTC')))->format(DATE_ATOM);
     }
 
     /**
@@ -148,13 +149,15 @@ class MigrationHandler implements ComponentContract
      */
     protected function migrate() : void
     {
-        if ($this->isLocked()) {
+        $migrationRoutineList = $this->getMigrationRoutinesToBeExecuted();
+
+        if (! $migrationRoutineList || $this->isLocked()) {
             return;
         }
 
         $this->lock();
 
-        foreach ($this->getMigrationRoutinesToBeExecuted() as $migrationRoutine) {
+        foreach ($migrationRoutineList as $migrationRoutine) {
             $this->executeMigrationRoutine($migrationRoutine);
         }
 

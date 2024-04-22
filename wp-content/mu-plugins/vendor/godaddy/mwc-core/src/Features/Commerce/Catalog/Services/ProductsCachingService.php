@@ -12,12 +12,15 @@ use GoDaddy\WordPress\MWC\Core\Features\Commerce\Services\AbstractCachingService
 /**
  * Caching service for products.
  *
- * @method ProductBase|null get(string $remoteId)
+ * @method ProductBase|null get(string $resourceIdentifier)
  * @method ProductBase set(CanConvertToArrayContract $resource)
  */
 class ProductsCachingService extends AbstractCachingService implements ProductsCachingServiceContract
 {
     use CanConvertProductResponseTrait;
+
+    /** @var int Products has its own cache ttl */
+    protected int $cacheTtl = 30;
 
     /** {@inheritDoc} */
     protected string $resourceType = 'products';
@@ -39,9 +42,14 @@ class ProductsCachingService extends AbstractCachingService implements ProductsC
      *
      * @param ProductBase&object $resource
      * @return string
+     * @throws MissingProductRemoteIdException
      */
-    protected function getResourceRemoteId(object $resource) : string
+    protected function getResourceIdentifier(object $resource) : string
     {
-        return $resource->productId ?? '';
+        if (! empty($resource->productId)) {
+            return $resource->productId;
+        }
+
+        throw MissingProductRemoteIdException::withDefaultMessage();
     }
 }

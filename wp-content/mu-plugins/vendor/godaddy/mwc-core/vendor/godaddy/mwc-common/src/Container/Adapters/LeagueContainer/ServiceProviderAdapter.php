@@ -4,7 +4,7 @@ namespace GoDaddy\WordPress\MWC\Common\Container\Adapters\LeagueContainer;
 
 use GoDaddy\WordPress\MWC\Common\Container\Contracts\ServiceProviderContract;
 use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
-use League\Container\ServiceProvider\AbstractServiceProvider;
+use GoDaddy\WordPress\MWC\Common\Vendor\League\Container\ServiceProvider\AbstractServiceProvider;
 
 /**
  * Adapts an MWC service provider instance to be compatible with League\Container's service provider interface.

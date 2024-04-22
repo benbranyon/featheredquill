@@ -36,11 +36,6 @@ parameters:
 			path: src/Fulfillment.php
 
 		-
-			message: "#^Method GoDaddy\\\\WordPress\\\\MWC\\\\Shipping\\\\Models\\\\Orders\\\\OrderFulfillment\\:\\:getShipmentsThatCanFulfillItems\\(\\) should return array\\<GoDaddy\\\\WordPress\\\\MWC\\\\Shipping\\\\Contracts\\\\ShipmentContract\\> but returns array\\<string, array\\<string, GoDaddy\\\\WordPress\\\\MWC\\\\Shipping\\\\Contracts\\\\ShipmentContract\\>\\>\\.$#"
-			count: 1
-			path: src/Models/Orders/OrderFulfillment.php
-
-		-
 			message: "#^PHPDoc tag @return with type float\\|int is not subtype of native type float\\.$#"
 			count: 1
 			path: src/Models/Orders/OrderFulfillment.php
@@ -224,16 +219,6 @@ parameters:
 			message: "#^Method GoDaddy\\\\WordPress\\\\MWC\\\\Shipping\\\\Tests\\\\Unit\\\\Models\\\\Orders\\\\FulfillmentStatuses\\\\UnfulfilledFulfillmentStatusTest\\:\\:testCanInitializeNameAndLabel\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: tests/Unit/Models/Orders/FulfillmentStatuses/UnfulfilledFulfillmentStatusTest.php
-
-		-
-			message: "#^Cannot call method getProviderName\\(\\) on GoDaddy\\\\WordPress\\\\MWC\\\\Shipping\\\\Contracts\\\\ShipmentContract\\|false\\.$#"
-			count: 2
-			path: tests/Unit/Models/Orders/OrderFulfillmentTest.php
-
-		-
-			message: "#^Method GoDaddy\\\\WordPress\\\\MWC\\\\Shipping\\\\Tests\\\\Unit\\\\Models\\\\Orders\\\\OrderFulfillmentTest\\:\\:providerCanGetFulfilledLineItems\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: tests/Unit/Models/Orders/OrderFulfillmentTest.php
 
 		-
 			message: "#^Method GoDaddy\\\\WordPress\\\\MWC\\\\Shipping\\\\Tests\\\\Unit\\\\Models\\\\Orders\\\\OrderFulfillmentTest\\:\\:providerCanGetLineItemsThatNeedShipping\\(\\) return type has no value type specified in iterable type array\\.$#"
@@ -566,17 +551,7 @@ parameters:
 			path: tests/Unit/Providers/AustraliaPost/AustraliaPostProviderTest.php
 
 		-
-			message: "#^Parameter \\#2 \\$haystack of method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) expects iterable, array\\<string, string\\>\\|false given\\.$#"
-			count: 1
-			path: tests/Unit/Providers/AustraliaPost/AustraliaPostProviderTest.php
-
-		-
 			message: "#^Method GoDaddy\\\\WordPress\\\\MWC\\\\Shipping\\\\Tests\\\\Unit\\\\Providers\\\\AustraliaPost\\\\Gateways\\\\AustraliaPostTrackingGatewayTest\\:\\:testCanBuildTrackingUrls\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: tests/Unit/Providers/AustraliaPost/Gateways/AustraliaPostTrackingGatewayTest.php
-
-		-
-			message: "#^Parameter \\#2 \\$haystack of method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) expects iterable, array\\<string, string\\>\\|false given\\.$#"
 			count: 1
 			path: tests/Unit/Providers/AustraliaPost/Gateways/AustraliaPostTrackingGatewayTest.php
 
@@ -591,17 +566,7 @@ parameters:
 			path: tests/Unit/Providers/CanadaPost/CanadaPostProviderTest.php
 
 		-
-			message: "#^Parameter \\#2 \\$haystack of method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) expects iterable, array\\<string, string\\>\\|false given\\.$#"
-			count: 1
-			path: tests/Unit/Providers/CanadaPost/CanadaPostProviderTest.php
-
-		-
 			message: "#^Method GoDaddy\\\\WordPress\\\\MWC\\\\Shipping\\\\Tests\\\\Unit\\\\Providers\\\\CanadaPost\\\\Gateways\\\\CanadaPostTrackingGatewayTest\\:\\:testCanBuildTrackingUrls\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: tests/Unit/Providers/CanadaPost/Gateways/CanadaPostTrackingGatewayTest.php
-
-		-
-			message: "#^Parameter \\#2 \\$haystack of method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) expects iterable, array\\<string, string\\>\\|false given\\.$#"
 			count: 1
 			path: tests/Unit/Providers/CanadaPost/Gateways/CanadaPostTrackingGatewayTest.php
 
@@ -616,17 +581,7 @@ parameters:
 			path: tests/Unit/Providers/DHL/DHLProviderTest.php
 
 		-
-			message: "#^Parameter \\#2 \\$haystack of method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) expects iterable, array\\<string, string\\>\\|false given\\.$#"
-			count: 1
-			path: tests/Unit/Providers/DHL/DHLProviderTest.php
-
-		-
 			message: "#^Method GoDaddy\\\\WordPress\\\\MWC\\\\Shipping\\\\Tests\\\\Unit\\\\Providers\\\\DHL\\\\Gateways\\\\DHLTrackingGatewayTest\\:\\:testCanBuildTrackingUrls\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: tests/Unit/Providers/DHL/Gateways/DHLTrackingGatewayTest.php
-
-		-
-			message: "#^Parameter \\#2 \\$haystack of method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) expects iterable, array\\<string, string\\>\\|false given\\.$#"
 			count: 1
 			path: tests/Unit/Providers/DHL/Gateways/DHLTrackingGatewayTest.php
 
@@ -641,17 +596,7 @@ parameters:
 			path: tests/Unit/Providers/FedEx/FedExProviderTest.php
 
 		-
-			message: "#^Parameter \\#2 \\$haystack of method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) expects iterable, array\\<string, string\\>\\|false given\\.$#"
-			count: 1
-			path: tests/Unit/Providers/FedEx/FedExProviderTest.php
-
-		-
 			message: "#^Method GoDaddy\\\\WordPress\\\\MWC\\\\Shipping\\\\Tests\\\\Unit\\\\Providers\\\\FedEx\\\\Gateways\\\\FedExTrackingGatewayTest\\:\\:testCanBuildTrackingUrls\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: tests/Unit/Providers/FedEx/Gateways/FedExTrackingGatewayTest.php
-
-		-
-			message: "#^Parameter \\#2 \\$haystack of method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) expects iterable, array\\<string, string\\>\\|false given\\.$#"
 			count: 1
 			path: tests/Unit/Providers/FedEx/Gateways/FedExTrackingGatewayTest.php
 
@@ -666,17 +611,7 @@ parameters:
 			path: tests/Unit/Providers/OnTrac/Gateways/OnTracTrackingGatewayTest.php
 
 		-
-			message: "#^Parameter \\#2 \\$haystack of method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) expects iterable, array\\<string, string\\>\\|false given\\.$#"
-			count: 1
-			path: tests/Unit/Providers/OnTrac/Gateways/OnTracTrackingGatewayTest.php
-
-		-
 			message: "#^Method GoDaddy\\\\WordPress\\\\MWC\\\\Shipping\\\\Tests\\\\Unit\\\\Providers\\\\OnTrac\\\\OnTracProviderTest\\:\\:testHasShippingTracking\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: tests/Unit/Providers/OnTrac/OnTracProviderTest.php
-
-		-
-			message: "#^Parameter \\#2 \\$haystack of method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) expects iterable, array\\<string, string\\>\\|false given\\.$#"
 			count: 1
 			path: tests/Unit/Providers/OnTrac/OnTracProviderTest.php
 
@@ -691,11 +626,6 @@ parameters:
 			path: tests/Unit/Providers/UPS/Gateways/UPSTrackingGatewayTest.php
 
 		-
-			message: "#^Parameter \\#2 \\$haystack of method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) expects iterable, array\\<string, string\\>\\|false given\\.$#"
-			count: 1
-			path: tests/Unit/Providers/UPS/Gateways/UPSTrackingGatewayTest.php
-
-		-
 			message: "#^Method GoDaddy\\\\WordPress\\\\MWC\\\\Shipping\\\\Tests\\\\Unit\\\\Providers\\\\UPS\\\\Tracking\\\\UPSTrackingUrlBuilderTest\\:\\:testCanGetTrackingUrlTemplate\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: tests/Unit/Providers/UPS/Tracking/UPSTrackingUrlBuilderTest.php
@@ -706,17 +636,7 @@ parameters:
 			path: tests/Unit/Providers/UPS/UPSProviderTest.php
 
 		-
-			message: "#^Parameter \\#2 \\$haystack of method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) expects iterable, array\\<string, string\\>\\|false given\\.$#"
-			count: 1
-			path: tests/Unit/Providers/UPS/UPSProviderTest.php
-
-		-
 			message: "#^Method GoDaddy\\\\WordPress\\\\MWC\\\\Shipping\\\\Tests\\\\Unit\\\\Providers\\\\USPS\\\\Gateways\\\\USPSTrackingGatewayTest\\:\\:testCanBuildTrackingUrls\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: tests/Unit/Providers/USPS/Gateways/USPSTrackingGatewayTest.php
-
-		-
-			message: "#^Parameter \\#2 \\$haystack of method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) expects iterable, array\\<string, string\\>\\|false given\\.$#"
 			count: 1
 			path: tests/Unit/Providers/USPS/Gateways/USPSTrackingGatewayTest.php
 
@@ -731,19 +651,9 @@ parameters:
 			path: tests/Unit/Providers/USPS/USPSProviderTest.php
 
 		-
-			message: "#^Parameter \\#2 \\$haystack of method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) expects iterable, array\\<string, string\\>\\|false given\\.$#"
-			count: 1
-			path: tests/Unit/Providers/USPS/USPSProviderTest.php
-
-		-
 			message: "#^Method GoDaddy\\\\WordPress\\\\MWC\\\\Shipping\\\\Tests\\\\Unit\\\\ShippingTest\\:\\:testCanSetProviders\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: tests/Unit/ShippingTest.php
-
-		-
-			message: "#^Method GoDaddy\\\\WordPress\\\\MWC\\\\Shipping\\\\Tests\\\\Unit\\\\TestCase\\:\\:setUp\\(\\) has Exception in PHPDoc @throws tag but it's not thrown\\.$#"
-			count: 1
-			path: tests/Unit/TestCase.php
 
 		-
 			message: "#^Call to an undefined method object\\:\\:getTrackingUrl\\(\\)\\.$#"
@@ -791,7 +701,7 @@ parameters:
 			path: tests/Unit/Traits/CanCalculateShippingRatesTraitTest.php
 
 		-
-			message: "#^Method class@anonymous/tests/Unit/Traits/CanCancelShippingLabelsTraitTest\\.php\\:77\\:\\:cancel\\(\\) should return array but returns mixed\\.$#"
+			message: "#^Method class@anonymous/tests/Unit/Traits/CanCancelShippingLabelsTraitTest\\.php\\:82\\:\\:cancel\\(\\) should return array but returns mixed\\.$#"
 			count: 1
 			path: tests/Unit/Traits/CanCancelShippingLabelsTraitTest.php
 
@@ -801,7 +711,7 @@ parameters:
 			path: tests/Unit/Traits/CanConnectShippingAccountTraitTest.php
 
 		-
-			message: "#^Method class@anonymous/tests/Unit/Traits/CanCreateShippingLabelsTraitTest\\.php\\:79\\:\\:create\\(\\) should return array but returns mixed\\.$#"
+			message: "#^Method class@anonymous/tests/Unit/Traits/CanCreateShippingLabelsTraitTest\\.php\\:83\\:\\:create\\(\\) should return array but returns mixed\\.$#"
 			count: 1
 			path: tests/Unit/Traits/CanCreateShippingLabelsTraitTest.php
 
@@ -811,7 +721,7 @@ parameters:
 			path: tests/Unit/Traits/CanDisconnectShippingAccountTraitTest.php
 
 		-
-			message: "#^Method class@anonymous/tests/Unit/Traits/CanEstimateShippingRatesTraitTest\\.php\\:77\\:\\:estimate\\(\\) should return array but returns mixed\\.$#"
+			message: "#^Method class@anonymous/tests/Unit/Traits/CanEstimateShippingRatesTraitTest\\.php\\:82\\:\\:estimate\\(\\) should return array but returns mixed\\.$#"
 			count: 1
 			path: tests/Unit/Traits/CanEstimateShippingRatesTraitTest.php
 

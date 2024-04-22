@@ -19,11 +19,20 @@ class LineItem extends AbstractDataObject
     /** @var LineItemMode::* */
     public string $fulfillmentMode;
 
+    /** @var non-empty-string|null */
+    public ?string $fulfillmentChannelId = null;
+
     public string $name;
+
+    /** @var non-empty-string|null */
+    public ?string $productId = null;
+
     public float $quantity = 1;
 
     /** @var LineItemStatus::* */
     public string $status;
+
+    public LineItemTotals $totals;
 
     /** @var LineItemType::* */
     public string $type;
@@ -37,9 +46,12 @@ class LineItem extends AbstractDataObject
      *     details?: ?LineItemDetails,
      *     id?: ?non-empty-string,
      *     fulfillmentMode: LineItemMode::*,
+     *     fulfillmentChannelId?: ?string,
      *     name: string,
+     *     productId?: ?non-empty-string,
      *     quantity: float,
      *     status: LineItemStatus::*,
+     *     totals: LineItemTotals,
      *     type: LineItemType::*,
      *     unitAmount: SimpleMoney
      * } $data

@@ -25,14 +25,24 @@ class ProductWebhookReceivedSubscriber extends AbstractWebhookReceivedSubscriber
     }
 
     /**
+     * {@inheritDoc}
+     */
+    protected function shouldHandleAction(string $action) : bool
+    {
+        return 'UPDATED' === $action && Pull::isEnabled();
+    }
+
+    /**
      * Handles the webhook action.
      *
      * @param string $action
      * @param AbstractModel $model
+     * @throws Exception
      */
     public function handleAction(string $action, AbstractModel $model)
     {
-        if ('UPDATED' !== $action || ! $model instanceof Product || ! Pull::isEnabled()) {
+        /* @NOTE at this point the $action type and Pull status have already been checked {@see static::shouldHandleAction()} */
+        if (! $model instanceof Product) {
             return;
         }
 
@@ -43,6 +53,7 @@ class ProductWebhookReceivedSubscriber extends AbstractWebhookReceivedSubscriber
      * Handles a product update.
      *
      * @param Product $product
+     * @throws Exception
      */
     public function handleUpdate(Product $product)
     {

@@ -4,7 +4,9 @@ namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataSour
 
 use DateTimeInterface;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
+use GoDaddy\WordPress\MWC\Common\Models\Orders\Contracts\NoteContract;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\Note;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Models\CustomerNote;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataObjects\Enums\NoteAuthorType;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataObjects\Note as NoteDataObject;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataSources\Contracts\DataObjectAdapterContract;
@@ -23,9 +25,9 @@ class NoteAdapter implements DataObjectAdapterContract
      * {@inheritDoc}
      * @param NoteDataObject $source
      */
-    public function convertFromSource($source) : Note
+    public function convertFromSource($source) : NoteContract
     {
-        return (new Note())
+        return $this->instantiateNoteModel($source)
             ->setContent($source->content)
             ->setAuthorName($source->author)
             ->setShouldNotifyCustomer($source->shouldNotifyCustomer)
@@ -33,8 +35,23 @@ class NoteAdapter implements DataObjectAdapterContract
     }
 
     /**
+     * Creates a new instance of {@see NoteContract} using the appropriate concrete type based for the given commerce note.
+     *
+     * @param NoteDataObject $source
+     * @return NoteContract
+     */
+    protected function instantiateNoteModel(NoteDataObject $source) : NoteContract
+    {
+        if ($source->authorType === NoteAuthorType::Customer) {
+            return new CustomerNote();
+        }
+
+        return new Note();
+    }
+
+    /**
      * {@inheritDoc}
-     * @param Note $target
+     * @param NoteContract $target
      */
     public function convertToSource($target) : NoteDataObject
     {
@@ -62,23 +79,25 @@ class NoteAdapter implements DataObjectAdapterContract
     /**
      * Finds the correct NoteAuthorType enum for the given note.
      *
-     * @param Note $target
-     *
+     * @param NoteContract $target
      * @return NoteAuthorType::*
      */
-    protected function convertAuthorTypeToSource(Note $target) : string
+    protected function convertAuthorTypeToSource(NoteContract $target) : string
     {
-        return $target->isAddedBySystem() ? NoteAuthorType::Merchant : NoteAuthorType::None;
+        if ($target instanceof CustomerNote) {
+            return NoteAuthorType::Customer;
+        }
+
+        return $target->isAddedBySystem() ? NoteAuthorType::None : NoteAuthorType::Merchant;
     }
 
     /**
      * Converts Note createdAt to string timestamp.
      *
-     * @param Note $target
-     *
+     * @param NoteContract $target
      * @return non-empty-string|null
      */
-    protected function convertCreatedAtToSource(Note $target) : ?string
+    protected function convertCreatedAtToSource(NoteContract $target) : ?string
     {
         return $this->dateTimeAdapter->convertToSource($target->getCreatedAt());
     }

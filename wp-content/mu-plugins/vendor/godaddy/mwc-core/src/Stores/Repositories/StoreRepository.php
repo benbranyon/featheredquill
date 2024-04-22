@@ -2,6 +2,7 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Stores\Repositories;
 
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Stores\Exceptions\RegisterStoreException;
 use GoDaddy\WordPress\MWC\Common\Stores\Repositories\AbstractStoreRepository;
 
@@ -15,8 +16,9 @@ class StoreRepository extends AbstractStoreRepository
      */
     public function determineDefaultStoreId() : ?string
     {
-        // not implemented at this time
-        return null;
+        $defaultStoreId = defined('GD_COMMERCE_DEFAULT_STORE_ID') ? GD_COMMERCE_DEFAULT_STORE_ID : null;
+
+        return TypeHelper::string($defaultStoreId, '') ?: null;
     }
 
     /**
@@ -24,7 +26,7 @@ class StoreRepository extends AbstractStoreRepository
      *
      * @throws RegisterStoreException
      */
-    public function registerStore(string $storeId) : void
+    public function registerStore(string $storeId, string $businessId) : void
     {
         throw new RegisterStoreException('registerStore is not implemented for the Managed WordPress platform.');
     }

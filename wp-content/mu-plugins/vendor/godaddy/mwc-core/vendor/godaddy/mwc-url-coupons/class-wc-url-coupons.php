@@ -17,7 +17,7 @@
  * needs please refer to http://docs.woocommerce.com/document/url-coupons/ for more information.
  *
  * @author      SkyVerge
- * @copyright   Copyright (c) 2013-2020, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright   Copyright (c) 2013-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -28,7 +28,7 @@ defined( 'ABSPATH' ) or exit;
 use GoDaddy\WordPress\MWC\UrlCoupons\Admin\WC_URL_Coupons_Admin;
 use GoDaddy\WordPress\MWC\UrlCoupons\API\REST_API;
 use GoDaddy\WordPress\MWC\UrlCoupons\Frontend\WC_URL_Coupons_Frontend;
-use SkyVerge\WooCommerce\PluginFramework\v5_10_12 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v5_11_0 as Framework;
 
 /**
  * URL Coupons main plugin class.
@@ -39,7 +39,7 @@ class WC_URL_Coupons extends Framework\SV_WC_Plugin {
 
 
 	/** plugin version number */
-	const VERSION = '3.0.0';
+	const VERSION = '3.1.0';
 
 	/** @var WC_URL_Coupons single instance of this plugin */
 	protected static $instance;
@@ -70,9 +70,10 @@ class WC_URL_Coupons extends Framework\SV_WC_Plugin {
 		parent::__construct(
 			self::PLUGIN_ID,
 			self::VERSION,
-			array(
-				'text_domain' => 'woocommerce-url-coupons',
-			)
+			[
+				'supports_hpos' => true,
+				'text_domain'   => 'woocommerce-url-coupons',
+			]
 		);
 
 		$this->includes();
@@ -88,8 +89,51 @@ class WC_URL_Coupons extends Framework\SV_WC_Plugin {
 	 */
 	public function add_admin_notices() {
 
+		parent::add_admin_notices();
+
+		$this->maybe_add_permalinks_notice();
 		$this->get_admin_instance()->maybe_add_first_coupon_notice();
 		$this->maybe_add_plugin_users_notice();
+	}
+
+
+	/**
+	 * May add a notice if pretty permalinks are disabled.
+	 *
+	 * @since 2.13.0
+	 */
+	protected function maybe_add_permalinks_notice() {
+
+		$current_screen = get_current_screen();
+
+		// determines whether the current screen must show the permalinks notice or not
+		$valid_screen = isset( $current_screen->id ) && in_array( $current_screen->id, [ 'plugins', 'edit-shop_coupon' ] );
+
+		if ( $valid_screen && ! $this->is_pretty_permalinks_enabled() ) {
+
+			$this->get_admin_notice_handler()->add_admin_notice(
+				sprintf(
+					/* translators: Placeholders: %1$s - opening <a> HTML link tag, %2$s - closing </a> HTML link tag */
+					__( 'Heads up! WooCommerce URL Coupons works best when pretty permalinks have been enabled. %1$sLearn more%2$s', 'woocommerce-url-coupons' ),
+					'<a href="' . esc_url('https://docs.woocommerce.com/document/permalinks/#section-3') . '" target="_blank">', '</a>'
+				),
+				$this->get_id_dasherized() . '-pretty-permalinks-disabled',
+				[ 'notice_class' => 'notice-info' ]
+			);
+		}
+	}
+
+
+	/**
+	 * Determines whether the WordPress instance is using pretty permalinks or not.
+	 *
+	 * @since 2.13.0
+	 *
+	 * @return bool true if pretty permalinks are enabled
+	 */
+	public function is_pretty_permalinks_enabled() {
+
+		return '' !== get_option( 'permalink_structure' );
 	}
 
 
@@ -104,7 +148,7 @@ class WC_URL_Coupons extends Framework\SV_WC_Plugin {
 
 		// only show on Plugins or Coupons pages, and only if the option is set
 		if ( ! in_array( $current_screen_id, [ 'plugins', 'edit-shop_coupon' ] )
-		     || 'yes' !== get_option( 'mwc_url_coupons_show_notice_plugin_users' ) ) {
+			 || 'yes' !== get_option( 'mwc_url_coupons_show_notice_plugin_users' ) ) {
 			return;
 		}
 
@@ -122,10 +166,10 @@ class WC_URL_Coupons extends Framework\SV_WC_Plugin {
 
 		$this->get_admin_notice_handler()->add_admin_notice(
 			sprintf(
-			    /* translators: Placeholders: %1$s - opening <p><strong> tag, %2$s - closing </strong></p> tag */
-			    __( '%1$sShare discount links%2$sThe URL Coupons plugin is now included natively in your hosting plan! The plugin has been deactivated, and your existing settings and coupons have been migrated successfully.', 'woocommerce-url-coupons' ) . $notice_buttons,
-			    '<p><strong>',
-			    '</strong></p>'
+				/* translators: Placeholders: %1$s - opening <p><strong> tag, %2$s - closing </strong></p> tag */
+				__( '%1$sShare discount links%2$sThe URL Coupons plugin is now included natively in your hosting plan! The plugin has been deactivated, and your existing settings and coupons have been migrated successfully.', 'woocommerce-url-coupons' ) . $notice_buttons,
+				'<p><strong>',
+				'</strong></p>'
 			),
 			$notice_id,
 			[
@@ -403,6 +447,15 @@ class WC_URL_Coupons extends Framework\SV_WC_Plugin {
 		}
 
 		return self::$instance;
+	}
+
+	/**
+	 * Handles HPOS compatibility.
+	 *
+	 * @return void
+	 */
+	public function handle_hpos_compatibility() {
+		// no-op for MWC dependencies
 	}
 
 

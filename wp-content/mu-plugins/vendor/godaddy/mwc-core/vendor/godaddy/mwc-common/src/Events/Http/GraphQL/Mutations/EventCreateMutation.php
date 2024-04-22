@@ -170,12 +170,16 @@ GQL;
                 'wp_version'       => WordPressRepository::getVersion(),
                 'php_version'      => PHP_VERSION,
                 'plan'             => $platformRepository->getPlan()->getName(),
+                'isOnTrial'        => $platformRepository->getPlan()->isTrial(),
                 'platform'         => $platformRepository->getPlatformName(),
                 'venture_id'       => $platformRepository->getVentureId() ?: null,
                 'channel_id'       => $platformRepository->getChannelId() ?: null,
+                'customer_id'      => $platformRepository->getGoDaddyCustomerId() ?: null,
                 'store_id'         => $platformRepository->getStoreRepository()->getStoreId(),
                 'environment'      => ManagedWooCommerceRepository::getEnvironment(),
                 'is_staging'       => $platformRepository->isStagingSite(),
+                'isReseller'       => $platformRepository->isReseller(),
+                'isTlaSite'        => $platformRepository->isTlaSite(),
             ],
         ];
     }

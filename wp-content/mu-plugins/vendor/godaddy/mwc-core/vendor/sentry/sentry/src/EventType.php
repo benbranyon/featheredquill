@@ -27,25 +27,24 @@ final class EventType implements \Stringable
         $this->value = $value;
     }
 
-    /**
-     * Creates an instance of this enum for the "default" value.
-     */
-    public static function default(): self
-    {
-        return self::getInstance('default');
-    }
-
     public static function event(): self
     {
         return self::getInstance('event');
     }
 
-    /**
-     * Creates an instance of this enum for the "transaction" value.
-     */
     public static function transaction(): self
     {
         return self::getInstance('transaction');
+    }
+
+    public static function checkIn(): self
+    {
+        return self::getInstance('check_in');
+    }
+
+    public static function metrics(): self
+    {
+        return self::getInstance('metrics');
     }
 
     public function __toString(): string

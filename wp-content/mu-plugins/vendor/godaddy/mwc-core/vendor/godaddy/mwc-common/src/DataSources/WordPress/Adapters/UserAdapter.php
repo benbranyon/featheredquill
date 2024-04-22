@@ -6,13 +6,18 @@ use GoDaddy\WordPress\MWC\Common\DataSources\Contracts\DataSourceAdapterContract
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Models\User;
+use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
 use WP_User;
 
 /**
  * Adapter to convert between a WordPress user object and a native user object.
+ *
+ * @method static static getNewInstance(array|User|WP_User $data)
  */
 class UserAdapter implements DataSourceAdapterContract
 {
+    use CanGetNewInstanceTrait;
+
     /** @var array<mixed> user data */
     private $data;
 

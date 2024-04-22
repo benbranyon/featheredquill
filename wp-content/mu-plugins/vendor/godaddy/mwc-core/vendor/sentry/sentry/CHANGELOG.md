@@ -1,285 +1,234 @@
 # CHANGELOG
 
-## Unreleased
+## 4.3.1
 
-## 3.13.0
+The Sentry SDK team is happy to announce the immediate availability of Sentry PHP SDK v4.3.1.
 
-The Sentry SDK team is happy to announce the immediate availability of Sentry PHP SDK v3.13.0.
+### Bug Fixes
+
+- Fix tags not being serialized correctly for metrics [(#1672)](https://github.com/getsentry/sentry-php/pull/1672)
+
+### Misc
+
+- Remove `@internal` annotation from `MetricsUnit` class [(#1671)](https://github.com/getsentry/sentry-php/pull/1671)
+
+## 4.3.0
+
+The Sentry SDK team is happy to announce the immediate availability of Sentry PHP SDK v4.3.0.
 
 ### Features
 
-- Object IDs are now automatically serialized as part of a stack trace frame [(#1443)](https://github.com/getsentry/sentry-php/pull/1443)
-  - If `Obj::getID()` or `Obj->id` is accessible, this value will be displayed inside the stack trace frame on the issue details page.
-    To attach local variables to your stack trace, make sure `zend.exception_ignore_arg: 0` is set in your `php.ini`.
-    See https://docs.sentry.io/platforms/php/troubleshooting/#missing-variables-in-stack-traces
+- Add support for Sentry Developer Metrics [(#1619)](https://github.com/getsentry/sentry-php/pull/1619)
 
-- Add more functionality to the `ExceptionMechanism::class` [(#1450)](https://github.com/getsentry/sentry-php/pull/1450)
-  - Attach arbitrary data
-    ```php
-    $hint = EventHint::fromArray([
-        'exception' => $exception,
-        'mechanism' => new ExceptionMechanism(
-            ExceptionMechanism::TYPE_GENERIC,
-            false,
-            [
-                'key' => 'value',
-                //...
-            ],
-        ),
-    ]);
-    captureEvent(Event::createEvent(), $hint);
-    ```
-    Learn more about the interface of the `ExceptionMechanism` on https://develop.sentry.dev/sdk/event-payloads/exception/#exception-mechanism
-  - Access or mutate `ExceptionMechanism::data` via `ExceptionMechanism::getData()` and `ExceptionMechanism::setData()`
-  - If an exception contains a user-provided `code`, the value will be serialized into the event and displayed on the issues details page.
-    ```php
-    throw new \Exception('Oh no!', 123);
-    ```
+  ```php
+  use function Sentry\metrics;
 
-## 3.12.1 (2023-01-12)
+  // Add 4 to a counter named hits
+  metrics()->increment(key: 'hits', value: 4);
 
-- fix: Allow `null` on `getTracesSampleRate` and `setTracesSampleRate` in `Options` class (#1441)
+  // Add 25 to a distribution named response_time with unit milliseconds
+  metrics()->distribution(key: 'response_time', value: 25, unit: MetricsUnit::millisecond());
 
-## 3.12.0 (2022-11-22)
+  // Add 2 to gauge named parallel_requests, tagged with type: "a"
+  metrics()->gauge(key: 'parallel_requests, value: 2, tags: ['type': 'a']);
 
-- feat: Add `before_send_transaction` option (#1424)
-- fix: Set `traces_sample_rate` to `null` by default (#1428)
+  // Add a user's email to a set named users.sessions, tagged with role: "admin"
+  metrics()->set('users.sessions, 'jane.doe@example.com', null, ['role' => User::admin()]);
 
-## 3.11.0 (2022-10-25)
+  // Add 2 to gauge named `parallel_requests`, tagged with `type: "a"`
+  Sentry.metrics.gauge('parallel_requests', 2, { tags: { type: 'a' } });
 
-- fix: Only include the transaction name to the DSC if it has good quality (#1410)
-- ref: Enable the ModulesIntegration by default (#1415)
-- ref: Expose the ExceptionMechanism through the event hint (#1416)
+  // Flush the metrics to Sentry
+  metrics()->flush();
 
-## 3.10.0 (2022-10-19)
+  // We recommend registering the flushing in a shutdown function
+  register_shutdown_function(static fn () => metrics()->flush());
+  ```
 
-- ref: Add correct `never` option for `max_request_body_size` (#1397)
-  - Deprecate `max_request_body_size.none` in favour of `max_request_body_size.never`
-- fix: Sampling now correctly takes in account the parent sampling decision if available instead of always being `false` when tracing is disabled (#1407)
+  To learn more about Sentry Developer Merics, join the discussion at https://github.com/getsentry/sentry-php/discussions/1666.
 
-## 3.9.1 (2022-10-11)
+### Bug Fixes
 
-- fix: Suppress errors on is_callable (#1401)
+- Disallow to seralize the `HubAdapter::class` [(#1663)](https://github.com/getsentry/sentry-php/pull/1663)
+- Do not overwrite trace context on event [(#1668)](https://github.com/getsentry/sentry-php/pull/1668)
+- Serialize breadcrumb data to display correct in the Sentry UI [(#1669)](https://github.com/getsentry/sentry-php/pull/1669)
 
-## 3.9.0 (2022-10-05)
+### Misc
 
-- feat: Add `trace_propagation_targets` option (#1396)
-- feat: Expose a function to retrieve the URL of the CSP endpoint (#1378)
-- feat: Add support for Dynamic Sampling (#1360)
-  - Add `segment` to `UserDataBag`
-  - Add `TransactionSource`, to set information about the transaction name via `TransactionContext::setSource()` (#1382)
-  - Deprecate `TransactionContext::fromSentryTrace()` in favor of `TransactionContext::fromHeaders()`
+- Remove the `final` keyword from `Hub::class`, `Client::class` and `Scope::class` [(#1665)](https://github.com/getsentry/sentry-php/pull/1665)
 
-## 3.8.1 (2022-09-21)
+## 4.2.0
 
-- fix: Use constant for the SDK version (#1374)
-- fix: Do not throw an TypeError on numeric HTTP headers (#1370)
+The Sentry SDK team is happy to announce the immediate availability of Sentry PHP SDK v4.2.0.
 
-## 3.8.0 (2022-09-05)
+### Features
 
-- Add `Sentry\Monolog\BreadcrumbHandler`, a Monolog handler to allow registration of logs as breadcrumbs (#1199)
-- Do not setup any error handlers if the DSN is null (#1349)
-- Add setter for type on the `ExceptionDataBag` (#1347)
-- Drop symfony/polyfill-uuid in favour of a standalone implementation (#1346)
+- Add a config option to allow overriding the Spotlight url [(#1659)](https://github.com/getsentry/sentry-php/pull/1659)
 
-## 3.7.0 (2022-07-18)
+  ```php
+  Sentry\init([
+      'spotlight_url' => 'http://localhost:8969',
+  ]);
+  ```
 
-- Fix `Scope::getTransaction()` so that it returns also unsampled transactions (#1334)
-- Set the event extras by taking the data from the Monolog record's extra (#1330)
+### Bug Fixes
 
-## 3.6.1 (2022-06-27)
+- Restore setting the `logger` value on the event payload [(#1657)](https://github.com/getsentry/sentry-php/pull/1657)
 
-- Set the `sentry-trace` header when using the tracing middleware (#1331)
+- Only apply the `sample_rate` on error/message events [(#1662)](https://github.com/getsentry/sentry-php/pull/1662)
 
-## 3.6.0 (2022-06-10)
+  This fixes an issue where Cron Check-Ins were wrongly sampled out if a `sample_rate` lower than `1.0` is used.
 
-- Add support for `monolog/monolog:^3.0` (#1321)
-- Add `setTag` and `removeTag` public methods to `Event` for easier manipulation of tags (#1324)
+### Misc
 
-## 3.5.0 (2022-05-19)
+- Remove the `@internal` annotation from `ClientBuilder::class` [(#1661)](https://github.com/getsentry/sentry-php/pull/1661)
 
-- Bump minimum version of `guzzlehttp/psr7` package to avoid [`CVE-2022-24775`](https://github.com/guzzle/psr7/security/advisories/GHSA-q7rv-6hp3-vh96) (#1305)
-- Fix stripping of memory addresses from stacktrace frames of anonymous classes in PHP `>=7.4.2` (#1314)
-- Set the default `send_attempts` to `0` (this disables retries) and deprecate the option. If you require retries you can increase the `send_attempts` option to the desired value. (#1312)
-- Add `http_connect_timeout` and `http_timeout` client options (#1282)
+## 4.1.0
 
-## 3.4.0 (2022-03-14)
+The Sentry SDK team is happy to announce the immediate availability of Sentry PHP SDK v4.1.0.
 
-- Update Guzzle tracing middleware to meet the [expected standard](https://develop.sentry.dev/sdk/features/#http-client-integrations) (#1234)
-- Add `toArray` public method in `PayloadSerializer` to be able to re-use Event serialization
-- The `withScope` methods now return the callback's return value (#1263)
-- Set the event extras by taking the data from the Monolog record's context (#1244)
-- Make the `StacktraceBuilder` class part of the public API and add the `Client::getStacktraceBuilder()` method to build custom stacktraces (#1124)
-- Support handling the server rate-limits when sending events to Sentry (#1291)
-- Treat the project ID component of the DSN as a `string` rather than an `integer` (#1293)
+### Features
 
-## 3.3.7 (2022-01-19)
+- Add support for Spotlight [(#1647)](https://github.com/getsentry/sentry-php/pull/1647)
 
-- Fix the serialization of a `callable` when the autoloader throws exceptions (#1280)
+  Spotlight is Sentry for Development. Inspired by an old project, Django Debug Toolbar. Spotlight brings a rich debug overlay into development environments, and it does it by leveraging the existing power of Sentry's SDKs.
 
-## 3.3.6 (2022-01-14)
+  To learn more about Spotlight, go to https://spotlightjs.com/.
 
-- Optimize `Span` constructor and add benchmarks (#1274)
-- Handle autoloader that throws an exception while trying to serialize a possible callable (#1276)
+### Misc
 
-## 3.3.5 (2021-12-27)
+- Normalize `response` status [(#1644)](https://github.com/getsentry/sentry-php/pull/1644)
 
-- Bump the minimum required version of the `jean85/pretty-package-versions` package (#1267)
+## 4.0.1
 
-## 3.3.4 (2021-11-08)
+The Sentry SDK team is happy to announce the immediate availability of Sentry PHP SDK v4.0.1.
 
-- Avoid overwriting the error level set by the user on the event when capturing an `ErrorException` exception (#1251)
-- Allow installing the project alongside Symfony `6.x` components (#1257)
-- Run the test suite against PHP `8.1` (#1245)
+### Bug Fixes
 
-## 3.3.3 (2021-10-04)
+- Fix capturing out-of-memory errors when memory-constrained [(#1636)](https://github.com/getsentry/sentry-php/pull/1636)
+- Check if the cURL extension is installed [(#1632)](https://github.com/getsentry/sentry-php/pull/1632)
 
--  Fix fatal error in the `EnvironmentIntegration` integration if the `php_uname` function is disabled (#1243)
+## 4.0.0
 
-## 3.3.2 (2021-07-19)
+The Sentry SDK team is thrilled to announce the immediate availability of Sentry PHP SDK v4.0.0.
 
-- Allow installation of `guzzlehttp/psr7:^2.0` (#1225)
-- Allow installation of `psr/log:^1.0|^2.0|^3.0` (#1229)
+### Breaking Change
 
-## 3.3.1 (2021-06-21)
+Please refer to the [UPGRADE-4.0.md](UPGRADE-4.0.md) guide for a complete list of breaking changes.
 
-- Fix missing collecting of frames's arguments when using `captureEvent()` without expliciting a stacktrace or an exception (#1223)
+- This version exclusively uses the [envelope endpoint](https://develop.sentry.dev/sdk/envelopes/) to send event data to Sentry.
 
-## 3.3.0 (2021-05-26)
-
-- Allow setting a custom timestamp on the breadcrumbs (#1193)
-- Add option `ignore_tags` to `IgnoreErrorsIntegration` in order to ignore exceptions by tags values (#1201)
-
-## 3.2.2 (2021-05-06)
-
-- Fix missing handling of `EventHint` in the `HubAdapter::capture*()` methods (#1206)
-
-## 3.2.1 (2021-04-06)
-
-- Changes behaviour of `error_types` option when not set: before it defaulted to `error_reporting()` statically at SDK initialization; now it will be evaluated each time during error handling to allow silencing errors temporarily (#1196)
-
-## 3.2.0 (2021-03-03)
-
-- Make the HTTP headers sanitizable in the `RequestIntegration` integration instead of removing them entirely (#1161)
-- Deprecate the `logger` option (#1167)
-- Pass the event hint from the `capture*()` methods down to the `before_send` callback (#1138)
-- Deprecate the `tags` option, see the [docs](https://docs.sentry.io/platforms/php/guides/laravel/enriching-events/tags/) for other ways to set tags (#1174)
-- Make sure the `environment` field is set to `production` if it has not been overridden explicitly (#1116)
-
-## 3.1.5 (2021-02-18)
-
-- Fix incorrect detection of silenced errors (by the `@` operator) (#1183)
-
-## 3.1.4 (2021-02-02)
-
-- Allow jean85/pretty-package-versions 2.0 (#1170)
-
-## 3.1.3 (2021-01-25)
-
-- Fix the fetching of the version of the SDK (#1169)
-- Add the `$customSamplingContext` argument to `Hub::startTransaction()` and `HubAdapter::startTransaction()` to fix deprecations thrown in Symfony (#1176)
-
-## 3.1.2 (2021-01-08)
-
-- Fix unwanted call to the `before_send` callback with transaction events, use `traces_sampler` instead to filter transactions (#1158)
-- Fix the `logger` option not being applied to the event object (#1165)
-- Fix a bug that made some event attributes being overwritten by option config values when calling `captureEvent()` (#1148)
-
-## 3.1.1 (2020-12-07)
-
-- Add support for PHP 8.0 (#1087)
-- Change the error handling for silenced fatal errors using `@` to use a mask check in order to be php 8 compatible (#1141)
-- Update the `guzzlehttp/promises` package to the minimum required version compatible with PHP 8 (#1144)
-- Update the `symfony/options-resolver` package to the minimum required version compatible with PHP 8 (#1144)
-
-## 3.1.0 (2020-12-01)
-
-- Fix capturing of the request body in the `RequestIntegration` integration (#1139)
-- Deprecate `SpanContext::fromTraceparent()` in favor of `TransactionContext::fromSentryTrace()` (#1134)
-- Allow setting custom data on the sampling context by passing it as 2nd argument of the `startTransaction()` function (#1134)
-- Add setter for value on the `ExceptionDataBag` (#1100)
-- Add `Scope::removeTag` method (#1126)
-
-## 3.0.4 (2020-11-06)
-
-- Fix stacktrace missing from payload for non-exception events (#1123)
-- Fix capturing of the request body in the `RequestIntegration` integration when the stream is empty (#1119)
-
-## 3.0.3 (2020-10-12)
-
-- Fix missing source code excerpts for stacktrace frames whose absolute file path is equal to the file path (#1104)
-- Fix requirements to construct a valid object instance of the `UserDataBag` class (#1108)
-
-## 3.0.2 (2020-10-02)
-
-- Fix use of the `sample_rate` option rather than `traces_sample_rate` when capturing a `Transaction` (#1106)
-
-## 3.0.1 (2020-10-01)
-
-- Fix use of `Transaction` instead of `Span` in the `GuzzleMiddleware` middleware (#1099)
-
-## 3.0.0 (2020-09-28)
-
-**Tracing API**
-
-In this version we released API for Tracing. `\Sentry\startTransaction` is your entry point for manual instrumentation.
-More information can be found in our [Performance](https://docs.sentry.io/platforms/php/performance/) docs.
-
-**Breaking Change**: This version uses the [envelope endpoint](https://develop.sentry.dev/sdk/envelopes/). If you are
-using an on-premise installation it requires Sentry version `>= v20.6.0` to work. If you are using
-[sentry.io](https://sentry.io) nothing will change and no action is needed.
-
-- [BC BREAK] Remove the deprecated code that made the `Hub` class a singleton (#1038)
-- [BC BREAK] Remove deprecated code that permitted to register the error, fatal error and exception handlers at once (#1037)
-- [BC BREAK] Change the default value for the `error_types` option from `E_ALL` to the value get from `error_reporting()` (#1037)
-- [BC BREAK] Remove deprecated code to return the event ID as a `string` rather than an object instance from the transport, the client and the hub (#1036)
-- [BC BREAK] Remove some deprecated methods from the `Options` class. (#1047)
-- [BC BREAK] Remove the deprecated code from the `ModulesIntegration` integration (#1047)
-- [BC BREAK] Remove the deprecated code from the `RequestIntegration` integration (#1047)
-- [BC BREAK] Remove the deprecated code from the `Breadcrumb` class (#1047)
-- [BC BREAK] Remove the deprecated methods from the `ClientBuilderInterface` interface and its implementations (#1047)
-- [BC BREAK] The `Scope::setUser()` method now always merges the given data with the existing one instead of replacing it as a whole (#1047)
-- [BC BREAK] Remove the `Context::CONTEXT_USER`, `Context::CONTEXT_RUNTIME`, `Context::CONTEXT_TAGS`, `Context::CONTEXT_EXTRA`, `Context::CONTEXT_SERVER_OS` constants (#1047)
-- [BC BREAK] Use PSR-17 factories in place of the Httplug's ones and return a promise from the transport (#1066)
-- [BC BREAK] The Monolog handler does not set anymore tags and extras on the event object (#1068)
-- [BC BREAK] Remove the `UserContext`, `ExtraContext` and `Context` classes and refactor the `ServerOsContext` and `RuntimeContext` classes (#1071)
-- [BC BREAK] Remove the `FlushableClientInterface` and the `ClosableTransportInterface` interfaces (#1079)
-- [BC BREAK] Remove the `SpoolTransport` transport and all its related classes (#1080)
-- Add the `EnvironmentIntegration` integration to gather data for the `os` and `runtime` contexts (#1071)
-- Refactor how the event data gets serialized to JSON (#1077)
-- Add `traces_sampler` option to set custom sample rate callback (#1083)
-- [BC BREAK] Add named constructors to the `Event` class (#1085)
-- Raise the minimum version of PHP to `7.2` and the minimum version of some dependencies (#1088)
-- [BC BREAK] Change the `captureEvent` to only accept an instance of the `Event` class rather than also a plain array (#1094)
-- Add Guzzle middleware to trace performance of HTTP requests (#1096)
-
-## 3.0.0-beta1 (2020-09-03)
-
-**Tracing API**
-
-In this version we released API for Tracing. `\Sentry\startTransaction` is your entry point for manual instrumentation.
-More information can be found in our [Performance](https://docs.sentry.io/product/performance/) docs or specific
-[PHP SDK](https://docs.sentry.io/platforms/php/) docs.
-
-**Breaking Change**: This version uses the [envelope endpoint](https://develop.sentry.dev/sdk/envelopes/). If you are
-using an on-premise installation it requires Sentry version `>= v20.6.0` to work. If you are using
-[sentry.io](https://sentry.io) nothing will change and no action is needed.
-
-- [BC BREAK] Remove the deprecated code that made the `Hub` class a singleton (#1038)
-- [BC BREAK] Remove deprecated code that permitted to register the error, fatal error and exception handlers at once (#1037)
-- [BC BREAK] Change the default value for the `error_types` option from `E_ALL` to the value get from `error_reporting()` (#1037)
-- [BC BREAK] Remove deprecated code to return the event ID as a `string` rather than an object instance from the transport, the client and the hub (#1036)
-- [BC BREAK] Remove some deprecated methods from the `Options` class. (#1047)
-- [BC BREAK] Remove the deprecated code from the `ModulesIntegration` integration (#1047)
-- [BC BREAK] Remove the deprecated code from the `RequestIntegration` integration (#1047)
-- [BC BREAK] Remove the deprecated code from the `Breadcrumb` class (#1047)
-- [BC BREAK] Remove the deprecated methods from the `ClientBuilderInterface` interface and its implementations (#1047)
-- [BC BREAK] The `Scope::setUser()` method now always merges the given data with the existing one instead of replacing it as a whole (#1047)
-- [BC BREAK] Remove the `Context::CONTEXT_USER`, `Context::CONTEXT_RUNTIME`, `Context::CONTEXT_TAGS`, `Context::CONTEXT_EXTRA`, `Context::CONTEXT_SERVER_OS` constants (#1047)
-- [BC BREAK] Use PSR-17 factories in place of the Httplug's ones and return a promise from the transport (#1066)
-- [BC BREAK] The Monolog handler does not set anymore tags and extras on the event object (#1068)
-- [BC BREAK] Remove the `UserContext`, `ExtraContext` and `Context` classes and refactor the `ServerOsContext` and `RuntimeContext` classes (#1071)
-- [BC BREAK] Remove the `FlushableClientInterface` and the `ClosableTransportInterface` interfaces (#1079)
-- [BC BREAK] Remove the `SpoolTransport` transport and all its related classes (#1080)
-- Add the `EnvironmentIntegration` integration to gather data for the `os` and `runtime` contexts (#1071)
-- Refactor how the event data gets serialized to JSON (#1077)
+  If you are using [sentry.io](https://sentry.io), no action is needed.
+  If you are using an on-premise/self-hosted installation of Sentry, the minimum requirement is now version `>= v20.6.0`.
+
+- You need to have `ext-curl` installed to use the SDK.
+
+- The `IgnoreErrorsIntegration` integration was removed. Use the `ignore_exceptions` option instead.
+
+  ```php
+  Sentry\init([
+      'ignore_exceptions' => [BadThingsHappenedException::class],
+  ]);
+  ```
+
+  This option performs an [`is_a`](https://www.php.net/manual/en/function.is-a.php) check now, so you can also ignore more generic exceptions.
+
+### Features
+
+- Add new fluent APIs [(#1601)](https://github.com/getsentry/sentry-php/pull/1601)
+
+  ```php
+  // Before
+  $transactionContext = new TransactionContext();
+  $transactionContext->setName('GET /example');
+  $transactionContext->setOp('http.server');
+
+  // After
+  $transactionContext = (new TransactionContext())
+      ->setName('GET /example');
+      ->setOp('http.server');
+  ```
+
+- Simplify the breadcrumb API [(#1603)](https://github.com/getsentry/sentry-php/pull/1603)
+
+  ```php
+  // Before
+  \Sentry\addBreadcrumb(
+      new \Sentry\Breadcrumb(
+          \Sentry\Breadcrumb::LEVEL_INFO,
+          \Sentry\Breadcrumb::TYPE_DEFAULT,
+          'auth',                // category
+          'User authenticated',  // message (optional)
+          ['user_id' => $userId] // data (optional)
+      )
+  );
+
+  // After
+  \Sentry\addBreadcrumb(
+      category: 'auth',
+      message: 'User authenticated', // optional
+      metadata: ['user_id' => $userId], // optional
+      level: Breadcrumb::LEVEL_INFO, // set by default
+      type: Breadcrumb::TYPE_DEFAULT, // set by default
+  );
+  ```
+
+- New `logger` option [(#1625)](https://github.com/getsentry/sentry-php/pull/1625)
+
+  To make it easier to debug the internals of the SDK, the `logger` option now accepts a `Psr\Log\LoggerInterface` instance.
+  We do provide two implementations, `Sentry\Logger\DebugFileLogger` and `Sentry\Logger\DebugStdOutLogger`.
+
+  ```php
+  // This logs messages to the provided file path
+  Sentry\init([
+      'logger' => new DebugFileLogger(filePath: ROOT . DS . 'sentry.log'),
+  ]);
+
+  // This logs messages to stdout
+  Sentry\init([
+      'logger' => new DebugStdOutLogger(),
+  ]);
+  ```
+
+- New default cURL HTTP client [(#1589)](https://github.com/getsentry/sentry-php/pull/1589)
+
+  The SDK now ships with its own HTTP client based on cURL. A few new options were added.
+
+  ```php
+  Sentry\init([
+      'http_proxy_authentication' => 'username:password', // user name and password to use for proxy authentication
+      'http_ssl_verify_peer' => false, // default true, verify the peer's SSL certificate
+      'http_compression' => false, // default true, http request body compression
+  ]);
+  ```
+
+  To use a different client, you may use the `http_client` option.
+
+  ```php
+  use Sentry\Client;
+  use Sentry\HttpClient\HttpClientInterface;
+  use Sentry\HttpClient\Request;
+  use Sentry\HttpClient\Response;
+  use Sentry\Options;
+
+  $httpClient = new class() implements HttpClientInterface {
+      public function sendRequest(Request $request, Options $options): Response
+      {
+
+          // your custom implementation
+
+          return new Response($response->getStatusCode(), $response->getHeaders(), '');
+      }
+  };
+
+  Sentry\init([
+      'http_client' => $httpClient,
+  ]);
+  ```
+
+  To use a different transport, you may use the `transport` option. A custom transport must implement the `TransportInterface`.
+  If you use the `transport` option, the `http_client` option has no effect.
+
+### Misc
+
+- The abandoned package `php-http/message-factory` was removed.

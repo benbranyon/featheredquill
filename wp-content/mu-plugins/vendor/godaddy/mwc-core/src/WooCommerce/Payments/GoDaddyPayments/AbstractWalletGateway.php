@@ -202,7 +202,7 @@ abstract class AbstractWalletGateway extends WC_Payment_Gateway
 
         if (! $parentGateway) {
             /* translators: Placeholder: %s - the gateway settings title, something like: "GoDaddy Payments - Apple Pay" */
-            throw new GatewayNotFoundException(sprintf(__('Cannot load the %s gateway process payment.', 'mwc-core'), $this->get_title()));
+            throw new GatewayNotFoundException(sprintf(__('Cannot load the %s gateway to process payment.', 'mwc-core'), $this->get_title()));
         }
 
         return $parentGateway->process_payment($orderId);

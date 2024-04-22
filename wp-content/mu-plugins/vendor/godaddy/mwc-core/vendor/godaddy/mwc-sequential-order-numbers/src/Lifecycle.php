@@ -17,7 +17,7 @@
  * needs please refer to http://docs.woocommerce.com/document/woocommerce-social-login/ for more information.
  *
  * @author      SkyVerge
- * @copyright   Copyright (c) 2012-2021, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright   Copyright (c) 2012-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -25,7 +25,7 @@ namespace GoDaddy\WordPress\MWC\SequentialOrderNumbers;
 
 defined( 'ABSPATH' ) or exit;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_10_12 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v5_11_0 as Framework;
 use GoDaddy\WordPress\MWC\Core\Features\SequentialOrderNumbers\SequentialOrderNumbers;
 
 /**
@@ -134,10 +134,14 @@ class Lifecycle extends Framework\Plugin\Lifecycle {
 			// while full set of results returned  (meaning there may be more results still to retrieve)
 			} while ( count( $order_ids ) === $posts_per_page );
 
+			$orders_meta = Framework\SV_WC_Plugin_Compatibility::is_hpos_enabled()
+				? $wpdb->prefix.'wc_orders_meta'
+				: $wpdb->postmeta;
+
 			// set the best order number start value that we can
 			$order_number = (int) $wpdb->get_var( "
 				SELECT MAX( CAST( meta_value AS SIGNED ) )
-				FROM {$wpdb->postmeta}
+				FROM {$orders_meta}
 				WHERE meta_key='_order_number'
 			" );
 

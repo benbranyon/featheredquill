@@ -10,6 +10,7 @@ use GoDaddy\WordPress\MWC\Common\Events\ModelEvent;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerce\ProductsRepository;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
+use GoDaddy\WordPress\MWC\Core\WooCommerce\Events\Transformers\Traits\IsProductEventTransformerTrait;
 use GoDaddy\WordPress\MWC\CostOfGoods\WC_COG_Product;
 use WC_Product;
 
@@ -18,16 +19,7 @@ use WC_Product;
  */
 class ProductEventTransformer extends AbstractEventTransformer
 {
-    /**
-     * Determines whether the event must be transformed or not.
-     *
-     * @param EventContract $event
-     * @return bool
-     */
-    public function shouldHandle(EventContract $event) : bool
-    {
-        return $event instanceof ModelEvent && 'product' === $event->getResource();
-    }
+    use IsProductEventTransformerTrait;
 
     /**
      * Handles and perhaps modifies the event.

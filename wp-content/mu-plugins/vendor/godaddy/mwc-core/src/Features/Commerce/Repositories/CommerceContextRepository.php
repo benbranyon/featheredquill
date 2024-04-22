@@ -7,6 +7,7 @@ use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPress\DatabaseRepository;
 use GoDaddy\WordPress\MWC\Common\Traits\IsSingletonTrait;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Cache\CommerceContextCache;
 use InvalidArgumentException;
 
 /**
@@ -72,5 +73,26 @@ class CommerceContextRepository
         }
 
         return $this->createContext($storeId);
+    }
+
+    /**
+     * Finds or creates a context for the given store ID, with an added caching layer.
+     *
+     * @param string $storeId
+     * @return int
+     * @throws InvalidArgumentException|WordPressDatabaseException
+     */
+    public function findOrCreateContextWithCache(string $storeId) : int
+    {
+        $cache = CommerceContextCache::getInstance($storeId);
+        if ($contextId = $cache->get()) {
+            return TypeHelper::int($contextId, 0);
+        } else {
+            $contextId = $this->findOrCreateContext($storeId);
+
+            $cache->set($contextId);
+
+            return $contextId;
+        }
     }
 }

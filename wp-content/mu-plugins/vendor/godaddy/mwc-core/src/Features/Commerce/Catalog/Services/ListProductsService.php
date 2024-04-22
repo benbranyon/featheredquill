@@ -2,27 +2,30 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Services;
 
-use GoDaddy\WordPress\MWC\Common\Exceptions\BaseException;
-use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
-use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\CatalogIntegration;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\DataSources\WooCommerce\Builders\ProductAssociationBuilder;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Events\ProductsListedEvent;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Helpers\Contracts\ListProductsCachingHelperContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Operations\Contracts\ListProductsOperationContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\Contracts\CatalogProviderContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ProductAssociation;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ProductBase;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ProductRequestInputs\ListProductsInput;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Services\Contracts\ListProductsCachingServiceContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Services\Contracts\ListProductsServiceContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Services\Contracts\ProductsCachingServiceContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\GatewayRequestException;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Models\Contracts\CommerceContextContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Operations\Contracts\ListRemoteResourcesOperationContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Repositories\ProductMapRepository;
-use InvalidArgumentException;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Services\AbstractListRemoteResourcesService;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Traits\CanBroadcastResourceEventsTrait;
 
 /**
  * List products service.
  */
-class ListProductsService implements ListProductsServiceContract
+class ListProductsService extends AbstractListRemoteResourcesService implements ListProductsServiceContract
 {
-    /** @var ProductMapRepository */
-    protected ProductMapRepository $productMapRepository;
+    use CanBroadcastResourceEventsTrait;
 
     /** @var CommerceContextContract */
     protected CommerceContextContract $commerceContext;
@@ -30,78 +33,38 @@ class ListProductsService implements ListProductsServiceContract
     /** @var CatalogProviderContract */
     protected CatalogProviderContract $catalogProvider;
 
-    /** @var ListProductsCachingServiceContract */
-    protected ListProductsCachingServiceContract $cachingService;
-
     /**
      * Constructor.
-     *
-     * @param ProductMapRepository $productMapRepository
-     * @param CommerceContextContract $commerceContext
-     * @param CatalogProviderContract $catalogProvider
-     * @param ListProductsCachingServiceContract $cachingService
      */
     public function __construct(
         ProductMapRepository $productMapRepository,
         CommerceContextContract $commerceContext,
         CatalogProviderContract $catalogProvider,
-        ListProductsCachingServiceContract $cachingService
+        ListProductsCachingHelperContract $listProductsCachingHelper,
+        ProductsCachingServiceContract $productsCachingService,
+        ProductAssociationBuilder $productAssociationBuilder
     ) {
-        $this->productMapRepository = $productMapRepository;
         $this->commerceContext = $commerceContext;
         $this->catalogProvider = $catalogProvider;
-        $this->cachingService = $cachingService;
+
+        parent::__construct(
+            $productMapRepository,
+            $listProductsCachingHelper,
+            $productsCachingService,
+            $productAssociationBuilder
+        );
     }
 
     /**
-     * Lists the products.
+     * Executes the list query via the platform API.
      *
      * @param ListProductsOperationContract $operation
-     * @return ProductAssociation[]
-     * @throws BaseException|InvalidArgumentException
+     * @return ProductBase[]
+     * @throws GatewayRequestException
      */
-    public function list(ListProductsOperationContract $operation) : array
+    protected function executeListQuery(ListRemoteResourcesOperationContract $operation) : array
     {
-        $products = [];
-
-        $this->convertLocalEntitiesToRemote($operation);
-
-        if ($this->cachingService->canCacheOperation($operation)) {
-            $products = $this->cachingService->getCachedProductsFromOperation($operation);
-        }
-
-        if ($this->cachingService->isOperationFullyCached($operation, $products)) {
-            return $this->associateRemoteProductsWithLocalIds($products);
-        }
-
-        $products = $this->catalogProvider->products()->list($this->getListProductsInput($operation));
-
-        // @TODO put all found products into cache (no story yet) {agibson 2023-04-06}
-
-        return $this->associateRemoteProductsWithLocalIds($products);
-    }
-
-    /**
-     * Converts local entities to remote. For example: convert local Woo product IDs to their remote counterparts.
-     *
-     * @param ListProductsOperationContract $operation
-     * @return void
-     * @throws BaseException|InvalidArgumentException
-     */
-    protected function convertLocalEntitiesToRemote(ListProductsOperationContract $operation) : void
-    {
-        if ($localIds = $operation->getLocalIds()) {
-            $localAndRemoteIds = $this->productMapRepository->getIdsBy('local_id', $localIds);
-
-            $remoteIds = TypeHelper::arrayOfStrings(ArrayHelper::combine(
-                TypeHelper::array($operation->getIds(), []),
-                array_column($localAndRemoteIds, 'commerce_id')
-            ), false);
-
-            $operation->setIds($remoteIds);
-        }
-
-        // @TODO once supported, we will also convert the category ID in this method (no story yet) {agibson 2023-04-06}
+        return $this->catalogProvider->products()->list($this->getListProductsInput($operation));
     }
 
     /**
@@ -121,43 +84,13 @@ class ListProductsService implements ListProductsServiceContract
     }
 
     /**
-     * Associates remote products with local products' IDs.
+     * Maybe broadcast a ProductsListedEvent event with the given association objects.
      *
-     * @param ProductBase[] $products
-     * @return ProductAssociation[]
+     * @param ProductAssociation[] $resourceAssociations
+     * @return void
      */
-    protected function associateRemoteProductsWithLocalIds(array $products) : array
+    protected function maybeBroadcastListEvent(array $resourceAssociations) : void
     {
-        $columnLocalId = $this->productMapRepository::COLUMN_LOCAL_ID;
-        $columnCommerceId = $this->productMapRepository::COLUMN_COMMERCE_ID;
-
-        $remoteProductIds = array_filter(array_column($products, 'productId'));
-        $productAssociations = [];
-
-        if (! empty($remoteProductIds)) {
-            try {
-                // strval mapping ensures that the productId values are strings, which is required by the repository method array shape
-                $localAndRemoteIds = $this->productMapRepository->getIdsBy($columnCommerceId, array_map('strval', $remoteProductIds));
-
-                foreach ($localAndRemoteIds as $localAndRemoteId) {
-                    if (empty($localAndRemoteId[$columnLocalId]) || empty($localAndRemoteId[$columnCommerceId]) || ! is_numeric($localAndRemoteId[$columnLocalId])) {
-                        continue;
-                    }
-
-                    $remoteProduct = ArrayHelper::where($products, fn (ProductBase $product) => $product->productId === $localAndRemoteId[$columnCommerceId], false)[0] ?? null;
-
-                    if ($remoteProduct instanceof ProductBase) {
-                        $productAssociations[] = ProductAssociation::getNewInstance([
-                            'localId' => (int) $localAndRemoteId[$columnLocalId],
-                            'product' => $remoteProduct,
-                        ]);
-                    }
-                }
-            } catch (InvalidArgumentException $exception) {
-                // should never be thrown since we are passing the column value from the repository constant
-            }
-        }
-
-        return $productAssociations;
+        $this->maybeBroadcastEvent(CatalogIntegration::class, ProductsListedEvent::getNewInstance($resourceAssociations));
     }
 }

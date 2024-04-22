@@ -10,6 +10,7 @@ use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Models\CurrencyAmount;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\Order;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\Statuses\CancelledOrderStatus;
+use GoDaddy\WordPress\MWC\Common\Models\Orders\Statuses\CheckoutDraftOrderStatus;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\Statuses\FailedOrderStatus;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\Statuses\RefundedOrderStatus;
 use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
@@ -86,8 +87,8 @@ class OrderAdapter extends CommonOrderAdapter
         $order->setNeedsPayment(TypeHelper::bool($this->source->needs_payment(), false));
         $order->setCheckoutPaymentUrl(TypeHelper::string($this->source->get_checkout_payment_url(), ''));
 
+        $this->convertCustomerNoteFromSource($order);
         $this->convertPaymentDataFromSource($order);
-
         $this->convertMarketplacesDataFromSource($order);
 
         // Cart ID
@@ -112,6 +113,8 @@ class OrderAdapter extends CommonOrderAdapter
         if ($order) {
             $this->source->update_meta_data(static::ORIGINATING_CHANNEL_ID_META_KEY, $order->getOriginatingChannelId()); /* @phpstan-ignore-line */
             $this->convertCartIdToSource($order);
+            $this->convertCustomerNoteToSource($order);
+            $this->convertFulfillmentStatusToSource($order);
         }
 
         try {
@@ -119,17 +122,12 @@ class OrderAdapter extends CommonOrderAdapter
                 if ($emailAddress = $order->getEmailAddress()) {
                     $this->source->set_billing_email($emailAddress);
                 }
-                if ($customerNote = $order->getCustomerNote()) {
-                    $this->source->set_customer_note($customerNote);
-                }
             }
         } catch (Exception $exception) {
             throw new AdapterException('Could not adapt native order email address to source order billing email address.', $exception);
         }
 
         $this->convertMarketplacesDataToSource($this->source, $order);
-
-        // @todo MWC-10283 convert fulfillment status and lineitem fulfillment status to source.
 
         parent::convertToSource($order);
 
@@ -165,6 +163,16 @@ class OrderAdapter extends CommonOrderAdapter
     }
 
     /**
+     * Sets the customer note on the given Order instance if a customer note is available in the source.
+     */
+    protected function convertCustomerNoteFromSource(CoreOrder $order) : void
+    {
+        if ($customerNote = $this->source->get_customer_note()) {
+            $order->setCustomerNote($customerNote);
+        }
+    }
+
+    /**
      * Converts payment information from a WC Order object to a core order instance.
      *
      * @param CoreOrder $order
@@ -175,12 +183,7 @@ class OrderAdapter extends CommonOrderAdapter
             $order->setEmailAddress($emailAddress);
         }
 
-        if ($customerNote = $this->source->get_customer_note()) {
-            $order->setCustomerNote($customerNote);
-        }
-
-        if ('yes' === $this->source->get_meta('_mwc_payments_is_captured')
-            || ('poynt' !== $this->source->get_meta('_mwc_transaction_provider_name') && ! empty($this->source->get_date_paid()) && (! empty($this->source->get_transaction_id())))) {
+        if ($this->isSourceOrderCaptured()) {
             $order->setCaptured(true);
         } elseif ($this->isOrderReadyForCapture($order)) {
             $order->setReadyForCapture(true);
@@ -196,6 +199,31 @@ class OrderAdapter extends CommonOrderAdapter
 
         // Order amounts
         $order->setDiscountAmount($this->convertCurrencyAmountFromSource((float) $this->source->get_total_discount()));
+    }
+
+    /**
+     * Determines whether the source order can be considered as captured.
+     */
+    protected function isSourceOrderCaptured() : bool
+    {
+        if ('yes' === $this->source->get_meta('_mwc_payments_is_captured')) {
+            return true;
+        }
+
+        return $this->isSourceOrderPaidByAnotherProvider();
+    }
+
+    /**
+     * Determines whether the source order was paid by provider other than Poynt.
+     */
+    protected function isSourceOrderPaidByAnotherProvider() : bool
+    {
+        // we pass 'edit' as the context parameter for get_date_paid() to prevent the `woocommerce_payment_complete_order_status`
+        // filter from being triggered for orders that haven't been saved
+        // https://godaddy-corp.atlassian.net/browse/MWC-13191
+        return 'poynt' !== $this->source->get_meta('_mwc_transaction_provider_name')
+            && ! empty($this->source->get_date_paid('edit'))
+            && ! empty($this->source->get_transaction_id());
     }
 
     /**
@@ -289,7 +317,7 @@ class OrderAdapter extends CommonOrderAdapter
      * @param Order $order
      * @return bool
      */
-    protected function isOrderReadyForCapture(Order $order)
+    protected function isOrderReadyForCapture(Order $order) : bool
     {
         if (! $providerName = $this->source->get_meta('_mwc_transaction_provider_name')) {
             return false;
@@ -301,15 +329,21 @@ class OrderAdapter extends CommonOrderAdapter
 
         // @TODO: something I don't like about this method: these order status checks imply too much knowledge / dependency on the WC admin. I think the status checks should be done "higher up" near the UI layer, since really these are determining whether to render a WC admin button or not {JS - 2021-10-21}
         // @TODO: something I don't like about this method: 'isOrderReadyForCapture' is assuming an action (capture) rather than returning a state (open authorization). An authorization can be captured or can be voided, so a better method name would probably be something like 'hasOpenAuthorization' or something to that effect, and the calling code can determine what to do with that state {JS - 2021-10-21}
-        if ($order->getStatus() instanceof CancelledOrderStatus) {
+        $orderStatus = $order->getStatus();
+
+        if ($orderStatus instanceof CheckoutDraftOrderStatus) {
             return false;
         }
 
-        if ($order->getStatus() instanceof RefundedOrderStatus) {
+        if ($orderStatus instanceof CancelledOrderStatus) {
             return false;
         }
 
-        if ($order->getStatus() instanceof FailedOrderStatus) {
+        if ($orderStatus instanceof RefundedOrderStatus) {
+            return false;
+        }
+
+        if ($orderStatus instanceof FailedOrderStatus) {
             return false;
         }
 
@@ -347,5 +381,27 @@ class OrderAdapter extends CommonOrderAdapter
         } catch (Exception $exception) {
             throw new AdapterException('Unable to adapt line items.', $exception);
         }
+    }
+
+    /**
+     * Sets the customer note on the source object.
+     *
+     * @throws AdapterException
+     */
+    protected function convertCustomerNoteToSource(CoreOrder $order) : void
+    {
+        try {
+            $this->source->set_customer_note((string) $order->getCustomerNote());
+        } catch (Exception $exception) {
+            throw AdapterException::getNewInstance('Could not set the customer note on the source order.', $exception);
+        }
+    }
+
+    /**
+     * Sets the fulfillment status of the given order model using the information in the source {@see WC_Order} instance.
+     */
+    protected function convertFulfillmentStatusToSource(CoreOrder $order) : void
+    {
+        $this->orderFulfillmentStatusAdapter::getNewInstance($this->source)->convertToSource($order);
     }
 }

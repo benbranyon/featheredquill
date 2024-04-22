@@ -1,5 +1,7 @@
 <?php
 
+use GoDaddy\WordPress\MWC\Common\HostingPlans\Enums\HostingPlanNamesEnum;
+
 return [
     // implementation of the HostingPlanRepositoryContract interface
     'repository' => GoDaddy\WordPress\MWC\Core\HostingPlans\Repositories\HostingPlanRepository::class,
@@ -10,51 +12,75 @@ return [
     // hosting plan grades for all known plans in MWP and MWCS
     'mappings' => [
         [
-            'name'  => 'pro-5',
+            'name'  => HostingPlanNamesEnum::Pro5,
             'grade' => 100,
         ],
         [
-            'name'  => 'pro-10',
+            'name'  => HostingPlanNamesEnum::Pro10,
             'grade' => 200,
         ],
         [
-            'name'  => 'pro-25',
+            'name'  => HostingPlanNamesEnum::Pro25,
             'grade' => 300,
         ],
         [
-            'name'  => 'pro-50',
+            'name'  => HostingPlanNamesEnum::Pro50,
             'grade' => 400,
         ],
         [
-            'name'  => 'basic',
+            'name'  => HostingPlanNamesEnum::Basic,
             'grade' => 500,
         ],
         [
-            'name'  => 'delux',
+            'name'  => HostingPlanNamesEnum::Deluxe,
             'grade' => 600,
         ],
         [
-            'name'  => 'ultimate',
+            'name'  => HostingPlanNamesEnum::Ultimate,
             'grade' => 700,
         ],
         [
-            'name'  => 'ecommerce',
+            'name'  => HostingPlanNamesEnum::Ecommerce,
             'grade' => 800,
         ],
         [
-            'name'  => 'essentials',
+            'name'  => HostingPlanNamesEnum::Essentials,
             'grade' => 850,
         ],
         [
-            'name'  => 'flex',
+            'name'  => HostingPlanNamesEnum::EssentialsCA,
+            'grade' => 850,
+        ],
+        [
+            'name'  => HostingPlanNamesEnum::EssentialsWorldpay,
+            'grade' => 850,
+        ],
+        [
+            'name'  => HostingPlanNamesEnum::Flex,
             'grade' => 900,
         ],
         [
-            'name'  => 'expand',
+            'name'  => HostingPlanNamesEnum::FlexCA,
+            'grade' => 900,
+        ],
+        [
+            'name'  => HostingPlanNamesEnum::FlexWorldpay,
+            'grade' => 900,
+        ],
+        [
+            'name'  => HostingPlanNamesEnum::Expand,
             'grade' => 1000,
         ],
         [
-            'name'  => 'premier',
+            'name'  => HostingPlanNamesEnum::ExpandCA,
+            'grade' => 1000,
+        ],
+        [
+            'name'  => HostingPlanNamesEnum::ExpandWorldpay,
+            'grade' => 1000,
+        ],
+        [
+            'name'  => HostingPlanNamesEnum::Premier,
             'grade' => 1100,
         ],
     ],

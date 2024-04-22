@@ -41,40 +41,14 @@ class OrderStatusesAdapter implements DataObjectAdapterContract
      *
      * @param OrderStatuses $source
      */
-    public function convertFromSource($source) : OrderStatusContract
+    public function convertFromSource($source, ?Order $order = null) : Order
     {
-        $orderStatus = $source->status;
-        $paymentStatus = $source->paymentStatus;
+        $order ??= new Order();
 
-        if (PaymentStatus::Refunded === $paymentStatus &&
-            in_array($orderStatus, [Status::Completed, Status::Canceled], true)) {
-            return new RefundedOrderStatus();
-        }
-
-        if (Status::Canceled === $orderStatus &&
-            ! in_array($paymentStatus, [PaymentStatus::None, PaymentStatus::Refunded], true)) {
-            return new CancelledOrderStatus();
-        }
-
-        if (Status::Completed === $orderStatus) {
-            return new CompletedOrderStatus();
-        }
-
-        if (Status::Open === $orderStatus) {
-            if (PaymentStatus::Declined === $paymentStatus) {
-                return new FailedOrderStatus();
-            }
-
-            if (PaymentStatus::Processing === $paymentStatus) {
-                return new HeldOrderStatus();
-            }
-
-            if (PaymentStatus::Pending === $paymentStatus) {
-                return new PendingOrderStatus();
-            }
-        }
-
-        return new ProcessingOrderStatus();
+        return $order->setStatus($this->convertOrderStatusFromSource($source))
+            ->setFulfillmentStatus(
+                $this->orderFulfillmentStatusAdapter->convertFromSource($source->fulfillmentStatus)
+            );
     }
 
     /**
@@ -130,9 +104,9 @@ class OrderStatusesAdapter implements DataObjectAdapterContract
         }
 
         $statusMapping = [
-            PendingOrderStatus::class    => PaymentStatus::Pending,
+            PendingOrderStatus::class    => PaymentStatus::None,
             ProcessingOrderStatus::class => PaymentStatus::Paid,
-            HeldOrderStatus::class       => PaymentStatus::Processing,
+            HeldOrderStatus::class       => PaymentStatus::Pending,
             CompletedOrderStatus::class  => PaymentStatus::Paid,
             CancelledOrderStatus::class  => PaymentStatus::Canceled,
             RefundedOrderStatus::class   => PaymentStatus::Refunded,
@@ -145,5 +119,46 @@ class OrderStatusesAdapter implements DataObjectAdapterContract
                 ''
             )
         ) ?? PaymentStatus::None;
+    }
+
+    /**
+     * Converts a Commerce {@see OrderStatuses} data object into a native order status {@see OrderStatusContract}.
+     *
+     * @param OrderStatuses $source
+     */
+    protected function convertOrderStatusFromSource(OrderStatuses $source) : OrderStatusContract
+    {
+        $orderStatus = $source->status;
+        $paymentStatus = $source->paymentStatus;
+
+        if (PaymentStatus::Refunded === $paymentStatus &&
+            in_array($orderStatus, [Status::Completed, Status::Canceled], true)) {
+            return new RefundedOrderStatus();
+        }
+
+        if (Status::Canceled === $orderStatus &&
+            ! in_array($paymentStatus, [PaymentStatus::None, PaymentStatus::Refunded], true)) {
+            return new CancelledOrderStatus();
+        }
+
+        if (Status::Completed === $orderStatus) {
+            return new CompletedOrderStatus();
+        }
+
+        if (Status::Open === $orderStatus) {
+            if (PaymentStatus::Declined === $paymentStatus) {
+                return new FailedOrderStatus();
+            }
+
+            if (PaymentStatus::Pending === $paymentStatus) {
+                return new HeldOrderStatus();
+            }
+
+            if (PaymentStatus::None === $paymentStatus) {
+                return new PendingOrderStatus();
+            }
+        }
+
+        return new ProcessingOrderStatus();
     }
 }

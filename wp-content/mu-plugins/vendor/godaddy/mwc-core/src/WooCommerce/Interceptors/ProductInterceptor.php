@@ -7,6 +7,7 @@ use GoDaddy\WordPress\MWC\Common\Interceptors\AbstractInterceptor;
 use GoDaddy\WordPress\MWC\Common\Models\Products\Product as CommonProduct;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerce\ProductsRepository;
+use GoDaddy\WordPress\MWC\Core\Traits\ShouldLoadOnlyIfWooCommerceIsEnabledTrait;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Adapters\ProductAdapter;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\NewWooCommerceObjectFlag;
 use WC_Product;
@@ -17,6 +18,8 @@ use WP_Post;
  */
 class ProductInterceptor extends AbstractInterceptor
 {
+    use ShouldLoadOnlyIfWooCommerceIsEnabledTrait;
+
     /**
      * {@inheritDoc}
      *
@@ -69,13 +72,13 @@ class ProductInterceptor extends AbstractInterceptor
      *
      * @throws Exception
      */
-    public function onWooCommerceUpdateProduct($postId)
+    public function onWooCommerceUpdateProduct($postId) : void
     {
         if (! ($wcProduct = ProductsRepository::get((int) $postId))) {
             return;
         }
 
-        $newProductFlag = $this->getNewProductFlag($wcProduct->get_id());
+        $newProductFlag = NewWooCommerceObjectFlag::getNewInstance($wcProduct);
 
         $product = $this->getConvertedProduct($wcProduct);
 
@@ -139,22 +142,26 @@ class ProductInterceptor extends AbstractInterceptor
      * @param WP_Post $post
      * @param bool $isUpdate
      */
-    protected function maybeFlagNewProduct($postId, $post, $isUpdate)
+    protected function maybeFlagNewProduct($postId, $post, $isUpdate) : void
     {
-        if (! $isUpdate && $post->post_type === 'product') {
-            $this->getNewProductFlag((int) $postId)->turnOn();
+        if (! $isUpdate && $post->post_type === 'product' && $flag = $this->maybeGetNewProductFlag((int) $postId)) {
+            $flag->turnOn();
         }
     }
 
     /**
-     * Gets the new product flag instance for the given product id.
+     * Gets the new product flag instance for the given coupon id.
      *
      * @param int $productId
-     * @return NewWooCommerceObjectFlag
+     * @return NewWooCommerceObjectFlag|null
      */
-    protected function getNewProductFlag(int $productId) : NewWooCommerceObjectFlag
+    protected function maybeGetNewProductFlag(int $productId) : ?NewWooCommerceObjectFlag
     {
-        return new NewWooCommerceObjectFlag($productId);
+        if ($product = ProductsRepository::get($productId)) {
+            return NewWooCommerceObjectFlag::getNewInstance($product);
+        }
+
+        return null;
     }
 
     /**

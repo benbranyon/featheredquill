@@ -20,12 +20,17 @@ class CreateOrUpdateProductResponse implements CreateOrUpdateProductResponseCont
      */
     protected string $remoteId;
 
+    /** @var ProductBase */
+    protected ProductBase $product;
+
     /**
      * @param non-empty-string $remoteId
+     * @param ProductBase $product
      */
-    public function __construct(string $remoteId)
+    public function __construct(string $remoteId, ProductBase $product)
     {
         $this->remoteId = $remoteId;
+        $this->product = $product;
     }
 
     /**
@@ -34,5 +39,13 @@ class CreateOrUpdateProductResponse implements CreateOrUpdateProductResponseCont
     public function getRemoteId() : string
     {
         return $this->remoteId;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getProduct() : ProductBase
+    {
+        return $this->product;
     }
 }

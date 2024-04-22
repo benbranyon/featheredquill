@@ -90,6 +90,13 @@ trait CanConvertToArrayTrait
      */
     private function toArrayShouldPropertyBeAccessible(ReflectionProperty $property) : bool
     {
+        // Force accessible for typed properties in PHP <8.1 to avoid an exception from isInitialized()
+        $property->setAccessible(true);
+
+        if (! $property->isInitialized($this)) {
+            return false;
+        }
+
         if ($this->toArrayIncludePublic && $property->isPublic()) {
             return true;
         }

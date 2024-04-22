@@ -106,7 +106,8 @@ class GooglePayGateway extends AbstractWalletGateway
                 'title'       => __('Enable', 'mwc-core'),
                 'label'       => __('Enable to add the payment method to your checkout.', 'mwc-core'),
                 'description' => sprintf(
-                    __('Google Pay shows to %1$ssupported browsers%2$s.', 'mwc-core'),
+                    /* translators: Placeholders: %1$s - open <a> HTML link tag, %2$s - close </a> HTML link tag */
+                    __('Google Pay shows on %1$ssupported browsers%2$s.', 'mwc-core'),
                     '<a href="https://developers.google.com/pay/api/web/guides/setup" target="_blank">',
                     ' <span class="dashicons dashicons-external"></span></a>'
                 ),
@@ -135,13 +136,13 @@ class GooglePayGateway extends AbstractWalletGateway
                 'class'       => 'wc-enhanced-select',
                 'default'     => GooglePayButton::BUTTON_TYPE_BUY,
                 'options'     => [
-                    GooglePayButton::BUTTON_TYPE_BOOK     => __('Book with', 'mwc-core'),
-                    GooglePayButton::BUTTON_TYPE_BUY      => __('Buy with', 'mwc-core'),
-                    GooglePayButton::BUTTON_TYPE_CHECKOUT => __('Check out with', 'mwc-core'),
-                    GooglePayButton::BUTTON_TYPE_DONATE   => __('Donate with', 'mwc-core'),
-                    GooglePayButton::BUTTON_TYPE_ORDER    => __('Order with', 'mwc-core'),
-                    GooglePayButton::BUTTON_TYPE_PAY      => __('Pay with', 'mwc-core'),
-                    GooglePayButton::BUTTON_TYPE_PLAIN    => __('Plain (logo only)', 'mwc-core'),
+                    GooglePayButton::BUTTON_TYPE_BOOK     => _x('Book with', 'Google Pay', 'mwc-core'),
+                    GooglePayButton::BUTTON_TYPE_BUY      => _x('Buy with', 'Google Pay', 'mwc-core'),
+                    GooglePayButton::BUTTON_TYPE_CHECKOUT => _x('Check out with', 'Google Pay', 'mwc-core'),
+                    GooglePayButton::BUTTON_TYPE_DONATE   => _x('Donate with', 'Google Pay', 'mwc-core'),
+                    GooglePayButton::BUTTON_TYPE_ORDER    => _x('Order with', 'Google Pay', 'mwc-core'),
+                    GooglePayButton::BUTTON_TYPE_PAY      => _x('Pay with', 'Google Pay', 'mwc-core'),
+                    GooglePayButton::BUTTON_TYPE_PLAIN    => _x('Plain (logo only)', 'Google Pay', 'mwc-core'),
                 ],
             ],
             /* @link https://developers.google.com/pay/api/web/guides/brand-guidelines#style */

@@ -6,17 +6,20 @@ use Exception;
 use GoDaddy\WordPress\MWC\Common\Configuration\Configuration;
 use GoDaddy\WordPress\MWC\Common\Exceptions\SentryException;
 use GoDaddy\WordPress\MWC\Common\Interceptors\AbstractInterceptor;
+use GoDaddy\WordPress\MWC\Common\Platforms\Exceptions\PlatformRepositoryException;
 use GoDaddy\WordPress\MWC\Common\Platforms\PlatformRepositoryFactory;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPressRepository;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Commerce;
-use GoDaddy\WordPress\MWC\Core\Features\Onboarding\Settings\OnboardingSetting;
+use GoDaddy\WordPress\MWC\Core\Traits\CanCheckIfOnboardingHasInitializedTrait;
 
 /**
  * Interceptor to handle the site (default) store ID.
  */
 class StoreIdInterceptor extends AbstractInterceptor
 {
+    use CanCheckIfOnboardingHasInitializedTrait;
+
     /**
      * {@inheritDoc}
      *
@@ -52,7 +55,11 @@ class StoreIdInterceptor extends AbstractInterceptor
     protected function shouldDetermineDefaultStoreId() : bool
     {
         try {
-            return true === Configuration::get('godaddy.store.shouldDetermineDefaultSiteId', false)
+            $shouldDetermineDefaultSiteId = $this->isEssentialsPlan()
+                ? true
+                : Configuration::get('godaddy.store.shouldDetermineDefaultSiteId', false);
+
+            return true === $shouldDetermineDefaultSiteId
                 && ! WordPressRepository::isAjax()
                 && ! $this->hasOnboardingInitialized()
                 && empty(Commerce::getStoreId());
@@ -63,18 +70,15 @@ class StoreIdInterceptor extends AbstractInterceptor
     }
 
     /**
-     * Determines whether the onboarding feature has been initialized yet.
+     * Determines if current plan is an Essentials Plan.
      *
-     * This does not check if onboarding has been _completed_, just whether the feature has run its initial set-up yet.
-     * This helps us run {@see static::shouldDetermineDefaultStoreId()} only once on initial admin load and not subsequent loads.
-     *
-     * @return bool
+     * @throws PlatformRepositoryException
      */
-    protected function hasOnboardingInitialized() : bool
+    protected function isEssentialsPlan() : bool
     {
-        $setting = OnboardingSetting::get(OnboardingSetting::SETTING_ID_FIRST_TIME);
+        $platformRepository = PlatformRepositoryFactory::getNewInstance()->getPlatformRepository();
 
-        return ! empty($setting->getValue());
+        return in_array($platformRepository->getPlan()->getName(), ['essentials', 'essentialsCA', 'essentials_GDGCPP'], true);
     }
 
     /**

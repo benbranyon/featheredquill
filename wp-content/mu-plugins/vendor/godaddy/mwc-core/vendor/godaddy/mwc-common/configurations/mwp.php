@@ -1,5 +1,7 @@
 <?php
 
+use GoDaddy\WordPress\MWC\Common\HostingPlans\Enums\HostingPlanNamesEnum;
+
 return [
     /*
      *--------------------------------------------------------------------------
@@ -15,28 +17,28 @@ return [
      */
     'hosting' => [
         'plans' => [
-            'basic' => [
+            HostingPlanNamesEnum::Basic => [
                 'name' => 'Basic Managed WordPress',
             ],
-            'deluxe' => [
+            HostingPlanNamesEnum::Deluxe => [
                 'name' => 'Deluxe Managed WordPress',
             ],
-            'ecommerce' => [
+            HostingPlanNamesEnum::Ecommerce => [
                 'name' => 'eCommerce Managed WordPress',
             ],
-            'pro-5' => [
+            HostingPlanNamesEnum::Pro5 => [
                 'name' => 'Managed WordPress - Pro 5',
             ],
-            'pro-10' => [
+            HostingPlanNamesEnum::Pro10 => [
                 'name' => 'Managed WordPress - Pro 10',
             ],
-            'pro-25' => [
+            HostingPlanNamesEnum::Pro25 => [
                 'name' => 'Managed WordPress - Pro 25',
             ],
-            'pro-50' => [
+            HostingPlanNamesEnum::Pro50 => [
                 'name' => 'Managed WordPress - Pro 50',
             ],
-            'ultimate' => [
+            HostingPlanNamesEnum::Ultimate => [
                 'name' => 'Ultimate Managed WordPress',
             ],
         ],

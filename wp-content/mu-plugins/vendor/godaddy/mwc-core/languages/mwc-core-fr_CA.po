@@ -8,99 +8,100 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2022-12-16T23:53:48+00:00\n"
+"POT-Creation-Date: 2024-03-18T15:39:36+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.7.1\n"
+"X-Generator: WP-CLI 2.10.0\n"
 "X-Domain: mwc-core\n"
 
 #. Plugin Name of the plugin
+#: mwc-core.php
 msgid "MWC Core."
 msgstr "MWC Core."
 
-#: configurations/features.php:44
+#: configurations/features.php:99
 msgid "Cost of goods"
 msgstr "Coût des marchandises"
 
 #. translators: Placeholders: %1$s - <a> tag for the plugin link, %2$s - </a> tag
-#: configurations/features.php:47
+#: configurations/features.php:102
 msgid "Track profit and cost of goods for your store. Generate profit reports by date, product, category, and more. This feature replaces the %1$sCost of Goods%2$s plugin."
 msgstr "Assurez le suivi des bénéfices et du coût des marchandises pour votre boutique. Générez des rapports sur les bénéfices par date, produit, catégorie, et plus encore. Cette fonctionnalité remplace l’extension %1$sCoût des marchandises%2$s."
 
-#: configurations/features.php:67
+#: configurations/features.php:122
 msgid "Ecommerce emails"
 msgstr "Courriels de commerce électronique"
 
 #. translators: Placeholders: %1$s - <a> tag for the plugin link, %2$s - </a> tag
-#: configurations/features.php:70
+#: configurations/features.php:125
 msgid "Customize your emails to reflect your brand and increase customer loyalty. This feature replaces the %1$sWooCommerce Email Customizer%2$s plugin."
 msgstr "Personnalisez vos courriels pour qu’ils reflètent votre marque et augmentent la fidélité de vos client. Cette fonctionnalité remplace l'extension %1$sWooCommerce Email Customizer%2$s."
 
-#: configurations/features.php:89
+#: configurations/features.php:153
 msgid "Google analytics"
 msgstr "Google Analytics"
 
 #. translators: Placeholders: %1$s and %3$s - <a> tag for the plugin link, %2$s and %4$s - </a> tag
-#: configurations/features.php:92
+#: configurations/features.php:156
 msgid "Track advanced eCommerce events and more with Google Analytics. This feature replaces the %1$sGoogle Analytics%2$s and %3$sGoogle Analytics Pro%4$s plugins."
 msgstr "Suivez les événements de commerce électronique avancés et plus encore avec Google Analytics. Cette fonctionnalité remplace les plug-ins %1$sGoogle Analytics%2$s et %3$sGoogle Analytics Pro%4$s."
 
-#: configurations/features.php:123
+#: configurations/features.php:187
 msgid "Sequential order numbers"
 msgstr "Numéros de commande séquentiels"
 
 #. translators: Placeholders: %1$s - <a> tag for the plugin link, %2$s - </a> tag
-#: configurations/features.php:126
+#: configurations/features.php:190
 msgid "Format order numbers, change your starting number, and differentiate free orders. This feature replaces the %1$sSequential Order Numbers Pro%2$s plugin."
 msgstr "Formatez les numéros de commande, modifiez votre numéro de départ et différenciez les commandes gratuites. Cette fonctionnalité remplace le plug-in %1$sSequential Order Numbers Pro%2$s."
 
-#: configurations/features.php:145
-#: src/WooCommerce/Pages/Orders/Columns/ShipmentTrackingColumn.php:27
+#: configurations/features.php:209
+#: src/WooCommerce/Pages/Orders/Columns/ShipmentTrackingColumn.php:24
 msgid "Shipment tracking"
 msgstr "Suivi des envois"
 
 #. translators: Placeholders: %1$s - <a> tag for the plugin link, %2$s - </a> tag
-#: configurations/features.php:148
+#: configurations/features.php:212
 msgid "Share shipment tracking information with your customers. Open one of your Processing orders to get started. This feature replaces the %1$sShipment Tracking%2$s plugin."
 msgstr "Partagez les informations de suivi des expéditions avec vos clients. Ouvrez l'une de vos commandes de traitement pour commencer. Cette fonctionnalité remplace le plugin %1$sSuivi des envois%2$s."
 
-#: configurations/features.php:160
+#: configurations/features.php:224
 msgid "Discount links"
 msgstr "Liens de remise"
 
 #. translators: Placeholders: %1$s - <a> tag for the plugin link, %2$s - </a> tag
-#: configurations/features.php:163
+#: configurations/features.php:227
 msgid "Share discount links with your customers and add coupons from ads, email campaigns, or social links. Create or edit a coupon to get started. This feature replaces the %1$sURL Coupons%2$s plugin."
 msgstr "Partagez des liens de remise avec vos clients et ajoutez des codes promo à partir d’annonces, de campagnes par e-mail ou de liens sociaux. Créez ou modifiez un code promo pour commencer. Cette fonctionnalité remplace l’extension %1$sURL de codes promo%2$s."
 
-#: configurations/features.php:181
+#: configurations/features.php:245
 msgid "Gift certificates"
 msgstr "Chèques-cadeaux"
 
 #. translators: Placeholders: %1$s - <a> tag for the plugin link, %2$s - </a> tag
-#: configurations/features.php:184
+#: configurations/features.php:248
 msgid "Create custom gift certificates that your customers can purchase and send to their friends and family. This feature replaces the %1$sPDF Product Vouchers%2$s plugin."
 msgstr "Créez des chèques-cadeaux personnalisés que vos clients peuvent acheter pour les envoyer à leur famille et leurs amis. Cette fonctionnalité remplace l’extension %1$sPDF Product Vouchers%2$s."
 
-#: configurations/features.php:218
+#: configurations/features.php:282
 msgid "Abandoned checkout reminders"
 msgstr "Rappels concernant les paniers abandonnés"
 
-#: configurations/features.php:219
+#: configurations/features.php:283
 msgid "Automatically track cart activity and send an email reminder to recover lost revenue."
 msgstr "Suivez automatiquement l'activité des paniers et envoyez un rappel par e-mail pour récupérer les pertes de revenus."
 
-#: configurations/features.php:249
+#: configurations/features.php:312
 #: src/Payments/Providers/StripeProvider.php:25
 #: src/WooCommerce/Payments/StripeGateway.php:74
-#: src/WooCommerce/Payments/StripeGateway.php:178
+#: src/WooCommerce/Payments/StripeGateway.php:185
 msgid "Stripe"
 msgstr "Stripe"
 
-#: configurations/features.php:250
+#: configurations/features.php:313
 msgid "Accept credit card payments using Stripe."
 msgstr "Accepter les paiements par carte de crédit en utilisant Stripe."
 
-#: configurations/features.php:260
+#: configurations/features.php:323
 #: src/Features/Marketplaces/Pages/EditOrder/Fields/MarketplacesFields.php:100
 #: src/Features/Marketplaces/Pages/MarketplacesPage.php:41
 #: src/Features/Marketplaces/Pages/MarketplacesPage.php:42
@@ -108,13 +109,65 @@ msgstr "Accepter les paiements par carte de crédit en utilisant Stripe."
 msgid "Marketplaces"
 msgstr "Places de marché"
 
-#: configurations/features.php:261
+#: configurations/features.php:324
 msgid "Sell to millions of customers from one place. Offer your products everywhere, from Amazon to Instagram, all from your own online store."
 msgstr "Vendez à des millions de clients à partir d'un même emplacement. Proposez vos produits partout, d'Amazon à Instagram, depuis votre propre boutique en ligne."
 
-#: configurations/features.php:279
+#: configurations/features.php:345
 msgid "Take order fulfillment to the next level! Get live shipping rates from your favourite providers, print labels in one click, and automate shipment tracking and customer email notifications."
 msgstr "Passez l’exécution des commandes au niveau supérieur ! Obtenez en temps réel les tarifs d'expédition de vos fournisseurs préférés, imprimez les étiquettes en un clic et automatisez le suivi des expéditions et les e-mails de notification à l’attention des clients."
+
+#: src/API/Controllers/AccountController.php:108
+msgid "The reseller private label ID (1 means GoDaddy, so not a reseller)."
+msgstr "L'ID de marque privée du revendeur (1 signifie GoDaddy, donc pas un revendeur)."
+
+#: src/API/Controllers/AccountController.php:114
+msgid "Whether the account can manually switch between extension versions."
+msgstr "Si le compte peut passer manuellement d'une version d'extension à l'autre."
+
+#: src/API/Controllers/AccountController.php:120
+msgid "Whether or not the site is sold by a reseller."
+msgstr "Si le site est ou non vendu par un revendeur."
+
+#: src/API/Controllers/AccountController.php:126
+msgid "The product plan the given account or site has purchased"
+msgstr "L’offre de produit que le compte ou le site spécifique a achetée"
+
+#: src/API/Controllers/AccountController.php:132
+msgid "The hosting platform the given account or site is running on"
+msgstr "La plateforme d'hébergement sur laquelle le compte ou le site spécifique est en cours d'exécution"
+
+#: src/API/Controllers/AccountController.php:138
+msgid "The ID of the customer"
+msgstr "L’ID du client"
+
+#: src/API/Controllers/AccountController.php:144
+msgid "The ID of the Federation Partner"
+msgstr "L'ID du partenaire de fédération"
+
+#: src/API/Controllers/Platform/StoresController.php:117
+msgid "A list of businesses."
+msgstr "Une liste de business."
+
+#: src/API/Controllers/Platform/StoresController.php:124
+msgid "The unique identifier for the business."
+msgstr "L’identificateur unique du business."
+
+#: src/API/Controllers/Platform/StoresController.php:128
+msgid "The legal name of the business."
+msgstr "Dénomination légale du business."
+
+#: src/API/Controllers/Platform/StoresController.php:132
+msgid "A list of stores associated with the business."
+msgstr "Liste des boutiques associées au business."
+
+#: src/API/Controllers/Platform/StoresController.php:138
+msgid "The display name of the store."
+msgstr "Nom affiché de la boutique."
+
+#: src/API/Controllers/Platform/StoresController.php:143
+msgid "The unique identifier for the store."
+msgstr "L’identificateur unique de la boutique."
 
 #: src/Auth/API/Controllers/TokenController.php:84
 msgid "The access token string as issued by the authorization server."
@@ -136,13 +189,34 @@ msgstr "ID du jeton d'accès."
 msgid "The type of token this is."
 msgstr "Le type de jeton concerné."
 
-#: src/Auth/Sso/WordPress/SsoInterceptor.php:109
+#: src/Auth/Sso/WordPress/Events/Subscribers/ForceCareAgentAdminRoleSubscriber.php:61
+msgid "The care agent account on this site has been misconfigured. Please log in again to fix this issue."
+msgstr "Le compte de l'agent de soins sur ce site a été mal configuré. Veuillez vous connecter à nouveau pour résoudre ce problème."
+
+#: src/Auth/Sso/WordPress/Interceptors/Handlers/SsoInterceptorHandler.php:103
+msgid "Something went wrong when creating the user account."
+msgstr "Un problème s'est produit lors de la création du compte utilisateur."
+
+#. translators: Placeholder: %s account username
+#: src/Auth/Sso/WordPress/Interceptors/Handlers/SsoInterceptorHandler.php:131
 msgid "User %s could not be logged in."
 msgstr "L'utilisateur %s n'a pas pu se connecter."
 
-#: src/Client/Client.php:418
+#: src/Auth/Sso/WordPress/Interceptors/MainAdminDeleteInterceptor.php:165
+msgid "You cannot delete the main administrator account."
+msgstr "Vous ne pouvez pas supprimer le compte administrateur principal."
+
+#: src/Auth/Sso/WordPress/Interceptors/MainAdminDeleteInterceptor.php:167
+msgid "Delete"
+msgstr "Supprimer"
+
+#: src/Client/Client.php:433
 msgid "Other"
 msgstr "Autre"
+
+#: src/Configuration/CartRecoveryEmailsFeatureRuntimeConfiguration.php:73
+msgid "Automatically track cart activity and recover lost revenue with a dedicated email campaign."
+msgstr "Suivez automatiquement l'activité des paniers et lancez une campagne e-mailing dédiée pour récupérer les pertes de revenus."
 
 #: src/Email/RemoteRenderingEmailService.php:130
 msgid "Unknown error."
@@ -152,13 +226,13 @@ msgstr "Erreur inconnue."
 msgid "Unable to retrieve the email sender data."
 msgstr "Impossible de récupérer les données de l’expéditeur de l’email."
 
-#: src/Features/CartRecoveryEmails/DataProviders/CheckoutDataProvider.php:54
-msgctxt "subject of greeting when name is not known"
+#: src/Features/CartRecoveryEmails/DataProviders/CheckoutDataProvider.php:56
+msgctxt "Subject of greeting when name is not known (this can be translated to empty string for languages where \"Hi there!\" cannot be rendered as in English and it will result in just \"Hi!\")"
 msgid "there"
 msgstr "bonjour"
 
 #: src/Features/CartRecoveryEmails/Models/CartRecoveryEmailContent.php:43
-#: src/Features/CartRecoveryEmails/Models/CartRecoveryEmailNotification.php:115
+#: src/Features/CartRecoveryEmails/Models/CartRecoveryEmailNotification.php:116
 msgid "Did you forget something?"
 msgstr "Vous n’avez rien oublié ?"
 
@@ -183,15 +257,15 @@ msgstr "Terminez votre achat"
 msgid "Trouble checking out? We're here to help. Please reply to this email if you have any questions or need our assistance."
 msgstr "Vous avez des difficultés à régler vos achats ? Nous sommes là pour vous aider. Veuillez répondre à cet e-mail si vous avez des questions ou si vous avez besoin de notre aide."
 
-#: src/Features/CartRecoveryEmails/Models/CartRecoveryEmailNotification.php:59
+#: src/Features/CartRecoveryEmails/Models/CartRecoveryEmailNotification.php:60
 msgid "Cart Recovery"
 msgstr "Récupération du panier"
 
-#: src/Features/CartRecoveryEmails/Models/CartRecoveryEmailNotification.php:60
+#: src/Features/CartRecoveryEmails/Models/CartRecoveryEmailNotification.php:61
 msgid "Send a reminder email to customers that left products in their cart but didn't complete the checkout."
 msgstr "Envoyez un e-mail de rappel aux clients qui ont laissé des produits dans leur panier, sans effectuer le processus de paiement."
 
-#: src/Features/CartRecoveryEmails/Models/CartRecoveryEmailNotification.php:104
+#: src/Features/CartRecoveryEmails/Models/CartRecoveryEmailNotification.php:105
 msgid "Hey {{customer_first_name}}, did you forget something?"
 msgstr "Bonjour {{customer_first_name}}, vous n’avez rien oublié ?"
 
@@ -220,76 +294,146 @@ msgstr "Êtes-vous prêt à terminer cet achat avant que votre panier n'expire 
 msgid "Your email and cart will be saved so we can send you an email reminder about this order."
 msgstr "Votre adresse e-mail et votre panier seront enregistrés afin que nous puissions vous envoyer par e-mail un rappel concernant cette commande."
 
-#: src/Features/EmailNotifications/API/API.php:65
+#: src/Features/Commerce/Catalog/Helpers/CheckForDeletedProductHelper.php:75
+msgid "You attempted to edit an item that does not exist. Perhaps it was deleted?"
+msgstr "Vous avez tenté de modifier un élément qui n'existe pas. Peut-être a-t-il été supprimé ?"
+
+#: src/Features/Commerce/Catalog/Interceptors/Handlers/CommerceProductUuidRequestHandler.php:48
+msgid "Product not found."
+msgstr "Produit introuvable."
+
+#: src/Features/Commerce/Catalog/Interceptors/ProductCategoryDeleteInterceptor.php:149
+msgid "Product categories must be deleted in Commerce Home"
+msgstr "Les catégories de produits doivent être supprimées dans le Accueil Commerce"
+
+#: src/Features/Commerce/Catalog/Interceptors/ProductCategoryDeleteInterceptor.php:150
+msgid "Delete product category"
+msgstr "Supprimer une catégorie de produits"
+
+#. translators: External link icon
+#: src/Features/Commerce/Catalog/Interceptors/ProductCategoryDeleteInterceptor.php:152
+msgid "Delete %s"
+msgstr "Supprimer %s"
+
+#: src/Features/Commerce/Catalog/Interceptors/ProductEditInterceptor.php:82
+msgid "The \"Any\" attribute cannot be used for variable products synced with your GoDaddy Commerce product catalog. Please specify the attribute value for each variation, then save your changes."
+msgstr "L'attribut « Tout » ne peut pas être utilisé pour les produits variables synchronisés avec votre catalogue de produits GoDaddy Commerce. Veuillez spécifier la valeur de l'attribut pour chaque variante, puis enregistrez vos modifications."
+
+#. translators: %1$s opening anchor tag; %2$s closing anchor tag
+#: src/Features/Commerce/Inventory/Interceptors/StockManagementSettingInterceptor.php:80
+msgid "Required for storing Product data in Commerce Home. Stock management can be enabled or disabled per product. Learn more about %1$sproduct inventory settings%2$s."
+msgstr "Nécessaire pour stocker les données sur les produits dans la page d’accueil Commerce. La gestion des stocks peut être activée ou désactivée par produit. En savoir plus sur les %1$sréglages d'inventaire des produits%2$s."
+
+#: src/Features/Commerce/Inventory/Interceptors/StockManagementSettingInterceptor.php:90
+msgid "Inventory amounts displayed on the frontend reflect total available for purchase and exclude reserved stock."
+msgstr "Les niveaux de stocks affichés sur le front-end reflètent le total disponible à l'achat et excluent le stock réservé."
+
+#. translators: Placeholders: %1$s - a product name, %2$s - a product SKU, %3$s - an API error message
+#: src/Features/Commerce/Inventory/Services/OrderReservationsService.php:75
+msgid "An error occurred while reserving stock for %1$s (%2$s). %3$s"
+msgstr "Une erreur s'est produite lors de la réservation de stock pour %1$s (%2$s). %3$s"
+
+#: src/Features/Commerce/Locations/Interceptors/LocalPickupAdminInterceptor.php:95
+#: src/Features/Commerce/Locations/Interceptors/LocalPickupCustomerInterceptor.php:241
+msgid "Available Pickup Locations"
+msgstr "Lieux de retrait disponibles"
+
+#: src/Features/Commerce/Locations/Interceptors/LocalPickupAdminInterceptor.php:98
+msgid "Select the location(s) that should be available for local pickup."
+msgstr "Sélectionnez le ou les lieux qui doivent être disponibles pour un retrait local."
+
+#: src/Features/Commerce/Locations/Interceptors/LocalPickupAdminInterceptor.php:195
+msgid "Pickup location"
+msgstr "Lieu de retrait"
+
+#: src/Features/Commerce/Locations/Interceptors/LocalPickupCustomerInterceptor.php:261
+msgid "No pickup locations available"
+msgstr "Aucun lieu de retrait disponible"
+
+#: src/Features/Commerce/Locations/Interceptors/LocalPickupCustomerInterceptor.php:263
+msgid "Please choose another shipping method, or contact the store for a pickup location."
+msgstr "Veuillez choisir un autre mode d'expédition, ou contactez la boutique pour connaître le lieu de retrait."
+
+#: src/Features/Commerce/Locations/Interceptors/LocalPickupCustomerInterceptor.php:407
+#: src/Features/Commerce/Locations/Interceptors/LocalPickupEmailsInterceptor.php:144
+#: src/Features/Commerce/Locations/Interceptors/LocalPickupEmailsInterceptor.php:174
+msgid "Pickup Location Information"
+msgstr "Information sur le lieu de retrait"
+
+#: src/Features/Commerce/Repositories/CommerceContextRepository.php:53
+msgid "Missing or invalid store ID"
+msgstr "ID de boutique manquant ou non valide"
+
+#: src/Features/EmailNotifications/API/API.php:66
 msgid "This token is expired"
 msgstr "Le jeton a expiré"
 
-#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:272
+#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:280
 msgid "Cannot generate a preview for an email notification that is not editable."
 msgstr "Impossible de générer un aperçu pour une notification par e-mail qui n'est pas modifiable."
 
-#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:436
+#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:444
 msgid "The settings parameter is required."
 msgstr "Le paramètre Réglages est obligatoire."
 
-#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:524
+#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:532
 msgid "Cannot send a test email for an email notification that is not editable."
 msgstr "Impossible d'envoyer un e-mail de test pour une notification par e-mail qui n'est pas modifiable."
 
-#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:690
+#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:698
 #: src/Features/EmailNotifications/API/Controllers/EmailTemplatesController.php:235
 msgid "The site has email template overrides and hasn't enabled the Email Notifications feature."
 msgstr "Le site est doté de modèles d'e-mail prioritaires et la fonctionnalité de notification par e-mail n’est pas activée."
 
-#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:953
+#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:961
 msgid "Unique email notification ID."
 msgstr "ID unique de la notification par email."
 
-#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:959
+#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:967
 msgid "Unique email notification name (matches the ID)."
 msgstr "Nom unique de la notification par email (correspondant à l'ID)."
 
-#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:965
+#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:973
 msgid "Email notification label."
 msgstr "Libellé de la notification par email."
 
-#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:971
+#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:979
 msgid "Email notification description."
 msgstr "Description de la notification par email."
 
-#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:977
+#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:985
 msgid "ID of the template used by this email notification."
 msgstr "ID du modèle utilisé par cette notification par email."
 
-#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:983
+#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:991
 msgid "A list of categories that the email notification belongs to."
 msgstr "Liste des catégories auxquelles la notification par email appartient."
 
-#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:992
+#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:1000
 msgid "Email notification status"
 msgstr "États de la notification par email."
 
-#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:999
+#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:1007
 msgid "Whether the email notification can only be sent manually."
 msgstr "Si la notification par email peut être envoyée manuellement uniquement."
 
-#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:1005
+#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:1013
 msgid "Whether the email notification will be sent to administrators."
 msgstr "Si la notification par email sera envoyée aux administrateurs."
 
-#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:1011
+#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:1019
 msgid "A list of placeholders that are available for the email notification."
 msgstr "Liste des textes indicatifs disponibles pour la notification par email."
 
-#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:1020
+#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:1028
 msgid "URL for the WooCommerce email settings screen for the email notification"
 msgstr "URL de l'écran des paramètres de messagerie WooCommerce pour la notification par e-mail."
 
-#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:1043
+#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:1051
 msgid "Unique email notification category ID."
 msgstr "ID unique de catégorie de la notification par email."
 
-#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:1049
+#: src/Features/EmailNotifications/API/Controllers/EmailNotificationsController.php:1057
 msgid "Email notification category name."
 msgstr "Nom de catégorie de la notification par email."
 
@@ -333,27 +477,27 @@ msgstr "Sous-groupes de réglages de modèle d'e-mail."
 msgid "Root settings for an email template."
 msgstr "Réglages racine d'un modèle d'e-mail."
 
-#: src/Features/EmailNotifications/API/Controllers/SendersController.php:182
+#: src/Features/EmailNotifications/API/Controllers/SendersController.php:185
 msgid "This email address belongs to another store. Please enter a different email address. If you already own this address, please reach out via %1$sGet Help%2$s."
 msgstr "Cette adresse de courriel appartient à un autre magasin. Saisissez une autre adresse de courriel. Si cette adresse vous appartient déjà, communiquez avec nous depuis %1$sObtenir de l’aide%2$s."
 
-#: src/Features/EmailNotifications/API/Controllers/SendersController.php:275
+#: src/Features/EmailNotifications/API/Controllers/SendersController.php:278
 msgid "Sender unique ID."
 msgstr "ID unique de l'expéditeur."
 
-#: src/Features/EmailNotifications/API/Controllers/SendersController.php:281
+#: src/Features/EmailNotifications/API/Controllers/SendersController.php:284
 msgid "Sender email address."
 msgstr "Adresse de courriel de l’expéditeur."
 
-#: src/Features/EmailNotifications/API/Controllers/SendersController.php:287
-msgid "Sender verified at."
-msgstr "Expéditeur vérifié à."
+#: src/Features/EmailNotifications/API/Controllers/SendersController.php:290
+msgid "The date and time when the sender was verified in our system."
+msgstr "Date et heure de la vérification de l’expéditeur par notre système."
 
-#: src/Features/EmailNotifications/API/Controllers/SendersController.php:293
-msgid "Sender verified by."
-msgstr "Expéditeur vérifié par."
+#: src/Features/EmailNotifications/API/Controllers/SendersController.php:296
+msgid "How the sender was verified."
+msgstr "Procédure de vérification de l’expéditeur."
 
-#: src/Features/EmailNotifications/API/Controllers/SendersController.php:299
+#: src/Features/EmailNotifications/API/Controllers/SendersController.php:302
 msgid "Sender status."
 msgstr "État de l'expéditeur."
 
@@ -413,49 +557,49 @@ msgstr "Liste des options disponibles pour le contrôle du réglage des notifica
 msgid "Optional input placeholder for the email notification setting control."
 msgstr "Texte indicatif facultatif pour le contrôle du paramètre de notification par e-mail."
 
-#: src/Features/EmailNotifications/DataSources/WooCommerce/EmailNotificationAdapter.php:162
+#: src/Features/EmailNotifications/DataSources/WooCommerce/EmailNotificationAdapter.php:163
 msgid "Could not match an email notification ID to a \"%s\" WooCommerce email ID."
 msgstr "Impossible d’associer un ID de notification par email à un ID par email WooCommerce « %s »."
 
-#: src/Features/EmailNotifications/DataSources/WooCommerce/EmailNotificationAdapter.php:192
+#: src/Features/EmailNotifications/DataSources/WooCommerce/EmailNotificationAdapter.php:193
 msgid "Could not match a WooCommerce email ID to a \"%s\" email notification ID."
 msgstr "Impossible d’associer un ID par email WooCommerce à un ID de notification par email « %s »."
 
-#: src/Features/EmailNotifications/DataSources/WooCommerce/EmailNotificationAdapter.php:615
-#: src/Features/EmailNotifications/DataStores/WooCommerce/EmailNotificationDataStore.php:96
+#: src/Features/EmailNotifications/DataSources/WooCommerce/EmailNotificationAdapter.php:622
+#: src/Features/EmailNotifications/DataStores/WooCommerce/EmailNotificationDataStore.php:93
 msgid "Could not find source WooCommerce email with ID \"%s\"."
 msgstr "Impossible de trouver l'e-mail WooCommerce source avec l'ID « %s »."
 
-#: src/Features/EmailNotifications/DataStores/EmailContentDataStore.php:67
+#: src/Features/EmailNotifications/DataStores/EmailContentDataStore.php:65
 msgid "No content template file found for the ID %s."
 msgstr "Aucun fichier de modèle de contenu trouvé pour l'ID %s."
 
-#: src/Features/EmailNotifications/DataStores/EmailNotificationDataStore.php:67
+#: src/Features/EmailNotifications/DataStores/EmailNotificationDataStore.php:72
 msgid "No email notification found with the ID %s."
 msgstr "Aucune notification par email trouvée avec l'ID %s."
 
-#: src/Features/EmailNotifications/DataStores/EmailNotificationDataStore.php:74
+#: src/Features/EmailNotifications/DataStores/EmailNotificationDataStore.php:79
 msgid "The class for %s must implement the EmailNotificationContract interface"
 msgstr "La classe pour %s doit mettre en œuvre l'interface EmailNotificationContract."
 
-#: src/Features/EmailNotifications/DataStores/EmailNotificationDataStore.php:84
+#: src/Features/EmailNotifications/DataStores/EmailNotificationDataStore.php:89
 msgid "The email notification with ID %s is not available on this site"
 msgstr "La notification par e-mail portant l’ID %s n'est pas disponible sur ce site."
 
-#: src/Features/EmailNotifications/DataStores/EmailTemplateDataStore.php:58
+#: src/Features/EmailNotifications/DataStores/EmailTemplateDataStore.php:59
 msgid "No email notification template found with the ID %s."
 msgstr "Aucun modèle de notification par email trouvé avec l'ID %s."
 
-#: src/Features/EmailNotifications/DataStores/EmailTemplateDataStore.php:67
+#: src/Features/EmailNotifications/DataStores/EmailTemplateDataStore.php:68
 msgid "The class for %s must implement the EmailTemplateContract interface"
 msgstr "La classe pour %s doit mettre en œuvre l'interface EmailTemplateContract."
 
-#: src/Features/EmailNotifications/DataStores/EmailTemplateDataStore.php:90
+#: src/Features/EmailNotifications/DataStores/EmailTemplateDataStore.php:91
 msgid "No template file found with the ID %s."
 msgstr "Aucun fichier de modèle trouvé avec l'ID %s."
 
 #: src/Features/EmailNotifications/DataStores/OptionsSettingsDataStore.php:40
-msgid "Invalid option name template \"%s\": it should contain a {{setting_id}} placeholder."
+msgid "Invalid template for the option name \"%s\": it should contain a {{setting_id}} placeholder."
 msgstr "Modèle de nom d'option « %s » non valide : il doit contenir un texte indicatif {{setting_id}}."
 
 #: src/Features/EmailNotifications/DataStores/SettingsDataStore.php:69
@@ -466,7 +610,7 @@ msgstr "Aucun paramètre trouvé avec l'ID %s."
 msgid "The class name for %s must implement ConfigurableContract"
 msgstr "Le nom de classe pour %s doit mettre en œuvre ConfigurableContract"
 
-#: src/Features/EmailNotifications/DataStores/WooCommerce/EmailNotificationDataStore.php:143
+#: src/Features/EmailNotifications/DataStores/WooCommerce/EmailNotificationDataStore.php:140
 msgid "No WooCommerce email found for \"%s\""
 msgstr "Aucun email WooCommerce trouvé pour « %s »."
 
@@ -542,12 +686,21 @@ msgstr "Facture client / détails de la commande"
 msgid "Emails containing order information and payment links sent manually."
 msgstr "Des courriels contenant des informations sur la commande et des liens de paiement sont envoyés manuellement."
 
+#. translators: %1$s Site title, %2$s Order pay link
+#: src/Features/EmailNotifications/Models/CustomerInvoiceEmailNotification.php:79
+msgid "An order has been created for you on %1$s. Your invoice is below, with a link to make payment when you’re ready: %2$s"
+msgstr "Une commande a été créée pour vous sur %1$s. Vous trouverez votre facture ci-dessous, avec un lien pour effectuer le paiement lorsque vous êtes prêt : %2$s"
+
+#: src/Features/EmailNotifications/Models/CustomerInvoiceEmailNotification.php:87
+msgid "Pay for this order"
+msgstr "Payer cette commande"
+
 #. translators: %s Order date
-#: src/Features/EmailNotifications/Models/CustomerInvoiceEmailNotification.php:76
+#: src/Features/EmailNotifications/Models/CustomerInvoiceEmailNotification.php:92
 msgid "Here are the details of your order placed on %s:"
 msgstr "Voici les détails de votre commande passée le %s :"
 
-#: src/Features/EmailNotifications/Models/CustomerInvoiceEmailNotification.php:92
+#: src/Features/EmailNotifications/Models/CustomerInvoiceEmailNotification.php:108
 msgid "Invoice for order #{{order_number}} on {{site_title}}"
 msgstr "Facture pour la commande N° {{order_number}} passée le {{site_title}}"
 
@@ -599,9 +752,9 @@ msgid "Email width"
 msgstr "Largeur de l'e-mail"
 
 #: src/Features/EmailNotifications/Models/DefaultEmailTemplate.php:132
-#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:442
+#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:443
 #: src/WooCommerce/Payments/Frontend/Views/MyPaymentMethods/PaymentMethodView.php:68
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:135
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:156
 msgid "Default"
 msgstr "Défaut"
 
@@ -679,7 +832,7 @@ msgid "Font size"
 msgstr "Taille de la police"
 
 #: src/Features/EmailNotifications/Models/EmailNotification.php:205
-#: src/WooCommerce/Payments/GoDaddyPayments/AbstractWalletGateway.php:281
+#: src/WooCommerce/Payments/GoDaddyPayments/AbstractWalletGateway.php:282
 msgid "Enabled"
 msgstr "Activé"
 
@@ -718,7 +871,7 @@ msgid "[{site_title}]: Order #{order_number} has failed"
 msgstr "[{site_title}] : La commande #{order_number} a échoué"
 
 #: src/Features/EmailNotifications/Models/ItemShippedEmailNotification.php:32
-#: src/WooCommerce/Emails/ItemShippedEmail.php:34
+#: src/WooCommerce/Emails/ItemShippedEmail.php:32
 msgid "Item shipped"
 msgstr "Article expédié"
 
@@ -929,15 +1082,238 @@ msgstr "Contacter le support technique"
 msgid "A 3rd-party email editing plugin has been detected on your store."
 msgstr "Une extension d'édition d'e-mails tierce a été détectée sur votre boutique."
 
+#. translators: %1$s opening strong tag; %2$s closing strong tag; %3$s opening anchor tag; %4$s closing anchor tag; %5$s opening anchor tag; %6$s closing anchor tag
+#: src/Features/ExternalDomainControls/Interceptors/DomainAttachNoticeInterceptor.php:92
+msgid "%1$sNote:%2$s Your site is using a temporary domain that cannot be indexed by search engines. Change your primary domain via the %3$sWoo store management area%4$s. Learn more about %5$sconnecting a domain%6$s."
+msgstr "%1$sNote :%2$s Votre site utilise un domaine temporaire qui ne peut pas être indexé par les moteurs de recherche. Changez votre domaine principal via la %3$szone de gestion de la boutique Woo%4$s. En savoir plus sur la %5$sconnexion d’un domaine%6$s."
+
+#. translators: %1$s opening anchor tag; %2$s closing anchor tag; %3$s opening anchor tag; %4$s closing anchor tag
+#: src/Features/ExternalDomainControls/Interceptors/DomainAttachNoticeInterceptor.php:102
+msgid "Change your primary domain via the %1$sWoo store management area%2$s. Learn more about %3$sconnecting a domain%4$s."
+msgstr "Changez votre domaine principal via la %1$szone de gestion de la boutique Woo%2$s. En savoir plus sur la %3$sconnexion d’un domaine%4$s."
+
+#: src/Features/GoDaddyPayments/Notices/AddBankInfoNotice.php:33
+msgid "Link bank account"
+msgstr "Lier le compte bancaire"
+
+#: src/Features/GoDaddyPayments/Notices/AddBankInfoNotice.php:34
+msgid "You've got money waiting with GoDaddy Payments! Add your banking info to get your payouts deposited."
+msgstr "Vous avez de l'argent qui vous attend avec GoDaddy Payments ! Ajoutez vos informations bancaires pour permettre le dépôt de vos paiements."
+
+#: src/Features/GoDaddyPayments/Notices/ApplePayEnabledNotice.php:21
+msgid "GoDaddy Payments - Apple Pay has been enabled on your selected pages and shows %1$sin Safari on supported devices%2$s."
+msgstr "GoDaddy Payments - Apple Pay a été activé sur vos pages sélectionnées et s'affiche %1$sdans Safari sur les appareils pris en charge%2$s."
+
+#: src/Features/GoDaddyPayments/Notices/ApplePayNoEnabledPagesNotice.php:23
+msgid "Please select the pages where Apple Pay should show."
+msgstr "Veuillez sélectionner les pages où Apple Pay doit apparaître."
+
+#: src/Features/GoDaddyPayments/Notices/ApplePayRegistrationFailedNotice.php:24
+msgid "There was a problem registering your site with Apple Pay. Please disable Apple Pay and try re-enabling, or %1$scontact support%2$s."
+msgstr "Un problème s’est produit lors de l'enregistrement de votre site avec Apple Pay. Veuillez désactiver Apple Pay et essayer de le réactiver, ou %1$scontactez le support technique%2$s."
+
+#: src/Features/GoDaddyPayments/Notices/BusinessConnectedNotice.php:24
+#: src/Features/GoDaddyPayments/Notices/BusinessEnabledNotice.php:23
+msgid "GoDaddy Payments successfully enabled!"
+msgstr "GoDaddy Payments a été activé !"
+
+#: src/Features/GoDaddyPayments/Notices/BusinessConnectedNotice.php:25
+#: src/Features/GoDaddyPayments/Notices/BusinessEnabledNotice.php:24
+msgid "GoDaddy Payments is now available to your customers at checkout."
+msgstr "Vos clients peuvent maintenant utiliser GoDaddy Payments au moment du paiement."
+
+#: src/Features/GoDaddyPayments/Notices/BusinessConnectedNotice.php:27
+msgid "GoDaddy Payments is now connected to your store!"
+msgstr "GoDaddy Payments est maintenant connecté à votre boutique !"
+
+#: src/Features/GoDaddyPayments/Notices/BusinessConnectedNotice.php:29
+#: src/Features/GoDaddyPayments/Notices/PoyntAlreadyIncludedNotice.php:21
+msgid "Enable GoDaddy Payments"
+msgstr "Activer GoDaddy Payments"
+
+#: src/Features/GoDaddyPayments/Notices/BusinessConnectedNotice.php:30
+msgid "Enable the payment method to add it to your checkout."
+msgstr "Activez le moyen de paiement pour l'ajouter à la procédure de paiement."
+
+#: src/Features/GoDaddyPayments/Notices/BusinessDisconnectedNotice.php:23
+msgid "Your GoDaddy Payments account has been closed."
+msgstr "Votre compte GoDaddy Payments a été fermé."
+
+#: src/Features/GoDaddyPayments/Notices/BusinessDisconnectedNotice.php:24
+msgid "The payment method has been disabled so it will not appear on your checkout. Please set up your account to resume processing payments."
+msgstr "Le moyen de paiement a été désactivé et n'apparaîtra donc pas au moment du paiement. Veuillez configurer votre compte pour reprendre le traitement des paiements."
+
+#: src/Features/GoDaddyPayments/Notices/BusinessIncompleteNotice.php:24
+msgid "It looks like you didn't finish your GoDaddy Payments application."
+msgstr "Il semble que vous n'ayez pas terminé votre demande pour GoDaddy Payments."
+
+#: src/Features/GoDaddyPayments/Notices/BusinessIncompleteNotice.php:26
+#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:232
+msgid "Resume"
+msgstr "Reprendre"
+
+#: src/Features/GoDaddyPayments/Notices/BusinessIncompleteNotice.php:27
+msgid "You're just a few minutes from processing payments."
+msgstr "Encore quelques minutes et vous serez en mesure de traiter les paiements."
+
+#: src/Features/GoDaddyPayments/Notices/BusinessSuspendedNotice.php:23
+msgid "Your GoDaddy Payments account needs attention."
+msgstr "Votre compte GoDaddy Payments exige votre attention."
+
+#: src/Features/GoDaddyPayments/Notices/BusinessSuspendedNotice.php:24
+msgid "The payment method has been disabled so it will not appear on your checkout. Please check your email for next steps."
+msgstr "Le moyen de paiement a été désactivé et n'apparaîtra donc pas au moment du paiement. Veuillez vérifier votre e-mail pour les prochaines étapes."
+
+#: src/Features/GoDaddyPayments/Notices/BusinessTerminatedNotice.php:23
+#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:330
+msgid "Your GoDaddy Payments account has been terminated."
+msgstr "Votre compte GoDaddy Payments a été résilié."
+
+#: src/Features/GoDaddyPayments/Notices/BusinessTerminatedNotice.php:24
+msgid "The payment method has been disabled so it will not appear on your checkout. Please check your email for more information."
+msgstr "Le moyen de paiement a été désactivé et n'apparaîtra donc pas au moment du paiement. Veuillez vérifier votre e-mail pour en savoir plus."
+
+#: src/Features/GoDaddyPayments/Notices/CompleteVerificationNotice.php:26
+#: src/Features/GoDaddyPayments/Notices/CompleteVerificationPastDueNotice.php:29
+#: src/Features/GoDaddyPayments/Notices/CompleteVerificationReminderNotice.php:29
+#: src/Features/GoDaddyPayments/Notices/CompleteVerificationWarningNotice.php:29
+msgid "Complete verification"
+msgstr "Terminer la vérification"
+
+#: src/Features/GoDaddyPayments/Notices/CompleteVerificationNotice.php:27
+msgid "You've got money waiting with GoDaddy Payments! Verify your identity and add your banking info to get your payouts deposited."
+msgstr "Vous avez de l'argent qui vous attend avec GoDaddy Payments ! Vérifiez votre identité et ajoutez vos informations bancaires pour permettre le dépôt de vos paiements."
+
+#: src/Features/GoDaddyPayments/Notices/CompleteVerificationPastDueNotice.php:30
+msgid "You haven't completed the necessary steps to verify your identity with GoDaddy Payments. Until you do that, you won't be able to take any payments or deposit your funds."
+msgstr "Vous n'avez pas effectué les étapes nécessaires pour vérifier votre identité avec GoDaddy Payments. Tant que vous n'aurez pas exécuté cette procédure, vous ne pourrez pas accepter les paiements ni déposer de fonds."
+
+#: src/Features/GoDaddyPayments/Notices/CompleteVerificationReminderNotice.php:30
+msgid "You've still got money waiting with GoDaddy Payments! Verify your identity and add your banking info as soon as you can to get your funds and keep taking payments."
+msgstr "Vous avez encore de l'argent qui vous attend avec GoDaddy Payments ! Vérifiez votre identité et ajoutez vos informations bancaires dès que possible pour obtenir vos fonds et continuer à recevoir des paiements."
+
+#: src/Features/GoDaddyPayments/Notices/CompleteVerificationWarningNotice.php:30
+msgid "The deadline to complete your payouts setup is coming up! To keep transacting with GoDaddy Payments and to get your money, verify your identity and add banking info."
+msgstr "La date limite pour terminer la configuration de vos paiements approche ! Pour continuer à effectuer des transactions avec GoDaddy Payments et obtenir votre argent, vérifiez votre identité et ajoutez vos informations bancaires."
+
+#: src/Features/GoDaddyPayments/Notices/ConnectedAccountNotice.php:27
+#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:287
+msgid "You're all set to take payments with GoDaddy Payments!"
+msgstr "Vous pouvez maintenant accepter des paiements par GoDaddy Payments !"
+
+#. translators: Placeholders: %1$s - <a> tag, %2$s - </a>
+#: src/Features/GoDaddyPayments/Notices/ConnectedAccountNotice.php:35
+#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:292
+msgid "To get your funds deposited to your bank account, verify your identity and add your banking info. %1$sSet up payouts%2$s"
+msgstr "Pour permettre le dépôt de vos fonds dans votre compte bancaire, vérifiez votre identité et ajoutez vos informations bancaires. %1$sConfigurer les paiements%2$s"
+
+#. translators: Placeholders: %1$s - a connected account's legal name, %2$s - a connected account's email address, %3$s - <a> tag, %4$s - </a>
+#: src/Features/GoDaddyPayments/Notices/ConnectedAccountNotice.php:42
+#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:300
+msgid "The connected GoDaddy Payments account is %1$s %2$s (Not the business owner's account? %3$sSwitch account%4$s)."
+msgstr "Le compte GoDaddy Payments connecté est %1$s %2$s (Ce n'est pas le compte du propriétaire du business ? %3$sChangez le compte%4$s)."
+
+#. translators: Placeholders: %1$s - a connected account's legal name, %2$s - a connected account's email address, %3$s - <a> tag, %4$s - </a>
+#: src/Features/GoDaddyPayments/Notices/ConnectedAccountSwitchedNotice.php:30
+#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:278
+msgid "GoDaddy Payments is now connected with the account %1$s %2$s. (Not right? %3$sSwitch account%4$s.)"
+msgstr "GoDaddy Payments est maintenant connecté au compte %1$s %2$s. (Ce n’est pas le bon compte ? %3$sChangez le compte%4$s.)"
+
+#: src/Features/GoDaddyPayments/Notices/GdpRegisterRecommendationNotice.php:28
+#: src/Features/GoDaddyPayments/Notices/GdpSipRecommendationNotice.php:28
+msgid "Get Started"
+msgstr "Commencer"
+
+#: src/Features/GoDaddyPayments/Notices/GdpRegisterRecommendationNotice.php:30
+#: src/Features/GoDaddyPayments/Notices/GdpSipRecommendationNotice.php:31
+#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:455
+#: src/WooCommerce/Views/Components/GoDaddyBranding.php:52
+msgid "Provided by GoDaddy"
+msgstr "Fourni par GoDaddy"
+
+#: src/Features/GoDaddyPayments/Notices/GdpRegisterRecommendationNotice.php:31
+msgid "Sell online and in person with GoDaddy Payments. Sync local pickup and delivery orders right to your Smart Terminal, then get paid fast with next-day deposits."
+msgstr "Vendez en ligne et en personne avec GoDaddy Payments. Synchronisez les commandes de prélèvement et de livraison locales directement sur votre terminal intelligent, puis faites-vous payer rapidement avec des versements le lendemain."
+
+#: src/Features/GoDaddyPayments/Notices/GdpSipRecommendationNotice.php:29
+msgid "Use GoDaddy Payments Selling in Person to sync local pickup and delivery orders to your Smart Terminal. Sell anything, anywhere and get paid fast with next-day deposits."
+msgstr "Utilisez la fonction Vente en personne de GoDaddy Payments pour synchroniser les commandes de prélèvement et de livraison locales sur votre terminal intelligent. Vendez ce que vous voulez, où vous le voulez et soyez payé rapidement par le biais de versements le lendemain."
+
+#: src/Features/GoDaddyPayments/Notices/GdpSipRecommendationNotice.php:32
+msgid "GoDaddy Selling in Person"
+msgstr "Vente en personne GoDaddy"
+
+#: src/Features/GoDaddyPayments/Notices/GdpUnsupportedCountryNotice.php:39
+msgid "Update Store"
+msgstr "Mettre à jour la boutique"
+
+#. translators: %s - list of supported countries
+#: src/Features/GoDaddyPayments/Notices/GdpUnsupportedCountryNotice.php:42
+msgid "GoDaddy Payments is available for businesses in %s. Please update your Store Address to use the payment method."
+msgstr "GoDaddy Payments est disponible pour les business établis dans les pays suivants : %s. Veuillez mettre à jour l’adresse de vote boutique pour utiliser le moyen de paiement."
+
+#: src/Features/GoDaddyPayments/Notices/GdpUnsupportedCurrencyForCurrentCountryNotice.php:42
+#: src/Features/GoDaddyPayments/Notices/GdpUnsupportedCurrencyNotice.php:37
+msgid "Change Currency"
+msgstr "Changer la devise"
+
+#. translators: %1$s - list of supported currencies, %2$s - store country
+#: src/Features/GoDaddyPayments/Notices/GdpUnsupportedCurrencyForCurrentCountryNotice.php:45
+msgid "GoDaddy Payments requires %1$s transactions for businesses in %2$s. Please change your Currency in order to use the payment method."
+msgstr "GoDaddy Payments exige des transactions en %1$s pour les business établis dans les pays suivants : %2$s. Veuillez changer votre devise afin de pouvoir utiliser ce moyen de paiement."
+
+#. translators: %s - list of supported currencies
+#: src/Features/GoDaddyPayments/Notices/GdpUnsupportedCurrencyNotice.php:40
+msgid "GoDaddy Payments requires %s transactions. Please change your Currency in order to use the payment method."
+msgstr "GoDaddy Payments requiert %s transactions. Veuillez changer votre devise afin de pouvoir utiliser ce moyen de paiement."
+
+#. translators: Placeholders: %1$s - <a> tag for the Google Pay docs link, %2$s - </a> tag
+#: src/Features/GoDaddyPayments/Notices/GooglePayEnabledNotice.php:22
+msgid "GoDaddy Payments - Google Pay has been enabled on your selected pages and shows %1$sin supported browsers and devices%2$s."
+msgstr "GoDaddy Payments - Google Pay a été activé sur vos pages sélectionnées et s’affiche %1$ssur les navigateurs et appareils pris en charge%2$s."
+
+#: src/Features/GoDaddyPayments/Notices/GooglePayNoEnabledPagesNotice.php:23
+msgid "Please select the pages where Google Pay should show."
+msgstr "Veuillez sélectionner les pages sur lesquelles Google Pay doit apparaître."
+
+#: src/Features/GoDaddyPayments/Notices/OnboardingErrorNotice.php:26
+msgid "There was an error connecting to GoDaddy Payments. Please try again."
+msgstr "Une erreur s'est produite lors de la connexion à GoDaddy Payments. Veuillez réessayer."
+
+#: src/Features/GoDaddyPayments/Notices/PoyntAlreadyIncludedNotice.php:22
+msgid "GoDaddy Payments (Poynt) is included for Managed WordPress customers without a separate plugin!"
+msgstr "GoDaddy Payments (Poynt) est inclus pour les clients ayant opté pour l’hébergement WordPress sans extension distincte !"
+
+#: src/Features/GoDaddyPayments/Notices/WooStagingNotice.php:23
+msgid "WooCommerce charges or authorizations/captures as well as refunds and voids made in your Staging site will process normally in your GoDaddy Payments account."
+msgstr "Les paiements ou les autorisations/imputations WooCommerce, de même que les remboursements et les annulations effectués sur votre site intermédiaire seront traités normalement dans votre compte GoDaddy Payments."
+
+#: src/Features/GoDaddyPayments/Traits/HasGoDaddyPaymentsUrlsTrait.php:43
+msgid "Commerce Home"
+msgstr "Accueil Commerce"
+
+#: src/Features/GoDaddyPayments/Traits/HasGoDaddyPaymentsUrlsTrait.php:47
+msgid "Payments Dashboard"
+msgstr "Tableau de bord des paiements"
+
+#: src/Features/GoDaddyPayments/Traits/HasGoDaddyPaymentsUrlsTrait.php:50
+msgid "GoDaddy Payments"
+msgstr "GoDaddy Payments"
+
+#: src/Features/Marketplaces/Adapters/OrderAdapter.php:265
+#: src/Features/Marketplaces/Adapters/OrderAdapter.php:266
+#: src/Payments/Poynt/Http/Adapters/SessionWalletRequestAdapter.php:197
+msgid "Tax"
+msgstr "Taxes"
+
 #: src/Features/Marketplaces/Handlers/SellbritePluginHandler.php:94
 msgid "The Sellbrite plugin is included in your hosting plan as GoDaddy Marketplaces. The plugin has been deactivated."
 msgstr "L’extension Sellbrite est incluse dans votre plan d'hébergement en tant que Places de marché GoDaddy. L’extension a été désactivée."
 
 #: src/Features/Marketplaces/Handlers/SellbritePluginHandler.php:95
 #: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:230
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:394
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:401
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:120
+#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:393
+#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:400
 msgid "Set up"
 msgstr "Configurer"
 
@@ -997,57 +1373,56 @@ msgstr "Canal de vente : %s"
 msgid "Sales Channel Order Number: %s"
 msgstr "Numéro de commande pour le canal de vente : %s"
 
-#: src/Features/Marketplaces/Interceptors/OrderInterceptor.php:209
+#: src/Features/Marketplaces/Interceptors/OrderInterceptor.php:166
 msgid "Return accepted via Walmart sales channel."
 msgstr "Retour accepté via le canal de vente Walmart."
 
 #. translators: Placeholders: %1$s - Opening HTML <a> link tag, %2$s - Closing HTML </a> link tag
-#: src/Features/Marketplaces/Interceptors/OrderInterceptor.php:232
+#: src/Features/Marketplaces/Interceptors/OrderInterceptor.php:189
 msgid "Return requested via Walmart sales channel. %1$sView request%2$s."
 msgstr "Retour demandé via le canal de vente Walmart. %1$sVoir la demande%2$s."
 
 #. translators: Placeholders: %1$s - opening HTML link tag <a> to products page, %2$s - closing HTML link tag </a>
-#: src/Features/Marketplaces/Marketplaces.php:275
+#: src/Features/Marketplaces/Marketplaces.php:291
 msgid "Create your first product listing by adding a new product or editing an existing one in WooCommerce. You can list a product on each of the marketplaces you've added. Once listed, the product info and inventory will sync automatically. Visit %1$sProducts%2$s to get started."
 msgstr "Créez votre première liste de produits : ajoutez un nouveau produit ou modifiez un produit existant dans WooCommerce. Vous pouvez lister un produit sur chacune des places de marché que vous avez ajoutées. Une fois le produit listé, les stocks et les informations sur le produit seront synchronisés automatiquement. Visitez %1$sProduits%2$s pour commencer."
 
-#: src/Features/Marketplaces/Marketplaces.php:285
+#: src/Features/Marketplaces/Marketplaces.php:301
 msgid "Welcome to GoDaddy Marketplaces!"
 msgstr "Bienvenue sur Places de marché GoDaddy !"
 
-#: src/Features/Marketplaces/Marketplaces.php:310
+#: src/Features/Marketplaces/Marketplaces.php:326
 msgid "Your store address must be in the US and currency US dollars in order to sync products, inventory, and orders with Marketplaces & Social sales channels."
 msgstr "L'adresse de votre boutique doit être aux États-Unis et vous devez utiliser le dollar américain la comme devise afin de synchroniser les produits, les stocks et les commandes avec les canaux de vente Places de marché et médias sociaux."
 
-#: src/Features/Marketplaces/Marketplaces.php:326
+#: src/Features/Marketplaces/Marketplaces.php:342
 msgid "Your store weight and dimensions units must be in \"lbs\" and \"in\" in order to sync products, inventory, and orders with Marketplaces & Social sales channels."
 msgstr "Les unités de poids et de taille de votre boutique doivent être exprimées en « lb » et en « po » afin de synchroniser les produits, les stocks et les commandes avec les canaux de vente Places de marché et médias sociaux."
 
-#: src/Features/Marketplaces/Marketplaces.php:327
-#: src/Features/Marketplaces/Marketplaces.php:370
+#: src/Features/Marketplaces/Marketplaces.php:343
+#: src/Features/Marketplaces/Marketplaces.php:386
 msgid "Update settings"
 msgstr "Mettre à jour les réglages"
 
-#: src/Features/Marketplaces/Marketplaces.php:369
+#: src/Features/Marketplaces/Marketplaces.php:385
 msgid "Stock management must be enabled in order to sync products, inventory, and orders with Marketplaces & Social sales channels."
 msgstr "La gestion des stocks doit être activée afin de synchroniser les produits, les stocks et les commandes avec les canaux de vente Places de marché et médias sociaux."
 
-#: src/Features/Marketplaces/Marketplaces.php:418
+#: src/Features/Marketplaces/Marketplaces.php:434
 msgid "Product, inventory, and order syncing is disabled in Staging to prevent conflicts with your Production site."
 msgstr "La synchronisation des produits, des stocks et des commandes est désactivée dans la phase intermédiaire pour éviter les conflits avec votre site de production."
 
 #. translators: Placeholders: %1$s - opening HTML link tag <a> to products page, %2$s - closing HTML link tag </a>
-#: src/Features/Marketplaces/Marketplaces.php:434
+#: src/Features/Marketplaces/Marketplaces.php:450
 msgid "You've used 90&#37; of your included monthly Marketplaces and Social orders. Upgrade soon to process more orders. %1$sUpgrade Plan%2$s"
 msgstr "Vous avez utilisé 90&#37; de vos commandes mensuelles incluses sur les places de marché et les médias sociaux. Mettez bientôt à niveau pour traiter davantage de commandes. %1$sMettre à niveau l’offre%2$s"
 
 #. translators: Placeholders: %1$s - opening HTML link tag <a> to products page, %2$s - closing HTML link tag </a>
-#: src/Features/Marketplaces/Marketplaces.php:460
+#: src/Features/Marketplaces/Marketplaces.php:476
 msgid "You've used all your included monthly Marketplaces and Social orders. Upgrade now to process more orders. %1$sUpgrade Plan%2$s"
 msgstr "Vous avez utilisé toutes vos commandes mensuelles incluses sur les places de marché et les médias sociaux. Mettez à niveau maintenant pour traiter davantage de commandes. %1$sMettre à niveau l’offre%2$s"
 
 #: src/Features/Marketplaces/Pages/EditOrder/Fields/MarketplacesFields.php:102
-#: src/Features/Marketplaces/Pages/Orders/Columns/SalesChannelColumn.php:33
 msgid "Sales Channel"
 msgstr "Canal de ventes"
 
@@ -1055,171 +1430,185 @@ msgstr "Canal de ventes"
 msgid "Sales Channel Order Number"
 msgstr "Numéro de commande pour le canal de vente"
 
-#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:71
-#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:137
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:81
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:155
 msgid "Product Brand"
 msgstr "Marque du produit"
 
-#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:76
-#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:145
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:86
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:162
 msgid "Product Condition"
 msgstr "Condition du produit"
 
-#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:95
-#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:153
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:91
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:167
+msgctxt "Product condition"
+msgid "New"
+msgstr "Nouveau"
+
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:92
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:168
+msgctxt "Product condition"
+msgid "Used"
+msgstr "Utilisé"
+
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:93
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:169
+msgctxt "Product condition"
+msgid "Refurbished"
+msgstr "Reconditionné"
+
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:113
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:177
 msgid "Global Trade Item Number"
 msgstr "Numéro d'article du commerce mondial"
 
-#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:95
-#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:153
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:113
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:177
 msgctxt "Global Trade Item Number (GTIN)"
 msgid "GTIN"
 msgstr "GTIN"
 
-#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:96
-#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:154
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:114
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:178
 msgid "A Global Trade Item Number is used to uniquely identify your product on Marketplaces & Social product listings. It can be found next to the barcode."
 msgstr "Un numéro d'article du commerce mondial (GTIN) est utilisé pour identifier de façon unique votre produit dans les listes de produits sur les places de marché et les médias sociaux. Il se trouve à côté du code-barres."
 
-#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:102
-#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:163
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:120
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:187
 msgid "Manufacturer Part Number"
 msgstr "Numéro de pièce du fabricant"
 
-#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:102
-#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:163
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:120
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:187
 msgctxt "Manufacturer Part Number (MPN)"
 msgid "MPN"
 msgstr "MPN"
 
-#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:103
-#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:164
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:121
+#: src/Features/Marketplaces/Pages/EditProduct/Fields/MarketplacesFields.php:188
 msgid "A Manufacturer Part Number is used to uniquely identify your product on Marketplaces & Social product listings. Only use the MPN assigned by the manufacturer."
 msgstr "Un numéro de pièce du fabricant (MPN) est utilisé pour identifier de façon unique votre produit dans les listes de produits sur les places de marché et les médias sociaux. Utilisez uniquement le MPN attribué par le fabricant."
 
-#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:54
+#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:53
 msgid "Marketplaces & Social"
 msgstr "Marchés et médias sociaux"
 
-#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:218
+#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:217
 msgid "You haven't connected this sales channel yet."
 msgstr "Vous n'avez pas encore connecté ce canal de vente."
 
-#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:222
+#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:221
 msgid "Connect Sales Channel"
 msgstr "Connecter un canal de vente"
 
 #. translators: Placeholders: %s: Marketplaces channel name (e.g. Amazon, eBay, Facebook, etc.)
-#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:246
+#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:245
 msgid "This product hasn't been listed on %s yet."
 msgstr "Ce produit n'a pas encore été listé sur %s."
 
-#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:251
+#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:250
 msgid "Create Draft Listing"
 msgstr "Créer un brouillon de liste"
 
 #. translators: Placeholders: %1$s - Opening <a> HTML link tag, %2$s - Closing </a> HTML link tag
-#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:260
+#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:259
 msgid "A draft listing will be automatically created once the product meets the requirements below. %1$sLearn more about product sync%2$s"
 msgstr "Un brouillon de liste sera automatiquement créé lorsque le produit répondra aux prérequis ci-dessous. %1$sEn savoir plus sur la synchronisation des produits%2$s"
 
 #. translators: Placeholders: %1%s - Opening HTML <a> link tag, %2$s - Closing HTML </a> link tag
-#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:267
+#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:266
 msgid "The requirements below must be met in order to list this product. %1$sLearn more about product sync%2$s"
 msgstr "Les conditions ci-dessous doivent être remplies pour vous permettre de lister ce produit. %1$sEn savoir plus sur la synchronisation des produits%2$s"
 
-#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:274
+#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:273
 msgctxt "Product property requirement"
 msgid "Simple or variable product (not virtual or downloadable)"
 msgstr "Produit simple ou variable (non virtuel ou téléchargeable)"
 
-#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:275
+#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:274
 msgctxt "Product property requirement"
 msgid "Published product"
 msgstr "Produit publié"
 
-#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:276
+#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:275
 msgctxt "Product property requirement"
 msgid "Product SKU must be set"
 msgstr "L'UGS du produit doit être définie"
 
-#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:277
+#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:276
 msgctxt "Product property requirement"
 msgid "Manage stock enabled and stock quantity > 0"
 msgstr "Gestion du stock activée et quantité en stock > 0"
 
-#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:278
+#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:277
 msgctxt "Product property requirement"
 msgid "No backorders allowed"
 msgstr "Aucune commande en attente n'est autorisée"
 
-#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:279
+#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:278
 msgctxt "Product property requirement"
 msgid "Brand and Condition fields filled"
 msgstr "Champs Marque et Condition renseignés"
 
 #. translators: Placeholders: %s Marketplaces channel name (e.g. Amazon, eBay, Facebook, etc.)
-#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:320
+#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:319
 msgid "A draft listing has been created for this product on %s."
 msgstr "Un brouillon de liste a été créé pour ce produit sur %s."
 
-#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:324
+#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:323
 msgid "View Draft Listing"
 msgstr "Voir le brouillon de liste"
 
 #. translators: Placeholders: %s Marketplaces channel name (e.g. Amazon, eBay, Facebook, etc.)
-#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:348
+#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:347
 msgid "This product has been listed on %s."
 msgstr "Ce produit a été listé sur %s."
 
-#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:351
+#: src/Features/Marketplaces/Pages/EditProduct/Metaboxes/MarketplacesMetabox.php:350
 msgid "Edit Listing"
 msgstr "Modifier la liste"
 
-#: src/Features/Marketplaces/Pages/MarketplacesPage.php:177
+#: src/Features/Marketplaces/Pages/MarketplacesPage.php:195
 msgid "Manage Sales Channels"
 msgstr "Gérer les canaux de vente"
 
-#: src/Features/Marketplaces/Pages/MarketplacesPage.php:210
+#: src/Features/Marketplaces/Pages/MarketplacesPage.php:228
 msgid "Marketplaces &amp; Social"
 msgstr "Places de marché et médias sociaux"
 
-#: src/Features/Marketplaces/Pages/MarketplacesPage.php:231
+#: src/Features/Marketplaces/Pages/MarketplacesPage.php:251
 msgid "Manage Listing Templates"
 msgstr "Gérer les modèles de listes"
 
-#: src/Features/Marketplaces/Pages/MarketplacesPage.php:245
+#: src/Features/Marketplaces/Pages/MarketplacesPage.php:265
 msgid "You haven't added any sales channels yet. Add sales channels in order to post your listings on third party marketplaces and social platforms."
 msgstr "Vous n'avez pas encore ajouté de canaux de vente. Ajoutez des canaux de vente afin de publier vos listes sur des plateformes sociales et des places de marché tierces."
 
-#: src/Features/Marketplaces/Pages/MarketplacesPage.php:260
+#: src/Features/Marketplaces/Pages/MarketplacesPage.php:279
 msgctxt "Refreshes the page"
 msgid "Refresh"
 msgstr "Réactualiser"
 
-#: src/Features/Marketplaces/Pages/MarketplacesPage.php:267
+#: src/Features/Marketplaces/Pages/MarketplacesPage.php:286
 msgid "Add Sales Channel"
 msgstr "Ajouter un canal de vente"
 
-#: src/Features/Marketplaces/Pages/MarketplacesPage.php:280
+#: src/Features/Marketplaces/Pages/MarketplacesPage.php:299
 msgid "Resources"
 msgstr "Ressources"
 
-#: src/Features/Marketplaces/Pages/MarketplacesPage.php:281
+#: src/Features/Marketplaces/Pages/MarketplacesPage.php:300
 msgid "What is Marketplaces &amp; Social?"
 msgstr "Qu’est-ce que Places de marché et médias sociaux ?"
 
-#: src/Features/Marketplaces/Pages/MarketplacesPage.php:283
+#: src/Features/Marketplaces/Pages/MarketplacesPage.php:302
 msgid "How to connect sales channels"
 msgstr "Comment connecter les canaux de vente"
 
-#: src/Features/Marketplaces/Pages/MarketplacesPage.php:285
+#: src/Features/Marketplaces/Pages/MarketplacesPage.php:304
 msgid "What products are eligible for Marketplaces & Social sales channels?"
 msgstr "Quels produits sont éligibles pour les canaux de ventes Places de marché et médias sociaux ?"
-
-#: src/Features/Marketplaces/Pages/MarketplacesPage.php:287
-msgid "Share feedback"
-msgstr "Partagez votre retour d’information"
 
 #: src/Features/Onboarding/API/Controllers/OnboardingSettingsController.php:119
 msgid "A non-empty settings parameter must be provided."
@@ -1295,193 +1684,202 @@ msgctxt "Menu title for the WooCommerce > Home page"
 msgid "Home"
 msgstr "Accueil"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:21
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:23
 msgid "First time"
 msgstr "Première fois"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:46
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:48
 msgid "Store name"
 msgstr "Nom de la boutique"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:59
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:61
 msgid "Store address 1"
 msgstr "Adresse de la boutique 1"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:73
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:75
 msgid "Store address 2"
 msgstr "Adresse de la boutique 2"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:87
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:89
+msgctxt "The country's region"
 msgid "Country Region"
 msgstr "Pays Région"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:101
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:103
 msgid "City"
 msgstr "Ville"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:115
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:117
 msgid "Postal code"
 msgstr "Code postal"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:129
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:131
 msgid "Currency"
 msgstr "Devise"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:143
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:145
 msgid "Left aligned"
 msgstr "Aligné à gauche"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:144
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:146
 msgid "Right aligned"
 msgstr "Aligné à droite"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:145
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:147
 msgid "Left aligned with space"
 msgstr "Aligné à gauche avec un espace"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:146
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:148
 msgid "Right aligned with space"
 msgstr "Aligné à droite avec un espace"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:150
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:152
 msgid "Currency position"
 msgstr "Position de la devise"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:169
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:226
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:171
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:228
 msgid "All countries"
 msgstr "Tous les pays"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:170
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:172
 msgid "Sell to all countries, except for..."
 msgstr "Vendre à tous les pays, sauf..."
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:171
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:194
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:173
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:196
 msgid "Sell to specific countries"
 msgstr "Vendre à des pays spécifiques"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:175
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:177
 msgid "Selling locations"
 msgstr "Lieux de vente"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:209
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:211
 msgid "Sell to all countries except for"
 msgstr "Vendre à tous les pays, à l’exception de"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:225
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:227
 msgid "Ship to all countries you sell to"
 msgstr "Expédier vers tous les pays dans lesquels vous vendez"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:227
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:229
 msgid "Ship to specific countries only"
 msgstr "Expédier uniquement vers des pays spécifiques"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:228
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:230
 msgid "Disable shipping & shipping calculations"
 msgstr "Désactiver l'expédition et le calcul des frais de port"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:232
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:234
 msgid "Shipping locations"
 msgstr "Lieux d'expédition"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:251
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:253
 msgid "Ship to specific countries"
 msgstr "Expédier à des pays spécifiques"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:266
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:268
 msgid "Thousands separator"
 msgstr "Séparateur des milliers"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:280
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:282
 msgid "Decimal separator"
 msgstr "Séparateur décimal"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:294
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:296
 msgid "Number of decimals"
 msgstr "Nombre de décimales"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:308
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:310
 msgid "Kilograms"
 msgstr "Kilogrammes"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:309
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:311
 msgid "Grams"
 msgstr "Grammes"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:310
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:312
 msgid "Pounds"
 msgstr "Livres"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:311
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:313
 msgid "Ounces"
 msgstr "Onces"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:315
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:317
 msgid "Weight units"
 msgstr "Unités de poids"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:334
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:336
 msgid "Meters"
 msgstr "Mètres"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:335
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:337
 msgid "Centimeters"
 msgstr "Centimètres"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:336
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:338
 msgid "Millimeters"
 msgstr "Millimètres"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:337
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:339
 msgid "Inches"
 msgstr "Pouces"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:338
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:340
 msgid "Yards"
 msgstr "Yards"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:342
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:344
 msgid "Dimension units"
 msgstr "Unités de dimension"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:361
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:363
 msgid "Enable taxes"
 msgstr "Activer les taxes"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:375
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:377
 msgid "Last onboarding step"
 msgstr "Dernière étape de l'intégration"
 
-#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:388
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:390
 msgid "Completed"
 msgstr "Terminé"
+
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:406
+msgid "Store selector dismissed"
+msgstr "Sélecteur de boutique ignoré"
+
+#: src/Features/Onboarding/Settings/OnboardingSettingFactory.php:421
+msgid "Dismissed"
+msgstr "Ignoré"
 
 #: src/Features/Onboarding/Settings/Settings.php:25
 msgid "Onboarding"
 msgstr "Intégration"
 
-#: src/Features/SequentialOrderNumbers/Settings/SequentialOrderNumbersSettings.php:42
+#: src/Features/SequentialOrderNumbers/Settings/SequentialOrderNumbersSettings.php:43
 msgid "Order Numbers"
 msgstr "Numéros de commande"
 
-#: src/Features/SequentialOrderNumbers/Settings/SequentialOrderNumbersSettings.php:58
+#: src/Features/SequentialOrderNumbers/Settings/SequentialOrderNumbersSettings.php:60
 msgid "Starting number"
 msgstr "Numéro de départ"
 
-#: src/Features/SequentialOrderNumbers/Settings/SequentialOrderNumbersSettings.php:68
+#: src/Features/SequentialOrderNumbers/Settings/SequentialOrderNumbersSettings.php:70
 msgid "Prefix"
 msgstr "Préfixe"
 
-#: src/Features/SequentialOrderNumbers/Settings/SequentialOrderNumbersSettings.php:78
+#: src/Features/SequentialOrderNumbers/Settings/SequentialOrderNumbersSettings.php:80
 msgid "Suffix"
 msgstr "Suffixe"
 
-#: src/Features/SequentialOrderNumbers/Settings/SequentialOrderNumbersSettings.php:88
+#: src/Features/SequentialOrderNumbers/Settings/SequentialOrderNumbersSettings.php:90
 msgid "Skip free orders"
 msgstr "Ignorer les commandes gratuites"
 
-#: src/Features/SequentialOrderNumbers/Settings/SequentialOrderNumbersSettings.php:98
+#: src/Features/SequentialOrderNumbers/Settings/SequentialOrderNumbersSettings.php:100
 msgid "Free order identifier"
 msgstr "Identificateur des commandes gratuites"
 
@@ -1522,7 +1920,6 @@ msgid "The shipping provider for the shipment."
 msgstr "Le prestataire d’expédition pour l'envoi."
 
 #: src/Features/Shipping/API/Controllers/Orders/Shipments/ShippingLabelsController.php:340
-#: src/Features/Shipping/API/Controllers/Orders/ShippingRatesController.php:278
 msgid "The label for a custom shipping provider."
 msgstr "L'étiquette pour un prestataire d'expédition personnalisé."
 
@@ -1579,6 +1976,11 @@ msgstr "L’étiquette d'expédition retournée par le prestataire d'expédition
 msgid "The shipment object associated with the shipping rates."
 msgstr "L'objet d'envoi associé aux tarifs d'expédition."
 
+#: src/Features/Shipping/API/Controllers/Orders/ShippingRatesController.php:278
+msgctxt "Display title, not physical label"
+msgid "The label for a custom shipping provider."
+msgstr "L'étiquette pour un prestataire d'expédition personnalisé."
+
 #: src/Features/Shipping/API/Controllers/Orders/ShippingRatesController.php:337
 msgid "The shipping rates returned by the shipping provider."
 msgstr "Les tarifs d'expédition indiqués par le prestataire d'expédition."
@@ -1590,6 +1992,11 @@ msgstr "Téléphone"
 #: src/Features/Shipping/Interceptors/AddPhoneNumberToStoreAddressInterceptor.php:44
 msgid "The phone number of your business."
 msgstr "Le numéro de téléphone de votre business."
+
+#: src/Features/Shipping/Interceptors/RedirectToShippingDashboardInterceptor.php:157
+msgctxt "GoDaddy name sent as brand name for the ShipEngine integration"
+msgid "GoDaddy"
+msgstr "GoDaddy"
 
 #: src/Features/Shipping/Interceptors/ShippingLabelsSettingsSectionInterceptor.php:82
 msgid "Shipping labels"
@@ -1608,47 +2015,47 @@ msgctxt "shipping provider name"
 msgid "ShipEngine"
 msgstr "ShipEngine"
 
-#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:149
-#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:358
+#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:150
+#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:359
 msgid "User does not have permission to manage WooCommerce"
 msgstr "L'utilisateur n'est pas autorisé à gérer WooCommerce"
 
 #. translators: Placeholders: %s - error message from the MWC API
-#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:165
+#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:166
 msgid "Could not create connection: %s"
 msgstr "Impossible de créer la connexion : %s"
 
-#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:171
+#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:172
 msgid "No redirect available"
 msgstr "Aucune redirection disponible"
 
-#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:496
-#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:506
+#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:497
+#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:507
 #: src/Payments/Adapters/PaymentTransactionMessageAdapter.php:33
 #: src/WooCommerce/Payments/Frontend/ExternalCheckout/WalletCheckoutIntegration.php:90
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/PaymentForm.php:62
+#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/PaymentForm.php:63
 #: src/WooCommerce/Payments/Integrations/SubscriptionsIntegration.php:177
-#: src/WooCommerce/Payments/Stripe/Frontend/PaymentForm.php:89
+#: src/WooCommerce/Payments/Stripe/Frontend/PaymentForm.php:109
 msgid "An error occurred, please try again or try an alternate form of payment."
 msgstr "Une erreur s'est produite. Veuillez réessayer ou utiliser un autre moyen de paiement."
 
-#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:504
+#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:505
 msgid "An error occurred while processing the payment: "
 msgstr "Une erreur s'est produite lors du traitement du paiement : "
 
-#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:545
+#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:546
 msgid "Payment method successfully added."
 msgstr "Moyen de paiement ajouté avec succès."
 
-#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:547
+#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:548
 msgid "Unable to add payment method to your account. Please try again."
 msgstr "Impossible d'ajouter un moyen de paiement à votre compte. Veuillez réessayer."
 
-#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:584
+#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:585
 msgid "Payment method could not be saved. %s"
 msgstr "Impossible d’enregistrer le moyen de paiement. %s"
 
-#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:638
+#: src/Features/Stripe/Interceptors/RedirectInterceptor.php:639
 msgid "Payment method updated."
 msgstr "Moyen de paiement mis à jour."
 
@@ -1671,6 +2078,7 @@ msgid " %1$s ending in %2$s (expires %3$s/%4$s)"
 msgstr " %1$s se terminant par %2$s (expire en %3$s/%4$s)"
 
 #: src/Payments/Adapters/PaymentTransactionOrderNoteAdapter.php:33
+#: src/WooCommerce/Payments/Events/Subscribers/TransactionAvsOrderNotesSubscriber.php:34
 #: src/WooCommerce/Payments/GoDaddyPayments/AbstractWalletGateway.php:181
 msgid "Card"
 msgstr "Carte"
@@ -1816,25 +2224,29 @@ msgstr "Si le client doit être autorisé à saisir des codes promo."
 msgid "A list of wallets to disable."
 msgstr "Une liste des portefeuilles à désactiver"
 
-#: src/Payments/API/Controllers/GoDaddyPaymentsController.php:155
+#: src/Payments/API/Controllers/GoDaddyPaymentsController.php:160
 msgid "Application ID."
 msgstr "ID d'application."
 
-#: src/Payments/API/Controllers/GoDaddyPaymentsController.php:161
+#: src/Payments/API/Controllers/GoDaddyPaymentsController.php:166
 msgid "Business ID."
 msgstr "ID de business."
 
-#: src/Payments/API/Controllers/GoDaddyPaymentsController.php:167
+#: src/Payments/API/Controllers/GoDaddyPaymentsController.php:172
 msgid "List of available features."
 msgstr "Liste des fonctionnalités disponibles."
 
-#: src/Payments/API/Controllers/GoDaddyPaymentsController.php:181
+#: src/Payments/API/Controllers/GoDaddyPaymentsController.php:186
 msgid "Whether the payment gateway is enabled."
 msgstr "Si la passerelle de paiement est activée."
 
-#: src/Payments/API/Controllers/GoDaddyPaymentsController.php:187
+#: src/Payments/API/Controllers/GoDaddyPaymentsController.php:192
 msgid "Payment gateway connection status."
 msgstr "État de la connexion à la passerelle de paiement."
+
+#: src/Payments/API/Controllers/GoDaddyPaymentsController.php:210
+msgid "Nonce for switching accounts."
+msgstr "Nonce pour le changement de comptes."
 
 #: src/Payments/API/Controllers/ProviderProcessingController.php:224
 msgid "Invalid phone number."
@@ -1867,40 +2279,45 @@ msgid "Error %d: Unable to create order. Please try again."
 msgstr "Erreur %d : Impossible de créer une commande. Veuillez réessayer."
 
 #: src/Payments/DataStores/WooCommerce/OrderPaymentTransactionDataStore.php:38
-#: src/WooCommerce/Payments/VirtualTerminal.php:102
+#: src/WooCommerce/Payments/VirtualTerminal.php:121
 msgid "Virtual Terminal"
 msgstr "Terminal virtuel"
 
-#: src/Payments/Poynt/Events/Producers/PushTransactionsProducer.php:264
-#: src/Payments/Poynt/Events/Producers/PushTransactionsProducer.php:269
+#. translators: Placeholder: %s - payment method name
+#: src/Payments/Poynt/Events/Producers/PushTransactionsProducer.php:271
+#: src/Payments/Poynt/Events/Producers/PushTransactionsProducer.php:277
 msgid "Paid in WooCommerce checkout by \"%s\""
 msgstr "Payé au moment au paiement dans WooCommerce par « %s »."
 
-#: src/Payments/Poynt/Events/Subscribers/TransactionWebhookReceivedSubscriber.php:776
+#: src/Payments/Poynt/Events/Subscribers/TransactionWebhookReceivedSubscriber.php:760
 msgid "Tip"
 msgstr "Pourboire"
 
-#: src/Payments/Poynt/Events/Subscribers/TransactionWebhookReceivedSubscriber.php:781
+#: src/Payments/Poynt/Events/Subscribers/TransactionWebhookReceivedSubscriber.php:765
 msgid "Cashback"
 msgstr "Cashback"
 
 #. translators: Placeholders: %1$s - item fee name, %2$s - item fee amount
-#: src/Payments/Poynt/Events/Subscribers/TransactionWebhookReceivedSubscriber.php:812
+#: src/Payments/Poynt/Events/Subscribers/TransactionWebhookReceivedSubscriber.php:796
 msgid "%1$s amount of %2$s added to order by GoDaddy Payments Smart Terminal"
 msgstr "Montant %1$s de %2$s ajouté à la commande par le terminal intelligent de GoDaddy Payments"
 
-#: src/Payments/Poynt/Events/Subscribers/TransactionWebhookReceivedSubscriber.php:956
+#: src/Payments/Poynt/Events/Subscribers/TransactionWebhookReceivedSubscriber.php:940
 msgid "From GoDaddy Payments Hub. Order fully refunded."
 msgstr "Depuis le centre des paiements GoDaddy. Commande entièrement remboursée."
 
-#: src/Payments/Poynt/Events/Subscribers/TransactionWebhookReceivedSubscriber.php:959
+#: src/Payments/Poynt/Events/Subscribers/TransactionWebhookReceivedSubscriber.php:943
 msgid "From GoDaddy Payments Hub. Order partially refunded."
 msgstr "Depuis le centre des paiements GoDaddy. Commande partiellement remboursée"
 
 #. translators: Placeholders: %1$s - date, %2$s time
-#: src/Payments/Poynt/Events/Subscribers/WebhookSubscriber.php:299
+#: src/Payments/Poynt/Events/Subscribers/WebhookSubscriber.php:347
 msgid "Order marked ready on terminal on %1$s at %2$s"
 msgstr "Commande marquée comme prête sur le terminal le %1$s à %2$s."
+
+#: src/Payments/Poynt/Http/Adapters/CardPaymentMethodAdapter.php:134
+msgid "Your billing address doesn't match your payment card information. Please update the billing address to submit your order."
+msgstr "Votre adresse de facturation ne correspond pas aux informations de votre carte de paiement. Veuillez mettre à jour l'adresse de facturation pour envoyer votre commande."
 
 #: src/Payments/Poynt/Http/Adapters/SessionWalletRequestAdapter.php:90
 msgid "Coupon code"
@@ -1918,20 +2335,16 @@ msgstr "Rabais"
 msgid "Shipping"
 msgstr "Expédition"
 
-#: src/Payments/Poynt/Http/Adapters/SessionWalletRequestAdapter.php:197
-msgid "Tax"
-msgstr "Taxes"
-
 #: src/Payments/Poynt/Http/Adapters/SessionWalletRequestAdapter.php:264
 msgid "Wallet payments cannot be used for carts with multiple shipments."
 msgstr "Les paiements par portefeuille ne peuvent pas être utilisés pour les paniers contenant plusieurs envois."
 
 #. translators: %1$s: payment gateway name
-#: src/Payments/Poynt/OrderSynchronization.php:331
+#: src/Payments/Poynt/OrderSynchronization.php:336
 msgid "Transaction refunded by %1$s from WooCommerce."
 msgstr "Transaction remboursée par %1$s depuis WooCommerce."
 
-#: src/Payments/Poynt/OrderSynchronization.php:333
+#: src/Payments/Poynt/OrderSynchronization.php:338
 msgid "Transaction manually refunded from WooCommerce."
 msgstr "Transaction remboursée manuellement depuis WooCommerce."
 
@@ -1939,19 +2352,19 @@ msgstr "Transaction remboursée manuellement depuis WooCommerce."
 msgid "Order is ready for pickup."
 msgstr "La commande est prête à être prélevée."
 
-#: src/WooCommerce/Emails/ItemShippedEmail.php:35
+#: src/WooCommerce/Emails/ItemShippedEmail.php:33
 msgid "Item shipped emails are sent to customers when tracking information is added for one or more items in their orders."
 msgstr "Les courriels de produits expédiés sont envoyés aux clients lorsque les informations de suivi sont ajoutées à un ou plusieurs articles dans leur commande."
 
-#: src/WooCommerce/Emails/ItemShippedEmail.php:60
+#: src/WooCommerce/Emails/ItemShippedEmail.php:56
 msgid "An item from {site_title} order #{order_number} has shipped!"
 msgstr "Un article de la commande {site_title} #{order_number} a été expédié !"
 
-#: src/WooCommerce/Emails/ItemShippedEmail.php:70
+#: src/WooCommerce/Emails/ItemShippedEmail.php:64
 msgid "Your package is on the way!"
 msgstr "Votre colis est en route !"
 
-#: src/WooCommerce/Emails/ItemShippedEmail.php:80
+#: src/WooCommerce/Emails/ItemShippedEmail.php:72
 msgid "Please note that it may take some time for the carrier to update shipment tracking information."
 msgstr "Veuillez noter que la mise à jour des informations de suivi des envois par le transporteur peut prendre un certain temps."
 
@@ -1971,51 +2384,56 @@ msgstr "La commande que vous avez passée sur {site_title} est prête pour prél
 msgid "Order ready for pickup!"
 msgstr "Commande prête pour le prélèvement !"
 
-#: src/WooCommerce/Pages/EditOrder/Metaboxes/ShipmentTrackingMetabox.php:33
+#: src/WooCommerce/ExtensionsTab.php:174
+msgid "GoDaddy Included"
+msgstr "GoDaddy Included"
+
+#: src/WooCommerce/Pages/EditOrder/Metaboxes/ShipmentTrackingMetabox.php:35
 msgid "Shipment Tracking"
 msgstr "Suivi des envois"
 
 #. translators: Placeholder: %s - payment gateway method title
-#: src/WooCommerce/Payments/AbstractPaymentGateway.php:631
+#: src/WooCommerce/Payments/AbstractPaymentGateway.php:634
 msgid "%s Virtual Terminal"
 msgstr "Terminal virtuel %s"
 
-#: src/WooCommerce/Payments/Captures.php:92
+#: src/WooCommerce/Payments/Captures.php:93
 msgid "No gateway found for order"
 msgstr "Aucune passerelle trouvée pour la commande"
 
-#: src/WooCommerce/Payments/Captures.php:173
-#: src/WooCommerce/Payments/Captures.php:295
+#: src/WooCommerce/Payments/Captures.php:195
+#: src/WooCommerce/Payments/Captures.php:317
 msgid "Capture Charge"
 msgstr "Saisir le montant"
 
-#: src/WooCommerce/Payments/Captures.php:287
+#: src/WooCommerce/Payments/Captures.php:309
 msgid "This charge has been fully captured"
 msgstr "Ce montant a été saisi"
 
-#: src/WooCommerce/Payments/Captures.php:305
+#: src/WooCommerce/Payments/Captures.php:327
 msgid "Are you sure you wish to process this capture? The action cannot be undone."
 msgstr "Souhaitez-vous vraiment traiter cette saisie ? Cette action ne peut pas être annulée."
 
-#: src/WooCommerce/Payments/Captures.php:306
+#: src/WooCommerce/Payments/Captures.php:328
 msgid "Something went wrong, and the capture could not be completed. Please try again."
 msgstr "Un problème s’est produit et la saisie n'a pas pu être effectuée. Veuillez réessayer."
+
+#. translators: Placeholders: %1s - the provider label, %2s - the payment method brand label, %3$s - the last four digits of the customer's credit card
+#: src/WooCommerce/Payments/Events/Subscribers/TransactionAvsOrderNotesSubscriber.php:32
+msgid "%1s transaction declined due to billing address mismatch for %2s ending in %3$s."
+msgstr "La transaction %1s a été refusée en raison d'une divergence d'adresse de facturation pour le moyen de paiement %2s se terminant par %3$s."
 
 #: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:112
 msgid "Status"
 msgstr "État"
-
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:232
-msgid "Resume"
-msgstr "Reprendre"
 
 #: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:235
 msgid "Remove"
 msgstr "Retirer"
 
 #: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:237
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:390
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:398
+#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:389
+#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:397
 msgid "Manage"
 msgstr "Gérer"
 
@@ -2026,7 +2444,7 @@ msgstr "Votre compte Stripe doit être configuré."
 #: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:255
 #: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:284
 #: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:297
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1334
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1339
 msgid "Connected"
 msgstr "Connecté"
 
@@ -2036,7 +2454,7 @@ msgstr "Connecté à votre compte Stripe."
 
 #: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:259
 #: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:311
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1340
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1345
 msgid "Disconnected"
 msgstr "Déconnecté"
 
@@ -2058,8 +2476,8 @@ msgid "Recommended"
 msgstr "Recommandé"
 
 #: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:292
-msgid "2.3% + 30¢ per online store transaction."
-msgstr "2,3 % + 30 ¢ par transaction de boutique en ligne."
+msgid "Click set up to get started."
+msgstr "Cliquez sur Configurer pour commencer."
 
 #: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:299
 msgid "Connect your terminal to Sell in Person."
@@ -2107,59 +2525,36 @@ msgstr "Besoin d’attention"
 msgid "Please check your email for next steps."
 msgstr "Veuillez vérifier votre e-mail pour les prochaines étapes."
 
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:330
-msgid "Your GoDaddy Payments account has been terminated."
-msgstr "Votre compte GoDaddy Payments a été résilié."
-
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:389
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:397
+#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:388
+#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:396
 msgid "Manage the \"%s\" payment method"
 msgstr "Gérer le moyen de paiement « %s »"
 
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:393
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:400
+#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:392
+#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:399
 msgid "Set up the \"%s\" payment method"
 msgstr "Configurer le moyen de paiement « %s »"
 
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:450
+#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:448
 msgid "Have a question? %1$sAsk the GoDaddy Team%3$s%2$s"
 msgstr "Vous avez une question ? %1$sInterrogez l'équipe GoDaddy%3$s%2$s"
 
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:453
+#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:451
 msgid "E-mail icon"
 msgstr "Icône d’email"
 
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:457
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:358
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:385
-#: src/WooCommerce/Views/Components/GoDaddyBranding.php:52
-msgid "Provided by GoDaddy"
-msgstr "Fourni par GoDaddy"
-
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:478
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:501
+#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:476
+#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:489
 msgid "Set up GoDaddy Payments"
 msgstr "Configurer GoDaddy Payments"
 
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:485
+#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:483
 msgid "You're about to open GoDaddy Payments account signup. In just a few minutes, you'll return here to enable secure payments in your checkout."
 msgstr "Vous êtes sur le point de créer un compte GoDaddy Payments. Dans quelques minutes, vous reviendrez ici afin d’activer les paiements sécurisés pour votre business."
 
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:489
-msgid "Connect to GoDaddy Payments to quickly and easily accept all major credit cards with no setup fees or contracts."
-msgstr "Connectez-vous à GoDaddy Payments pour accepter rapidement et facilement toutes les principales cartes de crédit sans frais ou contrats de démarrage."
-
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:492
-msgid "2.3% + 30¢"
-msgstr "2,3 % + 30 ¢"
-
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:493
-msgid "per online store transaction"
-msgstr "par transaction de boutique en ligne"
-
-#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:500
-#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:211
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1210
+#: src/WooCommerce/Payments/Frontend/Admin/PaymentMethodsListTable.php:488
+#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:212
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1215
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -2168,36 +2563,46 @@ msgstr "Annuler"
 msgid "or"
 msgstr "ou"
 
-#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:210
-#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:310
+#: src/WooCommerce/Payments/Frontend/ExternalCheckout/WalletCheckoutIntegration.php:91
+#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/PaymentForm.php:64
+msgid "Missing card details."
+msgstr "Informations de carte manquantes."
+
+#: src/WooCommerce/Payments/Frontend/ExternalCheckout/WalletCheckoutIntegration.php:92
+#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/PaymentForm.php:65
+msgid "Missing billing details."
+msgstr "Informations de facturation manquantes."
+
+#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:211
+#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:311
 msgid "Edit"
 msgstr "Modifier"
 
-#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:212
+#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:213
 msgid "Oops, there was an error updating your payment method. Please try again."
 msgstr "Une erreur s’est produite lors de la mise à jour de votre moyen de paiement. Veuillez réessayer."
 
-#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:213
+#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:214
 msgid "Are you sure you want to delete this payment method?"
 msgstr "Êtes-vous certain de vouloir supprimer ce mode de paiement?"
 
-#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:314
+#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:315
 msgid "Save"
 msgstr "Enregistrer"
 
-#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:334
+#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:335
 msgid "Title"
 msgstr "Titre"
 
-#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:335
+#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:336
 msgid "Details"
 msgstr "Détails"
 
-#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:337
+#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:338
 msgid "Default?"
 msgstr "Par défaut ?"
 
-#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:526
+#: src/WooCommerce/Payments/Frontend/MyPaymentMethods.php:527
 msgid "Invalid token ID"
 msgstr "ID de jeton non valide"
 
@@ -2207,7 +2612,7 @@ msgstr "Gérer les moyens de paiement"
 
 #: src/WooCommerce/Payments/Frontend/PaymentForm.php:215
 msgid "Use a new payment method"
-msgstr "Use a new payment method"
+msgstr "Utiliser un nouveau moyen de paiement"
 
 #: src/WooCommerce/Payments/Frontend/PaymentForm.php:278
 msgid "Securely Save to Account"
@@ -2223,243 +2628,249 @@ msgid "expires %s"
 msgstr "expire le %s"
 
 #. translators: Placeholders: %1$s - <a> tag, %2$s - </a> tag
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:82
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:88
 msgid "Customers can buy online and pay in person with orders synced to your GoDaddy Smart Terminal. Pay the lowest fees in the industry at only 2.3&#37; + 0&#162; per in-person transaction. %1$sGoDaddy Payments Terms apply%2$s."
 msgstr "Les clients peuvent acheter en ligne et payer en personne grâce aux commandes synchronisées avec votre terminal intelligent GoDaddy. Payez les frais les plus bas du secteur, seulement 2,3&#37; + 0&#162; par transaction en personne. %1$sLes conditions GoDaddy Payments s’appliquent%2$s."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:88
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:909
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:94
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:914
 msgid "Pay in Person"
 msgstr "Payer en personne"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:89
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:95
 msgid "Customers can buy online and pay in person with orders synced to your Terminals."
 msgstr "Les clients peuvent acheter en ligne et payer en personne en utilisant les commandes synchronisées avec vos terminaux."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:222
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:228
 msgid "Payment to be made upon delivery."
 msgstr "Le paiement doit être effectué à la livraison."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:291
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:336
-#: src/WooCommerce/Payments/StripeGateway.php:276
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:297
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:290
+#: src/WooCommerce/Payments/StripeGateway.php:283
 msgid "Return to payments"
 msgstr "Retour aux paiements"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:309
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:310
 msgid "%1$sShop Smart Terminal%2$s"
 msgstr "%1$sAchat à partir d’un terminal intelligent%2$s"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:318
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:319
 msgid "%1$sDevices%2$s"
 msgstr "%1$sAppareils%2$s"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:324
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:325
 msgid "%1$sCatalogs%2$s"
 msgstr "%1$sCatalogues%2$s"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:330
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:331
 msgid "%1$sCustomize Terminal%2$s"
 msgstr "%1$sPersonnaliser le terminal%2$s"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:344
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:349
 msgid "Smart Terminal"
 msgstr "Terminal intelligent"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:345
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:350
 msgid "Dual screens for smoother selling."
 msgstr "Doubles écrans pour une vente plus fluide."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:346
-msgid "Our dual screens make check out a breeze. Plus, our all-in-one terminal includes a built-in payment processor, scanner, printer, security and more."
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:351
+msgid "Our dual screens make checkout a breeze. Plus, our all-in-one terminal includes a built-in payment processor, scanner, printer, security and more."
 msgstr "Nos doubles écrans simplifient la procédure de paiement. De plus, notre terminal tout-en-un comprend un processeur de paiement intégré, un scanner, une imprimante, un dispositif de sécurité et bien plus encore."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:354
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:359
 msgid "Free"
 msgstr "Gratuit"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:355
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:360
 msgid "2-day shipping."
 msgstr "Livraison en 2 jours."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:358
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:363
 msgid "Learn More"
 msgstr "En savoir plus"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:369
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:374
 msgid "Settings"
 msgstr "Paramètres"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:815
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:820
 msgid "Enable Selling in Person"
 msgstr "Activer la vente en personne"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:822
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:827
 msgid "Checkout title"
 msgstr "Titre de la procédure de paiement"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:824
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:573
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:829
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:527
 msgid "Payment method title that the customer will see during checkout."
 msgstr "Titre du moyen de paiement que le client verra lors de la procédure de paiement."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:828
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:833
 #: src/WooCommerce/Shipping/LocalDelivery/LocalDelivery.php:179
 #: src/WooCommerce/Shipping/LocalDelivery/LocalDelivery.php:181
 #: src/WooCommerce/Shipping/LocalPickup.php:118
 msgid "Checkout description"
 msgstr "Description de la procédure de paiement"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:830
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:579
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:835
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:533
 msgid "Payment method description that the customer will see during checkout."
 msgstr "Description du moyen de paiement que le client verra lors de la procédure de paiement."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:835
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:840
 #: src/WooCommerce/Shipping/LocalDelivery/LocalDelivery.php:187
 msgid "Order received instructions"
 msgstr "Instructions relatives à la commande reçue"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:838
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:843
 msgid "Message that the customer will see on the order received page and in the processing order email after checkout."
 msgstr "Message que le client verra sur la page de la commande reçue et dans l'email de traitement de la commande après le paiement."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:842
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:847
 msgid "Enable for Shipping Methods"
 msgstr "Activer pour les modes d'expédition"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:848
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:853
 msgid "Select the shipping methods that will show this payment method for the customer during checkout."
 msgstr "Sélectionnez les modes d'expédition qui afficheront ce moyen de paiement à l’intention du client au moment du paiement."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:850
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:855
 msgid "Select Shipping Methods"
 msgstr "Sélectionner les modes d'expédition"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:870
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:875
 msgid "At least one shipping method is required to enable Selling in Person."
 msgstr "Au moins un mode d'expédition est nécessaire pour activer la vente en personne."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:885
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:890
 msgid "Pay for your order in-person at pickup or delivery."
 msgstr "Payez votre commande en personne lors du prélèvement ou de la livraison."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:897
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:902
 msgid "We accept major credit/debit cards and cash."
 msgstr "Nous acceptons les principales cartes de crédit/débit et les espèces."
 
 #. Translators: %1$s shipping method title, %2$s shipping method id.
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:940
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:945
 msgid "%1$s (#%2$s)"
 msgstr "%1$s (N° %2$s)"
 
 #. Translators: %1$s zone name, %2$s shipping method instance name.
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:943
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:948
 msgid "%1$s &ndash; %2$s"
 msgstr "%1$s &ndash; %2$s"
 
 #. Translators: %1$s zone name, %2$s shipping method instance name.
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:943
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:948
 msgid "Other locations"
 msgstr "Autres lieux"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1019
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1024
 msgid "Local Pickup Plus method"
 msgstr "Méthode de prélèvement local Plus"
 
-#. translators: Placeholders: %1$s - Shipping Method name
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1021
+#. translators: Placeholders: %1$s - Shipping Method name (for example FedEx, UPS or Local Pickup, etc.)
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1026
 msgid "Any \"%1$s\" method"
 msgstr "Toute méthode de « %1$s »"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1202
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1207
 msgid "Are you sure you want to move this product to trash?"
 msgstr "Voulez-vous vraiment déplacer ce produit vers la corbeille ?"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1205
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1210
 msgid "Are you sure you want to move this product to trash? Removing a synced product will also delete it from the In-Person catalog."
 msgstr "Voulez-vous vraiment déplacer ce produit vers la corbeille ? La suppression d'un produit synchronisé le retirera également du catalogue En personne."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1211
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1216
 msgid "Move to Trash"
 msgstr "Déplacer vers la corbeille"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1242
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1247
 msgid "This product is synced from the In-Person Catalog"
 msgstr "Ce produit est synchronisé depuis le catalogue En personne."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1246
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1251
 msgid "This product is synced to the In-Person Catalog"
 msgstr "Ce produit est synchronisé avec le catalogue En personne."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1345
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1350
 msgid "One or more products in your catalog failed to sync. Please enable debug logging or reach out to %1$sour Care team%2$s for help."
 msgstr "La synchronisation d'un ou plusieurs produits de votre catalogue a échoué. Veuillez activer la journalisation de débogage ou contacter %1$snotre équipe des services aux clients%2$s pour obtenir de l'aide."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1406
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1411
 msgid "%1$s has been removed. Products will no longer be synced to this catalog. To remove any products already synced you must delete them manually."
 msgstr "%1$s a été supprimé. Les produits ne seront plus synchronisés avec ce catalogue. Pour retirer les produits déjà synchronisés, vous devez les supprimer manuellement."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1432
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1437
 msgid "In-Person product sync to WooCommerce has been disabled. Products will no longer sync to WooCommerce. To remove any products already synced you must delete them manually."
 msgstr "La synchronisation des produits En personne avec WooCommerce a été désactivée. Les produits ne seront plus synchronisés avec WooCommerce. Pour retirer les produits déjà synchronisés, vous devez les supprimer manuellement."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1446
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1451
 msgid "%1$s has been removed from Selling In-Person. This catalog will no longer sync to WooCommerce"
 msgstr "%1$s a été retiré de la vente en personne. Ce catalogue ne sera plus synchronisé avec WooCommerce"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1513
+#. translators: We are prompting the user to sync their products with in-person product catalog(s) - refers to products sold in-person, e.g. via POS terminal
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1518
 msgid "In-Person Catalog Sync"
 msgstr "Synchronisation des catalogues En personne"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1516
+#. translators: Placeholders: %1$s - <a> tag, %2$s - </a> tag
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1522
 msgid "Sync your WooCommerce products with In-Person catalog(s). %1$sLearn more%2$s"
 msgstr "Synchronisez vos produits WooCommerce avec le(s) catalogue(s) En personne. %1$sEn savoir plus%2$s"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1524
+#. translators: We are prompting the user to sync their products with in-person product catalog(s) - refers to products sold in-person, e.g. via POS terminal
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1531
 msgid "Sync WooCommerce products to In-Person"
 msgstr "Synchronisation des produits WooCommerce avec le catalogue En personne"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1529
+#. translators: We are prompting the user to sync their products with in-person product catalog(s) - refers to products sold in-person, e.g. via POS terminal
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1537
 msgid "Basic WooCommerce product data is pushed to the selected In-Person catalog(s) for simple products."
 msgstr "Les données produits WooCommerce de base sont transmises vers le(s) catalogue(s) En personne sélectionné(s) pour les produits simples."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1539
+#. translators: In-person catalog(s) refers to products sold in-person, e.g. via POS terminal
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1548
 msgid "To sync to In-Person you must have at least one catalog selected."
 msgstr "Pour synchroniser avec En personne, vous devez sélectionner au moins un catalogue."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1547
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1556
 msgid "Sync In-Person products to WooCommerce"
 msgstr "Synchronisation des produits En personne avec WooCommerce"
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1552
+#. translators: In-person catalog(s) refers to products sold in-person, e.g. via POS terminal
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1562
 msgid "Product data is fetched from the selected In-Person catalog(s). Sync excludes products with custom prices or \"any combination\" modifiers."
 msgstr "Les données produits sont extraites du ou des catalogues En personne sélectionnés. La synchronisation exclut les produits affichant des prix personnalisés ou des modificateurs « toute combinaison »."
 
-#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1562
+#: src/WooCommerce/Payments/GoDaddyPayInPersonGateway.php:1572
 msgid "To sync to WooCommerce you must have at least one catalog selected."
 msgstr "Pour synchroniser avec WooCommerce, vous devez sélectionner au moins un catalogue."
 
 #. translators: Placeholder: %s - the gateway settings title, something like: "GoDaddy Payments - Apple Pay"
-#: src/WooCommerce/Payments/GoDaddyPayments/AbstractWalletGateway.php:204
-msgid "Cannot load the %s gateway process payment."
-msgstr "Impossible de charger le processus de passerelle %s pour le paiement."
+#: src/WooCommerce/Payments/GoDaddyPayments/AbstractWalletGateway.php:205
+msgid "Cannot load the %s gateway to process payment."
+msgstr "Impossible de charger la passerelle %s pour le traitement du paiement."
 
-#: src/WooCommerce/Payments/GoDaddyPayments/AbstractWalletGateway.php:228
+#: src/WooCommerce/Payments/GoDaddyPayments/AbstractWalletGateway.php:229
 msgid "Cannot load the GoDaddy Payments gateway."
 msgstr "Impossible de charger la passerelle GoDaddy Payments."
 
 #. translators: Placeholder: %s - the gateway settings page title, normally: "GoDaddy Payments - Credit/Debit card"
-#: src/WooCommerce/Payments/GoDaddyPayments/AbstractWalletGateway.php:239
+#: src/WooCommerce/Payments/GoDaddyPayments/AbstractWalletGateway.php:240
 msgid "These settings are managed from the %s page"
 msgstr "Ces réglages sont gérés à partir de la page %s."
 
-#: src/WooCommerce/Payments/GoDaddyPayments/AbstractWalletGateway.php:245
+#: src/WooCommerce/Payments/GoDaddyPayments/AbstractWalletGateway.php:246
 msgctxt "General settings"
 msgid "General"
 msgstr "Général"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/AbstractWalletGateway.php:281
+#: src/WooCommerce/Payments/GoDaddyPayments/AbstractWalletGateway.php:282
 msgid "Disabled"
 msgstr "Désactiver"
 
@@ -2476,511 +2887,410 @@ msgstr "Nonce pour valider la redirection après l'intégration."
 msgid "The GoDaddy Payments onboarding status"
 msgstr "États d'intégration de GoDaddy Payments"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:43
-msgid "Securely accept card payments and make checkout easier for customers with Apple Pay® on supported devices. Pay the industry's lowest fees at 2.3&#37; + 30&#162; per online transaction. %1$sGoDaddy Payments Terms apply%2$s."
-msgstr "Grâce à Apple Pay®, acceptez en toute sécurité les paiements par carte et facilitez la procédure de paiement pour les clients sur les appareils pris en charge. Payez les frais les plus bas du secteur, à 2,3&#37; + 30&#162; par transaction en ligne. %1$sLes conditions GoDaddy Payments s’appliquent%2$s."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:49
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:47
 msgid "Apple Pay"
 msgstr "Apple Pay"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:50
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:48
 msgid "Securely accept card payments and make checkout easier for customers with Apple Pay® on supported devices."
 msgstr "Acceptez en toute sécurité les paiements par carte et simplifiez la procédure de paiement pour les clients qui ont installé Apple Pay® sur des appareils pris en charge."
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:71
+#. translators: Placeholders: %1$s - <a> tag, %2$s - </a> tag
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:62
+msgid "Securely accept card payments and make checkout easier for customers with Apple Pay® on supported devices. Pay the industry's lowest fees at 2.3&#37; + 30&#162; per online transaction. %1$sGoDaddy Payments Terms apply%2$s."
+msgstr "Grâce à Apple Pay®, acceptez en toute sécurité les paiements par carte et facilitez la procédure de paiement pour les clients sur les appareils pris en charge. Payez les frais les plus bas du secteur, à 2,3&#37; + 30&#162; par transaction en ligne. %1$sLes conditions GoDaddy Payments s’appliquent%2$s."
+
+#. translators: Placeholders: %1$s - <a> tag, %2$s - </a> tag
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:66
+msgid "Securely accept card payments and make checkout easier for customers with Apple Pay® on supported devices. Pay the industry's lowest fees at 2.7&#37; + 0&#162; per online transaction. %1$sGoDaddy Payments Terms apply%2$s."
+msgstr "Acceptez en toute sécurité les paiements par carte et simplifiez la procédure de paiement pour les clients qui ont installé Apple Pay® sur les appareils pris en charge. Payez les frais les plus bas du secteur, à 2,7 &#37; + 0 &#162; par transaction en ligne. %1$sLes conditions GoDaddy Payments s'appliquent%2$s."
+
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:91
 msgid "Apple Pay Settings"
 msgstr "Paramètres Apple Pay"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:74
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:86
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:564
-#: src/WooCommerce/Payments/StripeGateway.php:491
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:94
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:106
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:518
+#: src/WooCommerce/Payments/StripeGateway.php:494
 msgid "Enable"
 msgstr "Activer"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:75
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:87
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:566
-#: src/WooCommerce/Payments/StripeGateway.php:493
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:95
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:107
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:520
+#: src/WooCommerce/Payments/StripeGateway.php:496
 msgid "Enable to add the payment method to your checkout."
 msgstr "Activez pour ajouter le moyen de paiement à votre procédure de paiement."
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:77
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:97
 msgid "Apple Pay shows to %1$sSafari users on supported devices%2$s."
 msgstr "Apple Pay s'affiche à l’intention des utilisateurs de %1$sSafari sur les appareils pris en charge%2$s."
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:85
+#. translators: Text displayed next to a dropdown input field with a list of pages for the user to choose from
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:106
 msgid "Pages to enable Apple Pay on"
 msgstr "Pages permettant d'activer Apple Pay sur"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:93
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:105
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:114
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:126
 msgid "Cart"
 msgstr "Panier"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:94
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:106
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:115
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:127
 msgid "Checkout"
 msgstr "Paiement"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:95
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:107
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:116
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:128
 msgid "Single Product"
 msgstr "Produit unique"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:100
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:112
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:121
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:133
 msgid "Button label"
 msgstr "Légende du bouton"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:101
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:113
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:122
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:134
 msgid "Check button labels here"
 msgstr "Vérifiez les libellés des boutons ici"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:106
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:127
+msgctxt "Apple Pay"
 msgid "Add Money with"
 msgstr "Ajouter de l'argent avec"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:107
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:118
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:128
+msgctxt "Apple Pay"
 msgid "Book with"
 msgstr "Réserver avec"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:108
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:119
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:129
+msgctxt "Apple Pay"
 msgid "Buy with"
 msgstr "Acheter avec"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:109
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:120
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:130
+msgctxt "Apple Pay"
 msgid "Check out with"
 msgstr "Vérifiez via"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:112
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:133
+msgctxt "Apple Pay"
 msgid "Contribute with"
 msgstr "Contribuer avec"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:113
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:121
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:134
+msgctxt "Apple Pay"
 msgid "Donate with"
 msgstr "Faire un don avec"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:114
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:122
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:135
+msgctxt "Apple Pay"
 msgid "Order with"
 msgstr "Passer une commande avec"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:117
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:124
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:138
+msgctxt "Apple Pay"
 msgid "Plain (logo only)"
 msgstr "Simple (logo uniquement)"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:118
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:139
+msgctxt "Apple Pay"
 msgid "Reload with"
 msgstr "Recharger avec"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:119
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:140
+msgctxt "Apple Pay"
 msgid "Rent with"
 msgstr "Louer avec"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:121
-msgid "Support with"
-msgstr "Support avec"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:122
-msgid "Tip with"
-msgstr "Conseil avec"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:123
-msgid "Top Up with"
-msgstr "Majorer avec"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:128
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:129
-msgid "Button style"
-msgstr "Style de bouton"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:129
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:130
-msgid "Check button style here"
-msgstr "Vérifiez le style du bouton ici"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:134
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:136
-msgid "Black"
-msgstr "Noir"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:135
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:137
-msgid "White"
-msgstr "Blanc"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:136
-msgid "White with outline"
-msgstr "Blanc avec contour"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:142
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:143
-msgid "Button height"
-msgstr "Hauteur du bouton"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:143
-msgid "Apple requests the button size match your cart/checkout button and be 30 to 64 pixels tall. The width is set automatically."
-msgstr "Apple demande que la taille du bouton corresponde à celle du bouton du panier/de la caisse et que sa hauteur soit comprise entre 30 et 64 pixels. La largeur est définie automatiquement."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:143
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:144
-msgid "Check button size here"
-msgstr "Vérifiez la taille du bouton ici"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:172
-msgid "There was an error connecting to GoDaddy Payments. Please try again."
-msgstr "Une erreur s'est produite lors de la connexion à GoDaddy Payments. Veuillez réessayer."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:186
-msgid "%1$sGoDaddy Payments successfully enabled!%2$s GoDaddy Payments is now available to your customers at checkout."
-msgstr "%1$sGoDaddy Payments activé avec succès !%2$s Vos clients peuvent maintenant utiliser GoDaddy Payments au moment du paiement."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:192
-msgid "%1$sGoDaddy Payments is now connected to your store!%2$s Enable the payment method to add it to your checkout. %3$sEnable GoDaddy Payments%4$s"
-msgstr "%1$sGoDaddy Payments est maintenant connecté à votre boutique !%2$s Activez le moyen de paiement pour l'ajouter à la procédure de paiement. %3$sActiver GoDaddy Payments%4$s"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:205
-msgid "%1$sYour GoDaddy Payments account has been closed.%2$s The payment method has been disabled so it will not appear on your checkout. Please set up your account to resume processing payments."
-msgstr "%1$sVotre compte GoDaddy Payments a été fermé.%2$s Le moyen de paiement a été désactivé et n'apparaîtra donc pas au moment du paiement. Veuillez configurer votre compte pour reprendre le traitement des paiements."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:215
-msgid "%1$sIt looks like you didn't finish your GoDaddy Payments application. You're just a few minutes from processing payments.%2$s %3$sResume%4$s"
-msgstr "%1$sIl semble que vous n'ayez pas terminé votre demande pour GoDaddy Payments. Encore quelques minutes et vous serez en mesure de traiter les paiements.%2$s %3$sReprendre%4$s"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:227
-msgid "%1$sYour GoDaddy Payments account needs attention.%2$s The payment method has been disabled so it will not appear on your checkout. Please check your email for next steps."
-msgstr "%1$sVotre compte GoDaddy Payments exige votre attention.%2$s Le moyen de paiement a été désactivé et n'apparaîtra donc pas au moment du paiement. Veuillez vérifier votre e-mail pour les prochaines étapes."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:237
-msgid "%1$sYour GoDaddy Payments account has been terminated.%2$s The payment method has been disabled so it will not appear on your checkout. Please check your email for more information."
-msgstr "%1$sVotre compte GoDaddy Payments a été résilié.%2$s Le moyen de paiement a été désactivé et n'apparaîtra donc pas au moment du paiement. Veuillez vérifier votre e-mail pour en savoir plus."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:275
-msgid "GoDaddy Payments is available for United States-based businesses. Please %1$supdate your Store Address%2$s if you are in the U.S."
-msgstr "GoDaddy Payments est proposé aux entreprises basées aux États-Unis. Veuillez %1$smettre à jour l'adresse de votre boutique%2$s si vous êtes aux États-Unis."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:288
-msgid "GoDaddy Payments requires U.S. dollar transactions. Please %1$schange your Currency%2$s in order to use the payment method."
-msgstr "GoDaddy Payments exige des transactions en dollars américains. Veuillez %1$schanger votre devise%2$s afin de pouvoir utiliser ce moyen de paiement."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:300
-msgid "WooCommerce charges or authorizations/captures as well as refunds and voids made in your Staging site will process normally in your GoDaddy Payments account."
-msgstr "Les paiements ou les autorisations/imputations WooCommerce, de même que les remboursements et les annulations effectués sur votre site intermédiaire seront traités normalement dans votre compte GoDaddy Payments."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:359
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:137
-msgid "GoDaddy Payments"
-msgstr "Paiements GoDaddy"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:360
-msgid "Sell online and in person with GoDaddy Payments. Sync local pickup and delivery orders right to your Smart Terminal, then get paid fast with next-day deposits."
-msgstr "Vendez en ligne et en personne avec GoDaddy Payments. Synchronisez les commandes de prélèvement et de livraison locales directement sur votre terminal intelligent, puis faites-vous payer rapidement avec des versements le lendemain."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:361
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:388
-msgid "Get Started"
-msgstr "Commencer"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:386
-msgid "GoDaddy Selling in Person"
-msgstr "Vente en personne GoDaddy"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:387
-msgid "Use GoDaddy Payments Selling in Person to sync local pickup and delivery orders to your Smart Terminal. Sell anything, anywhere and get paid fast with next-day deposits."
-msgstr "Utilisez la fonction Vente en personne de GoDaddy Payments pour synchroniser les commandes de prélèvement et de livraison locales sur votre terminal intelligent. Vendez ce que vous voulez, où vous le voulez et soyez payé rapidement par le biais de versements le lendemain."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:450
-msgid "GoDaddy Payments (Poynt) is included for Managed WordPress customers without a separate plugin! Go to %1$sPayments settings%2$s to enable it."
-msgstr "GoDaddy Payments (Poynt) est inclus pour les clients ayant opté pour l’hébergement WordPress sans extension distincts ! Allez dans %1$sParamètres des paiements%2$s pour l'activer."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:474
-msgid "GoDaddy Payments - Apple Pay has been enabled on your selected pages and shows %1$sin Safari on supported devices%2$s."
-msgstr "GoDaddy Payments - Apple Pay a été activé sur vos pages sélectionnées et s'affiche %1$sdans Safari sur les appareils pris en charge%2$s."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:485
-msgid "There was a problem registering your site with Apple Pay. Please disable Apple Pay and try re-enabling, or %1$scontact support%2$s."
-msgstr "Un problème s’est produit lors de l'enregistrement de votre site avec Apple Pay. Veuillez désactiver Apple Pay et essayer de le réactiver, ou %1$scontactez le support technique%2$s."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:505
-msgid "Please select the pages where Apple Pay should show."
-msgstr "Veuillez sélectionner les pages où Apple Pay doit apparaître."
-
-#. translators: Placeholders: %1$s - <a> tag for the Google Pay docs link, %2$s - </a> tag
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:544
-msgid "GoDaddy Payments - Google Pay has been enabled on your selected pages and shows %1$sin supported browsers and devices%2$s."
-msgstr "GoDaddy Payments - Google Pay a été activé sur vos pages sélectionnées et s’affiche %1$ssur les navigateurs et appareils pris en charge%2$s."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:560
-msgid "Please select the pages where Google Pay should show."
-msgstr "Veuillez sélectionner les pages sur lesquelles Google Pay doit apparaître."
-
-#. translators: Placeholders: %1$s - a connected account's legal name, %2$s - a connected account's email address, %3$s - <a> tag, %4$s - </a>
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:652
-msgid "GoDaddy Payments is now connected with the account %1$s %2$s. (Not right? %3$sSwitch account%4$s.)"
-msgstr "GoDaddy Payments est maintenant connecté au compte %1$s %2$s. (Ce n’est pas le bon compte ? %3$sChangez le compte%4$s.)"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:660
-msgid "You're all set to take payments with GoDaddy Payments!"
-msgstr "Vous pouvez maintenant accepter des paiements par GoDaddy Payments !"
-
-#. translators: Placeholders: %1$s - <a> tag, %2$s - </a>
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:665
-msgid "To get your funds deposited to your bank account, verify your identity and add your banking info. %1$sSet up payouts%2$s"
-msgstr "Pour permettre le dépôt de vos fonds dans votre compte bancaire, vérifiez votre identité et ajoutez vos informations bancaires. %1$sConfigurer les paiements%2$s"
-
-#. translators: Placeholders: %1$s - a connected account's legal name, %2$s - a connected account's email address, %3$s - <a> tag, %4$s - </a>
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:672
-msgid "The connected GoDaddy Payments account is %1$s %2$s (Not the business owner's account? %3$sSwitch account%4$s)."
-msgstr "Le compte GoDaddy Payments connecté est %1$s %2$s (Ce n'est pas le compte du propriétaire du business ? %3$sChangez le compte%4$s)."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:717
-msgid "Set up payouts"
-msgstr "Configurer les paiements"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:720
-msgid "You haven't completed the necessary steps to verify your identity with GoDaddy Payments. Until you do that, you won't be able to take any payments or deposit your funds."
-msgstr "Vous n'avez pas effectué les étapes nécessaires pour vérifier votre identité avec GoDaddy Payments. Tant que vous n'aurez pas exécuté cette procédure, vous ne pourrez pas accepter les paiements ni déposer de fonds."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:722
-msgid "Complete verification"
-msgstr "Terminer la vérification"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:726
-msgid "The deadline to complete your payouts setup is coming up! To keep transacting with GoDaddy Payments and to get your money, verify your identity and add banking info."
-msgstr "La date limite pour terminer la configuration de vos paiements approche ! Pour continuer à effectuer des transactions avec GoDaddy Payments et obtenir votre argent, vérifiez votre identité et ajoutez vos informations bancaires."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:731
-msgid "You've still got money waiting with GoDaddy Payments! Verify your identity and add your banking info as soon as you can to get your funds and keep taking payments."
-msgstr "Vous avez encore de l'argent qui vous attend avec GoDaddy Payments ! Vérifiez votre identité et ajoutez vos informations bancaires dès que possible pour obtenir vos fonds et continuer à recevoir des paiements."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:736
-msgid "You've got money waiting with GoDaddy Payments! Verify your identity and add your banking info to get your payouts deposited."
-msgstr "Vous avez de l'argent qui vous attend avec GoDaddy Payments ! Vérifiez votre identité et ajoutez vos informations bancaires pour permettre le dépôt de vos paiements."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:741
-msgid "You've got money waiting with GoDaddy Payments! Add your banking info to get your payouts deposited."
-msgstr "Vous avez de l'argent qui vous attend avec GoDaddy Payments ! Ajoutez vos informations bancaires pour permettre le dépôt de vos paiements."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Notices.php:751
-msgid "Link bank account"
-msgstr "Lier le compte bancaire"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Views/GoDaddyPaymentsPromotionBlock.php:27
-msgid "Get paid fast with GoDaddy Payments"
-msgstr "Choisissez un paiement rapide avec GoDaddy Payments"
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Views/GoDaddyPaymentsPromotionBlock.php:39
-msgid "Securely accept credit and debit card payments in minutes and get next-day payouts. Free setup and no hidden fees or long-term contracts."
-msgstr "Acceptez en quelques minutes, et en toute sécurité, les paiements par carte bancaire et recevez les paiements dès le lendemain. Configuration gratuite, sans frais cachés ni contrats à long terme."
-
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/Admin/Views/GoDaddyPaymentsPromotionBlock.php:63
-msgctxt "GoDaddy Payments promotion block button"
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:141
+msgctxt "Apple Pay"
 msgid "Set up"
 msgstr "Configurer"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/PaymentForm.php:63
-msgid "Missing card details."
-msgstr "Informations de carte manquantes."
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:142
+msgctxt "Apple Pay"
+msgid "Support with"
+msgstr "Support avec"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/Frontend/PaymentForm.php:64
-msgid "Missing billing details."
-msgstr "Informations de facturation manquantes."
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:143
+msgctxt "Apple Pay"
+msgid "Tip with"
+msgstr "Conseil avec"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:28
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:144
+msgctxt "Apple Pay"
+msgid "Top Up with"
+msgstr "Majorer avec"
+
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:149
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:150
+msgid "Button style"
+msgstr "Style de bouton"
+
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:150
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:151
+msgid "Check button style here"
+msgstr "Vérifiez le style du bouton ici"
+
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:155
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:157
+msgid "Black"
+msgstr "Noir"
+
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:156
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:158
+msgid "White"
+msgstr "Blanc"
+
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:157
+msgid "White with outline"
+msgstr "Blanc avec contour"
+
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:163
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:164
+msgid "Button height"
+msgstr "Hauteur du bouton"
+
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:164
+msgid "Apple requests the button size match your cart/checkout button and be 30 to 64 pixels tall. The width is set automatically."
+msgstr "Apple demande que la taille du bouton corresponde à celle du bouton du panier/de la caisse et que sa hauteur soit comprise entre 30 et 64 pixels. La largeur est définie automatiquement."
+
+#: src/WooCommerce/Payments/GoDaddyPayments/ApplePayGateway.php:164
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:165
+msgid "Check button size here"
+msgstr "Vérifiez la taille du bouton ici"
+
+#. translators: Placeholders: %1$s - <a> tag, %2$s - </a> tag
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:47
 msgid "Securely accept card payments and make checkout faster for customers with Google Pay™ on supported devices. Pay the industry's lowest fees at 2.3&#37; + 30&#162; per online transaction. %1$sGoDaddy Payments Terms apply%2$s."
 msgstr "Acceptez en toute sécurité les paiements par carte et accélérez la procédure de paiement pour les clients qui ont installé Google Pay™ sur des appareils pris en charge. Payez les frais les plus bas du secteur à 2,3 &#37; + 30 &#162; par transaction en ligne. %1$sLes conditions GoDaddy Payments s'appliquent%2$s."
 
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:83
+#. translators: Placeholders: %1$s - <a> tag, %2$s - </a> tag
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:51
+msgid "Securely accept card payments and make checkout faster for customers with Google Pay™ on supported devices. Pay the industry's lowest fees at 2.7&#37; + 0&#162; per online transaction. %1$sGoDaddy Payments Terms apply%2$s."
+msgstr "Acceptez en toute sécurité les paiements par carte et accélérez la procédure de paiement pour les clients qui ont installé Google Pay™ sur les appareils pris en charge. Payez les frais les plus bas du secteur, à 2,7 &#37; + 0 &#162; par transaction en ligne. %1$sLes conditions GoDaddy Payments s'appliquent%2$s."
+
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:103
 msgid "Google Pay Settings"
 msgstr "Réglages Google Pay"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:89
-msgid "Google Pay shows to %1$ssupported browsers%2$s."
+#. translators: Placeholders: %1$s - open <a> HTML link tag, %2$s - close </a> HTML link tag
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:110
+msgid "Google Pay shows on %1$ssupported browsers%2$s."
 msgstr "Google Pay s'affiche sur les %1$snavigateurs pris en charge%2$s."
 
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:97
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:118
 msgid "Pages to enable Google Pay on"
 msgstr "Pages sur lesquelles activer Google Pay"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:123
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:139
+msgctxt "Google Pay"
+msgid "Book with"
+msgstr "Réserver avec"
+
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:140
+msgctxt "Google Pay"
+msgid "Buy with"
+msgstr "Acheter avec"
+
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:141
+msgctxt "Google Pay"
+msgid "Check out with"
+msgstr "Vérifiez via"
+
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:142
+msgctxt "Google Pay"
+msgid "Donate with"
+msgstr "Faire un don avec"
+
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:143
+msgctxt "Google Pay"
+msgid "Order with"
+msgstr "Passer une commande avec"
+
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:144
+msgctxt "Google Pay"
 msgid "Pay with"
 msgstr "Payer avec"
 
-#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:144
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:145
+msgctxt "Google Pay"
+msgid "Plain (logo only)"
+msgstr "Simple (logo uniquement)"
+
+#: src/WooCommerce/Payments/GoDaddyPayments/GooglePayGateway.php:165
 msgid "Google requests the button size match your cart/checkout button and be 40 to 100 pixels tall."
 msgstr "Google demande que la taille du bouton corresponde à celle du bouton du panier/de la caisse et que sa hauteur soit comprise entre 40 et 100 pixels."
 
-#. translators: Placeholders: %1$s - <a> tag, %2$s - </a> tag
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:87
-msgid "Securely accept credit/debit cards in your checkout, and keep more of your money with the industry's lowest fees—just 2.3&#37; + 30&#162; per online transaction. Get paid fast with deposits as soon as the next day. %1$sGoDaddy Payments Terms apply%2$s."
-msgstr "Acceptez en toute sécurité les paiements par carte de crédit/débit, et gardez une plus grande partie de votre argent grâce aux frais les plus bas du secteur : seulement 2,3&#37; + 30&#162; par transaction en ligne. Soyez payé rapidement avec des dépôts dès le lendemain. %1$sLes conditions GoDaddy Payments s’appliquent%2$s."
-
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:95
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:718
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:92
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:672
 msgid "Credit/Debit Card"
 msgstr "Carte de crédit/débit"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:96
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:93
 msgid "Securely accept credit/debit cards in your checkout."
 msgstr "Acceptez en toute sécurité les paiements par carte de crédit/débit."
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:137
-msgid "Payments Dashboard"
-msgstr "Tableau de bord des paiements"
+#. translators: Placeholders: %1$s - <a> tag, %2$s - </a> tag
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:133
+msgid "Securely accept credit/debit cards in your checkout, and keep more of your money with the industry's lowest fees—just 2.3&#37; + 30&#162; per online transaction. Get paid fast with deposits as soon as the next day. %1$sGoDaddy Payments Terms apply%2$s."
+msgstr "Acceptez en toute sécurité les paiements par carte de crédit/débit, et gardez une plus grande partie de votre argent grâce aux frais les plus bas du secteur : seulement 2,3&#37; + 30&#162; par transaction en ligne. Soyez payé rapidement avec des dépôts dès le lendemain. %1$sLes conditions GoDaddy Payments s’appliquent%2$s."
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:274
+#. translators: Placeholders: %1$s - <a> tag, %2$s - </a> tag
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:137
+msgid "Securely accept credit/debit cards in your checkout, and keep more of your money with the industry's lowest fees—just 2.7&#37; + 0&#162; per online transaction. Get paid fast with deposits as soon as the next day. %1$sGoDaddy Payments Terms apply%2$s."
+msgstr "Acceptez en toute sécurité les paiements par carte de crédit/débit, et gardez une plus grande partie de vos gains grâce aux frais les plus bas du secteur : seulement 2,7 &#37; + 0 &#162; par transaction en ligne. Recevez un paiement rapide, avec des dépôts dès le lendemain. %1$sLes conditions GoDaddy Payments s'appliquent%2$s."
+
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:229
 msgid "Business Name:"
 msgstr "Nom du business :"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:279
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:234
 msgid "Email:"
 msgstr "Courriel:"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:285
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:240
 msgid "Switch account"
 msgstr "Changez votre compte"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:304
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:259
 msgid "Account Details"
 msgstr "Détails du compte"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:330
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:285
 msgid "Manage your account settings in the %1$spayments dashboard%2$s"
 msgstr "Gérez les réglages de votre compte dans le %1$stableau de bord des paiements%2$s."
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:330
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:285
 msgid "Manage your GoDaddy Payments account settings in the %1$sPayments Hub%2$s"
 msgstr "Gérez les paramètres de votre compte GoDaddy Payments dans le %1$scentre des paiements%2$s."
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:353
-#: src/WooCommerce/Payments/StripeGateway.php:533
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:307
+#: src/WooCommerce/Payments/StripeGateway.php:536
 msgid "Checkout Settings"
 msgstr "Paramètres de paiement"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:571
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:525
 msgid "Title in Checkout"
 msgstr "Titre dans la procédure de paiement"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:577
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:531
 msgid "Description in Checkout"
 msgstr "Description dans la procédure de paiement"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:584
-#: src/WooCommerce/Payments/StripeGateway.php:560
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:538
+#: src/WooCommerce/Payments/StripeGateway.php:563
 msgid "Transaction Type"
 msgstr "Type de transaction"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:586
-#: src/WooCommerce/Payments/StripeGateway.php:562
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:540
+#: src/WooCommerce/Payments/StripeGateway.php:565
 msgid "Select how transactions should be processed. Charge submits all transactions for settlement, Authorization simply authorizes the order total for capture later."
 msgstr "Sélectionnez le mode de traitement des transactions. L’option Facturer envoie toutes les transactions pour règlement, l’option Autorisation autorise simplement le total de la commande pour une saisie ultérieure."
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:589
-#: src/WooCommerce/Payments/StripeGateway.php:565
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:543
+#: src/WooCommerce/Payments/StripeGateway.php:568
 msgctxt "noun, credit card transaction type"
 msgid "Charge"
 msgstr "Frais"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:590
-#: src/WooCommerce/Payments/StripeGateway.php:566
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:544
+#: src/WooCommerce/Payments/StripeGateway.php:569
 msgctxt "credit card transaction type"
 msgid "Authorization"
 msgstr "Autorisation"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:594
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:548
 msgid "Charge Virtual-Only Orders"
 msgstr "Facturer les commandes virtuelles uniquement"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:596
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:550
 msgid "If the order contains exclusively virtual items, enable this to immediately charge, rather than authorize, the transaction."
 msgstr "Si la commande contient exclusivement des articles virtuels, activez cette option pour facturer immédiatement la transaction, au lieu de l'autoriser."
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:600
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:554
 msgid "Capture Paid Orders"
 msgstr "Saisir les commandes payées"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:604
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:558
 msgid "Automatically capture orders when they are changed to %s."
 msgstr "Saisissez automatiquement les commandes lorsqu'elles passent à l’%s."
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:605
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:559
 msgid "a paid status"
 msgstr "état payé"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:609
-#: src/WooCommerce/Payments/StripeGateway.php:538
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:563
+#: src/WooCommerce/Payments/StripeGateway.php:541
 msgid "Accepted Card Logos"
 msgstr "Logos des cartes acceptées"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:611
-#: src/WooCommerce/Payments/StripeGateway.php:540
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:565
+#: src/WooCommerce/Payments/StripeGateway.php:543
 msgid "These are the card logos that are displayed to customers as accepted during checkout."
 msgstr "Il s'agit des logos qui indiquent aux clients les cartes acceptées comme moyen de paiement."
 
 #. translators: Placeholders: %1$s - <strong> tag, %2$s - </strong> tag
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:614
-msgid "This setting %1$sdoes not%2$s change which card types the gateway will accept. Accepted cards are configured from your payment processor account."
-msgstr "Ce paramètre %1$sne modifie pas%2$s les types de carte acceptés par la passerelle. Les cartes acceptées sont configurées à partir de votre compte de processeur de paiement."
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:568
+msgid "This setting %1$sdoes not%2$s change which card types the gateway will accept."
+msgstr "Ce paramètre %1$sne modifie pas%2$s les types de carte acceptés par la passerelle."
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:625
-#: src/WooCommerce/Payments/StripeGateway.php:548
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:579
+#: src/WooCommerce/Payments/StripeGateway.php:551
 msgid "Saved Cards"
 msgstr "Cartes enregistrées"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:627
-#: src/WooCommerce/Payments/StripeGateway.php:550
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:581
+#: src/WooCommerce/Payments/StripeGateway.php:553
 msgid "Enable customers to securely save their payment cards to their account for future checkout."
 msgstr "Offrez à vos clients la possibilité d'enregistrer en toute sécurité leurs cartes de paiement dans leur compte pour une prochaine procédure de paiement."
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:631
-#: src/WooCommerce/Payments/StripeGateway.php:554
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:585
+#: src/WooCommerce/Payments/StripeGateway.php:557
 msgid "Detailed Decline Messages"
 msgstr "Messages de refus détaillés"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:633
-#: src/WooCommerce/Payments/StripeGateway.php:556
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:587
+#: src/WooCommerce/Payments/StripeGateway.php:559
 msgid "Enable detailed decline messages for customers during checkout rather than a generic decline message."
 msgstr "Des messages de refus détaillés s’afficheront à l’intention des clients pendant la procédure de paiement à la place d’un message de refus générique."
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:637
-#: src/WooCommerce/Payments/StripeGateway.php:570
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:591
+#: src/WooCommerce/Payments/StripeGateway.php:573
 msgid "Debug Mode"
 msgstr "Mode de débogage"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:639
-#: src/WooCommerce/Payments/StripeGateway.php:572
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:593
+#: src/WooCommerce/Payments/StripeGateway.php:575
 msgid "Show Detailed Error Messages and API requests/responses on the checkout page and/or save them to the debug log"
 msgstr "Affichez des messages d'erreur détaillés et des demandes/réponses API sur la page de paiement et/ou enregistrez-les dans le journal de débogage."
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:642
-#: src/WooCommerce/Payments/StripeGateway.php:575
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:596
+#: src/WooCommerce/Payments/StripeGateway.php:578
 msgid "Off"
 msgstr "Désactiver"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:643
-#: src/WooCommerce/Payments/StripeGateway.php:576
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:597
+#: src/WooCommerce/Payments/StripeGateway.php:579
 msgid "Show on Checkout Page"
 msgstr "Afficher sur la page de paiement"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:644
-#: src/WooCommerce/Payments/StripeGateway.php:577
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:598
+#: src/WooCommerce/Payments/StripeGateway.php:580
 msgid "Save to Log"
 msgstr "Enregistrer dans le journal"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:645
-#: src/WooCommerce/Payments/StripeGateway.php:578
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:599
+#: src/WooCommerce/Payments/StripeGateway.php:581
 msgid "Both"
 msgstr "Les deux"
 
-#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:704
+#: src/WooCommerce/Payments/GoDaddyPaymentsGateway.php:658
 msgid "Pay securely with your credit/debit card."
 msgstr "Payez en toute sécurité au moyen de votre carte bancaire."
 
@@ -2988,123 +3298,120 @@ msgstr "Payez en toute sécurité au moyen de votre carte bancaire."
 msgid "Pre-Order release payment failed: %s"
 msgstr "Le paiement de la précommande a échoué : %s"
 
-#: src/WooCommerce/Payments/Stripe/Frontend/PaymentForm.php:126
+#: src/WooCommerce/Payments/Stripe/Frontend/PaymentForm.php:146
 msgid "Currently unavailable"
 msgstr "Actuellement indisponible"
 
-#: src/WooCommerce/Payments/StripeGateway.php:75
-msgid "Accept online payments using credit/debit cards in over 35 international locations with Stripe."
-msgstr "Avec Stripe, acceptez les paiements en ligne par carte de crédit/débit sur plus de 35 sites internationaux."
+#. translators: Placeholders: %1$s & %3$s - <a> tag, %2$s & %4$s - </a> tag
+#: src/WooCommerce/Payments/StripeGateway.php:77
+msgid "Securely accept online payments via credit/debit card, wallets, bank redirects, and other methods enabled in your Stripe account. %1$sView Stripe pricing%2$s for your business' location and payment methods. %3$sStripe terms apply%4$s."
+msgstr "Acceptez en toute sécurité les paiements en ligne par carte de crédit/débit, portefeuille électronique, redirection bancaire et autres méthodes activées dans votre compte Stripe. %1$sConsultez les tarifs Stripe%2$s en fonction de la localisation de votre entreprise et des moyens de paiement. %3$sLes conditions Stripe s'appliquent%4$s."
 
-#: src/WooCommerce/Payments/StripeGateway.php:237
+#: src/WooCommerce/Payments/StripeGateway.php:244
 msgid "You are about to disconnect your Stripe account. Your store will not be able to process transactions using Stripe until you connect an account again."
 msgstr "Vous êtes sur le point de déconnecter votre compte Stripe. Votre boutique ne pourra pas traiter les transactions par Stripe tant que vous n'aurez pas reconnecté un compte."
 
-#: src/WooCommerce/Payments/StripeGateway.php:283
-msgid "Learn more about Stripe fees"
-msgstr "En savoir plus sur les frais Stripe"
-
-#: src/WooCommerce/Payments/StripeGateway.php:487
+#: src/WooCommerce/Payments/StripeGateway.php:490
 msgid "General"
 msgstr "Général"
 
-#: src/WooCommerce/Payments/StripeGateway.php:506
-msgid "Connect Stripe Account"
-msgstr "Connecter le compte Stripe"
-
-#: src/WooCommerce/Payments/StripeGateway.php:515
+#: src/WooCommerce/Payments/StripeGateway.php:509
 msgid "Disconnect Stripe Account"
 msgstr "Déconnecter le compte Stripe"
 
-#: src/WooCommerce/Payments/StripeGateway.php:524
+#: src/WooCommerce/Payments/StripeGateway.php:518
 msgid "Connecting to Stripe..."
-msgstr "Connecting to Stripe..."
+msgstr "Connexion à Stripe..."
 
-#: src/WooCommerce/Payments/StripeGateway.php:526
+#: src/WooCommerce/Payments/StripeGateway.php:520
 msgid "This operation can take up to a few seconds. Please reload this page to check the current status."
-msgstr "This operation can take up to a few seconds. Please reload this page to check the current status."
+msgstr "Cette opération peut prendre jusqu'à quelques secondes. Veuillez recharger cette page pour vérifier l'état actuel."
 
-#: src/WooCommerce/Payments/StripeGateway.php:591
+#: src/WooCommerce/Payments/StripeGateway.php:530
+msgid "Connect Stripe Account"
+msgstr "Connecter le compte Stripe"
+
+#: src/WooCommerce/Payments/StripeGateway.php:594
 msgid "Affirm"
 msgstr "Affirm"
 
-#: src/WooCommerce/Payments/StripeGateway.php:592
+#: src/WooCommerce/Payments/StripeGateway.php:595
 msgid "Afterpay / Clearpay"
 msgstr "Afterpay / Clearpay"
 
-#: src/WooCommerce/Payments/StripeGateway.php:593
+#: src/WooCommerce/Payments/StripeGateway.php:596
 msgid "Alipay"
 msgstr "Alipay"
 
-#: src/WooCommerce/Payments/StripeGateway.php:594
+#: src/WooCommerce/Payments/StripeGateway.php:597
 msgid "BECS direct debit"
 msgstr "Prélèvement automatique BECS"
 
-#: src/WooCommerce/Payments/StripeGateway.php:595
+#: src/WooCommerce/Payments/StripeGateway.php:598
 msgid "Bancontact"
 msgstr "Bancontact"
 
-#: src/WooCommerce/Payments/StripeGateway.php:596
+#: src/WooCommerce/Payments/StripeGateway.php:599
 msgid "Boleto"
 msgstr "Boleto"
 
-#: src/WooCommerce/Payments/StripeGateway.php:597
+#: src/WooCommerce/Payments/StripeGateway.php:600
 msgid "Credit / Debit"
 msgstr "Crédit / Débit"
 
-#: src/WooCommerce/Payments/StripeGateway.php:598
+#: src/WooCommerce/Payments/StripeGateway.php:601
 msgid "EPS"
 msgstr "EPS"
 
-#: src/WooCommerce/Payments/StripeGateway.php:599
+#: src/WooCommerce/Payments/StripeGateway.php:602
 msgid "FPX"
 msgstr "FPX"
 
-#: src/WooCommerce/Payments/StripeGateway.php:600
+#: src/WooCommerce/Payments/StripeGateway.php:603
 msgid "Giropay"
 msgstr "Giropay"
 
-#: src/WooCommerce/Payments/StripeGateway.php:601
+#: src/WooCommerce/Payments/StripeGateway.php:604
 msgid "GrabPay"
 msgstr "GrabPay"
 
-#: src/WooCommerce/Payments/StripeGateway.php:602
+#: src/WooCommerce/Payments/StripeGateway.php:605
 msgid "iDEAL"
 msgstr "iDEAL"
 
-#: src/WooCommerce/Payments/StripeGateway.php:603
+#: src/WooCommerce/Payments/StripeGateway.php:606
 msgid "Klarna"
 msgstr "Klarna"
 
-#: src/WooCommerce/Payments/StripeGateway.php:604
+#: src/WooCommerce/Payments/StripeGateway.php:607
 msgid "Konbini"
 msgstr "Konbini"
 
-#: src/WooCommerce/Payments/StripeGateway.php:605
+#: src/WooCommerce/Payments/StripeGateway.php:608
 msgid "OXXO"
 msgstr "OXXO"
 
-#: src/WooCommerce/Payments/StripeGateway.php:606
+#: src/WooCommerce/Payments/StripeGateway.php:609
 msgid "P24"
 msgstr "P24"
 
-#: src/WooCommerce/Payments/StripeGateway.php:607
+#: src/WooCommerce/Payments/StripeGateway.php:610
 msgid "PayNow"
 msgstr "PayNow"
 
-#: src/WooCommerce/Payments/StripeGateway.php:608
+#: src/WooCommerce/Payments/StripeGateway.php:611
 msgid "SEPA Debit"
 msgstr "Prélèvement SEPA"
 
-#: src/WooCommerce/Payments/StripeGateway.php:609
+#: src/WooCommerce/Payments/StripeGateway.php:612
 msgid "Sofort"
 msgstr "Sofort"
 
-#: src/WooCommerce/Payments/StripeGateway.php:610
+#: src/WooCommerce/Payments/StripeGateway.php:613
 msgid "ACH Direct Debit"
 msgstr "Débit bancaire ACH"
 
-#: src/WooCommerce/Payments/StripeGateway.php:611
+#: src/WooCommerce/Payments/StripeGateway.php:614
 msgid "WeChat Pay"
 msgstr "WeChat Pay"
 
@@ -3216,7 +3523,7 @@ msgstr "Articles"
 msgid "GoDaddy"
 msgstr "GoDaddy"
 
-#: src/WordPress/Interceptors/PlainPermalinksInterceptor.php:64
+#: src/WordPress/Interceptors/EnforcePostNamePermalinksInterceptor.php:111
 msgid "Warning! Plain Permalinks Detected"
 msgstr "Avertissement ! Permaliens simples détectés"
 

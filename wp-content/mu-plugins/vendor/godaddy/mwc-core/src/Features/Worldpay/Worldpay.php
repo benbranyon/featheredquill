@@ -56,4 +56,17 @@ class Worldpay extends AbstractFeature
     {
         $this->loadComponents();
     }
+
+    /**
+     * Determines whether Worldpay should be loaded with temporary content to the pages.
+     *
+     * By temporary content, consider new URLs, hooks that may behave with or without this conditional, among others.
+     *
+     * @return bool
+     * @throws Exception
+     */
+    public static function shouldProcessTemporaryContent() : bool
+    {
+        return Configuration::get('features.worldpay.useNewUrls', false) && static::shouldLoad();
+    }
 }

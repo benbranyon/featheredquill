@@ -17,7 +17,7 @@
  * needs please refer to https://help.godaddy.com/help/40882 for more information.
  *
  * @author      SkyVerge
- * @copyright   Copyright (c) 2015-2021, SkyVerge, Inc.
+ * @copyright   Copyright (c) 2015-2024, SkyVerge, Inc.
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -34,22 +34,22 @@ class WC_Google_Analytics_Pro_Loader {
 
 
 	/** minimum PHP version required by this plugin */
-	const MINIMUM_PHP_VERSION = '7.0';
+	const MINIMUM_PHP_VERSION = '7.4';
 
 	/** minimum WordPress version required by this plugin */
-	const MINIMUM_WP_VERSION = '5.2';
+	const MINIMUM_WP_VERSION = '5.6';
 
 	/** minimum WooCommerce version required by this plugin */
-	const MINIMUM_WC_VERSION = '3.5';
+	const MINIMUM_WC_VERSION = '3.9.4';
 
 	/** SkyVerge plugin framework version used by this plugin */
-	const FRAMEWORK_VERSION = '5.10.12';
+	const FRAMEWORK_VERSION = '5.11.0';
 
 	/** the plugin name, for displaying notices */
 	const PLUGIN_NAME = 'Google Analytics';
 
 
-	/** @var WC_Google_Analytics_Pro_Loader single instance of this class */
+	/** @var \WC_Google_Analytics_Pro_Loader single instance of this class */
 	protected static $instance;
 
 	/** @var array the admin notices to add */
@@ -114,8 +114,8 @@ class WC_Google_Analytics_Pro_Loader {
 
 			$this->load_framework();
 
-			// load the main plugin class
-			require_once( plugin_dir_path( __FILE__ ) . 'class-wc-google-analytics-pro.php' );
+			// load plugin helpers
+			require_once( plugin_dir_path( __FILE__ ) . 'src/Functions.php' );
 
 			// fire it up!
 			wc_google_analytics_pro();

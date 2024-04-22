@@ -61,11 +61,33 @@ class CreateOrderRequestAdapter extends AbstractGatewayRequestAdapter
     {
         $data = $this->input->order->toArray();
 
+        $data = $this->removeKeysIfValueIsNull($data, [
+            'number',
+        ]);
+
         return array_merge(
             ArrayHelper::except($data, 'id'),
             $this->getItemsWithIdRemoved($data, 'lineItems'),
             $this->getItemsWithIdRemoved($data, 'notes'),
         );
+    }
+
+    /**
+     * Remove the specified keys from the given array of data if their value is null.
+     *
+     * @param array<string, mixed> $data source data
+     * @param string[] $keys keys present in the source data
+     * @return array<string, mixed>
+     */
+    protected function removeKeysIfValueIsNull(array $data, array $keys) : array
+    {
+        foreach ($keys as $key) {
+            if (is_null(ArrayHelper::get($data, $key, 0))) {
+                ArrayHelper::remove($data, $key);
+            }
+        }
+
+        return $data;
     }
 
     /**

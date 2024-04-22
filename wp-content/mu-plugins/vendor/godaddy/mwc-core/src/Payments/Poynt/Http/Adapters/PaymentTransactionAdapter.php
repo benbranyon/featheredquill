@@ -18,6 +18,7 @@ use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
 use GoDaddy\WordPress\MWC\Core\Payments\Models\Transactions\PaymentTransaction;
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt;
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Http\ChargeRequest;
+use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Traits\CanGetOrderRemoteIdForPoyntReferenceTrait;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Models\Orders\Order;
 use GoDaddy\WordPress\MWC\Payments\Contracts\CardBrandContract;
 use GoDaddy\WordPress\MWC\Payments\Models\PaymentMethods\CardPaymentMethod;
@@ -34,9 +35,13 @@ use GoDaddy\WordPress\MWC\Payments\Models\Transactions\Statuses\DeclinedTransact
 
 /**
  * The payment transaction adapter.
+ *
+ * @phpstan-import-type TOrderReference from CanGetOrderRemoteIdForPoyntReferenceTrait
  */
 class PaymentTransactionAdapter implements DataSourceAdapterContract
 {
+    use CanGetOrderRemoteIdForPoyntReferenceTrait;
+
     /** @var string identifier for authorization payments */
     const PAYMENT_ACTION_AUTHORIZE = 'AUTHORIZE';
 
@@ -129,8 +134,9 @@ class PaymentTransactionAdapter implements DataSourceAdapterContract
             ],
         ];
 
-        /** @var Order $order */
-        if ($order = $this->source->getOrder()) {
+        $order = $this->source->getOrder();
+
+        if ($order instanceof Order) {
             $adaptedBillingAddress = $this->getAdaptedAddress($order->getBillingAddress());
 
             if ($this->hasAdaptedAddress($adaptedBillingAddress)) {
@@ -164,16 +170,7 @@ class PaymentTransactionAdapter implements DataSourceAdapterContract
                 'id'         => get_admin_url(null, 'post.php?post='.$order->getId().'&action=edit'),
             ];
 
-            if (Poynt::shouldPushOrderDetailsToPoynt($order)) {
-                $poyntOrderId = StringHelper::generateUuid4();
-                $transactionData['references'][] = [
-                    'type' => 'POYNT_ORDER',
-                    'id'   => $poyntOrderId,
-                ];
-                $wcOrder = OrdersRepository::get($order->getId());
-                $wcOrder->update_meta_data('_poynt_order_remoteId', $poyntOrderId);
-                $wcOrder->save();
-            }
+            $transactionData = $this->maybeAddOrderReference($order, $transactionData);
         }
 
         $transactionData['action'] = $this->source->isAuthOnly() ? self::PAYMENT_ACTION_AUTHORIZE : self::PAYMENT_ACTION_CHARGE;
@@ -292,6 +289,72 @@ class PaymentTransactionAdapter implements DataSourceAdapterContract
         $countryCodes = ($wcInstance = WooCommerceRepository::getInstance()) ? include($wcInstance->plugin_path().'/i18n/phone.php') : null;
 
         return $countryCodes ?: [];
+    }
+
+    /**
+     * Adds an order reference to given transaction data, if we can get one for the order.
+     *
+     * @template TTransactionData of array
+     * @param Order $order
+     * @param TTransactionData $transactionData
+     *
+     * @return TTransactionData
+     */
+    protected function maybeAddOrderReference(Order $order, array $transactionData) : array
+    {
+        if ($reference = $this->getOrCreateOrderReference($order)) {
+            $transactionData['references'][] = $reference;
+        }
+
+        return $transactionData;
+    }
+
+    /**
+     * Gets an existing order ID for the Poynt reference field or creates one.
+     *
+     * @return ?TOrderReference
+     */
+    protected function getOrCreateOrderReference(Order $order) : ?array
+    {
+        if ($reference = $this->getOrderReferenceForPoynt($order)) {
+            return $reference;
+        }
+
+        return $this->buildPoyntOrderReferenceIfNeeded($order);
+    }
+
+    /**
+     * Builds a Poynt order reference with a new Poynt order ID if conditions are met.
+     *
+     * @param Order $order
+     *
+     * @return ?TOrderReference
+     */
+    protected function buildPoyntOrderReferenceIfNeeded(Order $order)
+    {
+        if (Poynt::shouldPushOrderDetailsToPoynt($order)) {
+            return $this->buildPoyntOrderReference($this->createPoyntOrderId($order));
+        }
+
+        return null;
+    }
+
+    /**
+     * Creates a Poynt order ID and stores it in the order's metadata.
+     *
+     * @return non-empty-string
+     */
+    protected function createPoyntOrderId(Order $order) : string
+    {
+        /** @var non-empty-string $poyntOrderId */
+        $poyntOrderId = StringHelper::generateUuid4();
+
+        if ($wcOrder = OrdersRepository::get((int) $order->getId())) {
+            $wcOrder->update_meta_data('_poynt_order_remoteId', $poyntOrderId);
+            $wcOrder->save();
+        }
+
+        return $poyntOrderId;
     }
 
     /**

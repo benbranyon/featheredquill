@@ -11,6 +11,7 @@ use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Services\LineItemMapping
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Services\MultiLineItemsMappingService;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Services\MultiLineItemsPersistentMappingService;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Repositories\LineItemMapRepository;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Services\ResourceMaps\ResourceMapCachingServiceRouter;
 use GoDaddy\WordPress\MWC\Core\Repositories\Strategies\LineItemPrefixedRemoteIdMutationStrategy;
 
 class LineItemMappingServiceProvider extends AbstractServiceProvider
@@ -32,10 +33,13 @@ class LineItemMappingServiceProvider extends AbstractServiceProvider
             /** @var CommerceContextContract $commerceContext */
             $commerceContext = $this->getContainer()->get(CommerceContextContract::class);
 
+            /** @var ResourceMapCachingServiceRouter $resourceMapCachingServiceRouter */
+            $resourceMapCachingServiceRouter = $this->getContainer()->get(ResourceMapCachingServiceRouter::class);
+
             /** @var LineItemPrefixedRemoteIdMutationStrategy $remoteIdMutationStrategy */
             $remoteIdMutationStrategy = $this->getContainer()->get(LineItemPrefixedRemoteIdMutationStrategy::class);
 
-            return new LineItemMapRepository($commerceContext, $remoteIdMutationStrategy);
+            return new LineItemMapRepository($commerceContext, $resourceMapCachingServiceRouter, $remoteIdMutationStrategy);
         });
 
         $this->getContainer()->bind(LineItemMappingServiceContract::class, LineItemMappingService::class);

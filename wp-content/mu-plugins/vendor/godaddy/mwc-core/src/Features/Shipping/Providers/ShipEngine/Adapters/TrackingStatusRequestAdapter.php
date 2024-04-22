@@ -3,7 +3,6 @@
 namespace GoDaddy\WordPress\MWC\Core\Features\Shipping\Providers\ShipEngine\Adapters;
 
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
-use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
 use GoDaddy\WordPress\MWC\Common\Http\Contracts\RequestContract;
 use GoDaddy\WordPress\MWC\Common\Http\Contracts\ResponseContract;
 use GoDaddy\WordPress\MWC\Core\Features\Shipping\Providers\ShipEngine\Http\Request;
@@ -47,8 +46,8 @@ class TrackingStatusRequestAdapter extends AbstractGatewayRequestAdapter
     {
         $responseBody = ArrayHelper::wrap($response->getBody());
 
-        $trackingNumber = $this->getStringValue($responseBody, 'tracking_number');
-        $trackingUrl = $this->getStringValue($responseBody, 'tracking_url');
+        $trackingNumber = ArrayHelper::getStringValueForKey($responseBody, 'tracking_number');
+        $trackingUrl = ArrayHelper::getStringValueForKey($responseBody, 'tracking_url');
 
         if (empty($trackingNumber) && empty($trackingUrl)) {
             throw new ShippingException('Tracking information is missing.');
@@ -59,19 +58,5 @@ class TrackingStatusRequestAdapter extends AbstractGatewayRequestAdapter
         $this->operation->getPackage()->setTrackingNumber($trackingNumber)->setTrackingUrl($trackingUrl);
 
         return $this->operation;
-    }
-
-    /**
-     * Gets a string value from the given array.
-     *
-     * Returns an empty string if the value cannot be converted to string.
-     *
-     * @param array<string, mixed> $data
-     * @param string $key
-     * @return string
-     */
-    protected function getStringValue(array $data, string $key) : string
-    {
-        return (string) StringHelper::ensureScalar(ArrayHelper::get($data, $key));
     }
 }

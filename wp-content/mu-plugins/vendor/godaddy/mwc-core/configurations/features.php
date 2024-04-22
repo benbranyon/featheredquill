@@ -1,36 +1,43 @@
 <?php
 
 use GoDaddy\WordPress\MWC\Common\Features\AbstractFeature;
-use GoDaddy\WordPress\MWC\Core\Configuration\CartRecoveryEmailsRuntimeConfiguration;
+use GoDaddy\WordPress\MWC\Common\HostingPlans\Enums\HostingPlanNamesEnum;
+use GoDaddy\WordPress\MWC\Core\Auth\Sso\WordPress\WordPressSso;
+use GoDaddy\WordPress\MWC\Core\Configuration\CartRecoveryEmailsFeatureRuntimeConfiguration;
+use GoDaddy\WordPress\MWC\Core\Features\Assistant\Assistant;
 use GoDaddy\WordPress\MWC\Core\Features\CartRecoveryEmails\CartRecoveryEmails;
 use GoDaddy\WordPress\MWC\Core\Features\Categories;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Backfill\CommerceBackfill;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Backfill\Jobs\BackfillProductCategoriesJob;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Backfill\Jobs\BackfillProductsJob;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\CatalogIntegration;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Polling\RemoteCategoriesPollingProcessor;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Polling\RemoteProductsPollingProcessor;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Commerce;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\CommerceCustomerPush;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\CustomersIntegration;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\InventoryIntegration;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Locations\LocationsIntegration;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\OrdersIntegration;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Polling\CommercePolling;
 use GoDaddy\WordPress\MWC\Core\Features\CostOfGoods\CostOfGoods;
 use GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\EmailNotifications;
+use GoDaddy\WordPress\MWC\Core\Features\ExternalDomainControls\ExternalDomainControls;
 use GoDaddy\WordPress\MWC\Core\Features\GiftCertificates\GiftCertificates;
 use GoDaddy\WordPress\MWC\Core\Features\GoogleAnalytics\GoogleAnalytics;
 use GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Marketplaces;
 use GoDaddy\WordPress\MWC\Core\Features\Onboarding\Dashboard;
 use GoDaddy\WordPress\MWC\Core\Features\Onboarding\Onboarding;
+use GoDaddy\WordPress\MWC\Core\Features\PluginControls\PluginControls;
 use GoDaddy\WordPress\MWC\Core\Features\SequentialOrderNumbers\SequentialOrderNumbers;
 use GoDaddy\WordPress\MWC\Core\Features\ShipmentTracking\ShipmentTracking;
 use GoDaddy\WordPress\MWC\Core\Features\Shipping\Shipping;
 use GoDaddy\WordPress\MWC\Core\Features\Stripe\Stripe;
 use GoDaddy\WordPress\MWC\Core\Features\UrlCoupons\UrlCoupons;
 
-$mwcEcommerceAllowedHostingPlans = [
-    'ecommerce',
-    'essentials',
-    'flex',
-    'expand',
-    'premier',
-];
+$mwcEcommerceAllowedHostingPlans = HostingPlanNamesEnum::getAllEcommercePlanNames();
+
+$allMwcsHostingPlans = HostingPlanNamesEnum::getAllMwcsPlanNames();
 
 return [
     /*
@@ -44,9 +51,19 @@ return [
      *
      * Descriptive information (name, urls, etc.) is used to display the native features on the WooCommerce > Extensions page.
      */
-    'apple_pay'     => ! (defined('DISABLE_MWC_APPLE_PAY') && DISABLE_MWC_APPLE_PAY),
-    'google_pay'    => ! (defined('DISABLE_MWC_GOOGLE_PAY') && DISABLE_MWC_GOOGLE_PAY),
-    'bopit'         => ! (defined('DISABLE_MWC_BOPIT') && DISABLE_MWC_BOPIT),
+    'apple_pay'  => ! (defined('DISABLE_MWC_APPLE_PAY') && DISABLE_MWC_APPLE_PAY),
+    'google_pay' => ! (defined('DISABLE_MWC_GOOGLE_PAY') && DISABLE_MWC_GOOGLE_PAY),
+    'bopit'      => ! (defined('DISABLE_MWC_BOPIT') && DISABLE_MWC_BOPIT),
+    'assistant'  => [
+        'enabled'             => true,
+        'allowedHostingPlans' => $allMwcsHostingPlans,
+        'requiredPlugins'     => ['woocommerce'],
+        'overrides'           => [
+            'enabled'  => defined('ENABLE_MWC_AI_ASSISTANT') && ENABLE_MWC_AI_ASSISTANT,
+            'disabled' => defined('DISABLE_MWC_AI_ASSISTANT') && DISABLE_MWC_AI_ASSISTANT,
+        ],
+        'className' => Assistant::class,
+    ],
     'cost_of_goods' => [
         'name'        => function_exists('__') ? __('Cost of goods', 'mwc-core') : 'Cost of goods',
         'description' => function_exists('__') ? sprintf(
@@ -57,7 +74,7 @@ return [
         'documentation_url' => 'https://godaddy.com/help/40874',
         'settings_url'      => function_exists('admin_url') ? admin_url('admin.php?page=wc-settings&tab=orders') : '',
         'categories'        => [
-            Categories::STORE_MANAGEMENT,
+            Categories::StoreManagement,
         ],
         'enabled'                         => true,
         'allowedHostingPlans'             => $mwcEcommerceAllowedHostingPlans,
@@ -80,7 +97,7 @@ return [
         'documentation_url' => 'https://godaddy.com/help/40929',
         'settings_url'      => function_exists('admin_url') ? admin_url('admin.php?page=gd-email-notifications&tab=settings') : '',
         'categories'        => [
-            Categories::MARKETING,
+            Categories::Marketing,
         ],
         'enabled'                         => true,
         'allowedHostingPlans'             => $mwcEcommerceAllowedHostingPlans,
@@ -94,11 +111,11 @@ return [
     ],
     'godaddy_payments' => [
         'disabled'           => defined('DISABLE_GODADDY_PAYMENTS') && DISABLE_GODADDY_PAYMENTS,
-        'supportedCountries' => defined('ENABLE_GODADDY_PAYMENTS_CANADA') && ENABLE_GODADDY_PAYMENTS_CANADA ? [
+        'supportedCountries' => defined('DISABLE_GODADDY_PAYMENTS_CANADA') && DISABLE_GODADDY_PAYMENTS_CANADA ? [
             'US' => ['USD'],
-            'CA' => ['CAD'],
         ] : [
             'US' => ['USD'],
+            'CA' => ['CAD'],
         ],
     ],
     'google_analytics' => [
@@ -112,7 +129,7 @@ return [
         'documentation_url' => 'https://godaddy.com/help/40882',
         'settings_url'      => function_exists('admin_url') ? admin_url('admin.php?page=wc-settings&tab=integration&section=google_analytics_pro') : '',
         'categories'        => [
-            Categories::MARKETING,
+            Categories::Marketing,
         ],
         'enabled'                         => true,
         'allowedHostingPlans'             => $mwcEcommerceAllowedHostingPlans,
@@ -145,7 +162,7 @@ return [
         'documentation_url' => 'https://godaddy.com/help/40712',
         'settings_url'      => function_exists('admin_url') ? admin_url('admin.php?page=wc-settings&tab=orders') : '',
         'categories'        => [
-            Categories::STORE_MANAGEMENT,
+            Categories::StoreManagement,
         ],
         'enabled'                         => true,
         'allowedHostingPlans'             => $mwcEcommerceAllowedHostingPlans,
@@ -167,7 +184,7 @@ return [
         'documentation_url' => 'https://godaddy.com/help/40631',
         'settings_url'      => '',
         'categories'        => [
-            Categories::SHIPPING,
+            Categories::Shipping,
         ],
         'enabled'   => get_option('mwc_shipment_tracking_active', 'yes') === 'yes',
         'className' => ShipmentTracking::class,
@@ -181,7 +198,7 @@ return [
         ) : '',
         'documentation_url' => 'https://godaddy.com/help/40840',
         'categories'        => [
-            Categories::MARKETING,
+            Categories::Marketing,
         ],
         'enabled'                         => true,
         'allowedHostingPlans'             => $mwcEcommerceAllowedHostingPlans,
@@ -203,8 +220,8 @@ return [
         'documentation_url' => 'https://www.godaddy.com/help/40294',
         'settings_url'      => function_exists('admin_url') ? admin_url('edit.php?post_type=wc_voucher') : '',
         'categories'        => [
-            Categories::MERCHANDISING,
-            Categories::PRODUCT_TYPE,
+            Categories::Merchandising,
+            Categories::ProductType,
         ],
         'enabled'                         => true,
         'allowedHostingPlans'             => $mwcEcommerceAllowedHostingPlans,
@@ -236,8 +253,8 @@ return [
         'documentation_url' => 'https://godaddy.com/help/41079',
         'settings_url'      => function_exists('admin_url') ? admin_url('admin.php?page=gd-email-notifications&tab=emails&category=cart_recovery') : '',
         'categories'        => [
-            Categories::CART_CHECKOUT,
-            Categories::MARKETING,
+            Categories::CartCheckout,
+            Categories::Marketing,
         ],
         'enabled'                  => true,
         'requiredFeatures'         => EmailNotifications::class,
@@ -249,7 +266,7 @@ return [
             'disabled' => defined('DISABLE_MWC_CART_RECOVERY_EMAILS') && DISABLE_MWC_CART_RECOVERY_EMAILS,
         ],
         'className'             => CartRecoveryEmails::class,
-        'runtime_configuration' => CartRecoveryEmailsRuntimeConfiguration::class,
+        'runtime_configuration' => CartRecoveryEmailsFeatureRuntimeConfiguration::class,
         'isDelayReadOnly'       => false,
     ],
     'gdp_by_default' => [
@@ -266,7 +283,7 @@ return [
         'documentation_url' => 'https://stripe.com/pricing',
         'settings_url'      => function_exists('admin_url') ? admin_url('admin.php?page=wc-settings&tab=checkout&section=stripe') : '',
         'categories'        => [
-            Categories::PAYMENTS,
+            Categories::Payments,
         ],
         'allowedHostingPlans' => [],
         'className'           => Stripe::class,
@@ -277,56 +294,77 @@ return [
         'documentation_url' => 'https://godaddy.com/help/a-41221',
         'settings_url'      => function_exists('admin_url') ? admin_url('admin.php?page=gd-marketplaces') : '',
         'categories'        => [
-            Categories::MARKETING,
-            Categories::MERCHANDISING,
-            Categories::STORE_MANAGEMENT,
+            Categories::Marketing,
+            Categories::Merchandising,
+            Categories::StoreManagement,
         ],
-        'enabled'   => false,
+        'enabled'   => true,
         'overrides' => [
             'enabled'  => defined('ENABLE_MWC_MARKETPLACES') && ENABLE_MWC_MARKETPLACES,
             'disabled' => defined('DISABLE_MWC_MARKETPLACES') && DISABLE_MWC_MARKETPLACES,
         ],
-        'className' => Marketplaces::class,
+        'requiredPlugins' => ['woocommerce'],
+        // The Marketplaces feature is not available in CA markets yet -- {wvega 2023-07-07}
+        'allowedHostingPlans' => array_merge(HostingPlanNamesEnum::getDefaultMwcsPlanNames(), HostingPlanNamesEnum::getAllWorldpayPlanNames()),
+        'className'           => Marketplaces::class,
     ],
     'shipping' => [
-        'enabled'           => false,
+        'enabled'           => true,
         'name'              => 'Shipping',
         'description'       => function_exists('__') ? __('Take order fulfillment to the next level! Get live shipping rates from your favourite providers, print labels in one click, and automate shipment tracking and customer email notifications.', 'mwc-core') : '',
         'documentation_url' => 'https://godaddy.com/help/a-41210',
         'settings_url'      => '',
         'categories'        => [
-            Categories::SHIPPING,
+            Categories::Shipping,
         ],
-        'allowedHostingPlans' => [],
+        'allowedHostingPlans' => $allMwcsHostingPlans,
         'overrides'           => [
-            'disabled' => true,
+            'enabled'  => defined('ENABLE_MWC_SHIPPING') && ENABLE_MWC_SHIPPING,
+            'disabled' => defined('DISABLE_MWC_SHIPPING') && DISABLE_MWC_SHIPPING,
         ],
-        'className' => Shipping::class,
+        'requiredPlugins' => ['woocommerce'],
+        'className'       => Shipping::class,
     ],
     'worldpay' => [
-        'enabled' => false,
-        'hqUrl'   => 'https://poynt.godaddy.com/',
+        'enabled' => true,
+
+        // Note: MWP hosted sites do not currently have a WorldPay FPID,
+        // this will cause the feature to fail to load even though the plan may enable it.
+        // {@see WorldPlay::shouldLoad()}
+        'allowedHostingPlans' => $allMwcsHostingPlans,
+        'hqUrl'               => 'https://poynt.godaddy.com/',
+        'baseMenuUrl'         => 'https://commerce.godaddy.com/',
+        'useNewUrls'          => true,
+        'overrides'           => [
+            'enabled'  => defined('ENABLE_MWC_WORLDPAY') && ENABLE_MWC_WORLDPAY,
+            'disabled' => defined('DISABLE_MWC_WORLDPAY') && DISABLE_MWC_WORLDPAY,
+        ],
     ],
     'commerce' => [
-        'enabled'   => false,
-        'overrides' => [
-            'disabled' => true,
+        'enabled'             => true,
+        'allowedHostingPlans' => $allMwcsHostingPlans,
+        'overrides'           => [
+            'enabled'  => defined('ENABLE_COMMERCE_INTEGRATION') && ENABLE_COMMERCE_INTEGRATION,
+            'disabled' => defined('DISABLE_COMMERCE_INTEGRATION') && DISABLE_COMMERCE_INTEGRATION,
         ],
-        'className'    => Commerce::class,
-        'integrations' => [
+        'requiredPlugins' => ['woocommerce'],
+        'className'       => Commerce::class,
+        'integrations'    => [
             CatalogIntegration::NAME => [
-                'enabled'   => defined('ENABLE_MWC_COMMERCE_CATALOG') && ENABLE_MWC_COMMERCE_CATALOG,
+                'enabled'   => true,
                 'overrides' => [
                     'enabled'  => defined('ENABLE_MWC_COMMERCE_CATALOG_INTEGRATION') && ENABLE_MWC_COMMERCE_CATALOG_INTEGRATION,
                     'disabled' => defined('DISABLE_MWC_COMMERCE_CATALOG_INTEGRATION') && DISABLE_MWC_COMMERCE_CATALOG_INTEGRATION,
                 ],
                 'capabilities' => [
-                    Commerce::CAPABILITY_READ  => ! (defined('DISABLE_MWC_COMMERCE_CATALOG_READ') && DISABLE_MWC_COMMERCE_CATALOG_READ),
-                    Commerce::CAPABILITY_WRITE => ! (defined('DISABLE_MWC_COMMERCE_CATALOG_WRITE') && DISABLE_MWC_COMMERCE_CATALOG_WRITE),
+                    Commerce::CAPABILITY_READ                    => ! (defined('DISABLE_MWC_COMMERCE_CATALOG_READ') && DISABLE_MWC_COMMERCE_CATALOG_READ),
+                    Commerce::CAPABILITY_WRITE                   => ! (defined('DISABLE_MWC_COMMERCE_CATALOG_WRITE') && DISABLE_MWC_COMMERCE_CATALOG_WRITE),
+                    Commerce::CAPABILITY_EVENTS                  => ! (defined('DISABLE_MWC_COMMERCE_CATALOG_EVENTS') && DISABLE_MWC_COMMERCE_CATALOG_EVENTS),
+                    Commerce::CAPABILITY_DETECT_UPSTREAM_CHANGES => ! (defined('DISABLE_MWC_COMMERCE_CATALOG_DETECT_UPSTREAM_CHANGES') && DISABLE_MWC_COMMERCE_CATALOG_DETECT_UPSTREAM_CHANGES),
                 ],
             ],
             CustomersIntegration::NAME => [
-                'enabled'   => false,
+                'enabled'   => true,
                 'overrides' => [
                     'enabled'  => defined('ENABLE_MWC_COMMERCE_CUSTOMERS_INTEGRATION') && ENABLE_MWC_COMMERCE_CUSTOMERS_INTEGRATION,
                     'disabled' => defined('DISABLE_MWC_COMMERCE_CUSTOMERS_INTEGRATION') && DISABLE_MWC_COMMERCE_CUSTOMERS_INTEGRATION,
@@ -338,22 +376,30 @@ return [
             ],
             InventoryIntegration::NAME => [
                 'requiredFeatures' => CatalogIntegration::class,
-                'enabled'          => defined('ENABLE_MWC_COMMERCE_INVENTORY') && ENABLE_MWC_COMMERCE_INVENTORY,
-                'capabilities'     => [
+                'enabled'          => true,
+                'overrides'        => [
+                    'enabled'  => defined('ENABLE_MWC_COMMERCE_INVENTORY_INTEGRATION') && ENABLE_MWC_COMMERCE_INVENTORY_INTEGRATION,
+                    'disabled' => defined('DISABLE_MWC_COMMERCE_INVENTORY_INTEGRATION') && DISABLE_MWC_COMMERCE_INVENTORY_INTEGRATION,
+                ],
+                'capabilities' => [
                     Commerce::CAPABILITY_READ  => ! (defined('DISABLE_MWC_COMMERCE_INVENTORY_READ') && DISABLE_MWC_COMMERCE_INVENTORY_READ),
                     Commerce::CAPABILITY_WRITE => ! (defined('DISABLE_MWC_COMMERCE_INVENTORY_WRITE') && DISABLE_MWC_COMMERCE_INVENTORY_WRITE),
                 ],
             ],
             LocationsIntegration::NAME => [
                 'requiredFeatures' => CatalogIntegration::class,
-                'enabled'          => defined('ENABLE_MWC_COMMERCE_LOCATIONS') && ENABLE_MWC_COMMERCE_LOCATIONS,
-                'capabilities'     => [
+                'enabled'          => true,
+                'overrides'        => [
+                    'enabled'  => defined('ENABLE_MWC_COMMERCE_LOCATIONS_INTEGRATION') && ENABLE_MWC_COMMERCE_LOCATIONS_INTEGRATION,
+                    'disabled' => defined('DISABLE_MWC_COMMERCE_LOCATIONS_INTEGRATION') && DISABLE_MWC_COMMERCE_LOCATIONS_INTEGRATION,
+                ],
+                'capabilities' => [
                     Commerce::CAPABILITY_READ  => ! (defined('DISABLE_MWC_COMMERCE_LOCATIONS_READ') && DISABLE_MWC_COMMERCE_LOCATIONS_READ),
                     Commerce::CAPABILITY_WRITE => ! (defined('DISABLE_MWC_COMMERCE_LOCATIONS_WRITE') && DISABLE_MWC_COMMERCE_LOCATIONS_WRITE),
                 ],
             ],
             OrdersIntegration::NAME => [
-                'enabled'   => false,
+                'enabled'   => true,
                 'overrides' => [
                     'enabled'  => defined('ENABLE_MWC_COMMERCE_ORDERS_INTEGRATION') && ENABLE_MWC_COMMERCE_ORDERS_INTEGRATION,
                     'disabled' => defined('DISABLE_MWC_COMMERCE_ORDERS_INTEGRATION') && DISABLE_MWC_COMMERCE_ORDERS_INTEGRATION,
@@ -372,9 +418,98 @@ return [
     'commerce_customer_push' => [
         'enabled'   => false,
         'overrides' => [
-            'disabled' => true,
+            'enabled'  => defined('ENABLE_COMMERCE_CUSTOMER_PUSH') && ENABLE_COMMERCE_CUSTOMER_PUSH,
+            'disabled' => defined('DISABLE_COMMERCE_CUSTOMER_PUSH') && DISABLE_COMMERCE_CUSTOMER_PUSH,
         ],
         'requiredFeatures' => [Commerce::class],
         'className'        => CommerceCustomerPush::class,
+    ],
+    'commerce_backfill' => [
+        'enabled'             => true,
+        'allowedHostingPlans' => $allMwcsHostingPlans,
+        'overrides'           => [
+            'enabled'  => defined('ENABLE_MWC_COMMERCE_BACKFILL_INTEGRATION') && ENABLE_MWC_COMMERCE_BACKFILL_INTEGRATION,
+            'disabled' => defined('DISABLE_MWC_COMMERCE_BACKFILL_INTEGRATION') && DISABLE_MWC_COMMERCE_BACKFILL_INTEGRATION,
+        ],
+        'requiredFeatures' => [Commerce::class],
+        'className'        => CommerceBackfill::class,
+        'jobs'             => [
+            // backfill jobs listed in the order they should be run (with dependencies in mind)
+            // see queue.jobs config for registered jobs and their settings
+            BackfillProductCategoriesJob::class,
+            BackfillProductsJob::class,
+        ],
+    ],
+    'commerce_polling' => [
+        'enabled'   => true,
+        'overrides' => [
+            // @deprecated: ENABLE_MWC_COMMERCE_POLLING_INTEGRATION is deprecated and will be removed in the future, use ENABLE_COMMERCE_POLLING instead.
+            'enabled' => (defined('ENABLE_MWC_COMMERCE_POLLING_INTEGRATION') && ENABLE_MWC_COMMERCE_POLLING_INTEGRATION) || (defined('ENABLE_COMMERCE_POLLING') && ENABLE_COMMERCE_POLLING),
+            // @deprecated: DISABLE_MWC_COMMERCE_POLLING_INTEGRATION is deprecated and will be removed in the future, use DISABLE_COMMERCE_POLLING instead.
+            'disabled' => defined('DISABLE_MWC_COMMERCE_BACKFILL_INTEGRATION') && DISABLE_MWC_COMMERCE_BACKFILL_INTEGRATION || defined('DISABLE_COMMERCE_POLLING') && DISABLE_COMMERCE_POLLING,
+        ],
+        'requiredFeatures'       => [Commerce::class],
+        'className'              => CommercePolling::class,
+        'supervisorDateInterval' => 'PT2M', // interval at which the supervisor should run -- passed to DateInterval constructor @link https://www.php.net/manual/en/dateinterval.construct.php
+        'jobs'                   => [
+            RemoteProductsPollingProcessor::NAME => [
+                'enabled'          => ! (defined('DISABLE_MWC_COMMERCE_CATALOG_REMOTE_PRODUCTS_POLLING') && DISABLE_MWC_COMMERCE_CATALOG_REMOTE_PRODUCTS_POLLING),
+                'requiredFeatures' => [CatalogIntegration::class],
+                'jobProcessor'     => RemoteProductsPollingProcessor::class,
+                'jobDateInterval'  => [
+                    'default'  => 'PT2M', // note that 2 minutes will be the fallback value in case the configuration value is not set or is invalid
+                    'override' => defined('MWC_COMMERCE_CATALOG_REMOTE_PRODUCTS_POLLING_DATE_INTERVAL') ? (string) MWC_COMMERCE_CATALOG_REMOTE_PRODUCTS_POLLING_DATE_INTERVAL : null, // empty value means no override
+                ],
+                'pollingRequestPageSize' => 50,
+            ],
+            RemoteCategoriesPollingProcessor::NAME => [
+                'enabled'          => ! (defined('DISABLE_MWC_COMMERCE_CATALOG_REMOTE_CATEGORIES_POLLING') && DISABLE_MWC_COMMERCE_CATALOG_REMOTE_CATEGORIES_POLLING),
+                'requiredFeatures' => [CatalogIntegration::class],
+                'jobProcessor'     => RemoteCategoriesPollingProcessor::class,
+                'jobDateInterval'  => [
+                    'default'  => 'PT2M', // note that 2 minutes will be the fallback value in case the configuration value is not set or is invalid
+                    'override' => defined('MWC_COMMERCE_CATALOG_REMOTE_CATEGORIES_POLLING_DATE_INTERVAL') ? (string) MWC_COMMERCE_CATALOG_REMOTE_CATEGORIES_POLLING_DATE_INTERVAL : null, // empty value means no override
+                ],
+                'pollingRequestPageSize' => 50,
+            ],
+        ],
+    ],
+    'wordpress_sso' => [
+        'enabled'             => true,
+        'allowedHostingPlans' => $allMwcsHostingPlans,
+        'className'           => WordPressSso::class,
+        /*
+         *--------------------------------------------------------------------------
+         * Care Agent Account Settings
+         *--------------------------------------------------------------------------
+         */
+        'care' => [
+            'autoDeleteInterval' => 'PT24H', // after how long the care agent account should be deleted -- default is 24 hours
+            'name'               => 'GoDaddy Care Agent',
+            'usernamePrefix'     => 'godaddycare', // username prefix -- final username will be appended with a random string
+            'email'              => 'commerce@services.godaddy.com',
+        ],
+    ],
+    'plugin_controls' => [
+        'enabled'             => true,
+        'allowedHostingPlans' => $allMwcsHostingPlans,
+        'className'           => PluginControls::class,
+    ],
+    'external_domain_controls' => [
+        'enabled'             => true,
+        'allowedHostingPlans' => $allMwcsHostingPlans,
+        'className'           => ExternalDomainControls::class,
+        /*
+         *--------------------------------------------------------------------------
+         * Domain Attach Flow
+         *--------------------------------------------------------------------------
+         *
+         * enable & configure the domain attachment flow notices in Settings > General and Settings > Reading
+         *
+         */
+        'domainAttachFlow' => [
+            'showNotices'   => true,
+            'attachmentUrl' => 'https://mwcstores.godaddy.com/overview/?initialAddDomainStep=START_STEP',
+        ],
     ],
 ];

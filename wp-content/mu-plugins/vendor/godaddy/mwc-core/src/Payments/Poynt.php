@@ -309,10 +309,6 @@ class Poynt
      */
     public static function checkActivatedDevices(array $devices = [])
     {
-        if (static::hasPoyntSmartTerminalActivated()) {
-            return;
-        }
-
         if (empty($devices)) {
             $devices = static::getStoreDevices();
         }
@@ -323,7 +319,9 @@ class Poynt
                 continue;
             }
 
-            Events::broadcast(new PoyntStoreDeviceFirstActivatedEvent($device));
+            if (! static::hasPoyntSmartTerminalActivated()) {
+                Events::broadcast(new PoyntStoreDeviceFirstActivatedEvent($device));
+            }
 
             update_option('mwc_payments_payinperson_terminal_activated', true);
             Configuration::set('payments.godaddy-payments-payinperson.hasTerminalActivated', true);
@@ -369,7 +367,6 @@ class Poynt
      * Determines if the site has any Poynt smart terminal devices activated in the configurations.
      *
      * @return bool
-     * @throws Exception
      */
     public static function hasPoyntSmartTerminalActivated() : bool
     {
@@ -402,16 +399,9 @@ class Poynt
     }
 
     /**
-     * Returns true if the supplied order meets the criteria to be pushed to the
-     * Poynt API.
-     *
-     * Note: should this code live elsewhere? Is Poynt in danger of becoming a God object?
-     *
-     * @param Order $order
-     * @return bool
-     * @throws Exception
+     * Determines whether the site is properly configured to push orders to the Poynt API.
      */
-    public static function shouldPushOrderDetailsToPoynt(Order $order)
+    public static function isSiteReadyToPushOrderDetailsToPoynt() : bool
     {
         // don't send the event the BOPIT feature is disabled
         if (! Configuration::get('features.bopit', false)) {
@@ -425,6 +415,21 @@ class Poynt
 
         // bail if shop has doesn't have at least one terminal connected
         if (! static::hasPoyntSmartTerminalActivated()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns true if the supplied order meets the criteria to be pushed to the
+     * Poynt API.
+     *
+     * Note: should this code live elsewhere? Is Poynt in danger of becoming a God object?
+     */
+    public static function shouldPushOrderDetailsToPoynt(Order $order) : bool
+    {
+        if (! static::isSiteReadyToPushOrderDetailsToPoynt()) {
             return false;
         }
 

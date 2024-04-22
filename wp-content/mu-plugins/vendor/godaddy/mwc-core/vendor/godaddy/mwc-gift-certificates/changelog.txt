@@ -1,7 +1,31 @@
 *** MWC Gift Certificates (formerly WooCommerce PDF Product Vouchers) Changelog ***
 
-2021.nn.nn - version 4.0.0
- * Misc - Rename to Gift Certificates
+2023.07.21 - version 4.1.0
+ * Misc - Current MWC release
+ * Fix - replace deprecated `get_page_by_title` with `get_posts` when getting a voucher by number
+
+2023.07.10 - version 3.12.1
+ * Fix - Register admin voucher redemption page properly to avoid deprecation messages in PHP 8+
+
+2023.05.24 - version 3.12.0
+ * Misc - Add compatibility for WooCommerce High Performance Order Storage (HPOS)
+ * Misc - Update DomPDF Library to v2.0.3
+
+2022.12.07 - version 3.11.0
+ * Misc - Update DomPDF library to v2.0.1
+
+2022.11.22 - version 3.10.0
+ * Misc - Require PHP 7.4 and WordPress 5.6
+
+2022.04.08 - version 3.9.17
+ * Fix - Fix a conflict with Ultimate Member that was causing issues when customizing voucher templates
+
+2022.02.07 - version 3.9.16
+ * Fix - Replace deprecated usages of `is_ajax()` in favor of `wp_doing_ajax()`
+ * Misc - Require WooCommerce 3.9.4 or higher
+
+2021.12.27 - version 3.9.15
+ * Misc - Update DomPDF library to v1.0.2
 
 2021.11.29 - version 3.9.14
  * Tweak - Explain the Add Voucher action to users.

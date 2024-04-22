@@ -165,6 +165,7 @@ class Control implements ControlContract
      */
     protected function getAllowedTypes() : array
     {
+        /** @var string[] $allowedTypes */
         $allowedTypes = [];
         $constants = (new ReflectionClass($this))->getConstants();
 

@@ -20,6 +20,7 @@ use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Http\CancelOrderRequest;
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Http\CompleteOrderRequest;
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Http\ForceCompleteOrderRequest;
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Http\PutTransactionRequest;
+use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Traits\CanGetOrderRemoteIdForPoyntReferenceTrait;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Adapters\OrderAdapter;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Models\Orders\Order;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\CorePaymentGateways;
@@ -32,6 +33,10 @@ use WC_Order;
  */
 class OrderSynchronization
 {
+    use CanGetOrderRemoteIdForPoyntReferenceTrait;
+
+    protected const STATUS_REFUNDED = 'Refunded';
+
     /**
      * Order synchronization constructor.
      *
@@ -114,7 +119,7 @@ class OrderSynchronization
             return;
         }
 
-        $this->handleOrderStatusChange('Refunded', (int) $wcRefundOrder->get_parent_id(), $args);
+        $this->handleOrderStatusChange(static::STATUS_REFUNDED, (int) $wcRefundOrder->get_parent_id(), $args);
     }
 
     /**
@@ -137,7 +142,7 @@ class OrderSynchronization
 
         $order = (new OrderAdapter($wcOrder))->convertFromSource();
 
-        if (! $this->shouldPushOrderDetailsToPoynt($order)) {
+        if (! $this->shouldPushOrderDetailsToPoyntForRefunded($order)) {
             return;
         }
 
@@ -174,7 +179,7 @@ class OrderSynchronization
 
         $order = (new OrderAdapter($wcOrder))->convertFromSource();
 
-        if (! $this->shouldPushOrderDetailsToPoynt($order)) {
+        if (! $this->shouldPushOrderDetailsToPoyntForStatus($order, $status)) {
             return;
         }
 
@@ -286,7 +291,7 @@ class OrderSynchronization
 
         if ($response->isError() || $response->getStatus() !== 201) {
             $errorMessage = ArrayHelper::get($response->getBody(), 'developerMessage');
-            throw new RefundRemotePoyntOrderException("Could not cancel Poynt order {$order->getRemoteId()}: ({$response->getStatus()}) {$errorMessage}");
+            throw new RefundRemotePoyntOrderException("Could not cancel Poynt order {$this->getOrderRemoteIdForPoyntReference($order)}: ({$response->getStatus()}) {$errorMessage}");
         }
 
         if ($orderTransaction->getProviderName() == 'poynt') {
@@ -359,10 +364,7 @@ class OrderSynchronization
                 'transactionId' => $remoteRefundTransactionId,
             ],
             'references' => [
-                [
-                    'type' => 'POYNT_ORDER',
-                    'id'   => $order->getRemoteId(),
-                ],
+                $this->getOrderReferenceForPoynt($order),
             ],
             'context' => [
                 'sourceApp'  => Configuration::get('payments.poynt.api.source', ''),
@@ -402,10 +404,44 @@ class OrderSynchronization
     }
 
     /**
+     * Determines whether we should push order details to Poynt for the given status change.
+     */
+    protected function shouldPushOrderDetailsToPoyntForStatus(Order $order, string $status) : bool
+    {
+        switch ($status) {
+            case static::STATUS_REFUNDED:
+                return $this->shouldPushOrderDetailsToPoyntForRefunded($order);
+            default:
+                return $this->shouldPushOrderDetailsToPoynt($order);
+        }
+    }
+
+    /**
+     * Determines whether we should push order details to Poynt for a status change to Refunded.
+     *
+     * Refunded status changes are communicated using transactions and those transactions
+     * can include POYNT_ORDER references with either a Commerce remote ID or a Poynt remote ID.
+     */
+    protected function shouldPushOrderDetailsToPoyntForRefunded(Order $order) : bool
+    {
+        try {
+            $shouldPushOrderDetailsToPoynt = Poynt::shouldPushOrderDetailsToPoynt($order);
+        } catch (Exception $e) {
+            return false;
+        }
+
+        return $shouldPushOrderDetailsToPoynt && $this->getOrderRemoteIdForPoyntReference($order);
+    }
+
+    /**
+     * Determines whether we should push order details for the given order.
+     *
+     * Only orders that have a Poynt remote ID can be synchronized directly to the Poynt API.
+     *
      * @param Order $order
      * @return bool true if this order should be synchronized to the Poynt API
      */
-    protected function shouldPushOrderDetailsToPoynt(Order $order)
+    protected function shouldPushOrderDetailsToPoynt(Order $order) : bool
     {
         if (! Poynt::shouldPushOrderDetailsToPoynt($order)) {
             return false;

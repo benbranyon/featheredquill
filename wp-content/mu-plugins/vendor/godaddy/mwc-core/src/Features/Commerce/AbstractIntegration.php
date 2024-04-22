@@ -82,4 +82,82 @@ abstract class AbstractIntegration extends AbstractFeature
     {
         Configuration::set(sprintf('features.%s.capabilities.%s', static::getName(), $capability), false);
     }
+
+    /**
+     * Temporarily disable writes while executing the supplied callable.
+     *
+     * If an exception is thrown during the callable's execution, writes will
+     * be re-enabled before the exception is re-thrown.
+     *
+     * @param callable $callable
+     *
+     * @return mixed
+     */
+    public static function withoutWrites(callable $callable)
+    {
+        return static::executeCallableWithoutCapability(Commerce::CAPABILITY_WRITE, $callable);
+    }
+
+    /**
+     * Temporarily disable reads while executing the supplied callable.
+     *
+     * If an exception is thrown during the callable's execution, reads will
+     * be re-enabled before the exception is re-thrown.
+     *
+     * @param callable $callable
+     *
+     * @return mixed|void
+     */
+    public static function withoutReads(callable $callable)
+    {
+        return static::executeCallableWithoutCapability(Commerce::CAPABILITY_READ, $callable);
+    }
+
+    /**
+     * Temporarily disable broadcasting integration-related events while executing the supplied callable.
+     *
+     * Note: This does not disable events not dispatched directly by the integration.
+     *
+     * If an exception is thrown during the callable's execution, firing events will
+     * be re-disabled before the exception is re-thrown.
+     *
+     * @param callable $callable
+     *
+     * @return mixed|void
+     */
+    public static function withoutEvents(callable $callable)
+    {
+        return static::executeCallableWithoutCapability(Commerce::CAPABILITY_EVENTS, $callable);
+    }
+
+    /**
+     * Temporarily disables a capability while executing the supplied callable.
+     *
+     * If an exception is thrown during the callable's execution, the capability
+     * will be re-enabled before the exception is re-thrown.
+     *
+     * @param string   $capability
+     * @param callable $callable
+     *
+     * @return mixed|void
+     */
+    protected static function executeCallableWithoutCapability(string $capability, callable $callable)
+    {
+        $capabilityEnabled = static::hasCommerceCapability($capability);
+        if ($capabilityEnabled) {
+            static::disableCapability($capability);
+        }
+
+        try {
+            $response = $callable();
+        } finally {
+            if ($capabilityEnabled) {
+                static::enableCapability($capability);
+            }
+        }
+
+        if (isset($response)) {
+            return $response;
+        }
+    }
 }

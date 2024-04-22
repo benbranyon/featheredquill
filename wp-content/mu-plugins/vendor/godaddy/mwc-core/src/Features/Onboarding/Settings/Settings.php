@@ -56,6 +56,7 @@ class Settings extends SettingGroup
             OnboardingSetting::get(OnboardingSetting::SETTING_ID_LAST_ONBOARDING_STEP),
             OnboardingSetting::get(OnboardingSetting::SETTING_ID_COMPLETED),
             OnboardingSetting::get(OnboardingSetting::SETTING_ID_STORE_SELECTOR_DISMISSED),
+            OnboardingSetting::get(OnboardingSetting::SETTING_ID_DISMISSED),
         ];
     }
 }

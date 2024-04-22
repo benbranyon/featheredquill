@@ -5,6 +5,7 @@ namespace GoDaddy\WordPress\MWC\Common\Repositories\WooCommerce;
 use Exception;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
 
@@ -62,7 +63,7 @@ class TemplatesRepository
             }
         }
 
-        return $overrides;
+        return TypeHelper::arrayOfStrings($overrides);
     }
 
     /**

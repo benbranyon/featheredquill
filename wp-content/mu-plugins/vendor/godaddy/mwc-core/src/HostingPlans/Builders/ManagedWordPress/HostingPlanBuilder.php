@@ -53,13 +53,57 @@ class HostingPlanBuilder implements HostingPlanBuilderContract
             return '';
         }
 
+        if ($id = $this->getPlanIdFromMwpPlans($accountPlanName)) {
+            return $id;
+        } elseif ($id = $this->getPlanIdFromAllKnownPlans($accountPlanName)) {
+            return $id;
+        }
+
+        // assume that the account is using the smaller hosting plan if we can't determine one
+        return 'basic';
+    }
+
+    /**
+     * Finds the MWP hosting plan ID that corresponds to the provided plan name. For example: this matches
+     * plan name "eCommerce Managed WordPress" to plan ID "ecommerce".
+     *
+     * This checks the list of Managed WordPress product plan names only.
+     *
+     * @param string $accountPlanName
+     * @return string|null
+     */
+    protected function getPlanIdFromMwpPlans(string $accountPlanName) : ?string
+    {
         foreach (ArrayHelper::wrap(Configuration::get('mwp.hosting.plans')) as $id => $plan) {
             if (strtolower($accountPlanName) === strtolower(TypeHelper::string(ArrayHelper::get($plan, 'name'), ''))) {
                 return $id;
             }
         }
 
-        // assume that the account is using the smaller hosting plan if we can't determine one
-        return 'basic';
+        return null;
+    }
+
+    /**
+     * Matches the provided account plan name (lowercased) against our list of all known MWP and MWCS plans.
+     *
+     * {@see static::getPlanIdFromMwpPlans()} only accounts for MWP product plans.
+     * This method accounts for any MWCS plans that are being hosted on the MWP platform.
+     *
+     * @param string $accountPlanName
+     * @return string|null
+     */
+    protected function getPlanIdFromAllKnownPlans(string $accountPlanName) : ?string
+    {
+        $accountPlanName = strtolower($accountPlanName);
+
+        foreach (ArrayHelper::wrap(Configuration::get('hosting_plans.mappings')) as $planMapping) {
+            $planId = TypeHelper::string(ArrayHelper::get($planMapping, 'name'), '');
+
+            if ($accountPlanName === strtolower($planId)) {
+                return $planId;
+            }
+        }
+
+        return null;
     }
 }

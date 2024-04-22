@@ -68,6 +68,7 @@ class OptionsSettingDataStore implements SettingDataStoreContract
         OnboardingSetting::SETTING_ID_LAST_ONBOARDING_STEP     => 'mwc_onboarding_last_step',
         OnboardingSetting::SETTING_ID_COMPLETED                => 'mwc_onboarding_completed',
         OnboardingSetting::SETTING_ID_STORE_SELECTOR_DISMISSED => 'mwc_onboarding_store_selector_dismissed',
+        OnboardingSetting::SETTING_ID_DISMISSED                => 'mwc_onboarding_dismissed',
     ];
 
     /**

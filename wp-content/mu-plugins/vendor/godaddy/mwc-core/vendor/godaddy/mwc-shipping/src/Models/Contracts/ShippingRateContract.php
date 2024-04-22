@@ -26,6 +26,21 @@ interface ShippingRateContract extends ModelContract, HasStringRemoteIdentifierC
     public function setCarrier(CarrierContract $value);
 
     /**
+     * Gets the package type.
+     *
+     * @return ?PackageTypeContract
+     */
+    public function getPackageType() : ?PackageTypeContract;
+
+    /**
+     * Sets the package type.
+     *
+     * @param ?PackageTypeContract $value
+     * @return $this
+     */
+    public function setPackageType(?PackageTypeContract $value);
+
+    /**
      * Gets the service.
      *
      * @return ShippingServiceContract

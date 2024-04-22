@@ -3,12 +3,22 @@
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Services;
 
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Services\Contracts\ProductsMappingStrategyContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Models\Contracts\CommerceContextContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Repositories\ProductMapRepository;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Services\AbstractMappingStrategyFactory;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Models\Products\Product;
 
 class ProductsMappingStrategyFactory extends AbstractMappingStrategyFactory
 {
+    protected ProductMapRepository $productMapRepository;
+
+    public function __construct(CommerceContextContract $commerceContext, ProductMapRepository $productMapRepository)
+    {
+        parent::__construct($commerceContext);
+
+        $this->productMapRepository = $productMapRepository;
+    }
+
     /**
      * Gets the main mapping strategy for Products.
      *
@@ -31,7 +41,7 @@ class ProductsMappingStrategyFactory extends AbstractMappingStrategyFactory
      */
     protected function getProductMappingStrategy() : ProductsMappingStrategyContract
     {
-        return new ProductMappingStrategy(new ProductMapRepository($this->commerceContext));
+        return new ProductMappingStrategy($this->productMapRepository);
     }
 
     /**

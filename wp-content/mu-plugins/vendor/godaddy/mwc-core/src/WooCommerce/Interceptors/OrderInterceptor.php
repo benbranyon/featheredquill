@@ -61,16 +61,30 @@ class OrderInterceptor extends AbstractInterceptor
      * @param WC_Order|null $wcOrder
      * @throws Exception
      */
-    public function onWooCommerceUpdateOrder($orderId, $wcOrder = null)
+    public function onWooCommerceUpdateOrder($orderId, $wcOrder = null) : void
     {
-        // admin order that wasn't saved yet
-        if (ArrayHelper::contains(['new', 'auto-draft', 'draft'], get_post_status($orderId))) {
+        $wcOrder = $this->getWooCommerceOrder($orderId, $wcOrder);
+        $status = $wcOrder instanceof WC_Order ? $wcOrder->get_status() : get_post_status($orderId);
+
+        // woocommerce_update_order is triggered multiple times for admin orders before a proper WooCommerce status and all the order data is set
+        if (! $status || $this->isDraftOrderStatus($status)) {
             return;
         }
 
         if ($order = $this->getConvertedOrder($orderId, $wcOrder)) {
             $order->update();
         }
+    }
+
+    /**
+     * Checks whether the given status is considered a draft order status.
+     *
+     * @param string $status
+     * @return bool
+     */
+    protected function isDraftOrderStatus(string $status) : bool
+    {
+        return ArrayHelper::contains(['new', 'auto-draft', 'draft'], $status);
     }
 
     /**
@@ -81,13 +95,29 @@ class OrderInterceptor extends AbstractInterceptor
      * @throws Exception
      * @return Order|null
      */
-    protected function getConvertedOrder($orderId, $wcOrder)
+    protected function getConvertedOrder($orderId, $wcOrder) : ?Order
+    {
+        $wcOrder = $this->getWooCommerceOrder($orderId, $wcOrder);
+
+        return $wcOrder ? $this->convertOrder($wcOrder) : null;
+    }
+
+    /**
+     * Attempts to get the WooCommerce order with the given ID.
+     *
+     * If the second parameter is already a {@see WC_Order} instance, it returns that order instead.
+     *
+     * @param mixed $orderId
+     * @param mixed $wcOrder
+     * @return WC_Order|null
+     */
+    protected function getWooCommerceOrder($orderId, $wcOrder) : ?WC_Order
     {
         if (! $wcOrder instanceof WC_Order) {
             $wcOrder = is_numeric($orderId) ? OrdersRepository::get((int) $orderId) : null;
         }
 
-        return $wcOrder instanceof WC_Order ? $this->convertOrder($wcOrder) : null;
+        return $wcOrder;
     }
 
     /**

@@ -9,6 +9,7 @@ use GoDaddy\WordPress\MWC\Common\Configuration\Configuration;
 use GoDaddy\WordPress\MWC\Common\Exceptions\AdapterException;
 use GoDaddy\WordPress\MWC\Common\Exceptions\SentryException;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Interceptors\AbstractInterceptor;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
 use GoDaddy\WordPress\MWC\Common\Schedule\Schedule;
@@ -25,7 +26,7 @@ use WC_Order;
 class FindOrCreateOrderChannelActionInterceptor extends AbstractInterceptor
 {
     /** @var string the action used to find or create the order channel and update the order */
-    const FIND_OR_CREATE_ORDER_CHANNEL_ACTION = 'mwc_find_or_create_order_channel';
+    public const FIND_OR_CREATE_ORDER_CHANNEL_ACTION = 'mwc_find_or_create_order_channel';
 
     /**
      * Adds hooks.
@@ -61,7 +62,7 @@ class FindOrCreateOrderChannelActionInterceptor extends AbstractInterceptor
             $response = ChannelRequest::getNewInstance()
                                       ->setMethod('POST')
                                       ->setPath('/channels/find-or-create')
-                                      ->setBody($requestBody)
+                                      ->setBody(TypeHelper::array($requestBody, []))
                                       ->send();
 
             if ($response->isSuccess()) {

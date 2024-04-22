@@ -6,7 +6,7 @@ use Exception;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Interceptors\AbstractInterceptor;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
-use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
+use GoDaddy\WordPress\MWC\Core\Traits\ShouldLoadOnlyIfWooCommerceIsEnabledTrait;
 use GoDaddy\WordPress\MWC\Payments\DataSources\WooCommerce\Adapters\CustomerAdapter;
 use GoDaddy\WordPress\MWC\Payments\Models\Customer;
 use WC_Customer;
@@ -16,6 +16,8 @@ use WC_Customer;
  */
 class CustomerInterceptor extends AbstractInterceptor
 {
+    use ShouldLoadOnlyIfWooCommerceIsEnabledTrait;
+
     /**
      * Adds hooks.
      *
@@ -45,10 +47,6 @@ class CustomerInterceptor extends AbstractInterceptor
      */
     public function onWordPressUserRegister($userId) : void
     {
-        if (! WooCommerceRepository::isWooCommerceActive()) {
-            return;
-        }
-
         try {
             if ($sourceCustomer = $this->getWooCommerceCustomer($userId)) {
                 $this->getNativeCustomer($sourceCustomer)->save();
@@ -69,10 +67,6 @@ class CustomerInterceptor extends AbstractInterceptor
      */
     public function onWordPressUserProfileUpdate($userId) : void
     {
-        if (! WooCommerceRepository::isWooCommerceActive()) {
-            return;
-        }
-
         try {
             if ($sourceCustomer = $this->getWooCommerceCustomer($userId)) {
                 $this->getNativeCustomer($sourceCustomer)->update();

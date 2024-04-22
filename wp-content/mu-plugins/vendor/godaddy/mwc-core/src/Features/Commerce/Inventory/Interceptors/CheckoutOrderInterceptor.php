@@ -47,6 +47,11 @@ class CheckoutOrderInterceptor extends AbstractInterceptor
             ->setGroup('woocommerce_payment_complete_reduce_order_stock')
             ->setHandler('__return_false')
             ->execute();
+
+        Register::filter()
+            ->setGroup('woocommerce_prevent_adjust_line_item_product_stock')
+            ->setHandler('__return_true')
+            ->execute();
     }
 
     /**

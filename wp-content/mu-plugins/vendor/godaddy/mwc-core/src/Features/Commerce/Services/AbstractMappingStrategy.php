@@ -34,9 +34,21 @@ abstract class AbstractMappingStrategy implements MappingStrategyContract
         }
 
         try {
-            $this->resourceMapRepository->add($localId, $remoteId);
+            $this->saveMappingUsingRepository($localId, $remoteId);
         } catch (WordPressDatabaseException $exception) {
             throw new CommerceException("A database error occurred trying to save the remote UUID: {$exception->getMessage()}");
         }
+    }
+
+    /**
+     * Saves a mapping of the given local ID to the given remote ID using the configured map repository.
+     *
+     * @param int $localId
+     * @param non-empty-string $remoteId
+     * @throws WordPressDatabaseException
+     */
+    protected function saveMappingUsingRepository(int $localId, string $remoteId) : void
+    {
+        $this->resourceMapRepository->add($localId, $remoteId);
     }
 }

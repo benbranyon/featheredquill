@@ -37,7 +37,7 @@ class CustomerRemoteIdAdapter implements DataObjectAdapterContract
      * Converts an Order's customer ID into a remote customer ID.
      *
      * @param Order $target
-     * @return string|null
+     * @return non-empty-string|null
      */
     public function convertToSource($target) : ?string
     {
@@ -45,6 +45,6 @@ class CustomerRemoteIdAdapter implements DataObjectAdapterContract
             return null;
         }
 
-        return $this->customersMappingService->getRemoteId($customer);
+        return $this->customersMappingService->getRemoteId($customer) ?: null;
     }
 }

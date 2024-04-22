@@ -212,7 +212,7 @@ class PluginLifecycleEventsProducer extends AbstractInterceptor implements Produ
         $plugin = PluginExtension::getNewInstance()->setSlug(is_string($slug) ? $slug : '');
 
         if (WordPressRepository::isError($eventData)) {
-            Events::broadcast($this->buildErrorEvent($plugin, AbstractExtension::ACTION_INSTALL, $eventData instanceof WP_Error ? $eventData->get_error_message() : 'Unknown error.'));
+            Events::broadcast($this->buildErrorEvent($plugin, AbstractExtension::ACTION_INSTALL, $eventData->get_error_message()));
         } elseif (! empty($slug)) {
             Events::broadcast($this->buildEvent($plugin, AbstractExtension::ACTION_INSTALL));
         }
@@ -235,7 +235,7 @@ class PluginLifecycleEventsProducer extends AbstractInterceptor implements Produ
 
         if ($plugin = $filePath && $this->canReadPluginFilePath($filePath) ? PluginExtension::get($filePath) : null) {
             if (WordPressRepository::isError($eventData)) {
-                Events::broadcast($this->buildErrorEvent($plugin, AbstractExtension::ACTION_UPDATE, $eventData instanceof WP_Error ? $eventData->get_error_message() : 'Unknown error.'));
+                Events::broadcast($this->buildErrorEvent($plugin, AbstractExtension::ACTION_UPDATE, $eventData->get_error_message()));
             } else {
                 Events::broadcast($this->buildEvent($plugin, AbstractExtension::ACTION_UPDATE));
             }

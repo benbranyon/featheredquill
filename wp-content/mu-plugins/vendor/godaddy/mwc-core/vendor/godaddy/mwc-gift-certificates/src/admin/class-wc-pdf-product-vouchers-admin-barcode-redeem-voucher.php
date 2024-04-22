@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/woocommerce-pdf-product-vouchers/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2012-2021, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright Copyright (c) 2012-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -26,7 +26,7 @@ namespace GoDaddy\WordPress\MWC\GiftCertificates\Admin;
 defined( 'ABSPATH' ) or exit;
 
 use function GoDaddy\WordPress\MWC\GiftCertificates\wc_pdf_product_vouchers;
-use SkyVerge\WooCommerce\PluginFramework\v5_10_12 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v5_11_0 as Framework;
 
 /**
  * MWC_Gift_Certificates_Admin_Barcode_Redeem_Vouchers
@@ -107,7 +107,7 @@ class MWC_Gift_Certificates_Admin_Barcode_Redeem_Vouchers {
 		if ( current_user_can( 'manage_woocommerce' ) ) {
 
 			add_submenu_page(
-				null,
+				'woocommerce-pdf-product-vouchers',
 				esc_html__( 'Redeem Gift Certificate', 'woocommerce-pdf-product-vouchers' ),
 				esc_html__( 'Redeem Gift Certificate', 'woocommerce-pdf-product-vouchers' ),
 				'redeem_woocommerce_vouchers',

@@ -51,8 +51,6 @@ class Checkout extends CommonCheckout
 
     /**
      * Checkout constructor.
-     *
-     * @throws Exception
      */
     public function __construct()
     {

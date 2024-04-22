@@ -7,6 +7,7 @@ use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Interceptors\AbstractInterceptor;
 use GoDaddy\WordPress\MWC\Common\Register\Exceptions\InvalidActionException;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
+use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
 use GoDaddy\WordPress\MWC\Core\Admin\Notices\Notices;
 use GoDaddy\WordPress\MWC\Core\Features\Shipping\Notices\LocationChangeNotice;
 use GoDaddy\WordPress\MWC\Core\Features\Shipping\Shipping;
@@ -45,7 +46,9 @@ class EnqueueLocationChangeNoticeInterceptor extends AbstractInterceptor
      */
     protected static function isOrdersPage() : bool
     {
-        return static::isPostListPage('shop_order');
+        return WooCommerceRepository::isCustomOrdersTableUsageEnabled()
+            ? ArrayHelper::get($_GET, 'page') === 'wc-orders'
+            : static::isPostListPage('shop_order');
     }
 
     /**
@@ -67,7 +70,9 @@ class EnqueueLocationChangeNoticeInterceptor extends AbstractInterceptor
      */
     protected static function isEditOrderPage() : bool
     {
-        return static::isEditPostPage('shop_order');
+        return WooCommerceRepository::isCustomOrdersTableUsageEnabled()
+            ? static::isOrdersPage() && ArrayHelper::get($_GET, 'action') === 'edit'
+            : static::isEditPostPage('shop_order');
     }
 
     /**

@@ -2,7 +2,7 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Services;
 
-use GoDaddy\WordPress\MWC\Common\Models\Orders\Note;
+use GoDaddy\WordPress\MWC\Common\Models\Orders\Contracts\NoteContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataObjects\Note as CommerceNote;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Services\Contracts\MultiNotesMappingServiceContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Services\Contracts\NoteMappingServiceContract;
@@ -10,7 +10,7 @@ use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Services\Hash\CommerceNo
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Services\Hash\NoteHashService;
 
 /**
- * @extends AbstractMultiItemsMappingService<Note, CommerceNote>
+ * @extends AbstractMultiItemsMappingService<NoteContract, CommerceNote>
  */
 class MultiNotesMappingService extends AbstractMultiItemsMappingService implements MultiNotesMappingServiceContract
 {

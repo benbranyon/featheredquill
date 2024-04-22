@@ -6,6 +6,7 @@ use GoDaddy\WordPress\MWC\Common\DataSources\Contracts\DataSourceAdapterContract
 use GoDaddy\WordPress\MWC\Common\DataSources\WooCommerce\Adapters\CurrencyAmountAdapter;
 use GoDaddy\WordPress\MWC\Common\DataSources\WooCommerce\Adapters\Product\Attribute\AttributeAdapter;
 use GoDaddy\WordPress\MWC\Common\DataSources\WooCommerce\Adapters\WeightAdapter;
+use GoDaddy\WordPress\MWC\Common\Helpers\SanitizationHelper;
 use GoDaddy\WordPress\MWC\Common\Models\CurrencyAmount;
 use GoDaddy\WordPress\MWC\Common\Models\Products\Attributes\Attribute;
 use GoDaddy\WordPress\MWC\Common\Models\Products\Attributes\AttributeValue;
@@ -132,6 +133,7 @@ class ProductAdapter implements DataSourceAdapterContract
             return null;
         }
 
+        // $sourceProduct is the parent product of the variation
         $sourceProduct = ProductsRepository::get($this->source->get_parent_id());
         $parentAttributes = $sourceProduct ? $this->convertAttributesFromSource($sourceProduct->get_attributes()) : [];
         $variantAttributeMapping = [];
@@ -141,6 +143,7 @@ class ProductAdapter implements DataSourceAdapterContract
                 continue;
             }
 
+            $attributeValueName = SanitizationHelper::slug($attributeValueName);
             $parentAttribute = $parentAttributes[strtolower($attributeName)];
 
             // an empty source attribute value means the attribute is set to "Any..." for the variation
@@ -148,7 +151,7 @@ class ProductAdapter implements DataSourceAdapterContract
                 $variantAttributeMapping[strtolower($attributeName)] = null;
             } else {
                 foreach ($parentAttribute->getValues() as $parentAttributeValue) {
-                    if ($parentAttributeValue->getName() === strtolower($attributeValueName)) {
+                    if ($parentAttributeValue->getName() === $attributeValueName) {
                         $variantAttributeMapping[strtolower($attributeName)] = $parentAttributeValue;
                         break;
                     }

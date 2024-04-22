@@ -14,6 +14,6 @@ use GoDaddy\WordPress\MWC\Common\Container\Contracts\ContainerContract;
  * If MWC ever needs to switch to another DI container library (external or its own), create a new container adapter
  * class for the other library, then extend that new class here. Code depending on this Container won't need any changes.
  */
-class Container extends ContainerAdapter implements ContainerContract
+class Container extends ContainerAdapter
 {
 }

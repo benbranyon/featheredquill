@@ -17,7 +17,7 @@
  * needs please refer to http://docs.woocommerce.com/document/cost-of-goods/ for more information.
  *
  * @author      SkyVerge
- * @copyright   Copyright (c) 2013-2020, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright   Copyright (c) 2013-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -26,7 +26,7 @@ namespace GoDaddy\WordPress\MWC\CostOfGoods\Admin;
 defined( 'ABSPATH' ) or exit;
 
 use GoDaddy\WordPress\MWC\CostOfGoods\WC_COG_Product;
-use SkyVerge\WooCommerce\PluginFramework\v5_10_12 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v5_11_0 as Framework;
 use function GoDaddy\WordPress\MWC\CostOfGoods\wc_cog;
 
 /**
@@ -70,22 +70,22 @@ class WC_COG_Admin_Reports {
 
 		$profit_reports = [
 			'profit' => [
-				'title'   => __( 'Profit', 'mwc-cost-of-goods' ),
+				'title'   => __( 'Profit', 'woocommerce-cost-of-goods' ),
 				'reports' => [
 					'profit_by_date'     => [
-						'title'       => __( 'Profit by date', 'mwc-cost-of-goods' ),
+						'title'       => __( 'Profit by date', 'woocommerce-cost-of-goods' ),
 						'description' => '',
 						'hide_title'  => true,
 						'callback'    => [ $this, 'load_report' ],
 					],
 					'profit_by_product'  => [
-						'title'       => __( 'Profit by product', 'mwc-cost-of-goods' ),
+						'title'       => __( 'Profit by product', 'woocommerce-cost-of-goods' ),
 						'description' => '',
 						'hide_title'  => true,
 						'callback'    => [ $this, 'load_report' ],
 					],
 					'profit_by_category' => [
-						'title'       => __( 'Profit by category', 'mwc-cost-of-goods' ),
+						'title'       => __( 'Profit by category', 'woocommerce-cost-of-goods' ),
 						'description' => '',
 						'hide_title'  => true,
 						'callback'    => [ $this, 'load_report' ],
@@ -96,14 +96,14 @@ class WC_COG_Admin_Reports {
 
 		$stock_reports = [
 			'product_valuation' => [
-				'title'       => __( 'Product Valuation', 'mwc-cost-of-goods' ),
+				'title'       => __( 'Product Valuation', 'woocommerce-cost-of-goods' ),
 				'description' => '',
 				'hide_title'  => false,
 				'function'    => [ $this, 'load_report' ],
 			],
 			'total_valuation'   => [
-				'title'       => __( 'Total Valuation', 'mwc-cost-of-goods' ),
-				'description' => __( 'Total valuation provides the value of all inventory within your store at both the cost of the good, as well as the total value of inventory at the retail price (regular price, or sale price if set). Stock count must be set to be included in this valuation.', 'mwc-cost-of-goods' ),
+				'title'       => __( 'Total Valuation', 'woocommerce-cost-of-goods' ),
+				'description' => __( 'Total valuation provides the value of all inventory within your store at both the cost of the good, as well as the total value of inventory at the retail price (regular price, or sale price if set). Stock count must be set to be included in this valuation.', 'woocommerce-cost-of-goods' ),
 				'hide_title'  => false,
 				'function'    => [ $this, 'load_report' ],
 			],
@@ -355,9 +355,9 @@ class WC_COG_Admin_Reports {
 				$product_data_line[] = $product->get_stock_quantity();
 
 				if ( $product->is_in_stock() ) {
-					$stock_html = __( 'In stock', 'mwc-cost-of-goods' );
+					$stock_html = __( 'In stock', 'woocommerce-cost-of-goods' );
 				} else {
-					$stock_html = __( 'Out of stock', 'mwc-cost-of-goods' );
+					$stock_html = __( 'Out of stock', 'woocommerce-cost-of-goods' );
 				}
 
 				$product_data_line[] = esc_html( apply_filters( 'woocommerce_admin_stock_html', $stock_html, $product ) );

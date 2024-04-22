@@ -2,7 +2,6 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Customers\DataSources\Builders;
 
-use GoDaddy\WordPress\MWC\Common\Models\Address;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Customers\DataSources\WooCommerce\Builders\OrderToCustomerBuilder as WooCommerceOrderToCustomerBuilder;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Models\Orders\Order;
 
@@ -36,13 +35,12 @@ class OrderToCustomerBuilder extends AbstractOrderToCustomerBuilder
      */
     protected function getCustomerInfoFromOrder(object $order)
     {
-        // TODO: Implement getCustomerInfoFromOrder() method in MWC-12127.
         return [
-            'email'           => '',
-            'firstName'       => '',
-            'lastName'        => '',
-            'billingAddress'  => new Address(),
-            'shippingAddress' => new Address(),
+            'email'           => (string) $order->getEmailAddress(),
+            'firstName'       => $order->getBillingAddress()->getFirstName(),
+            'lastName'        => $order->getBillingAddress()->getLastName(),
+            'billingAddress'  => $order->getBillingAddress(),
+            'shippingAddress' => $order->getShippingAddress(),
         ];
     }
 }

@@ -29,6 +29,7 @@ return [
     'hiddenOrderItemMeta' => [
         '_mwc_fulfillment_status',
         \GoDaddy\WordPress\MWC\Core\WooCommerce\Adapters\OrderAdapter::MARKETPLACES_INTERNAL_ORDER_ITEM_ID_META_KEY,
+        \GoDaddy\WordPress\MWC\Core\WooCommerce\Adapters\LineItemAdapter::FULFILLMENT_CHANNEL_ID_META_KEY,
     ],
 
     /*

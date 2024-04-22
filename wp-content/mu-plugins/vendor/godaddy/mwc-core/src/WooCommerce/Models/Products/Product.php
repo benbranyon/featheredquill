@@ -4,6 +4,7 @@ namespace GoDaddy\WordPress\MWC\Core\WooCommerce\Models\Products;
 
 use DateTime;
 use GoDaddy\WordPress\MWC\Common\Events\Events;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Models\Downloadable;
 use GoDaddy\WordPress\MWC\Common\Models\Image;
 use GoDaddy\WordPress\MWC\Common\Models\Products\Product as CommonProduct;
@@ -92,6 +93,12 @@ class Product extends CommonProduct
 
     /** @var bool whether the product is purchasable */
     protected bool $isPurchasable = false;
+
+    /** @var string|null password for password-protected products */
+    protected ?string $password = null;
+
+    /** @var float|null low stock threashold */
+    protected ?float $lowStockThreshold = null;
 
     /**
      * Gets the product categories.
@@ -300,7 +307,13 @@ class Product extends CommonProduct
      */
     public function getMainImage() : ?Image
     {
-        return $this->mainImageId ? Image::get($this->mainImageId) : null;
+        if (! $this->mainImageId) {
+            return null;
+        }
+
+        $mainImage = Image::get($this->mainImageId);
+
+        return $mainImage instanceof Image ? $mainImage : null;
     }
 
     /**
@@ -328,7 +341,7 @@ class Product extends CommonProduct
             }
         }
 
-        return $images;
+        return TypeHelper::arrayOf($images, Image::class);
     }
 
     /**
@@ -339,6 +352,36 @@ class Product extends CommonProduct
     public function getIsPurchasable() : bool
     {
         return $this->isPurchasable;
+    }
+
+    /**
+     * Determines if the product is password-protected.
+     *
+     * @return bool
+     */
+    public function isPasswordProtected() : bool
+    {
+        return null !== $this->getPassword();
+    }
+
+    /**
+     * Gets the product password for password-protected products.
+     *
+     * @return string|null
+     */
+    public function getPassword() : ?string
+    {
+        return '' === $this->password ? null : $this->password;
+    }
+
+    /**
+     * Gets the low stock threshold.
+     *
+     * @return float|null
+     */
+    public function getLowStockThreshold() : ?float
+    {
+        return $this->lowStockThreshold;
     }
 
     /**
@@ -752,6 +795,19 @@ class Product extends CommonProduct
     }
 
     /**
+     * Sets a password to make the product password-protected.
+     *
+     * @param string $value
+     * @return $this
+     */
+    public function setPassword(string $value) : Product
+    {
+        $this->password = '' === $value ? null : $value;
+
+        return $this;
+    }
+
+    /**
      * Updates the product.
      *
      * This method also broadcast model events.
@@ -797,5 +853,18 @@ class Product extends CommonProduct
         parent::delete();
 
         Events::broadcast($this->buildEvent('product', 'delete'));
+    }
+
+    /**
+     * Sets the low stock threshold.
+     *
+     * @param float|null $value
+     * @return $this
+     */
+    public function setLowStockThreshold(?float $value) : Product
+    {
+        $this->lowStockThreshold = $value;
+
+        return $this;
     }
 }

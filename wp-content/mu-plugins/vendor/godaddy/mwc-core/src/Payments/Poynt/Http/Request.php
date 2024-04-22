@@ -34,9 +34,9 @@ class Request extends CommonRequest
     public function __construct()
     {
         $this->setUserAgentHeader()
+            ->setFullUrl()
             ->sslVerify()
-            ->timeout()
-            ->setFullUrl();
+            ->timeout();
     }
 
     /**

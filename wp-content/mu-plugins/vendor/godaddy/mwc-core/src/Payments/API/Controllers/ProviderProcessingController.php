@@ -248,7 +248,7 @@ class ProviderProcessingController extends AbstractProviderController
         } else {
             $wcOrder->update_status('on-hold');
             // must decrease stock levels manually
-            wc_reduce_stock_levels($wcOrder->get_id());
+            wc_maybe_reduce_stock_levels($wcOrder->get_id());
         }
     }
 

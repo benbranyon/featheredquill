@@ -24,4 +24,11 @@ interface ListProductsResponseContract
      * @return ProductAssociation[]
      */
     public function getProducts() : array;
+
+    /**
+     * Gets the local IDs for the products.
+     *
+     * @return int[]
+     */
+    public function getLocalIds() : array;
 }

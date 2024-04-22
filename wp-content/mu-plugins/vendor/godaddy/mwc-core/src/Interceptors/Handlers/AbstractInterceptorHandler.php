@@ -5,7 +5,6 @@ namespace GoDaddy\WordPress\MWC\Core\Interceptors\Handlers;
 use GoDaddy\WordPress\MWC\Common\Container\ContainerFactory;
 use GoDaddy\WordPress\MWC\Common\Exceptions\SentryException;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
-use Psr\Container\ContainerExceptionInterface;
 use Throwable;
 
 abstract class AbstractInterceptorHandler
@@ -37,10 +36,6 @@ abstract class AbstractInterceptorHandler
     protected static function tryGetInstanceFromContainer() : ?AbstractInterceptorHandler
     {
         try {
-            /**
-             * @var static
-             * @throws ContainerExceptionInterface&Throwable
-             */
             return ContainerFactory::getInstance()->getSharedContainer()->get(static::class);
         } catch (Throwable $exception) {
             SentryException::getNewInstance('Could not instantiate '.static::class, $exception);

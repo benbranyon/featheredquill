@@ -4,6 +4,7 @@ namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\Adapters;
 
 use GoDaddy\WordPress\MWC\Common\Http\Contracts\ResponseContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\Contracts\CommerceExceptionContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\GatewayRequest404Exception;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\GatewayRequestException;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\Adapters\Contracts\GatewayRequestAdapterContract;
 
@@ -33,14 +34,22 @@ abstract class AbstractGatewayRequestAdapter implements GatewayRequestAdapterCon
     abstract protected function convertResponse(ResponseContract $response);
 
     /**
-     * @param ResponseContract $response
+     * Throws an exception on error responses.
      *
+     * @param ResponseContract $response
+     * @return void
      * @throws CommerceExceptionContract
      */
     protected function throwIfIsErrorResponse(ResponseContract $response) : void
     {
         if ($response->isError()) {
-            throw new GatewayRequestException($response->getErrorMessage() ?: 'Request Error. The server responded with status: '.$response->getStatus());
+            $errorMessage = $response->getErrorMessage() ?: 'Request Error. The server responded with status: '.$response->getStatus();
+
+            if (404 === $response->getStatus()) {
+                throw new GatewayRequest404Exception($errorMessage);
+            } else {
+                throw new GatewayRequestException($errorMessage);
+            }
         }
     }
 }

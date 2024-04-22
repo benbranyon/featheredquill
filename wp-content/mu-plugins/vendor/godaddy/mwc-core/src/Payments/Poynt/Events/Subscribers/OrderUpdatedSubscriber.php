@@ -94,7 +94,6 @@ class OrderUpdatedSubscriber implements SubscriberContract
      * @param WC_Order $wcOrder
      * @param Order $order
      * @return bool
-     * @throws Exception
      */
     public static function shouldPushSaleTransactionToPoynt(WC_Order $wcOrder, Order $order) : bool
     {
@@ -124,7 +123,6 @@ class OrderUpdatedSubscriber implements SubscriberContract
      * @param WC_Order $wcOrder
      * @param Order $order
      * @return bool
-     * @throws Exception
      */
     public static function shouldPushAuthorizationTransactionToPoynt(WC_Order $wcOrder, Order $order) : bool
     {
@@ -159,7 +157,6 @@ class OrderUpdatedSubscriber implements SubscriberContract
      * @param WC_Order $wcOrder
      * @param Order $order
      * @return bool
-     * @throws Exception
      */
     public static function shouldPushCaptureTransactionToPoynt(WC_Order $wcOrder, Order $order) : bool
     {

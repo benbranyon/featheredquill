@@ -177,7 +177,6 @@ class Onboarding
      * Gets the onboarding status.
      *
      * @return string
-     * @throws Exception
      */
     public static function getStatus() : string
     {
@@ -375,7 +374,6 @@ class Onboarding
      * @since z.y.z
      *
      * @return bool
-     * @throws Exception
      */
     public static function shouldAutoEnablePaymentGateways() : bool
     {

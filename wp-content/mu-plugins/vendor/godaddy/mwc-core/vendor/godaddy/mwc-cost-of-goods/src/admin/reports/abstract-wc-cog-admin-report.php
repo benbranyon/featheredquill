@@ -17,7 +17,7 @@
  * needs please refer to http://docs.woocommerce.com/document/cost-of-goods/ for more information.
  *
  * @author      SkyVerge
- * @copyright   Copyright (c) 2013-2020, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright   Copyright (c) 2013-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -62,10 +62,10 @@ abstract class WC_COG_Admin_Report extends WC_Admin_Report {
 
 		// used in view
 		$ranges = [
-			'year'       => __( 'Year', 'mwc-cost-of-goods' ),
-			'last_month' => __( 'Last Month', 'mwc-cost-of-goods' ),
-			'month'      => __( 'This Month', 'mwc-cost-of-goods' ),
-			'7day'       => __( 'Last 7 Days', 'mwc-cost-of-goods' ),
+			'year'       => __( 'Year', 'woocommerce-cost-of-goods' ),
+			'last_month' => __( 'Last Month', 'woocommerce-cost-of-goods' ),
+			'month'      => __( 'This Month', 'woocommerce-cost-of-goods' ),
+			'7day'       => __( 'Last 7 Days', 'woocommerce-cost-of-goods' ),
 		];
 
 		include( WC()->plugin_path() . '/includes/admin/views/html-report-by-date.php' );
@@ -86,7 +86,7 @@ abstract class WC_COG_Admin_Report extends WC_Admin_Report {
 				strtolower( str_replace( [ '\WC_COG_Admin_Report_', 'WC_COG_Admin_Report_', '_' ], [ '', '', '-' ], get_class( $this ) ) ),
 				$this->get_current_range(), date_i18n( 'Y-m-d', current_time( 'timestamp' ) )
 			),
-			'xaxes'          => __( 'Date', 'mwc-cost-of-goods' ),
+			'xaxes'          => __( 'Date', 'woocommerce-cost-of-goods' ),
 			'exclude_series' => '',
 			'groupby'        => $this->chart_groupby,
 		];
@@ -103,7 +103,7 @@ abstract class WC_COG_Admin_Report extends WC_Admin_Report {
 			data-exclude_series="<?php echo esc_attr( $args['exclude_series'] ); ?>"
 			data-groupby="<?php echo esc_attr( $args['groupby'] ); ?>"
 		>
-			<?php esc_html_e( 'Export CSV', 'mwc-cost-of-goods' ); ?>
+			<?php esc_html_e( 'Export CSV', 'woocommerce-cost-of-goods' ); ?>
 		</a>
 		<?php
 	}

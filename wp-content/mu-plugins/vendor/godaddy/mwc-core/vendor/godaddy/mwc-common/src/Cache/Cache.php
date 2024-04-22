@@ -2,7 +2,6 @@
 
 namespace GoDaddy\WordPress\MWC\Common\Cache;
 
-use GoDaddy\WordPress\MWC\Common\Cache\Contracts\CacheableContract;
 use GoDaddy\WordPress\MWC\Common\Cache\Types\CacheConfigurations;
 use GoDaddy\WordPress\MWC\Common\Cache\Types\CacheExtensions;
 use GoDaddy\WordPress\MWC\Common\Cache\Types\CacheHttpResponse;
@@ -12,8 +11,11 @@ use GoDaddy\WordPress\MWC\Common\Repositories\WordPressRepository;
 
 /**
  * Main cache handler.
+ *
+ * This caches data in memory in a static property {@see Cache::$cache}. Data may also optionally be saved to
+ * persistent database cache using transients {@see Cache::setPersisted()}.
  */
-class Cache implements CacheableContract
+class Cache extends AbstractCache
 {
     /**
      * The current static cache instance.
@@ -24,24 +26,8 @@ class Cache implements CacheableContract
      */
     protected static $cache = [];
 
-    /**
-     * How long in seconds should the cache be kept for.
-     *
-     * Static caches are reset on each page change and will not have an expiry set.
-     * Databases will respect the expiry.
-     *
-     * @var int
-     */
-    protected $expires;
-
-    /** @var string the cache key */
-    protected $key = 'system';
-
     /** @var string the cache key prefix applied to subclass keys */
     protected $keyPrefix = 'gd_';
-
-    /** @var string the type of object we are caching */
-    protected $type;
 
     /**
      * Creates an instance for caching configurations.
@@ -110,37 +96,6 @@ class Cache implements CacheableContract
         if (WordPressRepository::hasWordPressInstance()) {
             delete_transient($this->getKey());
         }
-    }
-
-    /**
-     * Sets when the cache should expire.
-     *
-     * @param int $seconds
-     * @return Cache
-     */
-    public function expires(int $seconds) : self
-    {
-        $this->expires = $seconds;
-
-        return $this;
-    }
-
-    /**
-     * Get an item from the cache, or execute the given callable and store the result.
-     *
-     * @param callable $loader function that returns value to cache.
-     *
-     * @return mixed
-     */
-    public function remember(callable $loader)
-    {
-        $value = $this->get(null);
-
-        if (null === $value) {
-            $this->set($value = $loader());
-        }
-
-        return $value;
     }
 
     /**
@@ -218,19 +173,6 @@ class Cache implements CacheableContract
     }
 
     /**
-     * Sets what key the data will be stored in within the cache.
-     *
-     * @param string $key
-     * @return Cache
-     */
-    public function key(string $key) : self
-    {
-        $this->key = $key;
-
-        return $this;
-    }
-
-    /**
      * Sets a value in the cache.
      *
      * @param mixed $value
@@ -286,18 +228,5 @@ class Cache implements CacheableContract
 
         // @NOTE: Strict comparison for non-objects required so things like false and null don't equate {JO: 2021-09-01}
         return $currentCache !== $valueToBeSet;
-    }
-
-    /**
-     * Sets the type of data being cached.
-     *
-     * @param string $type
-     * @return Cache
-     */
-    public function type(string $type) : self
-    {
-        $this->type = $type;
-
-        return $this;
     }
 }

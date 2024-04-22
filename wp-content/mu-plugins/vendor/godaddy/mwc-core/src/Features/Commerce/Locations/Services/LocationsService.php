@@ -4,7 +4,6 @@ namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Locations\Services;
 
 use Exception;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
-use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\Contracts\CommerceExceptionContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Locations\Providers\DataObjects\Contact;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Locations\Providers\DataObjects\Location;
@@ -20,6 +19,9 @@ class LocationsService
     /** @var CommerceContextContract */
     protected CommerceContextContract $commerceContext;
 
+    /** @var Location[]|null used to store locations temporarily to prevent multiple API calls on the same request */
+    protected ?array $locations;
+
     /**
      * The Locations Service constructor.
      */
@@ -33,15 +35,18 @@ class LocationsService
      * Retrieves the locations.
      *
      * @return Location[]
-     * @throws CommerceExceptionContract
-     * @throws Exception
+     * @throws CommerceExceptionContract|Exception
      */
     public function getLocations() : array
     {
-        $adapter = ListLocationsRequestAdapter::getNewInstance($this->commerceContext->getStoreId());
-        $request = $adapter->convertFromSource();
+        if (! isset($this->locations)) {
+            $adapter = ListLocationsRequestAdapter::getNewInstance($this->commerceContext->getStoreId());
+            $request = $adapter->convertFromSource();
 
-        return $adapter->convertResponse($request->send());
+            $this->locations = $adapter->convertResponse($request->send());
+        }
+
+        return $this->locations;
     }
 
     /**
@@ -57,25 +62,27 @@ class LocationsService
         $adapter = GetLocationRequestAdapter::getNewInstance($location);
         $request = $adapter->convertFromSource();
 
-        return $adapter->convertResponse($request->send());
+        /** @var Location $location */
+        $location = $adapter->convertToSource($request->send());
+
+        return $location;
     }
 
     /**
      * Retrieves locations from local pickup shipping method instance.
      *
-     * @param string $methodId
-     * @param string $instanceId
+     * @param array<string, mixed> $data
      * @return Location[]
-     * @throws CommerceExceptionContract|Exception
      */
-    public function getLocationsForShippingMethodInstance(string $methodId, string $instanceId) : array
+    public function getLocationsForShippingMethodInstance(array $data) : array
     {
         $locations = [];
 
-        $data = WooCommerceRepository::getShippingMethodInstance($methodId, $instanceId);
-
         foreach (ArrayHelper::wrap(ArrayHelper::get($data, 'godaddy_commerce_locations')) as $channelId) {
-            $locations[] = $this->getLocation($channelId);
+            try {
+                $locations[] = $this->getLocation($channelId);
+            } catch (CommerceExceptionContract|Exception $exception) {
+            }
         }
 
         return $locations;
@@ -86,14 +93,17 @@ class LocationsService
      *
      * @param Order $order
      * @return Location[]
-     * @throws CommerceExceptionContract|Exception
+     * @throws Exception
      */
     public function getLocationsForOrder(Order $order) : array
     {
         $locations = [];
 
         foreach (OrdersRepository::getPickupLocations($order) as $shippingItemId => $channelId) {
-            $locations[$shippingItemId] = $this->getLocation($channelId);
+            try {
+                $locations[$shippingItemId] = $this->getLocation($channelId);
+            } catch (CommerceExceptionContract|Exception $exception) {
+            }
         }
 
         return $locations;

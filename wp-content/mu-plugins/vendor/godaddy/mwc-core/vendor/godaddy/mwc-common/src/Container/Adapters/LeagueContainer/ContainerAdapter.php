@@ -5,8 +5,13 @@ namespace GoDaddy\WordPress\MWC\Common\Container\Adapters\LeagueContainer;
 use Closure;
 use GoDaddy\WordPress\MWC\Common\Container\Contracts\ContainerContract;
 use GoDaddy\WordPress\MWC\Common\Container\Contracts\ServiceProviderContract;
-use League\Container\Container as LeagueContainer;
-use League\Container\ReflectionContainer;
+use GoDaddy\WordPress\MWC\Common\Container\Exceptions\ContainerException;
+use GoDaddy\WordPress\MWC\Common\Container\Exceptions\EntryNotFoundException;
+use GoDaddy\WordPress\MWC\Common\Vendor\League\Container\Container as LeagueContainer;
+use GoDaddy\WordPress\MWC\Common\Vendor\League\Container\ReflectionContainer;
+use GoDaddy\WordPress\MWC\Common\Vendor\Psr\Container\ContainerExceptionInterface;
+use GoDaddy\WordPress\MWC\Common\Vendor\Psr\Container\NotFoundExceptionInterface;
+use Throwable;
 
 /**
  * Adapts {@see LeagueContainer} to interface with {@see ContainerContract}.
@@ -30,13 +35,25 @@ class ContainerAdapter implements ContainerContract
      * @note Due to how league/container works, binding a class-string $concrete only works when auto-wiring is enabled
      *    {@see enableAutoWiring}. The alternative is to always pass a closure that instantiates the concrete class.
      */
-    public function bind(string $abstract, $concrete, ?array $constructorArgs = null) : void
+    public function bind(string $abstract, $concrete) : void
     {
         if (! $concrete instanceof Closure) {
             $concrete = fn () => $this->get($concrete);
         }
 
         $this->container->add($abstract, $concrete);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function singleton(string $abstract, $concrete) : void
+    {
+        if (! $concrete instanceof Closure) {
+            $concrete = fn () => $this->get($concrete);
+        }
+
+        $this->container->addShared($abstract, $concrete);
     }
 
     /**
@@ -69,7 +86,17 @@ class ContainerAdapter implements ContainerContract
      */
     public function get($id)
     {
-        return $this->container->get($id);
+        try {
+            $instance = $this->container->get($id);
+        } catch (NotFoundExceptionInterface $exception) {
+            throw new EntryNotFoundException($exception->getMessage(), $exception);
+        } catch (ContainerExceptionInterface|Throwable $throwable) {
+            throw new ContainerException($throwable->getMessage(), $throwable);
+        }
+
+        $this->validateInstanceType($instance, $id);
+
+        return $instance;
     }
 
     /**
@@ -78,5 +105,21 @@ class ContainerAdapter implements ContainerContract
     public function has($id) : bool
     {
         return $this->container->has($id);
+    }
+
+    /**
+     * Validates that instance is an object of given type, if type is a class or interface.
+     *
+     * @param string $id
+     * @param mixed $instance
+     *
+     * @throws ContainerException
+     */
+    protected function validateInstanceType($instance, string $id) : void
+    {
+        if ((class_exists($id) || interface_exists($id)) &&
+            (! is_object($instance) || ! is_a($instance, $id))) {
+            throw new ContainerException("Error while retrieving an instance of {$id} from the container.");
+        }
     }
 }

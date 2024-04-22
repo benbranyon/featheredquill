@@ -22,11 +22,16 @@ class OptionAdapter implements DataSourceAdapterContract
     /**
      * Converts a source {@see Attribute} into a native {@see AbstractOption}.
      *
+     * Disable the PHP Compatibility rule for now because it doesn't take into account use statements: https://github.com/PHPCompatibility/PHPCompatibility/issues/1291
+     * @phpcs:disable PHPCompatibility.Classes.NewClasses.attributeFound
+     *
      * @param Attribute|null $attribute
      * @return AbstractOption|null
      */
     public function convertToSource(?Attribute $attribute = null) : ?AbstractOption
     {
+        // @phpcs:enable PHPCompatibility.Classes.NewClasses.attributeFound
+
         if (! $attribute) {
             return null;
         }

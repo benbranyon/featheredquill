@@ -5,6 +5,6 @@ namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\Contrac
 /**
  * Catalog provider contract.
  */
-interface CatalogProviderContract extends HasProductsGatewayContract
+interface CatalogProviderContract extends HasCategoriesGatewayContract, HasProductsGatewayContract
 {
 }

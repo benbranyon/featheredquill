@@ -3,26 +3,28 @@
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Interceptors\Traits;
 
 use Exception;
-use GoDaddy\WordPress\MWC\Common\Exceptions\SentryException;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Operations\ListProductsOperation;
+use GoDaddy\WordPress\MWC\Common\Repositories\WordPressRepository;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\CatalogIntegration;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ProductAssociation;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ProductPost;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataSources\Adapters\ProductPostAdapter;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Services\Contracts\ProductsServiceContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Services\BatchListProductsByLocalIdService;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Commerce;
 use stdClass;
 use WP_Post;
+use WP_Query;
 
 /**
  * A trait for injecting Commerce data into WordPress product posts.
  */
 trait CanInjectCommerceProductsIntoPostsArrayTrait
 {
-    /** @var ProductsServiceContract */
-    protected ProductsServiceContract $productsService;
-
     /** @var ProductPostAdapter */
     protected ProductPostAdapter $postAdapter;
+
+    /** @var BatchListProductsByLocalIdService */
+    protected BatchListProductsByLocalIdService $batchListProductsByLocalIdService;
 
     /**
      * Injects Commerce data in WordPress product posts.
@@ -33,6 +35,10 @@ trait CanInjectCommerceProductsIntoPostsArrayTrait
      */
     protected function injectCommerceData(array $posts, ?array $localIds = null) : array
     {
+        if (! $this->shouldQueryPlatformForProducts()) {
+            return $posts;
+        }
+
         // try to get the local IDs from the posts data rows if missing
         $localIds = $this->parseLocalProductPostIds($localIds ?: [], $posts);
 
@@ -40,27 +46,33 @@ trait CanInjectCommerceProductsIntoPostsArrayTrait
             return $posts;
         }
 
-        try {
-            $remoteProducts = $this->productsService->listProducts(ListProductsOperation::seed(['localIds' => $localIds]))->getProducts();
+        $remoteProducts = $this->batchListProductsByLocalIdService
+            ->setWithVariants($this->shouldQueryVariants())
+            ->batchListByLocalIds($localIds);
 
-            /** @var stdClass|WP_Post $localProductPost */
-            foreach ($posts as $postIndex => $localProductPost) {
-                $commerceProductPost = $this->getRemoteProductForPost($localProductPost, $remoteProducts);
+        /** @var stdClass|WP_Post $localProductPost */
+        foreach ($posts as $postIndex => $localProductPost) {
+            $commerceProductPost = $this->getRemoteProductForPost($localProductPost, $remoteProducts);
 
-                if (! $commerceProductPost) {
-                    continue;
-                }
-
-                // maintains the original index and type of the posts as received by this function
-                $posts[$postIndex] = $this->overlayCommerceDataToWordPressPost($commerceProductPost, $localProductPost);
+            if (! $commerceProductPost) {
+                continue;
             }
 
-            return $posts;
-        } catch(Exception $exception) {
-            new SentryException($exception->getMessage(), $exception);
-
-            return $posts;
+            // maintains the original index and type of the posts as received by this function
+            $posts[$postIndex] = $this->overlayCommerceDataToWordPressPost($commerceProductPost, $localProductPost);
         }
+
+        return $posts;
+    }
+
+    /**
+     * Determines whether we should query the platform for product data.
+     *
+     * @return bool
+     */
+    protected function shouldQueryPlatformForProducts() : bool
+    {
+        return CatalogIntegration::hasCommerceCapability(Commerce::CAPABILITY_READ);
     }
 
     /**
@@ -77,6 +89,24 @@ trait CanInjectCommerceProductsIntoPostsArrayTrait
         }
 
         return $localIds;
+    }
+
+    /**
+     * Determines whether we should pre-emptively query variants as well. This can improve performance when we know
+     * variants will be queried immediately after the parents.
+     *
+     * @return bool
+     */
+    protected function shouldQueryVariants() : bool
+    {
+        global $wp_query;
+
+        try {
+            // we only want to do this if we're on the admin "All Products" page
+            return isset($wp_query) && $wp_query instanceof WP_Query && $wp_query->is_main_query() && WordPressRepository::isCurrentScreen('edit-product');
+        } catch(Exception $e) {
+            return false;
+        }
     }
 
     /**
@@ -101,7 +131,7 @@ trait CanInjectCommerceProductsIntoPostsArrayTrait
             return null;
         }
 
-        return $this->postAdapter->convertToSource($remoteProduct[0]->product);
+        return $this->postAdapter->setLocalPost((array) $post)->convertToSource($remoteProduct[0]->remoteResource);
     }
 
     /**

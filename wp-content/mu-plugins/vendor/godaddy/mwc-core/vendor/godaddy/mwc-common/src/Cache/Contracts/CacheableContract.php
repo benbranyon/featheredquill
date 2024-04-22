@@ -33,7 +33,8 @@ interface CacheableContract
     /**
      * Gets a cached value from the static store.
      *
-     * @param $default
+     * @param mixed $default
+     * @return mixed
      */
     public function get($default = null);
 

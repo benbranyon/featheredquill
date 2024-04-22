@@ -7,8 +7,12 @@ use GoDaddy\WordPress\MWC\Common\Interceptors\AbstractInterceptor;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\CatalogIntegration;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Interceptors\Handlers\ProductReadHandler;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Interceptors\Handlers\ProductVariationReadHandler;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Traits\CanLoadWhenReadsEnabledTrait;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Commerce;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Enums\CustomWordPressCoreHook;
+use WP_Post;
+use WP_Query;
 
 /**
  * Interceptor for reading product post objects from catalog.
@@ -27,22 +31,29 @@ class ProductReadInterceptor extends AbstractInterceptor
     {
         /* @see wp_insert_post() */
         Register::action()
-            ->setGroup('godaddy/wp_insert_post/before_get_post_instance') // @TODO confirm hook name {unfulvio 2023-04-25}
+            ->setGroup(CustomWordPressCoreHook::WpInsertPost_BeforeGetPostInstance)
             ->setHandler([$this, 'disableReads'])
             ->setPriority(PHP_INT_MAX)
             ->execute();
 
         /* @see wp_insert_post() */
         Register::action()
-            ->setGroup('godaddy/wp_insert_post/after_get_post_instance') // @TODO confirm hook name {unfulvio 2023-04-25}
+            ->setGroup(CustomWordPressCoreHook::WpInsertPost_AfterGetPostInstance)
             ->setHandler([$this, 'enableReads'])
             ->setPriority(PHP_INT_MAX)
             ->execute();
 
-        /* @see \WP_Post::get_instance() */
+        /* @see WP_Post::get_instance() */
         Register::filter()
-            ->setGroup('godaddy/wp_post/get_instance') // @TODO confirm hook name {unfulvio 2023-04-25}
+            ->setGroup(CustomWordPressCoreHook::WpPost_GetInstance)
             ->setHandler([ProductReadHandler::class, 'handle'])
+            ->setPriority(PHP_INT_MAX)
+            ->execute();
+
+        /* @see WP_Query::get_posts() */
+        Register::action()
+            ->setGroup('pre_get_posts')
+            ->setHandler([ProductVariationReadHandler::class, 'handle'])
             ->setPriority(PHP_INT_MAX)
             ->execute();
     }

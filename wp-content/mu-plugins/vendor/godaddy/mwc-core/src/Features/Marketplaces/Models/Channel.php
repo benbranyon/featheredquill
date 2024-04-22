@@ -18,7 +18,7 @@ class Channel extends AbstractModel
     /** @var string Etsy channel type slug */
     const TYPE_ETSY = 'etsy';
 
-    /** @var string Facebook channel type slug */
+    /** @var string Facebook channel type slug. Note: "Facebook" channel also includes Instagram listings. */
     const TYPE_FACEBOOK = 'facebook';
 
     /** @var string Google channel type slug */

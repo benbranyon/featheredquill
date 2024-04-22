@@ -17,7 +17,7 @@
  * needs please refer to http://docs.woocommerce.com/document/cost-of-goods/ for more information.
  *
  * @author      SkyVerge
- * @copyright   Copyright (c) 2013-2020, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright   Copyright (c) 2013-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -27,7 +27,7 @@ defined( 'ABSPATH' ) or exit;
 
 use GoDaddy\WordPress\MWC\Core\Features\CostOfGoods\CostOfGoods;
 use GoDaddy\WordPress\MWC\CostOfGoods\Admin\WC_COG_Admin;
-use SkyVerge\WooCommerce\PluginFramework\v5_10_12 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v5_11_0 as Framework;
 
 /**
  * Plugin lifecycle handler.
@@ -110,9 +110,9 @@ class Lifecycle extends Framework\Plugin\Lifecycle {
 
 				/* @type \WP_Error $product_ids */
 				/* translators: Placeholders: %s - error messages */
-				$error_message = sprintf( __( 'Error upgrading <strong>WooCommerce Cost of Goods</strong>: %s', 'mwc-cost-of-goods' ), '<ul><li>' . implode( '</li><li>', $product_ids->get_error_messages() ) . '</li></ul>' );
+				$error_message = sprintf( __( 'Error upgrading <strong>WooCommerce Cost of Goods</strong>: %s', 'woocommerce-cost-of-goods' ), '<ul><li>' . implode( '</li><li>', $product_ids->get_error_messages() ) . '</li></ul>' );
 
-				wp_die( $error_message . ' <a href="' . admin_url( 'plugins.php' ) . '">' . __( '&laquo; Go Back', 'mwc-cost-of-goods' ) . '</a>' );
+				wp_die( $error_message . ' <a href="' . admin_url( 'plugins.php' ) . '">' . __( '&laquo; Go Back', 'woocommerce-cost-of-goods' ) . '</a>' );
 			}
 
 			// otherwise go through the results and set the min/max/cost
@@ -186,9 +186,9 @@ class Lifecycle extends Framework\Plugin\Lifecycle {
 
 				/* @type \WP_Error $product_ids */
 				/* translators: Placeholders: %s - error messages */
-				$error_message = sprintf( __( 'Error upgrading <strong>WooCommerce Cost of Goods</strong>: %s', 'mwc-cost-of-goods' ), '<ul><li>' . implode( '</li><li>', $product_ids->get_error_messages() ) . '</li></ul>' );
+				$error_message = sprintf( __( 'Error upgrading <strong>WooCommerce Cost of Goods</strong>: %s', 'woocommerce-cost-of-goods' ), '<ul><li>' . implode( '</li><li>', $product_ids->get_error_messages() ) . '</li></ul>' );
 
-				wp_die( $error_message . ' <a href="' . admin_url( 'plugins.php' ) . '">' . __( '&laquo; Go Back', 'mwc-cost-of-goods' ) . '</a>' );
+				wp_die( $error_message . ' <a href="' . admin_url( 'plugins.php' ) . '">' . __( '&laquo; Go Back', 'woocommerce-cost-of-goods' ) . '</a>' );
 
 				// ...otherwise go through the results and set the min/max/cost.
 			} elseif ( is_array( $product_ids ) ) {

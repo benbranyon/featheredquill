@@ -8,10 +8,11 @@ class Level extends AbstractDataObject
 {
     public ?string $inventoryLevelId = null;
     public string $inventorySummaryId;
-    public string $inventoryLocationId;
+    public ?string $inventoryLocationId = null;
     public string $productId;
     public float $quantity;
-    public ?SimpleMoney $cost;
+    public ?SimpleMoney $cost = null;
+    public ?Summary $summary = null;
 
     /**
      * Creates a new data object.

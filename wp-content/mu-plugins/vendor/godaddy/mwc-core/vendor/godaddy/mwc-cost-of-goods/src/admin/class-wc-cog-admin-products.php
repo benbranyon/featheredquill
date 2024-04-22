@@ -17,7 +17,7 @@
  * needs please refer to http://docs.woocommerce.com/document/cost-of-goods/ for more information.
  *
  * @author      SkyVerge
- * @copyright   Copyright (c) 2013-2020, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright   Copyright (c) 2013-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -126,7 +126,7 @@ class WC_COG_Admin_Products {
 	 */
 	protected function get_cog_field_description() : string {
 
-		return __( 'Enter the amount it costs you to make and sell this product. The amount will be deducted from sales for profit reporting.', 'mwc-cost-of-goods' );
+		return __( 'Enter the amount it costs you to make and sell this product. The amount will be deducted from sales for profit reporting.', 'woocommerce-cost-of-goods' );
 	}
 
 
@@ -141,7 +141,7 @@ class WC_COG_Admin_Products {
 			'id'          => '_wc_cog_cost',
 			'class'       => 'wc_input_price short',
 			/* translators: Placeholder: %s - currency symbol */
-			'label'       => sprintf( __( 'Cost of Good (%s)', 'mwc-cost-of-goods' ), '<span>' . get_woocommerce_currency_symbol() . '</span>' ),
+			'label'       => sprintf( __( 'Cost of Good (%s)', 'woocommerce-cost-of-goods' ), '<span>' . get_woocommerce_currency_symbol() . '</span>' ),
 			'data_type'   => 'price',
 			'desc_tip'    => true,
 			'description' => $this->get_cog_field_description(),
@@ -162,10 +162,10 @@ class WC_COG_Admin_Products {
 				'class'         => 'wc_input_price short',
 				'wrapper_class' => 'show_if_variable',
 				/* translators: Placeholder: %s - currency symbol */
-				'label'         => sprintf( __( 'Cost of Good (%s)', 'mwc-cost-of-goods' ), '<span>' . get_woocommerce_currency_symbol() . '</span>' ),
+				'label'         => sprintf( __( 'Cost of Good (%s)', 'woocommerce-cost-of-goods' ), '<span>' . get_woocommerce_currency_symbol() . '</span>' ),
 				'data_type'     => 'price',
 				'desc_tip'      => true,
-				'description'   => __( 'Default cost for product variations', 'mwc-cost-of-goods' ),
+				'description'   => __( 'Default cost for product variations', 'woocommerce-cost-of-goods' ),
 			]
 		);
 	}
@@ -196,7 +196,7 @@ class WC_COG_Admin_Products {
 	 */
 	public function add_variable_product_bulk_edit_cost_action() {
 
-		$option_label = __( 'Set cost', 'mwc-cost-of-goods' );
+		$option_label = __( 'Set cost', 'woocommerce-cost-of-goods' );
 
 		echo '<option value="variable_cost_of_good">' . esc_html( $option_label ) . '</option>';
 	}
@@ -247,7 +247,7 @@ class WC_COG_Admin_Products {
 			<p class="form-row form-row-first">
 				<label><?php
 					/* translators: Placeholder: %s - currency symbol */
-					printf( __( 'Cost of Good (%s)', 'mwc-cost-of-goods' ), '<span>' . get_woocommerce_currency_symbol() . '</span>' );
+					printf( __( 'Cost of Good (%s)', 'woocommerce-cost-of-goods' ), '<span>' . get_woocommerce_currency_symbol() . '</span>' );
 					?></label>
 
 				<?php echo wc_help_tip( $this->get_cog_field_description() ); ?>
@@ -393,15 +393,15 @@ class WC_COG_Admin_Products {
 		?>
 		<div class="inline-edit-group">
 			<label class="alignleft">
-				<span class="title"><?php esc_html_e( 'Cost of Good', 'mwc-cost-of-goods' ); ?></span>
+				<span class="title"><?php esc_html_e( 'Cost of Good', 'woocommerce-cost-of-goods' ); ?></span>
 				<span class="input-text-wrap">
 						<select class="change_cost_of_good change_to" name="change_cost_of_good">
 							<?php
 							$options = [
-								''  => __( '— No Change —', 'mwc-cost-of-goods' ),
-								'1' => __( 'Change to:', 'mwc-cost-of-goods' ),
-								'2' => __( 'Increase by (fixed amount or %):', 'mwc-cost-of-goods' ),
-								'3' => __( 'Decrease by (fixed amount or %):', 'mwc-cost-of-goods' ),
+								''  => __( '— No Change —', 'woocommerce-cost-of-goods' ),
+								'1' => __( 'Change to:', 'woocommerce-cost-of-goods' ),
+								'2' => __( 'Increase by (fixed amount or %):', 'woocommerce-cost-of-goods' ),
+								'3' => __( 'Decrease by (fixed amount or %):', 'woocommerce-cost-of-goods' ),
 							];
 							foreach ( $options as $key => $value ) {
 								echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</option>';
@@ -411,7 +411,7 @@ class WC_COG_Admin_Products {
 					</span>
 			</label>
 			<label class="change-input">
-				<input type="text" name="_cost_of_good" class="text cost_of_good" placeholder="<?php esc_attr_e( 'Enter Cost:', 'mwc-cost-of-goods' ); ?>" value="" />
+				<input type="text" name="_cost_of_good" class="text cost_of_good" placeholder="<?php esc_attr_e( 'Enter Cost:', 'woocommerce-cost-of-goods' ); ?>" value="" />
 			</label>
 		</div>
 		<?php
@@ -574,7 +574,7 @@ class WC_COG_Admin_Products {
 		?>
 		<br class="clear" />
 		<label class="alignleft">
-			<span class="title"><?php esc_html_e( 'Cost', 'mwc-cost-of-goods' ); ?></span>
+			<span class="title"><?php esc_html_e( 'Cost', 'woocommerce-cost-of-goods' ); ?></span>
 			<span class="input-text-wrap">
 					<input type="text" name="_wc_cog_cost" class="text wc-cog-cost" value="">
 				</span>
@@ -647,7 +647,7 @@ class WC_COG_Admin_Products {
 				'class'         => 'wc_input_price short',
 				'wrapper_class' => 'show_if_booking',
 				/* translators: Placeholder: %s - currency symbol */
-				'label'         => sprintf( __( 'Cost of Good (%s)', 'mwc-cost-of-goods' ), '<span>' . get_woocommerce_currency_symbol() . '</span>' ),
+				'label'         => sprintf( __( 'Cost of Good (%s)', 'woocommerce-cost-of-goods' ), '<span>' . get_woocommerce_currency_symbol() . '</span>' ),
 				'data_type'     => 'price',
 			]
 		);
@@ -691,7 +691,7 @@ class WC_COG_Admin_Products {
 
 			// add our cost column after price
 			if ( 'price' === $key ) {
-				$columns['cost'] = __( 'Cost', 'mwc-cost-of-goods' );
+				$columns['cost'] = __( 'Cost', 'woocommerce-cost-of-goods' );
 			}
 		}
 

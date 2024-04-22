@@ -46,4 +46,12 @@ class ListProductsResponse implements ListProductsResponseContract
     {
         return $this->products;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getLocalIds() : array
+    {
+        return array_column($this->getProducts(), 'localId');
+    }
 }

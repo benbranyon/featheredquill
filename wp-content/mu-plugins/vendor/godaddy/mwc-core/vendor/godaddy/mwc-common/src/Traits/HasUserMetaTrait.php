@@ -13,7 +13,7 @@ trait HasUserMetaTrait
     /** @var string meta key used to load/store the metadata */
     protected $metaKey;
 
-    /** @var string|array|int|float|bool|null value to be stored as metadata */
+    /** @var string|array<mixed>|int|float|bool|null value to be stored as metadata */
     protected $value;
 
     /**
@@ -21,15 +21,17 @@ trait HasUserMetaTrait
      *
      * It sets the value property to the value loaded from the user metadata or the default value.
      *
-     * @param string|array|int|float|bool|null $defaultValue value used if the user metadata doesn't exist
-     * @return string|array|int|float|bool|null
+     * @param string|array<mixed>|int|float|bool|null $defaultValue value used if the user metadata doesn't exist
+     * @return string|array<mixed>|int|float|bool|null
      */
     public function loadUserMeta($defaultValue)
     {
         if (! metadata_exists('user', $this->userId, $this->metaKey)) {
             $this->value = $defaultValue;
         } else {
-            $this->value = get_user_meta($this->userId, $this->metaKey, true);
+            /** @var string|array<mixed>|int|float|bool|null $value */
+            $value = get_user_meta($this->userId, $this->metaKey, true);
+            $this->value = $value;
         }
 
         return $this->value;
@@ -38,7 +40,7 @@ trait HasUserMetaTrait
     /**
      * Gets the value property.
      *
-     * @return string|array|int|float|bool|null
+     * @return string|array<mixed>|int|float|bool|null
      */
     public function getUserMeta()
     {
@@ -48,7 +50,7 @@ trait HasUserMetaTrait
     /**
      * Sets the value property.
      *
-     * @param string|array|int|float|bool|null $value value to store
+     * @param string|array<mixed>|int|float|bool|null $value value to store
      * @return $this
      */
     public function setUserMeta($value) : self

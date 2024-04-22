@@ -5,6 +5,7 @@ namespace GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\WooCommerce;
 use Exception;
 use GoDaddy\WordPress\MWC\Common\Components\Contracts\ConditionalComponentContract;
 use GoDaddy\WordPress\MWC\Common\Email\Exceptions\EmailSendFailedException;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
 use GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\Contracts\EmailNotificationContract;
 use GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\DataSources\WooCommerce\EmailNotificationAdapter;
@@ -25,6 +26,12 @@ class EmailCatcher implements ConditionalComponentContract
 {
     use CanGetEmailNotificationDataStoreTrait;
 
+    /** @var mixed */
+    protected $originalCallback = null;
+
+    /** @var mixed */
+    protected $originalCallbackParameters = [];
+
     /**
      * Processes a WooCommerce email to send when invoked by WooCommerce as a function.
      *
@@ -34,7 +41,7 @@ class EmailCatcher implements ConditionalComponentContract
      * @see EmailCatcher::filterMailCallback()
      * @see EmailCatcher::filterMailCallbackParameters()
      */
-    public function __invoke(WC_Email $email)
+    public function __invoke(WC_Email $email) : void
     {
         try {
             try {
@@ -51,6 +58,10 @@ class EmailCatcher implements ConditionalComponentContract
             }
         } catch (EmailSendFailedException $exception) {
             // there was an error sending the email: the exception will be reported to sentry
+            // attempt sending the email using the original mail_callable callback & params
+            if ($this->isSafeCallback($this->originalCallback)) {
+                call_user_func_array($this->originalCallback, TypeHelper::array($this->originalCallbackParameters, []));
+            }
         }
     }
 
@@ -98,6 +109,32 @@ class EmailCatcher implements ConditionalComponentContract
     }
 
     /**
+     * Determines whether the given callback is callable.
+     *
+     * Returns false if the callback is an instance of this class to avoid infinite loops.
+     *
+     * @param mixed $callback
+     * @return bool
+     * @phpstan-assert-if-true callable $callback
+     */
+    protected function isSafeCallback($callback) : bool
+    {
+        if (! is_callable($callback)) {
+            return false;
+        }
+
+        if ($callback instanceof EmailCatcher) {
+            return false;
+        }
+
+        if (is_array($callback) && isset($callback[0]) && $callback[0] instanceof EmailCatcher) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Loads the component.
      *
      * @throws Exception
@@ -112,7 +149,7 @@ class EmailCatcher implements ConditionalComponentContract
      *
      * @throws Exception
      */
-    protected function addHooks()
+    protected function addHooks() : void
     {
         Register::filter()
             ->setGroup('woocommerce_mail_callback')
@@ -135,15 +172,19 @@ class EmailCatcher implements ConditionalComponentContract
      * @see EmailCatcher::addHooks()
      * @see EmailCatcher::__invoke()
      *
-     * @param string|array|object|Closure $callback
-     * @param WC_Email|mixed $email
-     * @return string|self
+     * @param mixed $callback
+     * @param mixed $email
+     * @return mixed
      */
     public function filterMailCallback($callback, $email)
     {
-        return $this->shouldFilterEmailHandling($email)
-            ? $this
-            : $callback;
+        if ($this->shouldFilterEmailHandling($email)) {
+            $this->originalCallback = $callback;
+
+            return $this;
+        }
+
+        return $callback;
     }
 
     /**
@@ -154,15 +195,19 @@ class EmailCatcher implements ConditionalComponentContract
      * @see EmailCatcher::addHooks()
      * @see EmailCatcher::__invoke()
      *
-     * @param array|mixed $params
-     * @param WC_Email|mixed $email
-     * @return array|mixed
+     * @param mixed $params
+     * @param mixed $email
+     * @return mixed
      */
     public function filterMailCallbackParameters($params, $email)
     {
-        return $this->shouldFilterEmailHandling($email)
-            ? [$email]
-            : $params;
+        if ($this->shouldFilterEmailHandling($email)) {
+            $this->originalCallbackParameters = $params;
+
+            return [$email];
+        }
+
+        return $params;
     }
 
     /**

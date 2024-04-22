@@ -12,20 +12,26 @@ use GoDaddy\WordPress\MWC\Common\Traits\IsSingletonTrait;
 use GoDaddy\WordPress\MWC\Core\Admin\Notices\Notices;
 use GoDaddy\WordPress\MWC\Core\API\API;
 use GoDaddy\WordPress\MWC\Core\Auth\API\API as AuthenticationAPI;
+use GoDaddy\WordPress\MWC\Core\Auth\Sso\WordPress\WordPressSso;
 use GoDaddy\WordPress\MWC\Core\Client\Client;
 use GoDaddy\WordPress\MWC\Core\Events\Producers;
 use GoDaddy\WordPress\MWC\Core\FeatureFlags\ConfigurationLoader;
+use GoDaddy\WordPress\MWC\Core\Features\Assistant\Assistant;
 use GoDaddy\WordPress\MWC\Core\Features\CartRecoveryEmails\CartRecoveryEmails;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Backfill\CommerceBackfill;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Commerce;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\CommerceCustomerPush;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Polling\CommercePolling;
 use GoDaddy\WordPress\MWC\Core\Features\CostOfGoods\CostOfGoods;
 use GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\EmailNotifications;
+use GoDaddy\WordPress\MWC\Core\Features\ExternalDomainControls\ExternalDomainControls;
 use GoDaddy\WordPress\MWC\Core\Features\GiftCertificates\GiftCertificates;
 use GoDaddy\WordPress\MWC\Core\Features\GoDaddyPayments\GoDaddyPayments;
 use GoDaddy\WordPress\MWC\Core\Features\GoogleAnalytics\GoogleAnalytics;
 use GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Marketplaces;
 use GoDaddy\WordPress\MWC\Core\Features\Onboarding\Dashboard as OnboardingDashboard;
 use GoDaddy\WordPress\MWC\Core\Features\Onboarding\Onboarding;
+use GoDaddy\WordPress\MWC\Core\Features\PluginControls\PluginControls;
 use GoDaddy\WordPress\MWC\Core\Features\SequentialOrderNumbers\SequentialOrderNumbers;
 use GoDaddy\WordPress\MWC\Core\Features\Shipping\Shipping;
 use GoDaddy\WordPress\MWC\Core\Features\UrlCoupons\UrlCoupons;
@@ -75,6 +81,7 @@ class Package extends BasePlatformPlugin
 
     /** @var class-string<ComponentContract>[] */
     protected $componentClasses = [
+        Assistant::class,
         GiftCertificates::class,
         Onboarding::class,
         OnboardingDashboard::class,
@@ -84,16 +91,21 @@ class Package extends BasePlatformPlugin
         AuthenticationAPI::class,
         CartRecoveryEmails::class,
         Commerce::class,
+        CommerceBackfill::class,
         CommerceCustomerPush::class,
+        CommercePolling::class,
         CostOfGoods::class,
         Interceptors::class,
         GoogleAnalytics::class,
         EmailNotifications::class,
         Marketplaces::class,
+        PluginControls::class,
         Shipping::class,
         API::class,
         GoDaddyPayments::class,
         Worldpay::class,
+        WordPressSso::class,
+        ExternalDomainControls::class,
     ];
 
     /**
@@ -128,7 +140,7 @@ class Package extends BasePlatformPlugin
     protected function getConfigurationValues() : array
     {
         return array_merge(parent::getConfigurationValues(), [
-            'version'    => '3.12.3',
+            'version'    => '4.2.0',
             'plugin_dir' => dirname(__DIR__),
             'plugin_url' => plugin_dir_url(__DIR__),
         ]);

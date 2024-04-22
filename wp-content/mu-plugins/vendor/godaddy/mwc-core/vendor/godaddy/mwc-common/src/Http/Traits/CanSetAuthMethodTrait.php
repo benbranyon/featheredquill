@@ -2,6 +2,7 @@
 
 namespace GoDaddy\WordPress\MWC\Common\Http\Traits;
 
+use Exception;
 use GoDaddy\WordPress\MWC\Common\Auth\Contracts\AuthMethodContract;
 use GoDaddy\WordPress\MWC\Common\Auth\Exceptions\AuthProviderException;
 use GoDaddy\WordPress\MWC\Common\Auth\Exceptions\CredentialsCreateFailedException;
@@ -49,8 +50,7 @@ trait CanSetAuthMethodTrait
     /**
      * Sets the auth method for this request.
      *
-     * @param AuthMethodContract $value The auth method to set.
-     *
+     * @param AuthMethodContract $value the auth method to set
      * @return $this
      */
     abstract public function setAuthMethod(AuthMethodContract $value);

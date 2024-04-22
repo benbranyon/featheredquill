@@ -20,6 +20,14 @@ abstract class AbstractPlatformRepository implements PlatformRepositoryContract
     /**
      * {@inheritDoc}
      */
+    public function isTlaSite() : bool
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function getChannelId() : string
     {
         return '';

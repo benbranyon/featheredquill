@@ -37,7 +37,7 @@ class OptionsSettingsDataStore
     {
         if (! StringHelper::contains($optionNameTemplate, static::SETTING_ID_MERGE_TAG)) {
             throw new InvalidArgumentException(sprintf(
-                __('Invalid option name template "%s": it should contain a {{setting_id}} placeholder.', 'mwc-core'),
+                __('Invalid template for the option name "%s": it should contain a {{setting_id}} placeholder.', 'mwc-core'),
                 $optionNameTemplate
             ));
         }

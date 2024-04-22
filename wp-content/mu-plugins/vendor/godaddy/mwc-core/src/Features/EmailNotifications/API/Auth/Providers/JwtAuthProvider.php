@@ -3,10 +3,10 @@
 namespace GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\API\Auth\Providers;
 
 use Exception;
-use Firebase\JWT\JWK;
-use Firebase\JWT\JWT;
 use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
 use GoDaddy\WordPress\MWC\Core\Auth\JWT\ManagedWooCommerce\Http\Providers\KeySetProvider;
+use GoDaddy\WordPress\MWC\Core\Vendor\Firebase\JWT\JWK;
+use GoDaddy\WordPress\MWC\Core\Vendor\Firebase\JWT\JWT;
 
 /**
  * Decodes a JWT token using the MWC API JWK.

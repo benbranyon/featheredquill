@@ -19,7 +19,7 @@ class EnqueuePoyntPluginNoticeInterceptor extends AbstractGoDaddyPaymentsNoticeI
      */
     public static function shouldLoad() : bool
     {
-        if (! is_plugin_active(static::GODADDY_PAYMENTS_PLUGIN_PATH)) {
+        if (function_exists('is_plugin_active') && ! is_plugin_active(static::GODADDY_PAYMENTS_PLUGIN_PATH)) {
             return false;
         }
 

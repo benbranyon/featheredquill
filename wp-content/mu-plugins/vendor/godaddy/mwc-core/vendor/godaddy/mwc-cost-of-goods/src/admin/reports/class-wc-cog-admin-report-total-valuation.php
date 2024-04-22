@@ -17,7 +17,7 @@
  * needs please refer to http://docs.woocommerce.com/document/cost-of-goods/ for more information.
  *
  * @author      SkyVerge
- * @copyright   Copyright (c) 2013-2020, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright   Copyright (c) 2013-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -54,14 +54,14 @@ class WC_COG_Admin_Report_Total_Valuation {
 		?>
 		<div id="poststuff" class="woocommerce-reports-wide wc-cogs-total-valuation">
 			<div class="wrapper wc-cog-cost">
-				<span class="title"><?php esc_html_e( 'at cost', 'mwc-cost-of-goods' ); ?></span>
+				<span class="title"><?php esc_html_e( 'at cost', 'woocommerce-cost-of-goods' ); ?></span>
 				<h3 class="amount"><?php echo wc_price( $valuation['at_cost'] ); ?></h3>
 				<div class="loader">
 					<img src="<?php echo esc_url( $loader_image ); ?>" />
 				</div>
 			</div>
 			<div class="wrapper wc-cog-retail">
-				<span class="title"><?php esc_html_e( 'at retail', 'mwc-cost-of-goods' ); ?></span>
+				<span class="title"><?php esc_html_e( 'at retail', 'woocommerce-cost-of-goods' ); ?></span>
 				<h3 class="amount"><?php echo wc_price( $valuation['at_retail'] ); ?></h3>
 				<div class="loader">
 					<img src="<?php echo esc_url( $loader_image ); ?>" />

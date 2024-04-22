@@ -9,9 +9,9 @@ class Location extends AbstractDataObject
 {
     public string $channelId;
     public string $alias;
-    public Address $address;
+    public ?Address $address = null;
     /** @var Contact[] */
-    public array $contacts;
+    public array $contacts = [];
 
     /** @var string represents the RETAIL location type */
     const TYPE_RETAIL = 'RETAIL';
@@ -22,8 +22,8 @@ class Location extends AbstractDataObject
      * @param array{
      *     channelId: string,
      *     alias: string,
-     *     address: Address,
-     *     contacts: Contact[],
+     *     address?: Address,
+     *     contacts?: Contact[],
      * } $data
      */
     public function __construct(array $data)

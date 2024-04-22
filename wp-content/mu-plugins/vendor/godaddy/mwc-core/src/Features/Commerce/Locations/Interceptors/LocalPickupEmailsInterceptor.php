@@ -23,6 +23,8 @@ use WC_Order;
 
 /**
  * Interceptor to handle the Local Pickup Email components.
+ *
+ * @NOTE: This is documented by documentation/development/features/commerce/locations/local-pickup-emails-interceptor.md
  */
 class LocalPickupEmailsInterceptor extends AbstractInterceptor
 {
@@ -148,8 +150,10 @@ class LocalPickupEmailsInterceptor extends AbstractInterceptor
                 echo "\n";
             }
 
-            echo esc_attr($this->getFormattedAddress($location->address));
-            echo "\n";
+            if ($address = $location->address) {
+                echo esc_attr($this->getFormattedAddress($address));
+                echo "\n";
+            }
 
             foreach ($this->getFormattedContacts($location->contacts) as $contact) {
                 echo esc_attr($contact);
@@ -176,7 +180,9 @@ class LocalPickupEmailsInterceptor extends AbstractInterceptor
                 echo '<strong>'.esc_attr($alias).'</strong><br />';
             }
 
-            echo esc_attr($this->getFormattedAddress($location->address)).'<br />';
+            if ($address = $location->address) {
+                echo esc_attr($this->getFormattedAddress($address)).'<br />';
+            }
 
             foreach ($this->getFormattedContacts($location->contacts) as $contact) {
                 echo esc_attr($contact).'<br />';

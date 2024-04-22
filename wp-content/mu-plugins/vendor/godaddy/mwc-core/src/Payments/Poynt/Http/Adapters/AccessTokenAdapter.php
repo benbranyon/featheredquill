@@ -3,13 +3,13 @@
 namespace GoDaddy\WordPress\MWC\Core\Payments\Poynt\Http\Adapters;
 
 use Exception;
-use Firebase\JWT\JWT;
 use GoDaddy\WordPress\MWC\Common\DataSources\Contracts\DataSourceAdapterContract;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
 use GoDaddy\WordPress\MWC\Common\Http\Response;
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt;
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Http\GenerateTokenRequest;
+use GoDaddy\WordPress\MWC\Core\Vendor\Firebase\JWT\JWT;
 
 /**
  * Class AccessTokenAdapter.

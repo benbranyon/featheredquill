@@ -11,6 +11,9 @@ use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\A
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\Inventory;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ProductBase;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\VariantListOption;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Commerce;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\InventoryIntegration;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\DataObjects\Summary;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\DataObjects\ExternalId;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\DataObjects\SimpleMoney;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\DataObjects\Value;
@@ -20,6 +23,8 @@ use GoDaddy\WordPress\MWC\Core\WooCommerce\Adapters\ProductAdapter;
  * Adapter for converting {@see ProductBase} properties into WordPress metadata.
  *
  * This adapter can be used to convert a {@see ProductBase} DTO into an array of key-values that can be used to fill WordPress metadata for a WooCommerce product.
+ *
+ * @TODO in the future try to decouple the inventory logic MWC-12698 {agibson 2023-06-14}
  *
  * @method static static getNewInstance(ProductBase $productBase)
  */
@@ -32,6 +37,9 @@ class ProductPostMetaAdapter implements DataSourceAdapterContract
 
     /** @var array<string, array<int, mixed>> array of local metadata - used to compare against the local database */
     protected array $localMeta = [];
+
+    /** @var Summary|null inventory summary related to this product, if available */
+    protected ?Summary $inventorySummary = null;
 
     /**
      * Constructor.
@@ -62,6 +70,30 @@ class ProductPostMetaAdapter implements DataSourceAdapterContract
     public function setLocalMeta(array $value) : ProductPostMetaAdapter
     {
         $this->localMeta = $value;
+
+        return $this;
+    }
+
+    /**
+     * Gets the inventory summary.
+     *
+     * @return Summary|null
+     */
+    public function getInventorySummary() : ?Summary
+    {
+        return $this->inventorySummary;
+    }
+
+    /**
+     * Sets the inventory summary for this product.
+     *
+     * @param Summary|null $inventorySummary
+     *
+     * @return ProductPostMetaAdapter
+     */
+    public function setInventorySummary(?Summary $inventorySummary) : ProductPostMetaAdapter
+    {
+        $this->inventorySummary = $inventorySummary;
 
         return $this;
     }
@@ -143,23 +175,38 @@ class ProductPostMetaAdapter implements DataSourceAdapterContract
             return $metaData;
         }
 
-        $metaData['_backorders'] = $this->source->inventory->backorderable ? 'yes' : 'no';
-        $metaData['_manage_stock'] = $this->source->inventory->externalService ? 'yes' : 'no';
-        $metaData['_stock'] = $this->source->inventory->quantity ?: '';
+        $isManagingStock = $this->source->inventory->tracking;
 
-        $stockStatus = 'instock'; // always in stock if not tracking inventory or quantity is null
-        if ($this->source->inventory->tracking && null !== $this->source->inventory->quantity && $this->source->inventory->quantity <= 0.0) {
-            $stockStatus = 'outofstock';
+        $metaData['_manage_stock'] = $isManagingStock ? 'yes' : 'no';
 
-            // the Catalog API does not support an "on backorder" status, so we have to reference the local database here
-            if ('onbackorder' === ArrayHelper::get($this->localMeta, '_stock_status.0')) {
-                $stockStatus = 'onbackorder';
+        if ($isManagingStock && $this->inventorySummary && $this->shouldReadInventoryStock()) {
+            $metaData['_stock'] = $this->inventorySummary->totalOnHand;
+
+            /*
+             * We need to update the stock status string, even if using a stock quantity, as WooCommerce still references
+             * this in some contexts. Example: {@see \WC_Product::is_in_stock()}
+             *
+             * @NOTE `totalAvailable` value can go into the negatives, which is why we do a <= here (MWC-12835)
+             */
+            if (is_numeric($metaData['_stock']) && $metaData['_stock'] <= 0) {
+                $metaData['_stock_status'] = 'outofstock';
+            } else {
+                // When reading stock from inventory summary, its default state is "in stock."
+                $metaData['_stock_status'] = 'instock';
             }
         }
 
-        $metaData['_stock_status'] = $stockStatus;
-
         return $metaData;
+    }
+
+    /**
+     * Determines whether inventory stock should be read.
+     *
+     * @return bool
+     */
+    protected function shouldReadInventoryStock() : bool
+    {
+        return InventoryIntegration::shouldLoad() && InventoryIntegration::hasCommerceCapability(Commerce::CAPABILITY_READ);
     }
 
     /**
@@ -272,8 +319,7 @@ class ProductPostMetaAdapter implements DataSourceAdapterContract
                     continue;
                 }
 
-                // product attribute taxonomies in WooCommerce are always prefixed with `pa_`
-                $isTaxonomy = strpos($attribute->name, 'pa_') === 0;
+                $isTaxonomy = $this->isTaxonomyAttribute($attribute->name);
                 $attributeName = strtolower($attribute->name);
 
                 $attributes[$attributeName] = [
@@ -313,6 +359,18 @@ class ProductPostMetaAdapter implements DataSourceAdapterContract
     }
 
     /**
+     * Determines whether the supplied attribute `name` relates to a taxonomy in WooCommerce. Attribute taxonomies
+     * are always prefixed with `pa_`.
+     *
+     * @param string $attributeName
+     * @return bool
+     */
+    protected function isTaxonomyAttribute(string $attributeName) : bool
+    {
+        return strpos($attributeName, 'pa_') === 0;
+    }
+
+    /**
      * Converts {@see ProductBase} variant option mapping into WooCommerce product variation attributes metadata.
      *
      * @param array<string, scalar|array<scalar>> $metaData
@@ -326,11 +384,106 @@ class ProductPostMetaAdapter implements DataSourceAdapterContract
         }
 
         foreach ($this->source->variantOptionMapping as $attribute) {
+            // for taxonomy attributes values are inferred from attribute taxonomy terms assigned to the product
+            if ($this->isTaxonomyAttribute($attribute->name)) {
+                continue;
+            }
+
             // a taxonomy attribute key will be for example `attribute_pa_color`, while a custom attribute key will be for example `attribute_fabric`
-            $metaData['attribute_'.strtolower($attribute->name)] = $attribute->value;
+            $metaData['attribute_'.strtolower($attribute->name)] = $this->getVariantMappingAttributeDisplayValue($attribute->name, $attribute->value);
         }
 
         return $metaData;
+    }
+
+    /**
+     * Gets the display ("presentation") value for the provided option name and value name (slug) combination.
+     *
+     * As an example, this might convert:
+     * $optionName = `color`
+     * $valueName = `blue` (slug/"value" version)
+     * to the end result: `Blue` (presentation version)
+     *
+     * @param string $optionName
+     * @param string $valueName
+     * @return string
+     */
+    protected function getVariantMappingAttributeDisplayValue(string $optionName, string $valueName) : string
+    {
+        if ($displayValue = $this->getVariantMappingAttributeDisplayValueFromOptionsList($optionName, $valueName)) {
+            return $displayValue;
+        }
+
+        // if we can't find a corresponding "presentation" value, we can attempt to guess it by converting the slug version to uppercase.
+        return ucwords($valueName);
+    }
+
+    /**
+     * Gets the display ("presentation") value that matches the provided option name + value name. We do this by finding
+     * a matching record in the `options` array and using that presentation value.
+     *
+     * For example, `variantOptionMapping` might look like this:
+     *
+        "variantOptionMapping": [
+            {
+                "name": "color",
+                "value": "blue"
+            }
+        ]
+     *
+     * And `options` looks like this:
+     *
+        "options": [
+            {
+                "type": "VARIANT_LIST",
+                "name": "color",
+                "presentation": "Color",
+                "cardinality": "1",
+                "values": [
+                    {
+                        "name": "blue",
+                        "presentation": "Blue"
+                    }
+                ]
+            }
+        ]
+     *
+     * Given what we know about `variantOptionMapping`, we find the corresponding record in `options` so that we
+     * can pull out the `presentation` value.
+     *
+     * @param string $optionName
+     * @param string $valueName
+     * @return string|null
+     */
+    protected function getVariantMappingAttributeDisplayValueFromOptionsList(string $optionName, string $valueName) : ?string
+    {
+        if (empty($this->source->options)) {
+            return null;
+        }
+
+        // find the option that matches the provided `$optionName`
+        /** @var VariantListOption[] $options */
+        $options = ArrayHelper::where($this->source->options, function ($option) use ($optionName) {
+            /* @var AbstractOption $option */
+            return $option instanceof VariantListOption && $optionName === $option->name;
+        }, false);
+
+        if (empty($options[0]) || empty($options[0]->values)) {
+            return null;
+        }
+
+        // find the value _presentation_ that matches the provided `$valueName`
+        /** @var Value[] $optionValues */
+        $optionValues = ArrayHelper::where($options[0]->values, function ($value) use ($valueName) {
+            /* @var Value $value */
+            return $valueName === $value->name;
+        }, false);
+
+        if (empty($optionValues[0])) {
+            return null;
+        }
+
+        return $optionValues[0]->presentation;
     }
 
     /**

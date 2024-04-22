@@ -20,8 +20,11 @@ use GoDaddy\WordPress\MWC\Shipping\Models\Packages\Statuses\CreatedPackageStatus
 
 class CalculateShippingRatesRequestAdapter extends AbstractGatewayRequestAdapter
 {
-    /** @var CalculateShippingRatesOperationContract */
-    protected $operation;
+    protected const ADDRESS_TYPE_ORIGIN = 'origin';
+
+    protected const ADDRESS_TYPE_DESTINATION = 'destination';
+
+    protected CalculateShippingRatesOperationContract $operation;
 
     public function __construct(CalculateShippingRatesOperationContract $operation)
     {
@@ -71,17 +74,17 @@ class CalculateShippingRatesRequestAdapter extends AbstractGatewayRequestAdapter
      */
     protected function getShipToAddressForRequest(?Address $address) : ?array
     {
-        return $this->getAddressForRequest($address, 'residential');
+        return $this->getAddressForRequest($address, static::ADDRESS_TYPE_DESTINATION);
     }
 
     /**
      * Gets data from the given Address object in the format needed for the request.
      *
      * @param Address|null $address
-     * @param string|null $type
+     * @param static::ADDRESS_TYPE* $type
      * @return array<string, string|null>|null
      */
-    protected function getAddressForRequest(?Address $address, string $type = null) : ?array
+    protected function getAddressForRequest(?Address $address, string $type) : ?array
     {
         if (! $address) {
             return null;
@@ -101,7 +104,7 @@ class CalculateShippingRatesRequestAdapter extends AbstractGatewayRequestAdapter
             'address_residential_indicator' => null,
         ];
 
-        $addressNames = $this->getAddressNamesForRequest($address);
+        $addressNames = $this->getAddressNamesForRequest($address, $type);
         $addressLines = $this->getAddressLinesForRequest($address);
         $addressResidentialIndicator = $this->getAddressResidentialIndicator($addressNames, $type);
 
@@ -125,16 +128,23 @@ class CalculateShippingRatesRequestAdapter extends AbstractGatewayRequestAdapter
      * Gets the value of the name and company_name fields for an address in the request.
      *
      * @param Address $address
+     * @param static::ADDRESS_TYPE* $type
      * @return array<string, string|null>
      */
-    protected function getAddressNamesForRequest(Address $address) : array
+    protected function getAddressNamesForRequest(Address $address, string $type) : array
     {
-        $name = trim("{$address->getFirstName()} {$address->getLastName()}") ?: null;
+        $fullName = trim("{$address->getFirstName()} {$address->getLastName()}") ?: null;
         $businessName = $address->getBusinessName() ?: null;
 
+        if ($type === static::ADDRESS_TYPE_ORIGIN) {
+            $companyName = $businessName ?: $fullName;
+        } else {
+            $companyName = $fullName ? $businessName : null;
+        }
+
         return [
-            'name'         => $name ?: $businessName,
-            'company_name' => $name ? $businessName : null,
+            'name'         => $fullName ?: $businessName,
+            'company_name' => $companyName,
         ];
     }
 
@@ -142,14 +152,14 @@ class CalculateShippingRatesRequestAdapter extends AbstractGatewayRequestAdapter
      * Gets the value of the residential indicator field for an address in the request.
      *
      * @param array<string, string|null> $addressNames
-     * @param string|null $type
+     * @param static::ADDRESS_TYPE* $type
      * @return array<string, string|null>
      */
-    protected function getAddressResidentialIndicator(array $addressNames, ?string $type = null) : array
+    protected function getAddressResidentialIndicator(array $addressNames, string $type) : array
     {
         $addressResidentialIndicator = 'no';
 
-        if ($type === 'residential' && ! ArrayHelper::get($addressNames, 'company_name')) {
+        if ($type === static::ADDRESS_TYPE_DESTINATION && ! ArrayHelper::get($addressNames, 'company_name')) {
             $addressResidentialIndicator = 'yes';
         }
 
@@ -194,7 +204,7 @@ class CalculateShippingRatesRequestAdapter extends AbstractGatewayRequestAdapter
      */
     protected function getShipFromAddressForRequest(?Address $address) : ?array
     {
-        return $this->getAddressForRequest($address);
+        return $this->getAddressForRequest($address, static::ADDRESS_TYPE_ORIGIN);
     }
 
     /**
@@ -289,25 +299,11 @@ class CalculateShippingRatesRequestAdapter extends AbstractGatewayRequestAdapter
      */
     protected function getShipmentRemoteId(ResponseContract $response) : string
     {
-        if (! $remoteId = $this->getStringValue(ArrayHelper::wrap($response->getBody()), 'shipment_id')) {
+        if (! $remoteId = ArrayHelper::getStringValueForKey(ArrayHelper::wrap($response->getBody()), 'shipment_id')) {
             throw new ShippingException('The response does not include a shipment ID.');
         }
 
         return $remoteId;
-    }
-
-    /**
-     * Gets a string value from the given array.
-     *
-     * Returns an empty string if the value cannot be converted to string.
-     *
-     * @param array<string, mixed> $stored
-     * @param string $key
-     * @return string
-     */
-    protected function getStringValue(array $stored, string $key) : string
-    {
-        return (string) StringHelper::ensureScalar(ArrayHelper::get($stored, $key));
     }
 
     /**
@@ -332,7 +328,9 @@ class CalculateShippingRatesRequestAdapter extends AbstractGatewayRequestAdapter
                 throw new ShippingException('The response includes invalid shipping rates data.');
             }
 
-            $shippingRates[] = ShippingRateAdapter::getNewInstance($shippingRateData)->convertFromSource();
+            $shippingRates[] = ShippingRateAdapter::getNewInstance($shippingRateData)
+                ->setCarriers($this->operation->getCarriers())
+                ->convertFromSource();
         }
 
         return $shippingRates;

@@ -275,7 +275,7 @@ class ShippingRatesController extends AbstractController
                             'context'     => ['view', 'edit'],
                         ],
                         'otherShippingProviderDescription' => [
-                            'description' => __('The label for a custom shipping provider.', 'mwc-core'),
+                            'description' => _x('The label for a custom shipping provider.', 'Display title, not physical label', 'mwc-core'),
                             'type'        => 'string',
                             'context'     => ['view', 'edit'],
                         ],

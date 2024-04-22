@@ -212,11 +212,11 @@ class WooCommercePluginsRepository
         $subscription = static::getWooCommerceSubscription($pluginData);
 
         if (empty($subscription)) {
-            return __('no subscription', 'mwc-dashboard');
+            return lcfirst(__('No subscription', 'mwc-dashboard'));
         }
 
         if (! empty($subscription['lifetime'])) {
-            return __('lifetime', 'mwc-dashboard');
+            return lcfirst(_x('Lifetime', 'Lifetime subscription', 'mwc-dashboard'));
         }
 
         if (! empty($subscription['expires'])) {

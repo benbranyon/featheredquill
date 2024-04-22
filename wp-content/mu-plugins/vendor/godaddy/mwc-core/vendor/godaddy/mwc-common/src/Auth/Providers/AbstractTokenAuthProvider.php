@@ -32,13 +32,14 @@ abstract class AbstractTokenAuthProvider extends AbstractAuthProvider
     }
 
     /**
-     * Get Token Expiration.
+     * Get Token Expiration. If the token expires in less than 5 minutes, returns the minimum expiration allowed:
+     * 1 second (0 would cause it to never expire, negative expiration is not allowed by redis).
      *
      * @param Token $credentials
      */
     protected function getCredentialsExpiration(AuthCredentialsContract $credentials) : int
     {
-        return max($credentials->getExpiresIn() - 300, 0);
+        return max($credentials->getExpiresIn() - 300, 1);
     }
 
     /**

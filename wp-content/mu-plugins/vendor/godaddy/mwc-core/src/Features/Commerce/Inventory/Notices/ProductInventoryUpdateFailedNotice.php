@@ -18,8 +18,8 @@ class ProductInventoryUpdateFailedNotice extends Notice
     /**
      * ProductInventoryUpdateFailedNotice constructor.
      */
-    public function __construct()
+    public function __construct(string $failReason)
     {
-        $this->setContent(__('Notice content TBD'));
+        $this->setContent(__('An error occurred trying to update the stock level. '.$failReason));
     }
 }

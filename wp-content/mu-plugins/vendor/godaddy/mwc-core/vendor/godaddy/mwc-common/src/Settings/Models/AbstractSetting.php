@@ -212,6 +212,7 @@ abstract class AbstractSetting extends AbstractModel implements SettingContract
      */
     protected function getAllowedTypes() : array
     {
+        /** @var string[] $allowedTypes */
         $allowedTypes = [];
         $constants = (new ReflectionClass($this))->getConstants();
 

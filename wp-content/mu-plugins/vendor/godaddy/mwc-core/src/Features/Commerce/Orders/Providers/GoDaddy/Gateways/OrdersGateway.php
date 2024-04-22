@@ -8,8 +8,13 @@ use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\CommerceException;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\Contracts\CommerceExceptionContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\Contracts\OrdersGatewayContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataObjects\CreateOrderInput;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataObjects\ListOrdersByIdInput;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataObjects\OrderOutput;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataObjects\OrdersListOutput;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataObjects\UpdateOrderInput;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\GoDaddy\Adapters\CreateOrderRequestAdapter;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\GoDaddy\Adapters\ListOrdersByIdRequestAdapter;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\GoDaddy\Adapters\UpdateOrderStatusRequestAdapter;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\Adapters\AbstractGatewayRequestAdapter;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\Gateways\AbstractGateway;
 
@@ -24,6 +29,28 @@ class OrdersGateway extends AbstractGateway implements OrdersGatewayContract
     {
         /** @var OrderOutput $result */
         $result = $this->doAdaptedRequest(CreateOrderRequestAdapter::getNewInstance($input));
+
+        return $result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function updateOrderStatus(UpdateOrderInput $input) : OrderOutput
+    {
+        /** @var OrderOutput $result */
+        $result = $this->doAdaptedRequest(UpdateOrderStatusRequestAdapter::getNewInstance($input));
+
+        return $result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function listById(ListOrdersByIdInput $input) : OrdersListOutput
+    {
+        /** @var OrdersListOutput $result */
+        $result = $this->doAdaptedRequest(ListOrdersByIdRequestAdapter::getNewInstance($input));
 
         return $result;
     }

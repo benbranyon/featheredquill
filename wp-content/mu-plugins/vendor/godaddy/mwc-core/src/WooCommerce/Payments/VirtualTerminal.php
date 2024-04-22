@@ -8,7 +8,9 @@ use GoDaddy\WordPress\MWC\Common\Enqueue\Enqueue;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
 use GoDaddy\WordPress\MWC\Common\Repositories\ManagedWooCommerceRepository;
+use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPressRepository;
+use GoDaddy\WordPress\MWC\Core\Features\Worldpay\Worldpay;
 use WC_Order;
 
 /**
@@ -45,22 +47,26 @@ class VirtualTerminal
         Register::action()
                 ->setGroup('woocommerce_order_item_add_action_buttons')
                 ->setHandler([$this, 'renderActionButtonsHtml'])
+                ->setCondition([$this, 'canRenderVirtualTerminalContent'])
                 ->setArgumentsCount(1)
                 ->execute();
 
         Register::action()
                 ->setGroup('add_meta_boxes')
                 ->setHandler([$this, 'addCallToActionMetaBox'])
+                ->setCondition([$this, 'canRenderVirtualTerminalContent'])
                 ->setPriority(40)
                 ->execute();
 
         Register::action()
                 ->setGroup('all_admin_notices')
                 ->setHandler([$this, 'renderPendingNotice'])
+                ->setCondition([$this, 'canRenderVirtualTerminalContent'])
                 ->execute();
 
         Register::action()
                 ->setGroup('admin_enqueue_scripts')
+                ->setCondition([$this, 'canRenderVirtualTerminalContent'])
                 ->setHandler([$this, 'enqueueCollectScript'])
                 ->execute();
     }
@@ -90,18 +96,31 @@ class VirtualTerminal
     }
 
     /**
+     * Determines whether the Virtual Terminal content should be rendered or not.
+     *
+     * @internal
+     *
+     * @return bool
+     * @throws Exception
+     */
+    public function canRenderVirtualTerminalContent() : bool
+    {
+        return ! Worldpay::shouldProcessTemporaryContent();
+    }
+
+    /**
      * Adds a side meta box with an empty element for displaying a call-to-action notice.
      *
      * @internal
      * @see VirtualTerminal::addHooks()
      */
-    public function addCallToActionMetaBox()
+    public function addCallToActionMetaBox() : void
     {
         add_meta_box(
             static::CTA_META_BOX_ID.'-meta-box',
             __('Virtual Terminal', 'mwc-core'),
             __CLASS__.'::renderCallToActionMetaBox',
-            'shop_order',
+            WooCommerceRepository::getEditOrderPageScreenId(),
             'side',
             'high'
         );

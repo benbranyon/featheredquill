@@ -10,6 +10,7 @@ use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ProductBase;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ProductRequestInputs\ListProductsInput;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\GoDaddy\Adapters\Traits\CanConvertProductResponseTrait;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\GoDaddy\Adapters\Traits\CanConvertQueryArgsFromSourceTrait;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\GoDaddy\Http\Requests\Request;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\MissingProductRemoteIdException;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\Adapters\AbstractGatewayRequestAdapter;
@@ -23,6 +24,7 @@ class ListProductsRequestAdapter extends AbstractGatewayRequestAdapter
 {
     use CanGetNewInstanceTrait;
     use CanConvertProductResponseTrait;
+    use CanConvertQueryArgsFromSourceTrait;
 
     protected ListProductsInput $input;
 
@@ -54,7 +56,6 @@ class ListProductsRequestAdapter extends AbstractGatewayRequestAdapter
      * Converts the source list products input to a gateway request.
      *
      * @return RequestContract
-     * @throws MissingProductRemoteIdException
      */
     public function convertFromSource() : RequestContract
     {
@@ -62,19 +63,7 @@ class ListProductsRequestAdapter extends AbstractGatewayRequestAdapter
             ->setStoreId($this->input->storeId)
             ->setPath('/products');
 
-        $queryArgs = $this->input->queryArgs;
-
-        if (empty($queryArgs['ids'])) {
-            throw new MissingProductRemoteIdException('Remote Ids are required to list products.');
-        }
-
-        if (ArrayHelper::accessible($queryArgs['ids'])) {
-            $queryArgs['ids'] = implode(',', $queryArgs['ids']);
-        }
-
-        if (ArrayHelper::accessible($queryArgs)) {
-            $request->setQuery($queryArgs);
-        }
+        $request->setQuery($this->convertQueryArgsFromSource());
 
         return $request;
     }

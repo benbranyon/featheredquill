@@ -8,6 +8,7 @@ use GoDaddy\WordPress\MWC\Common\Content\AbstractAdminPage;
 use GoDaddy\WordPress\MWC\Common\Enqueue\Enqueue;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\SanitizationHelper;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Http\Redirect;
 use GoDaddy\WordPress\MWC\Common\Platforms\Exceptions\PlatformRepositoryException;
 use GoDaddy\WordPress\MWC\Common\Platforms\PlatformRepositoryFactory;
@@ -51,7 +52,7 @@ class WooCommerceExtensionsPage extends AbstractAdminPage
     {
         $this->screenId = 'wc-addons';
         $this->title = __('WooCommerce extensions', 'mwc-dashboard');
-        $this->menuTitle = __('Extensions', 'mwc-dashboard');
+        $this->menuTitle = _x('Extensions', 'WooCommerce extensions', 'mwc-dashboard');
         $this->parentMenuSlug = 'woocommerce';
 
         $this->capability = 'manage_woocommerce';
@@ -62,6 +63,26 @@ class WooCommerceExtensionsPage extends AbstractAdminPage
         parent::__construct();
 
         $this->addHooks();
+    }
+
+    /**
+     * @param string $tab
+     * @return void
+     * @throws Exception
+     */
+    public function redirectToExtensions(string $tab) : void
+    {
+        // if invalid tab, don't redirect.
+        if (! in_array($tab, [self::TAB_SUBSCRIPTIONS, self::TAB_AVAILABLE_EXTENSIONS, self::TAB_BROWSE_EXTENSIONS], true)) {
+            return;
+        }
+
+        $this->getRedirect()->setLocation(admin_url('admin.php'))
+            ->setQueryParameters([
+                'page' => 'wc-addons',
+                'tab'  => $tab,
+            ])
+            ->execute();
     }
 
     /**
@@ -87,6 +108,7 @@ class WooCommerceExtensionsPage extends AbstractAdminPage
     public function addMenuItem() : AbstractAdminPage
     {
         if ($count = $this->getUpdatesCountHtml()) {
+            /* translators: Placeholder: %s - WooCommerce extensions count HTML */
             $this->menuTitle = sprintf(esc_html__('Extensions %s', 'mwc-dashboard'), $count);
         }
 
@@ -103,7 +125,7 @@ class WooCommerceExtensionsPage extends AbstractAdminPage
         Register::filter()
             ->setGroup('woocommerce_show_addons_page')
             ->setHandler('__return_false')
-            ->setPriority(10)
+            ->setPriority(PHP_INT_MAX)
             ->setArgumentsCount(1)
             ->execute();
 
@@ -111,6 +133,38 @@ class WooCommerceExtensionsPage extends AbstractAdminPage
             ->setGroup('admin_init')
             ->setHandler([$this, 'maybeRedirectToAvailableExtensionsTab'])
             ->execute();
+
+        Register::action()
+            ->setGroup('admin_menu')
+            ->setHandler([$this, 'removeRedundantExtensionsMenuItems'])
+            ->setPriority(PHP_INT_MAX)
+            ->execute();
+
+        $this->maybeAddRenderContentHook();
+    }
+
+    /**
+     * Removes some redundant Extensions menu items that appear in WC 8.2+.
+     *
+     * @internal
+     *
+     * @return void
+     */
+    public function removeRedundantExtensionsMenuItems() : void
+    {
+        if (version_compare(WooCommerceRepository::getWooCommerceVersion() ?: '', '8.2', '<')) {
+            return;
+        }
+
+        // The new WC react-based extensions page needs to be removed from the menu.
+        remove_submenu_page('woocommerce', 'wc-admin&path=/extensions');
+
+        // In WC 8.3+ do not remove the 'wc-addons' menu.
+        if (version_compare(WooCommerceRepository::getWooCommerceVersion() ?: '', '8.3', '>=')) {
+            return;
+        }
+
+        remove_submenu_page('woocommerce', 'wc-addons');
     }
 
     /**
@@ -185,22 +239,53 @@ class WooCommerceExtensionsPage extends AbstractAdminPage
      *
      * @throws Exception
      */
-    public function maybeRedirectToAvailableExtensionsTab()
+    public function maybeRedirectToAvailableExtensionsTab() : void
     {
-        $page = SanitizationHelper::input((string) ArrayHelper::get($_GET, 'page'));
-        $tab = SanitizationHelper::input((string) ArrayHelper::get($_GET, 'tab'));
-        $section = SanitizationHelper::input((string) ArrayHelper::get($_GET, 'section'));
-        $helperConnect = (bool) ArrayHelper::get($_GET, 'wc-helper-connect', false);
+        $page = SanitizationHelper::input(TypeHelper::string(ArrayHelper::get($_GET, 'page'), ''));
+        $tab = SanitizationHelper::input(TypeHelper::string(ArrayHelper::get($_GET, 'tab'), ''));
 
         /* @NOTE we need to be past the `admin_init` hook to use {@see WordPressRepository::isCurrentScreen()} here {unfulvio 2022-02-10} */
-        if (WordPressRepository::isAdmin() && 'wc-addons' === $page && ! $helperConnect && ! $section && ! $tab) {
-            $this->getRedirect()->setLocation(admin_url('admin.php'))
-                ->setQueryParameters([
-                    'page' => 'wc-addons',
-                    'tab'  => self::TAB_AVAILABLE_EXTENSIONS,
-                ])
-                ->execute();
+        if (WordPressRepository::isAdmin()) {
+            if ($this->isWcAddonsPage($page, $tab)) {
+                $this->redirectToExtensions(self::TAB_AVAILABLE_EXTENSIONS);
+            } elseif ($this->isWcReactExtensionsPage($page)) {
+                // redirect the new WC "browse extensions" tab to the GD extensions browse tab
+                if ($tab == 'extensions') {
+                    $this->redirectToExtensions(self::TAB_BROWSE_EXTENSIONS);
+                }
+
+                // else redirect WC extensions page to GD available extensions tab.
+                $this->redirectToExtensions(self::TAB_AVAILABLE_EXTENSIONS);
+            }
         }
+    }
+
+    /**
+     * Is the wc-addons page.
+     *
+     * @param string $page
+     * @param string $tab
+     * @return bool
+     */
+    protected function isWcAddonsPage(string $page, string $tab) : bool
+    {
+        $section = SanitizationHelper::input(TypeHelper::string(ArrayHelper::get($_GET, 'section'), ''));
+        $helperConnect = TypeHelper::bool(ArrayHelper::get($_GET, 'wc-helper-connect', false), false);
+
+        return 'wc-addons' === $page && ! $helperConnect && ! $section && ! $tab;
+    }
+
+    /**
+     * Is the new react-based WC extensions page.
+     *
+     * @param string $page
+     * @return bool
+     */
+    protected function isWcReactExtensionsPage(string $page) : bool
+    {
+        $path = SanitizationHelper::input(TypeHelper::string(ArrayHelper::get($_GET, 'path'), ''));
+
+        return  'wc-admin' === $page && '/extensions' === $path;
     }
 
     /**
@@ -215,18 +300,38 @@ class WooCommerceExtensionsPage extends AbstractAdminPage
 
     /**
      * Renders the page HTML.
+     *
+     * @return void
+     * @throws PlatformRepositoryException
      */
-    public function render()
+    public function render() : void
+    {
+        // when running WC 8.2+, the content will be rendered at the top of the `woocommerce_page_wc-addons` action hook instead,
+        // to prevent WooCommerce react components to load ahead of ours
+        if (version_compare(WooCommerceRepository::getWooCommerceVersion() ?: '', '8.2', '<')) {
+            $this->renderContent();
+        }
+    }
+
+    /**
+     * Renders the content for the addons page.
+     *
+     * @return void
+     * @throws PlatformRepositoryException
+     */
+    public function renderContent() : void
     {
         // @NOTE: Clearing at beginning and end is required as the count is loaded and cache set multiple times during page render {JO 2021-02-15}
         $this->maybeClearUpdatesCacheCount();
 
-        $current_tab = $this->getCurrentTab(); ?>
+        $current_tab = $this->getCurrentTab();
 
-        <div class="wrap woocommerce wc_addons_wrap mwc-dashboard-wc-addons-wrap">
+        // the min-height here helps to mask the WooCommerce component that is rendered in the background until it is removed
+        ?>
+        <div class="wrap woocommerce wc_addons_wrap mwc-dashboard-wc-addons-wrap" style="min-height:100vh">
 
             <nav class="nav-tab-wrapper woo-nav-tab-wrapper mwc-dashboard-nav-tab-wrapper">
-			<?php
+                <?php
                 foreach ($this->getTabs() as $slug => $tab) {
                     printf(
                         '<a href="%1$s" class="nav-tab%2$s">%3$s</a>',
@@ -239,13 +344,18 @@ class WooCommerceExtensionsPage extends AbstractAdminPage
 
             <h1 class="screen-reader-text"><?php esc_html_e('WooCommerce Extensions', 'woocommerce'); ?></h1>
 
-        <?php $this->renderTab($current_tab); ?>
+            <?php $this->renderTab($current_tab); ?>
 
         </div>
 
         <div class="clear"></div>
 
         <?php
+
+        // this is used to remove from the DOM a component added by WC 8.2+ that will output its own extensions
+        if ($current_tab === static::TAB_AVAILABLE_EXTENSIONS && version_compare(WooCommerceRepository::getWooCommerceVersion() ?: '', '8.2', '>=')) {
+            wc_enqueue_js("jQuery( '.wc-addons-wrap' ).remove();");
+        }
 
         // @NOTE: Clearing at beginning and end is required as the count is loaded and cache set multiple times during page render {JO 2021-02-15}
         $this->maybeClearUpdatesCacheCount();
@@ -294,12 +404,12 @@ class WooCommerceExtensionsPage extends AbstractAdminPage
         $tabs = [
             self::TAB_AVAILABLE_EXTENSIONS => [
                 'label' => PlatformRepositoryFactory::getNewInstance()->getPlatformRepository()->isReseller()
-                    ? esc_html__('Included Extensions', 'mwc-dashboard')
-                    : esc_html__('GoDaddy Included Extensions', 'mwc-dashboard'),
+                    ? esc_html_x('Included Extensions', 'WooCommerce extensions', 'mwc-dashboard')
+                    : esc_html_x('GoDaddy Included Extensions', 'WooCommerce extensions', 'mwc-dashboard'),
                 'url' => $url.'&'.ArrayHelper::query(['tab' => self::TAB_AVAILABLE_EXTENSIONS]),
             ],
             self::TAB_BROWSE_EXTENSIONS => [
-                'label' => esc_html__('Browse Extensions', 'woocommerce'),
+                'label' => esc_html_x('Browse Extensions', 'WooCommerce extensions', 'woocommerce'),
                 'url'   => $url.'&'.ArrayHelper::query(['tab' => self::TAB_BROWSE_EXTENSIONS]),
             ],
             self::TAB_SUBSCRIPTIONS => [
@@ -416,5 +526,22 @@ class WooCommerceExtensionsPage extends AbstractAdminPage
     {
         return WooCommerceRepository::isWooCommerceActive()
             && PlatformRepositoryFactory::getNewInstance()->getPlatformRepository()->hasEcommercePlan();
+    }
+
+    /**
+     * For WC 8.2 and above we need to register a hook to render the page content as early as possible.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function maybeAddRenderContentHook() : void
+    {
+        if (version_compare(WooCommerceRepository::getWooCommerceVersion() ?: '', '8.2', '>=')) {
+            Register::action()
+                ->setGroup('woocommerce_page_wc-addons')
+                ->setHandler([$this, 'renderContent'])
+                ->setPriority(PHP_INT_MIN)
+                ->execute();
+        }
     }
 }

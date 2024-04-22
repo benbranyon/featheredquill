@@ -9,6 +9,7 @@ use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\SanitizationHelper;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerce\OrdersRepository;
+use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPressRepository;
 use GoDaddy\WordPress\MWC\Core\Payments\DataStores\WooCommerce\OrderPaymentTransactionDataStore;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Adapters\OrderAdapter;
@@ -117,12 +118,13 @@ class Captures
      * @internal callback
      * @see Captures::registerHooks()
      *
-     * @param string $hookSuffix
+     * @param mixed $hookSuffix expected to be a string that represents the current admin screen
+     * @return void
      * @throws Exception
      */
-    public function enqueueScripts($hookSuffix)
+    public function enqueueScripts($hookSuffix) : void
     {
-        if ('post.php' !== $hookSuffix || 'shop_order' !== get_post_type()) {
+        if (! $this->shouldEnqueueScripts($hookSuffix)) {
             return;
         }
 
@@ -131,6 +133,26 @@ class Captures
             ->setSource(WordPressRepository::getAssetsUrl('js/payments/captures.js'))
             ->setDependencies(['jquery'])
             ->execute();
+    }
+
+    /**
+     * Determines whether to enqueue JS assets or not.
+     *
+     * @param mixed $hookSuffix
+     * @return bool
+     */
+    protected function shouldEnqueueScripts($hookSuffix) : bool
+    {
+        if (! is_string($hookSuffix)) {
+            return false;
+        }
+
+        if (WooCommerceRepository::isCustomOrdersTableUsageEnabled()) {
+            return 'woocommerce_page_wc-orders' === $hookSuffix;
+        }
+
+        return 'post.php' === $hookSuffix
+            && 'shop_order' === get_post_type();
     }
 
     /**
@@ -182,11 +204,11 @@ class Captures
      * @internal callback
      * @see Captures::registerHooks()
      *
-     * @param null|WC_Order $order
+     * @param WC_Order|null $order
      */
-    public function maybeAddCaptureButton($order)
+    public function maybeAddCaptureButton($order) : void
     {
-        if (! $order instanceof WC_Order || 'shop_order' !== get_post_type($order->get_id())) {
+        if (! $order instanceof WC_Order || 'shop_order' !== OrdersRepository::getOrderType($order->get_id())) {
             return;
         }
 

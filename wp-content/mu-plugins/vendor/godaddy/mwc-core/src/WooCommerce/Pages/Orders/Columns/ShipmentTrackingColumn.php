@@ -2,13 +2,10 @@
 
 namespace GoDaddy\WordPress\MWC\Core\WooCommerce\Pages\Orders\Columns;
 
-use GoDaddy\WordPress\MWC\Common\Content\AbstractPostsTableColumn;
+use GoDaddy\WordPress\MWC\Common\Content\AbstractWooCommerceOrdersTableColumn;
 
-class ShipmentTrackingColumn extends AbstractPostsTableColumn
+class ShipmentTrackingColumn extends AbstractWooCommerceOrdersTableColumn
 {
-    /** @var string post type associated with this column */
-    protected $postType = 'shop_order';
-
     /** @var int the value 100 makes this column render last */
     protected $registerPriority = 100;
 

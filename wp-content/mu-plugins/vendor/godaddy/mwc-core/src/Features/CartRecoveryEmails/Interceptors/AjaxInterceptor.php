@@ -131,7 +131,7 @@ class AjaxInterceptor extends AbstractInterceptor
                 return;
             }
 
-            if (filter_var(ArrayHelper::get($_POST, 'optOut'), FILTER_VALIDATE_BOOL)) {
+            if (filter_var(ArrayHelper::get($_POST, 'optOut'), FILTER_VALIDATE_BOOLEAN)) {
                 $isSuccessful = OptOutSetting::getNewInstance()->save($email);
             } else {
                 $isSuccessful = OptOutSetting::getNewInstance()->delete($email);

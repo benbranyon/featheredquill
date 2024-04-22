@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/woocommerce-pdf-product-vouchers/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2012-2021, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright Copyright (c) 2012-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -26,7 +26,8 @@ namespace GoDaddy\WordPress\MWC\GiftCertificates;
 defined( 'ABSPATH' ) or exit;
 
 use WC_Order;
-use SkyVerge\WooCommerce\PluginFramework\v5_10_12 as Framework;
+use WP_Post;
+use SkyVerge\WooCommerce\PluginFramework\v5_11_0 as Framework;
 
 /**
  * Vouchers handler class
@@ -186,7 +187,7 @@ class MWC_Gift_Certificates_Handler {
 
 		} elseif ( is_string( $post ) ) {
 
-			$post = get_page_by_title( $post, OBJECT, 'wc_voucher' );
+			$post = $this->get_voucher_post_by_number( $post );
 
 		} elseif ( ! ( $post instanceof \WP_Post ) ) {
 
@@ -218,11 +219,35 @@ class MWC_Gift_Certificates_Handler {
 	 * @param string $voucher_number the voucher number (or coupon code)
 	 * @return WC_Voucher|false
 	 */
-	public function get_voucher_by_voucher_number( $voucher_number ) {
+	public function get_voucher_by_voucher_number( string $voucher_number ) {
 
-		$voucher_post = get_page_by_title( $voucher_number, OBJECT, 'wc_voucher' );
+		$voucher_post = $this->get_voucher_post_by_number( $voucher_number );
 
 		return $voucher_post ? $this->get_voucher( $voucher_post ) : false;
+	}
+
+
+	/**
+	 * Gets the voucher post object by the voucher number.
+	 *
+	 * @since 3.12.2
+	 *
+	 * @param string $voucher_number
+	 * @return WP_Post|null
+	 */
+	protected function get_voucher_post_by_number( string $voucher_number ) : ?WP_Post {
+
+		/** @link https://make.wordpress.org/core/2023/03/06/get_page_by_title-deprecated/ */
+		return get_posts([
+			'post_type'              => 'wc_voucher',
+			'title'                  => $voucher_number,
+			'post_status'            => 'all',
+			'numberposts'            => 1,
+			'update_post_term_cache' => false,
+			'update_post_meta_cache' => false,
+			'orderby'                => 'post_date ID',
+			'order'                  => 'ASC',
+		])[0] ?? null;
 	}
 
 

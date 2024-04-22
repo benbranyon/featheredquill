@@ -4,6 +4,7 @@ namespace GoDaddy\WordPress\MWC\Common\DataSources\WooCommerce\Adapters\Order;
 
 use GoDaddy\WordPress\MWC\Common\DataSources\Contracts\DataSourceAdapterContract;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\FeeItem;
+use WC_Order;
 use WC_Order_Item_Fee;
 
 /**
@@ -14,6 +15,8 @@ use WC_Order_Item_Fee;
  * @since 3.4.1
  *
  * @property WC_Order_Item_Fee $source
+ * @method static static getNewInstance(WC_Order_Item_Fee $source)
+ * @method static static for(WC_Order_Item_Fee $source, ?WC_Order $sourceOrder = null)
  */
 class FeeItemAdapter extends AbstractOrderItemAdapter implements DataSourceAdapterContract
 {

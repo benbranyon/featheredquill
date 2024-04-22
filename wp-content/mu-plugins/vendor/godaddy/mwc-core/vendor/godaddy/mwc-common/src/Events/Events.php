@@ -3,12 +3,15 @@
 namespace GoDaddy\WordPress\MWC\Common\Events;
 
 use Exception;
+use GoDaddy\WordPress\MWC\Common\Container\ContainerFactory;
+use GoDaddy\WordPress\MWC\Common\Container\Exceptions\ContainerException;
 use GoDaddy\WordPress\MWC\Common\Events\Contracts\EventContract;
 use GoDaddy\WordPress\MWC\Common\Events\Contracts\SubscriberContract;
 use GoDaddy\WordPress\MWC\Common\Events\Exceptions\EventBroadcastFailedException;
 use GoDaddy\WordPress\MWC\Common\Events\Exceptions\EventTransformFailedException;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\ConfigHelper;
+use InvalidArgumentException;
 
 /**
  * Event Handler.
@@ -49,7 +52,11 @@ class Events
         EventTransformers::transform($event);
 
         foreach (static::getSubscribers($event) as $subscriberClass) {
-            static::getSubscriber($subscriberClass)->handle($event);
+            try {
+                static::getSubscriber($subscriberClass)->handle($event);
+            } catch (Exception $exception) {
+                EventBroadcastFailedException::getNewInstance($exception->getMessage(), $exception);
+            }
         }
     }
 
@@ -58,10 +65,22 @@ class Events
      *
      * @param string $subscriberClass
      * @return SubscriberContract
+     * @throws InvalidArgumentException
      */
     protected static function getSubscriber(string $subscriberClass) : SubscriberContract
     {
-        return new $subscriberClass();
+        try {
+            $subscriber = ContainerFactory::getInstance()->getSharedContainer()->get($subscriberClass);
+        } catch (ContainerException $exception) {
+            // Try new without params - this was the behavior before DI container.
+            $subscriber = new $subscriberClass();
+        }
+
+        if (! (is_object($subscriber) && is_a($subscriber, SubscriberContract::class))) {
+            throw new InvalidArgumentException("{$subscriberClass} does not implement SubscriberContract");
+        }
+
+        return $subscriber;
     }
 
     /**

@@ -11,8 +11,6 @@ use GoDaddy\WordPress\MWC\Shipping\Models\ShippingLabel;
  * Provides methods to an object to create shipping labels.
  *
  * @see ShippingLabel
- *
- * @since 0.1.0
  */
 trait CanCreateShippingLabelsTrait
 {
@@ -24,10 +22,8 @@ trait CanCreateShippingLabelsTrait
     /**
      * Creates shipping labels for shipments.
      *
-     * @since 0.1.0
-     *
      * @param ShipmentContract[] $shipments
-     * @return mixed[]
+     * @return array<mixed>
      * @throws ShippingExceptionContract
      */
     public function create(array $shipments) : array

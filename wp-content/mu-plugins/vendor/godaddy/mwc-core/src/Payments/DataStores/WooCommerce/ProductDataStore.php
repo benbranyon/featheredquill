@@ -77,6 +77,14 @@ class ProductDataStore implements DataStoreContract
 
         /** @var WC_Product_Attribute $attribute */
         foreach ($wooProduct->get_attributes() as $attribute) {
+            if (! $attribute instanceof WC_Product_Attribute) {
+                /*
+                 * When `get_attributes()` is called on `WC_Product_Variation`, it returns array<string|int, mixed>
+                 * instead of WC_Product_Attribute[]. This code doesn't yet support variants.
+                 */
+                continue;
+            }
+
             // only include attributes that are visible on the product pages
             if (! $attribute->get_visible()) {
                 continue;

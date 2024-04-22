@@ -171,6 +171,7 @@ class ExtensionsTab
             ->attachInlineScriptVariables([
                 'plugins'             => $this->prepareEnqueuedPluginsData(),
                 'isSubscriptionsPage' => $this->isSubscriptionTabActive(),
+                'godaddyIncluded'     => esc_html__('GoDaddy Included', 'mwc-core'),
             ])
             ->execute();
     }

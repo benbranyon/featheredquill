@@ -3,6 +3,8 @@
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataSources\Adapters;
 
 use GoDaddy\WordPress\MWC\Common\DataSources\Contracts\DataSourceAdapterContract;
+use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\DataObjects\ExternalId;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Models\Products\Product;
@@ -51,5 +53,32 @@ class ExternalIdsAdapter implements DataSourceAdapterContract
     public function convertFromSource()
     {
         // no-op for now
+    }
+
+    /**
+     * Converts an array of external ID data into an array of {@see ExternalId} DTOs.
+     *
+     * @param array<array<string, string>> $externalIdsData
+     * @return ExternalId[]|null
+     */
+    public function convertToSourceFromArray(array $externalIdsData) : ?array
+    {
+        $externalIds = [];
+
+        foreach ($externalIdsData as $externalId) {
+            $type = TypeHelper::string(ArrayHelper::get($externalId, 'type'), '');
+            $value = TypeHelper::string(ArrayHelper::get($externalId, 'value'), '');
+
+            if (empty($type) || empty($value)) {
+                continue;
+            }
+
+            $externalIds[] = new ExternalId([
+                'type'  => $type,
+                'value' => $value,
+            ]);
+        }
+
+        return $externalIds ?: null;
     }
 }

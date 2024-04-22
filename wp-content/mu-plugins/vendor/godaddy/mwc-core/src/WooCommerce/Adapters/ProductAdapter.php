@@ -14,6 +14,7 @@ use GoDaddy\WordPress\MWC\Common\Models\Term;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerce\ProductsRepository;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPress\TermsRepository;
 use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\CatalogIntegration;
 use GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Models\Listing;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Models\Products\Product;
 use WC_Product;
@@ -48,6 +49,9 @@ class ProductAdapter extends CommonProductAdapter
     /** @var string the Marketplaces Google Product ID */
     const MARKETPLACES_GOOGLE_PRODUCT_ID = '_marketplaces_google_product_id';
 
+    /** @var string the default tax category */
+    const TAX_CATEGORY_STANDARD = 'standard';
+
     /** @var class-string<Product> the product class name */
     protected $productClass = Product::class;
 
@@ -65,7 +69,8 @@ class ProductAdapter extends CommonProductAdapter
         $product->setSlug(TypeHelper::string($this->source->get_slug(), ''));
         $product->setUrl($this->source->get_permalink());
         $product->setDescription(TypeHelper::string($this->source->get_description(), ''));
-        $product->setTaxCategory(TypeHelper::string($this->source->get_tax_class(), ''));
+        $product->setPassword(TypeHelper::string($this->source->get_post_password(), ''));
+        $product->setTaxCategory($this->convertTaxCategoryFromSource());
 
         if ($parentId = TypeHelper::int($this->source->get_parent_id(), 0)) {
             $product->setParentId($parentId);
@@ -100,11 +105,22 @@ class ProductAdapter extends CommonProductAdapter
         $this->source = parent::convertToSource($product, $getNewInstance);
 
         if ($product) {
+            if ($parentId = $product->getParentId()) {
+                $this->source->set_parent_id($parentId);
+            }
+
+            /* @phpstan-ignore-next-line `WC_Product` incorrectly documented the value of `set_post_password()` as int instead of string */
+            $this->source->set_post_password($product->getPassword() ?: '');
+
+            $this->source->set_tax_class($this->convertTaxCategoryToSource($product));
+
             $this->convertCategoriesToSource($this->source, $product);
 
             if ($backordersAllowed = $product->getBackordersAllowed()) {
                 $this->source->set_backorders($backordersAllowed);
             }
+
+            $this->convertImageIdsToSource($this->source, $product);
         }
 
         $this->convertMarketplacesDataToSource($this->source, $product);
@@ -152,6 +168,10 @@ class ProductAdapter extends CommonProductAdapter
             $product->setBackordersAllowed($backordersAllowed);
         }
 
+        if ($isStockManaged && ($lowStockAmount = $this->source->get_low_stock_amount())) {
+            $product->setLowStockThreshold(TypeHelper::float($lowStockAmount, 0.0));
+        }
+
         if (! $isStockManaged && ($stockStatus = $this->source->get_stock_status())) {
             $product->setStockStatus(TypeHelper::string($stockStatus, ''));
         }
@@ -188,7 +208,7 @@ class ProductAdapter extends CommonProductAdapter
 
         foreach ($this->source->get_category_ids() as $categoryId) {
             // NOTE: this is not an N+1 problem, as the terms were already loaded into memory when the WC product was fetched
-            if ($term = TermsRepository::getTerm($categoryId, 'product_cat')) {
+            if ($term = TermsRepository::getTerm($categoryId, CatalogIntegration::PRODUCT_CATEGORY_TAXONOMY)) {
                 $categories[] = TaxonomyTermAdapter::getNewInstance($term)->convertFromSource();
             }
         }
@@ -216,6 +236,23 @@ class ProductAdapter extends CommonProductAdapter
     }
 
     /**
+     * Converts image IDs on the core Product model to the WC_Product model.
+     *
+     * @param WC_Product $wcProduct
+     * @param Product $product
+     * @return void
+     */
+    protected function convertImageIdsToSource(WC_Product $wcProduct, Product $product) : void
+    {
+        if ($mainImageId = $product->getMainImageId()) {
+            $wcProduct->set_image_id($mainImageId);
+        }
+        if ($galleryIds = $product->getImageIds()) {
+            $wcProduct->set_gallery_image_ids($galleryIds);
+        }
+    }
+
+    /**
      * Converts product dimensions from source.
      *
      * @return Dimensions
@@ -228,7 +265,7 @@ class ProductAdapter extends CommonProductAdapter
             $getDimension = 'get_'.$dimension;
             $setDimension = 'set'.ucfirst($dimension);
 
-            if ($value = $this->convertNumberToFloat($this->source->{$getDimension}())) {
+            if ($value = $this->convertNumberToFloat($this->source->{$getDimension}('edit'))) {
                 $dimensions->{$setDimension}($value);
             }
         }
@@ -326,6 +363,18 @@ class ProductAdapter extends CommonProductAdapter
     }
 
     /**
+     * Converts native product tax class values to tax categories.
+     *
+     * Defaults to 'standard'.
+     *
+     * @return string
+     */
+    protected function convertTaxCategoryFromSource() : string
+    {
+        return TypeHelper::string($this->source->get_tax_class(), static::TAX_CATEGORY_STANDARD) ?: static::TAX_CATEGORY_STANDARD;
+    }
+
+    /**
      * Converts an array of native product categories into an array of WooCommerce product category IDs.
      *
      * @param WC_Product $wcProduct
@@ -365,5 +414,24 @@ class ProductAdapter extends CommonProductAdapter
             $wcProduct->update_meta_data(static::MARKETPLACES_MPN_META_KEY, $product->getMarketplacesMpn() ?: '');
             $wcProduct->update_meta_data(static::MARKETPLACES_GOOGLE_PRODUCT_ID, $product->getMarketplacesGoogleProductId() ?: '');
         }
+    }
+
+    /**
+     * Converts the native tax category into a WooCommerce tax class.
+     *
+     * If a 'standard' tax category is set, use an empty string for WooCommerce (intended empty value).
+     *
+     * @param Product $product
+     * @return string
+     */
+    protected function convertTaxCategoryToSource(Product $product) : string
+    {
+        $taxCategory = $product->getTaxCategory();
+
+        if (static::TAX_CATEGORY_STANDARD === $taxCategory) {
+            return '';
+        }
+
+        return TypeHelper::string($taxCategory, '');
     }
 }

@@ -3,10 +3,14 @@
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\DataStores;
 
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\DataStores\VariableProductDataStore as CatalogVariableProductDataStore;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Helpers\MapAssetsHelper;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Services\BatchListProductsByLocalIdService;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Services\Contracts\ProductsServiceContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\DataStores\Traits\CanCrudPlatformInventoryDataTrait;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\Contracts\InventoryProviderContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services\Contracts\LevelsServiceContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services\Contracts\LevelsServiceWithCacheContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services\Contracts\SummariesServiceContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Models\Contracts\CommerceContextContract;
 
 class VariableProductDataStore extends CatalogVariableProductDataStore
@@ -16,19 +20,30 @@ class VariableProductDataStore extends CatalogVariableProductDataStore
     /**
      * @param ProductsServiceContract $productsService
      * @param LevelsServiceContract $levelsService
+     * @param LevelsServiceWithCacheContract $levelsServiceWithCache
+     * @param SummariesServiceContract $summariesService
      * @param InventoryProviderContract $inventoryProvider
      * @param CommerceContextContract $commerceContext
+     * @param MapAssetsHelper $mapAssetsHelper
+     * @param BatchListProductsByLocalIdService $batchListProductsByLocalIdService
      */
     public function __construct(
         ProductsServiceContract $productsService,
         LevelsServiceContract $levelsService,
+        LevelsServiceWithCacheContract $levelsServiceWithCache,
+        SummariesServiceContract $summariesService,
         InventoryProviderContract $inventoryProvider,
-        CommerceContextContract $commerceContext
+        CommerceContextContract $commerceContext,
+        MapAssetsHelper $mapAssetsHelper,
+        BatchListProductsByLocalIdService $batchListProductsByLocalIdService
     ) {
         $this->levelsService = $levelsService;
+        $this->levelsServiceWithCache = $levelsServiceWithCache;
+        $this->summariesService = $summariesService;
         $this->inventoryProvider = $inventoryProvider;
         $this->commerceContext = $commerceContext;
+        $this->mapAssetsHelper = $mapAssetsHelper;
 
-        parent::__construct($productsService);
+        parent::__construct($productsService, $mapAssetsHelper, $batchListProductsByLocalIdService);
     }
 }

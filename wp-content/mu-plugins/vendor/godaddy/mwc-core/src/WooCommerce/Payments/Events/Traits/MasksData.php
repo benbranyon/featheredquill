@@ -9,7 +9,7 @@ trait MasksData
     /**
      * Masks the given data keys.
      *
-     * @param array<string> $data
+     * @param array<string|int, mixed> $data
      * @param array<string> $maskedKeys
      *
      * @return array<string>

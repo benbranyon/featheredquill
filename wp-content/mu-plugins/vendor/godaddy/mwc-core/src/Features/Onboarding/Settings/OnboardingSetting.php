@@ -81,6 +81,9 @@ class OnboardingSetting extends AbstractSetting
     /** @var string ID of the internal flag for when the store selector has been dismissed */
     const SETTING_ID_STORE_SELECTOR_DISMISSED = 'storeSelectorDismissed';
 
+    /** @var string ID of the internal flag for when the onboarding dialog has been dismissed */
+    const SETTING_ID_DISMISSED = 'dismissed';
+
     /**
      * No-op: no such thing as creating a setting.
      *

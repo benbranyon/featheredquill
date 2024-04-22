@@ -65,6 +65,12 @@ class ShopController extends AbstractController
                             'type'        => 'string',
                             'context'     => ['view', 'edit'],
                         ],
+                        'businessId' => [
+                            'required'    => true,
+                            'description' => __('The business ID', 'mwc-dashboard'),
+                            'type'        => 'string',
+                            'context'     => ['view', 'edit'],
+                        ],
                     ],
                 ],
                 'schema' => [$this, 'getItemSchema'],
@@ -125,31 +131,12 @@ class ShopController extends AbstractController
                 'isEmailVerificationFeatureActive'   => static::isEmailVerificationFeatureActive(),
                 'isOnlyVirtual'                      => $this->isSellingOnlyDigitalProducts(),
                 'hasEmailTemplateOverrides'          => $this->hasEmailTemplateOverrides(),
-                // @TODO Utilize core Onboarding::shouldLoad() once merged into core {nmolham 2021-11-17}
-                'isOnboardingEnabled' => $this->isOnboardingEnabled(),
-                'settings'            => $this->getShopSettings(),
-                'permalinkStructure'  => $this->getPermalinkStructure(),
+                'settings'                           => $this->getShopSettings(),
+                'permalinkStructure'                 => $this->getPermalinkStructure(),
             ],
         ];
 
         return rest_ensure_response($item);
-    }
-
-    /**
-     * Determines if the Onboarding feature is enabled or not.
-     *
-     * @return bool
-     * @throws PlatformRepositoryException
-     */
-    protected function isOnboardingEnabled() : bool
-    {
-        return Configuration::get('features.onboarding.enabled', false)
-            && ManagedWooCommerceRepository::isAllowedToUseNativeFeatures()
-            && PlatformRepositoryFactory::getNewInstance()->getPlatformRepository()->hasEcommercePlan()
-            && WooCommerceRepository::isWooCommerceActive()
-            && current_user_can('manage_woocommerce')
-            && current_user_can('install_plugins')
-            && current_user_can('activate_plugins');
     }
 
     /**
@@ -194,16 +181,21 @@ class ShopController extends AbstractController
     {
         try {
             $defaultStoreId = $request->get_param('defaultStoreId');
+            $businessId = $request->get_param('businessId');
 
             if (empty($defaultStoreId) || ! is_string($defaultStoreId)) {
                 throw new StoreRepositoryException('The default store ID must be a non-empty string');
+            }
+
+            if (empty($businessId) || ! is_string($businessId)) {
+                throw new StoreRepositoryException('The business ID must be a non-empty string');
             }
 
             $platform = PlatformRepositoryFactory::getNewInstance()->getPlatformRepository();
             $store = $platform->getStoreRepository();
 
             // store the default store ID locally only if remote registration is successful (no exceptions thrown)
-            $store->registerStore($defaultStoreId);
+            $store->registerStore($defaultStoreId, $businessId);
             $store->setDefaultStoreId($defaultStoreId);
 
             Response::getNewInstance()->success()->send();

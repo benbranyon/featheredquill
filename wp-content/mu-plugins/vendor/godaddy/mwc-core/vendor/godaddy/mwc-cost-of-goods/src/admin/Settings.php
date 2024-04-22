@@ -17,7 +17,7 @@
  * needs please refer to http://docs.woocommerce.com/document/cost-of-goods/ for more information.
  *
  * @author      SkyVerge
- * @copyright   Copyright (c) 2013-2020, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright   Copyright (c) 2013-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -50,7 +50,7 @@ class Settings extends WC_Settings_Page {
 
 		$this->plugin = $plugin;
 		$this->id     = WC_COG::SETTINGS_TAB_ID;
-		$this->label  = __( 'Orders', 'mwc-cost-of-goods' );
+		$this->label  = __( 'Orders', 'woocommerce-cost-of-goods' );
 
 		// add a apply costs woocommerce_admin_fields() field type
 		add_action( 'woocommerce_admin_field_wc_cog_apply_costs_to_previous_orders', [ $this, 'render_apply_costs_section' ] );
@@ -91,7 +91,7 @@ class Settings extends WC_Settings_Page {
 
 		return [
 			// WC_Settings_Page requires a default section with an empty ID, so we cannot set the ID here
-			'' => __( 'Cost of Goods', 'mwc-cost-of-goods' ),
+			'' => __( 'Cost of Goods', 'woocommerce-cost-of-goods' ),
 		];
 	}
 
@@ -161,7 +161,7 @@ class Settings extends WC_Settings_Page {
 		<tr valign="top">
 			<th scope="row" class="titledesc">
 				<label for="<?php echo esc_attr( $field['id'] ); ?>">
-					<?php esc_html_e( 'Apply Costs to Previous Orders', 'mwc-cost-of-goods' ); ?>
+					<?php esc_html_e( 'Apply Costs to Previous Orders', 'woocommerce-cost-of-goods' ); ?>
 				</label>
 			</th>
 			<td class="forminp forminp-<?php echo sanitize_html_class( $field['type'] ) ?>">
@@ -187,13 +187,13 @@ class Settings extends WC_Settings_Page {
 						name="wc_cog_apply_costs_job_id"
 						value="<?php echo $job_in_progress ? esc_attr( $job_in_progress->id ) : ''; ?>"
 					/>
-					<span class="description"><?php esc_html_e( 'Apply costs to all orders, overriding previous costs, this action is not reversible!', 'mwc-cost-of-goods' ); ?></span>
+					<span class="description"><?php esc_html_e( 'Apply costs to all orders, overriding previous costs, this action is not reversible!', 'woocommerce-cost-of-goods' ); ?></span>
 					<br /><br />
 					<button
 						id="<?php echo esc_attr( $field['id'] ); ?>"
 						class="button"
 						<?php disabled( (bool) $job_in_progress, true, true ); ?>><?php
-						esc_html_e( 'Apply Costs', 'mwc-cost-of-goods' ); ?></button>
+						esc_html_e( 'Apply Costs', 'woocommerce-cost-of-goods' ); ?></button>
 					<span class="spinner applying-costs-progress <?php echo (bool) $job_in_progress ? 'is-active' : ''; ?>" style="float: none;"></span>
 					<p></p><?php // holds job progress updates ?>
 					<br />
@@ -201,7 +201,7 @@ class Settings extends WC_Settings_Page {
 						<?php
 						printf(
 							/* translators: Placeholders: %1$s - <a>, %2$s - </a> */
-							esc_html__( 'Need to bulk update some orders but not all? Use your included Customer/Order/Coupon Export and Customer/Order/Coupon CSV Import Suite extensions to update costs in bulk. %1$sGet extensions%2$s', 'mwc-cost-of-goods' ),
+							esc_html__( 'Need to bulk update some orders but not all? Use your included Customer/Order/Coupon Export and Customer/Order/Coupon CSV Import Suite extensions to update costs in bulk. %1$sGet extensions%2$s', 'woocommerce-cost-of-goods' ),
 							'<a href="' . admin_url( 'admin.php?page=wc-addons&tab=available_extensions' ) . '" target="_blank">',
 							'</a>'
 						);
@@ -255,11 +255,11 @@ class Settings extends WC_Settings_Page {
 				'get_applying_cost_of_goods_status_nonce' => wp_create_nonce( 'get-applying-cost-of-goods-status' ),
 
 				'i18n' => [
-					'apply_costs_confirm_message_all' => __( 'Are you sure you want to apply costs to ALL previous orders, overriding those with existing costs? This cannot be reversed! Note that this can take some time in shops with a large number of orders.', 'mwc-cost-of-goods' ),
-					'apply_costs_error'               => __( 'Oops! Something went wrong. Please try again.', 'mwc-cost-of-goods' ),
-					'apply_costs_success'             => __( 'Cost of goods applied to previous orders.', 'mwc-cost-of-goods' ),
-					'apply_costs_in_progress'         => __( 'Applying costs of goods to previous orders...', 'mwc-cost-of-goods' ),
-					'apply_costs_notice'              => __( 'Process is running in the background, you can safely navigate away from this page without disrupting the process.', 'mwc-cost-of-goods' ),
+					'apply_costs_confirm_message_all' => __( 'Are you sure you want to apply costs to ALL previous orders, overriding those with existing costs? This cannot be reversed! Note that this can take some time in shops with a large number of orders.', 'woocommerce-cost-of-goods' ),
+					'apply_costs_error'               => __( 'Oops! Something went wrong. Please try again.', 'woocommerce-cost-of-goods' ),
+					'apply_costs_success'             => __( 'Cost of goods applied to previous orders.', 'woocommerce-cost-of-goods' ),
+					'apply_costs_in_progress'         => __( 'Applying costs of goods to previous orders...', 'woocommerce-cost-of-goods' ),
+					'apply_costs_notice'              => __( 'Process is running in the background, you can safely navigate away from this page without disrupting the process.', 'woocommerce-cost-of-goods' ),
 				],
 			] );
 

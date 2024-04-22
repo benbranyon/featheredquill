@@ -4,6 +4,7 @@ namespace GoDaddy\WordPress\MWC\Common\DataSources\WooCommerce\Adapters\Order;
 
 use GoDaddy\WordPress\MWC\Common\DataSources\Contracts\DataSourceAdapterContract;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\TaxItem;
+use WC_Order;
 use WC_Order_Item_Tax;
 
 /**
@@ -14,6 +15,8 @@ use WC_Order_Item_Tax;
  * @since 3.4.1
  *
  * @property WC_Order_Item_Tax $source
+ * @method static static getNewInstance(WC_Order_Item_Tax $source)
+ * @method static static for(WC_Order_Item_Tax $source, ?WC_Order $sourceOrder = null)
  */
 class TaxItemAdapter extends AbstractOrderItemAdapter implements DataSourceAdapterContract
 {
@@ -42,7 +45,7 @@ class TaxItemAdapter extends AbstractOrderItemAdapter implements DataSourceAdapt
             ->setId($this->source->get_id())
             ->setLabel($this->source->get_label())
             ->setName($this->source->get_rate_code())
-            ->setRate($this->source->get_rate_percent())
+            ->setRate($this->source->get_rate_percent() ?: 0.0)
             ->setTotalAmount($this->convertCurrencyAmountFromSource((float) $this->source->get_tax_total()));
     }
 

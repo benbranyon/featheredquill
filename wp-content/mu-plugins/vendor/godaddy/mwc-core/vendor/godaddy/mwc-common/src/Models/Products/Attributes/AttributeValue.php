@@ -19,7 +19,7 @@ class AttributeValue
 {
     use CanBulkAssignPropertiesTrait;
     use CanConvertToArrayTrait {
-        toArray as protected traitToArray;
+        CanConvertToArrayTrait::toArray as protected traitToArray;
     }
     use CanGetNewInstanceTrait;
     use HasLabelTrait;
@@ -114,5 +114,15 @@ class AttributeValue
         }
 
         return $this->traitToArray();
+    }
+
+    /**
+     * Gets the associated attribute.
+     *
+     * @return Attribute
+     */
+    public function getAttribute() : Attribute
+    {
+        return $this->attribute;
     }
 }

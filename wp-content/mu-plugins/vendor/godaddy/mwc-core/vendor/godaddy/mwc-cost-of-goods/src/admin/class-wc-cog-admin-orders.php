@@ -17,7 +17,7 @@
  * needs please refer to http://docs.woocommerce.com/document/cost-of-goods/ for more information.
  *
  * @author      SkyVerge
- * @copyright   Copyright (c) 2013-2020, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright   Copyright (c) 2013-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -99,7 +99,7 @@ class WC_COG_Admin_Orders {
 
 		?>
 		<th class="item_cost_of_goods sortable" data-sort="float">
-			<?php esc_html_e( 'Cost of Goods', 'mwc-cost-of-goods' ); ?>
+			<?php esc_html_e( 'Cost of Goods', 'woocommerce-cost-of-goods' ); ?>
 		</th>
 		<?php
 	}
@@ -175,7 +175,7 @@ class WC_COG_Admin_Orders {
 							       value="<?php echo esc_attr( $formatted_item_cost ); ?>" />
 						</div>
 						<div class="input">
-							<label><?php esc_html_e( 'Should be:', 'mwc-cost-of-goods' ); ?></label>
+							<label><?php esc_html_e( 'Should be:', 'woocommerce-cost-of-goods' ); ?></label>
 							<input type="text"
 							       value="<?php esc_attr_e( wc_format_localized_price( $formatted_item_cost ) ); ?>"
 							       class="cog-suggestion"
@@ -415,7 +415,7 @@ class WC_COG_Admin_Orders {
 
 		?>
 		<tr>
-			<td class="label"><?php esc_html_e( 'Cost of Goods', 'mwc-cost-of-goods' ); ?>:</td>
+			<td class="label"><?php esc_html_e( 'Cost of Goods', 'woocommerce-cost-of-goods' ); ?>:</td>
 			<td width="1%"></td>
 			<td class="total cost-total"><?php echo $this->get_formatted_order_total_cost( (int) $post_id ); ?></td>
 		</tr>

@@ -7,6 +7,7 @@ use GoDaddy\WordPress\MWC\Common\Interceptors\AbstractInterceptor;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Interceptors\Handlers\ProductQueryHandler;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Traits\CanDetermineWpQueryProductPostTypeTrait;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Enums\CustomWordPressCoreHook;
 use WP_Query;
 
 /**
@@ -32,7 +33,7 @@ class WpQueryInterceptor extends AbstractInterceptor
 
         /* @see WP_Query::get_posts() */
         Register::filter()
-            ->setGroup('godaddy/wp_query/get_posts/before_get_post')
+            ->setGroup(CustomWordPressCoreHook::WpQuery_BeforeGetPost)
             ->setHandler([$this, 'primePostsCache'])
             ->setArgumentsCount(2)
             ->setPriority(PHP_INT_MAX)

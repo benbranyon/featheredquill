@@ -9,10 +9,12 @@ use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\Contracts\Pro
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ProductBase;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ProductRequestInputs\CreateProductInput;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ProductRequestInputs\ListProductsInput;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ProductRequestInputs\PatchProductInput;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ProductRequestInputs\ReadProductInput;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ProductRequestInputs\UpdateProductInput;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\GoDaddy\Adapters\CreateProductRequestAdapter;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\GoDaddy\Adapters\ListProductsRequestAdapter;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\GoDaddy\Adapters\PatchProductRequestAdapter;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\GoDaddy\Adapters\ReadProductRequestAdapter;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\GoDaddy\Adapters\UpdateProductRequestAdapter;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\Contracts\CommerceExceptionContract;
@@ -81,6 +83,21 @@ class ProductsGateway extends AbstractGateway implements ProductsGatewayContract
     {
         /** @var ProductBase[] $result */
         $result = $this->doAdaptedRequest(ListProductsRequestAdapter::getNewInstance($input));
+
+        return $result;
+    }
+
+    /**
+     * Patches a product.
+     *
+     * @param PatchProductInput $input
+     * @return ProductBase
+     * @throws CommerceExceptionContract|BaseException|Exception
+     */
+    public function patch(PatchProductInput $input) : ProductBase
+    {
+        /** @var ProductBase $result */
+        $result = $this->doAdaptedRequest(PatchProductRequestAdapter::getNewInstance($input));
 
         return $result;
     }

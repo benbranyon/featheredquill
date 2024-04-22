@@ -2,6 +2,8 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Features;
 
+use GoDaddy\WordPress\MWC\Core\Traits\EnumTrait;
+
 /**
  * Holder class for features possible categories values.
  * TODO: switch it to ENUMS once the platform minimum requirements becomes PHP 8.x {nmolham 27-12-2021}.
@@ -10,24 +12,19 @@ namespace GoDaddy\WordPress\MWC\Core\Features;
  */
 class Categories
 {
-    /** @var string */
-    public const STORE_MANAGEMENT = 'Store Management';
+    use EnumTrait;
 
-    /** @var string */
-    public const MARKETING = 'Marketing and Messaging';
+    public const StoreManagement = 'Store Management';
 
-    /** @var string */
-    public const SHIPPING = 'Shipping';
+    public const Marketing = 'Marketing and Messaging';
 
-    /** @var string */
-    public const MERCHANDISING = 'Merchandising';
+    public const Shipping = 'Shipping';
 
-    /** @var string */
-    public const PRODUCT_TYPE = 'Product Type';
+    public const Merchandising = 'Merchandising';
 
-    /** @var string */
-    public const CART_CHECKOUT = 'Cart and Checkout';
+    public const ProductType = 'Product Type';
 
-    /** @var string */
-    public const PAYMENTS = 'Payments';
+    public const CartCheckout = 'Cart and Checkout';
+
+    public const Payments = 'Payments';
 }

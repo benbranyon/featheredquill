@@ -17,7 +17,7 @@
  * needs please refer to http://docs.woocommerce.com/document/url-coupons/ for more information.
  *
  * @author      SkyVerge
- * @copyright   Copyright (c) 2013-2020, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright   Copyright (c) 2013-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -25,7 +25,7 @@ namespace GoDaddy\WordPress\MWC\UrlCoupons\Admin;
 
 defined( 'ABSPATH' ) or exit;
 
-use SkyVerge\WooCommerce\PluginFramework\v5_10_12 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v5_11_0 as Framework;
 use function GoDaddy\WordPress\MWC\UrlCoupons\wc_url_coupons;
 
 /**
@@ -86,7 +86,7 @@ class WC_URL_Coupons_Admin {
 
 		$should_add_new_badge = $this->should_add_new_badge();
 		$tab_css_selector     = '#woocommerce-coupon-data ul.wc-tabs li.discount_links_options';
-		
+
 		?>
 		<style>
 			<?php echo $tab_css_selector; ?> > a::before {
@@ -130,7 +130,7 @@ class WC_URL_Coupons_Admin {
 
 	/**
 	 * @TODO: Remove this method in V2 and its usages to print styles {@acastro1 2021-08-10}
-     *
+	 *
 	 * Determines if the "New" badge should be added or not.
 	 *
 	 * @since 2.13.0
@@ -532,7 +532,7 @@ class WC_URL_Coupons_Admin {
 
 			$( '#_wc_url_coupons_redirect_page' ).change( function() {
 				var page      = $( this ).val(),
-				    page_type = '';
+					page_type = '';
 				if ( page ) {
 					page_type = page.substr( 0, page.indexOf( '|' ) );
 				}
@@ -541,7 +541,7 @@ class WC_URL_Coupons_Admin {
 
 			$( '#_wc_url_coupons_existing_page' ).change( function() {
 				var page      = $( this ).val(),
-				    page_type = '';
+					page_type = '';
 				if ( page ) {
 					page_type = page.substr( 0, page.indexOf( '|' ) );
 				}
@@ -723,14 +723,14 @@ class WC_URL_Coupons_Admin {
 
 		$coupon             = new \WC_Coupon( $post->ID );
 		$apply_via_url      = ! empty( $_POST['_wc_url_coupons_apply_via_url'] );
-		$apply_when         = filter_input( INPUT_POST, '_wc_url_coupons_apply_when', FILTER_SANITIZE_STRING );
-		$existing_page      = filter_input( INPUT_POST, '_wc_url_coupons_existing_page', FILTER_SANITIZE_STRING );
-		$existing_page_type = filter_input( INPUT_POST, '_wc_url_coupons_existing_page_type', FILTER_SANITIZE_STRING );
-		$unique_url         = filter_input( INPUT_POST, '_wc_url_coupons_unique_url', FILTER_SANITIZE_STRING );
-		$redirect_page      = filter_input( INPUT_POST, '_wc_url_coupons_redirect_page', FILTER_SANITIZE_STRING );
-		$redirect_page_type = filter_input( INPUT_POST, '_wc_url_coupons_redirect_page_type', FILTER_SANITIZE_STRING );
+		$apply_when         = filter_input( INPUT_POST, '_wc_url_coupons_apply_when', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$existing_page      = filter_input( INPUT_POST, '_wc_url_coupons_existing_page', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$existing_page_type = filter_input( INPUT_POST, '_wc_url_coupons_existing_page_type', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$unique_url         = filter_input( INPUT_POST, '_wc_url_coupons_unique_url', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$redirect_page      = filter_input( INPUT_POST, '_wc_url_coupons_redirect_page', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$redirect_page_type = filter_input( INPUT_POST, '_wc_url_coupons_redirect_page_type', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		$product_ids        = $_POST['_wc_url_coupons_product_ids'] ?? [];
-		$defer_apply        = filter_input( INPUT_POST, '_wc_url_coupons_defer_apply', FILTER_SANITIZE_STRING );
+		$defer_apply        = filter_input( INPUT_POST, '_wc_url_coupons_defer_apply', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
 		if ( empty( $redirect_page_type ) ) {
 			$redirect_page_type = 'page';
@@ -1081,8 +1081,8 @@ class WC_URL_Coupons_Admin {
 		$current_screen = get_current_screen();
 
 		if ( isset( $current_screen->id ) && 'shop_coupon' === $current_screen->id &&
-		     // if the user has not saved a coupon before, this is their first one
-		     ! wc_string_to_bool( get_user_meta( get_current_user_id(), 'wc_url_coupons_first_coupon_saved', true ) ) ) {
+			 // if the user has not saved a coupon before, this is their first one
+			 ! wc_string_to_bool( get_user_meta( get_current_user_id(), 'wc_url_coupons_first_coupon_saved', true ) ) ) {
 
 			wc_url_coupons()->get_admin_notice_handler()->add_admin_notice(
 				/* translators: Placeholders: %1$s - opening <a> link tag, %2$s - closing </a> link tag */

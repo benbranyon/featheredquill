@@ -3,6 +3,7 @@
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Traits;
 
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\CatalogIntegration;
 use WP_Query;
 
 /**
@@ -22,6 +23,11 @@ trait CanDetermineWpQueryProductPostTypeTrait
             return false;
         }
 
-        return count(array_intersect(['product', 'product_variation'], ArrayHelper::wrap($wpQuery->query_vars['post_type']))) > 0;
+        $productPostTypes = [
+            CatalogIntegration::PRODUCT_POST_TYPE,
+            CatalogIntegration::PRODUCT_VARIATION_POST_TYPE,
+        ];
+
+        return count(array_intersect($productPostTypes, ArrayHelper::wrap($wpQuery->query_vars['post_type']))) > 0;
     }
 }

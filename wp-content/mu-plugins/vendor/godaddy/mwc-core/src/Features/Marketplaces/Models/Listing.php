@@ -13,7 +13,7 @@ class Listing extends AbstractModel
     protected $listingId;
 
     /** @var string */
-    protected $channelType;
+    protected $channelType = '';
 
     /** @var bool */
     protected $isPublished = false;

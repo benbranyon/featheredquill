@@ -5,7 +5,6 @@ namespace GoDaddy\WordPress\MWC\Core\Features\Shipping\DataStores;
 use DateTime;
 use Exception;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
-use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPress\SiteRepository;
 use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
@@ -44,30 +43,16 @@ class AccountDataStore implements AccountDataStoreContract
         $stored = ArrayHelper::wrap(get_option(static::SHIPPING_ACCOUNT_OPTION_NAME));
 
         return ArrayHelper::whereNotNull([
-            'id'                => $this->getStringValue($stored, 'id'),
-            'remoteId'          => $this->getStringValue($stored, 'remoteId') ?: null,
-            'firstName'         => $this->getStringValue($stored, 'firstName'),
-            'lastName'          => $this->getStringValue($stored, 'lastName'),
-            'companyName'       => $this->getStringValue($stored, 'companyName') ?: SiteRepository::getTitle(),
-            'originCountryCode' => $this->getStringValue($stored, 'originCountryCode') ?: WooCommerceRepository::getBaseCountry(),
-            'status'            => $this->getAccountStatus($this->getStringValue($stored, 'status')),
+            'id'                => ArrayHelper::getStringValueForKey($stored, 'id'),
+            'remoteId'          => ArrayHelper::getStringValueForKey($stored, 'remoteId') ?: null,
+            'firstName'         => ArrayHelper::getStringValueForKey($stored, 'firstName'),
+            'lastName'          => ArrayHelper::getStringValueForKey($stored, 'lastName'),
+            'companyName'       => ArrayHelper::getStringValueForKey($stored, 'companyName') ?: SiteRepository::getTitle(),
+            'originCountryCode' => ArrayHelper::getStringValueForKey($stored, 'originCountryCode') ?: WooCommerceRepository::getBaseCountry(),
+            'status'            => $this->getAccountStatus(ArrayHelper::getStringValueForKey($stored, 'status')),
             'createdAt'         => $this->getDateTimeValue($stored, 'createdAt'),
             'updatedAt'         => $this->getDateTimeValue($stored, 'updatedAt'),
         ]);
-    }
-
-    /**
-     * Gets a string value from the given array.
-     *
-     * Returns an empty string if the value cannot be converted to string.
-     *
-     * @param array<string, mixed> $stored
-     * @param string $key
-     * @return string
-     */
-    protected function getStringValue(array $stored, string $key) : string
-    {
-        return (string) StringHelper::ensureScalar(ArrayHelper::get($stored, $key));
     }
 
     /**

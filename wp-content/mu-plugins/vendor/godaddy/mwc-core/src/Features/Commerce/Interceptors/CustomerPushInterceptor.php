@@ -91,6 +91,7 @@ class CustomerPushInterceptor extends AbstractInterceptor
      * @param Customer $customer
      *
      * @return CustomerPushStrategyContract
+     * @throws CommerceExceptionContract
      */
     protected function getCustomerStrategy(Customer $customer) : CustomerPushStrategyContract
     {

@@ -11,6 +11,8 @@ use WP_Term;
 
 /**
  * Adapter for taxonomy terms.
+ *
+ * @method static static getNewInstance(WP_Term $term)
  */
 class TaxonomyTermAdapter implements DataSourceAdapterContract
 {
@@ -39,7 +41,9 @@ class TaxonomyTermAdapter implements DataSourceAdapterContract
         return Term::getNewInstance(Taxonomy::getNewInstance()->setName($this->source->taxonomy ?: ''))
             ->setId((int) $this->source->term_id)
             ->setLabel($this->source->name ?: '')
-            ->setName($this->source->slug ?: '');
+            ->setName($this->source->slug ?: '')
+            ->setDescription($this->source->description ?: '')
+            ->setParentId((int) $this->source->parent);
     }
 
     /**
@@ -54,10 +58,12 @@ class TaxonomyTermAdapter implements DataSourceAdapterContract
             $termData = $this->source;
         } else {
             $termData = (object) [
-                'term_id'  => (int) $term->getId(),
-                'name'     => $term->getLabel() ?: '',
-                'slug'     => $term->getName() ?: '',
-                'taxonomy' => $term->getTaxonomy()->getName() ?: '',
+                'term_id'     => (int) $term->getId(),
+                'name'        => $term->getLabel() ?: '',
+                'slug'        => $term->getName() ?: '',
+                'taxonomy'    => $term->getTaxonomy()->getName() ?: '',
+                'description' => $term->getDescription() ?: '',
+                'parent'      => (int) $term->getParentId(),
             ];
         }
 

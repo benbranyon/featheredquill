@@ -51,6 +51,7 @@ return [
             GoDaddy\WordPress\MWC\Core\Payments\Events\Transformers\OrderEventTransformer::class,
             GoDaddy\WordPress\MWC\Core\Features\CostOfGoods\Events\Transformers\ProductEventTransformer::class,
             GoDaddy\WordPress\MWC\Core\WooCommerce\Events\Transformers\ProductEventTransformer::class,
+            GoDaddy\WordPress\MWC\Core\WooCommerce\Events\Transformers\AddProductSummaryProductEventTransformer::class,
             GoDaddy\WordPress\MWC\Core\Features\CartRecoveryEmails\Events\Transformers\CheckoutEventTransformer::class,
             GoDaddy\WordPress\MWC\Core\Features\CartRecoveryEmails\Events\Transformers\OrderEventTransformer::class,
             GoDaddy\WordPress\MWC\Core\Channels\Events\Transformers\OrderEventTransformer::class,
@@ -60,6 +61,7 @@ return [
             GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\Events\Transformers\EmailNotificationsSettingsUpdatedEventTransformer::class,
         ],
         GoDaddy\WordPress\MWC\Common\Events\Contracts\EventBridgeEventContract::class => [
+            GoDaddy\WordPress\MWC\Core\Auth\Sso\WordPress\Events\Transformers\CareAgentUserFlagTransformer::class,
             GoDaddy\WordPress\MWC\Core\Events\Transformers\SitePropertiesTransformer::class,
         ],
     ],
@@ -141,6 +143,7 @@ return [
             GoDaddy\WordPress\MWC\Core\Features\CartRecoveryEmails\Events\Subscribers\CheckoutSubscriber::class,
             GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Events\Subscribers\OrderChannelSubscriber::class,
             GoDaddy\WordPress\MWC\Core\Features\Commerce\Events\Subscribers\CustomerSubscriber::class,
+            GoDaddy\WordPress\MWC\Core\WooCommerce\Events\Subscribers\DeleteWPNUXProductMetaDataSubscriber::class,
         ],
         GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\Events\EmailNotificationSentEvent::class => [
             GoDaddy\WordPress\MWC\Core\Features\CartRecoveryEmails\Events\Subscribers\EmailNotificationSentSubscriber::class,
@@ -187,6 +190,48 @@ return [
         GoDaddy\WordPress\MWC\Core\Features\Commerce\Events\CustomerPushFailedEvent::class => [
             GoDaddy\WordPress\MWC\Core\Features\Commerce\Events\Subscribers\CustomerPushFailedSubscriber::class,
         ],
+        GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Events\LineItemReservedEvent::class => [
+            GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Events\Subscribers\LineItemReservedNotificationsSubscriber::class,
+        ],
+        GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Events\ProductsListedEvent::class => [
+            GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Events\Subscribers\ProductsListedPrimeCacheSubscriber::class,
+            GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Events\Subscribers\MaybeDetectProductChangesSubscriber::class,
+        ],
+        GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Events\UpdateLevelFailedEvent::class => [
+            GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Subscribers\UpdateLevelFailedSubscriber::class,
+        ],
+        GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Events\ProductCreatedEvent::class => [
+            GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Events\Subscribers\UpdateProductLastKnownUpdatedAtTimeSubscriber::class,
+            GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Events\Subscribers\VariableProductCreatedSubscriber::class,
+        ],
+        GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Events\ProductUpdatedEvent::class => [
+            GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Events\Subscribers\UpdateProductLastKnownUpdatedAtTimeSubscriber::class,
+        ],
+        GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Events\ProductReadEvent::class => [
+            GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Events\Subscribers\MaybeDetectProductChangesSubscriber::class,
+        ],
+        GoDaddy\WordPress\MWC\Core\Auth\Sso\WordPress\Events\CareUserLogInEvent::class => [
+            GoDaddy\WordPress\MWC\Core\Auth\Sso\WordPress\Events\Subscribers\ForceCareAgentAdminRoleSubscriber::class,
+            GoDaddy\WordPress\MWC\Core\Auth\Sso\WordPress\Events\Subscribers\ScheduleCareAgentDeleteSubscriber::class,
+        ],
+        GoDaddy\WordPress\MWC\Core\JobQueue\Events\QueuedJobDoneEvent::class => [
+            GoDaddy\WordPress\MWC\Core\JobQueue\Events\Subscribers\QueueNextJobSubscriber::class,
+        ],
+        GoDaddy\WordPress\MWC\Core\JobQueue\Events\QueuedJobCreatedEvent::class => [
+            GoDaddy\WordPress\MWC\Core\JobQueue\Events\Subscribers\QueueNextJobSubscriber::class,
+        ],
+        GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\Events\InvalidTransactionAvsEvent::class => [
+            GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\Events\Subscribers\TransactionAvsOrderNotesSubscriber::class,
+        ],
+        GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Events\RemoteProductUpdatedEvent::class => [
+            GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Events\Subscribers\DispatchJobToSaveLocalProductSubscriber::class,
+        ],
+        GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Events\ProductsInsertedEvent::class => [
+            GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Events\Subscribers\ProductsInsertedEventSubscriber::class,
+        ],
+        GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Events\AttachmentsInsertedEvent::class => [
+            GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Events\Subscribers\DownloadRemoteAssetDataSubscriber::class,
+        ],
     ],
 
     /*
@@ -222,6 +267,6 @@ return [
         GoDaddy\WordPress\MWC\Core\Payments\Poynt\Events\Producers\PushOrdersProducer::class,
         GoDaddy\WordPress\MWC\Core\Payments\Poynt\Events\Producers\PushTransactionsProducer::class,
         GoDaddy\WordPress\MWC\Core\Payments\Poynt\Events\Producers\RegisterWebhooksProducer::class,
-        GoDaddy\WordPress\MWC\Core\Payments\Poynt\Events\Subscribers\WebhookSubscriber::class,
+        WebhookSubscriber::class,
     ],
 ];

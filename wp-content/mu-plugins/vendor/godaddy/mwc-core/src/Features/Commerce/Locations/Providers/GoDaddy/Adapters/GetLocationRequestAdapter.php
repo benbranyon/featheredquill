@@ -36,7 +36,7 @@ class GetLocationRequestAdapter extends AbstractGatewayRequestAdapter
      * @return Location
      * @throws Exception
      */
-    public function convertResponse(ResponseContract $response) : Location
+    protected function convertResponse(ResponseContract $response) : Location
     {
         return $this->convertLocationResponse(ArrayHelper::wrap($response->getBody()));
     }

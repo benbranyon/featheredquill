@@ -2,18 +2,29 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Subscribers;
 
+use GoDaddy\WordPress\MWC\Common\Events\Contracts\EventContract;
 use GoDaddy\WordPress\MWC\Core\Admin\Notices\Notice;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Events\UpdateLevelFailedEvent;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Notices\Flags\ProductInventoryUpdateFailedNoticeFlag;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Notices\ProductInventoryUpdateFailedNotice;
 
 class UpdateLevelFailedSubscriber extends AbstractFailHandlerSubscriber
 {
     /**
-     * Gets the notice for the subscriber.
-     *
-     * @return Notice
+     * {@inheritDoc}
      */
-    public function getNotice() : Notice
+    public function getNotice(string $failReason = null) : Notice
     {
-        return ProductInventoryUpdateFailedNotice::getNewInstance();
+        return ProductInventoryUpdateFailedNotice::getNewInstance($failReason);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function handle(EventContract $event) : void
+    {
+        if ($event instanceof UpdateLevelFailedEvent) {
+            ProductInventoryUpdateFailedNoticeFlag::getNewInstance()->turnOn($event->failReason);
+        }
     }
 }

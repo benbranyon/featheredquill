@@ -5,7 +5,7 @@ namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Interceptors;
 use Exception;
 use GoDaddy\WordPress\MWC\Common\Interceptors\AbstractInterceptor;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Interceptors\Handlers\AbstractDataStoreHandler;
+use GoDaddy\WordPress\MWC\Core\Interceptors\Handlers\AbstractInterceptorHandler;
 
 class AbstractDataStoreInterceptor extends AbstractInterceptor
 {
@@ -15,7 +15,7 @@ class AbstractDataStoreInterceptor extends AbstractInterceptor
     protected string $objectType;
 
     /**
-     * @var class-string<AbstractDataStoreHandler>
+     * @var class-string<AbstractInterceptorHandler>
      */
     protected string $handler;
 

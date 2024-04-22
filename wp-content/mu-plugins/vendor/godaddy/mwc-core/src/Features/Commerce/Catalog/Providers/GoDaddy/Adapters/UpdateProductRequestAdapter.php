@@ -2,13 +2,17 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\GoDaddy\Adapters;
 
+use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Http\Contracts\RequestContract;
 use GoDaddy\WordPress\MWC\Common\Http\Contracts\ResponseContract;
 use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ProductBase;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ProductRequestInputs\UpdateProductInput;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\GoDaddy\Adapters\Traits\CanConvertProductResponseTrait;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\GoDaddy\Http\Requests\Request;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\CommerceException;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\MissingProductRemoteIdException;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\Adapters\AbstractGatewayRequestAdapter;
 
 /**
@@ -19,6 +23,7 @@ use GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\Adapters\AbstractGate
 class UpdateProductRequestAdapter extends AbstractGatewayRequestAdapter
 {
     use CanGetNewInstanceTrait;
+    use CanConvertProductResponseTrait;
 
     /** @var UpdateProductInput data used to create the request */
     protected UpdateProductInput $input;
@@ -44,11 +49,22 @@ class UpdateProductRequestAdapter extends AbstractGatewayRequestAdapter
 
         $body = $this->input->product->toArray();
 
-        // We do not need the productId, channelIds, or categoryIds in the request body:
-        // the productId is only needed to build the API path; the channelIds are only required when creating products;
-        // we do not yet utilize categoryIds and do not want to overwrite values other channels may have set.
-        // The API does not support updates using the parentId parameter.
-        unset($body['productId'], $body['channelIds'], $body['categoryIds'], $body['parentId']);
+        // Set channelIds for the PATCH request.
+        $body['channelIds'] = $this->input->channelIds->toArray();
+
+        /*
+         * We do not need certain properties in the request body:
+         *
+         * - the productId is only needed to build the API path;
+         * - the API does not support updates using the parentId parameter;
+         * - we do not implement `altId` and do not want to overwrite values other channels may have set;
+         * - we are not supposed to set `updatedAt` or `createdAt` when writing to the catalog service;
+         * - `variants` is a readonly property and should not be written;
+         *
+         * @TODO this logic will be refactored and improved in MWC-12385, as a hard-coded list like this is not sustainable {agibson 2023-05-24}
+         * @see CreateProductRequestAdapter::convertFromSource() for a similar case
+         */
+        unset($body['productId'], $body['parentId'], $body['altId'], $body['updatedAt'], $body['createdAt'], $body['variants']);
 
         return Request::withAuth()
             ->setStoreId($this->input->storeId)
@@ -62,9 +78,12 @@ class UpdateProductRequestAdapter extends AbstractGatewayRequestAdapter
      *
      * @param ResponseContract $response
      * @return ProductBase
+     * @throws MissingProductRemoteIdException
      */
     protected function convertResponse(ResponseContract $response) : ProductBase
     {
-        return $this->input->product;
+        return $this->convertProductResponse(
+            TypeHelper::array(ArrayHelper::get((array) $response->getBody(), 'product'), [])
+        );
     }
 }

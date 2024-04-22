@@ -10,6 +10,7 @@ use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerce\OrdersRepository;
+use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPress\DateTimeRepository;
 use GoDaddy\WordPress\MWC\Core\Events\AbstractWebhookReceivedEvent;
 use GoDaddy\WordPress\MWC\Core\Events\Subscribers\AbstractWebhookReceivedSubscriber;
@@ -156,19 +157,65 @@ class WebhookSubscriber extends AbstractWebhookReceivedSubscriber implements Com
      *
      * @param array $data
      * @return WC_Order|null
-     * @throws Exception
      */
-    protected function findOrderForPayload(array $data)
+    protected function findOrderForPayload(array $data) : ?WC_Order
+    {
+        if (WooCommerceRepository::isCustomOrdersTableUsageEnabled()) {
+            return $this->findOrderForPayloadUsingCustomerOrdersTable($data);
+        }
+
+        return $this->findOrderForPayloadUsingCustomPosts($data);
+    }
+
+    /**
+     * Finds an order stored in WooCommerce's tables that is associated with the resource ID included in the given payload.
+     *
+     * @param array<string, mixed> $data
+     * @return WC_Order|null
+     */
+    protected function findOrderForPayloadUsingCustomerOrdersTable(array $data) : ?WC_Order
+    {
+        $orders = OrdersRepository::query([
+            'return'     => 'objects',
+            'meta_query' => $this->getFindOrderForPayloadMetaQuery($data),
+        ]);
+
+        return $orders ? array_shift($orders) : null;
+    }
+
+    /**
+     * Finds an order stored as custom post type that is associated with the resource ID included in the given payload.
+     *
+     * @param array<string, mixed> $data
+     * @return WC_Order|null
+     */
+    protected function findOrderForPayloadUsingCustomPosts(array $data) : ?WC_Order
     {
         $results = get_posts([
             'post_type'   => 'shop_order',
             'fields'      => 'ids',
             'post_status' => 'any',
-            'meta_key'    => '_poynt_order_remoteId',
-            'meta_value'  => ArrayHelper::get($data, 'resourceId'),
+            'meta_query'  => $this->getFindOrderForPayloadMetaQuery($data),
         ]);
 
         return $results ? OrdersRepository::get($results[0]) : null;
+    }
+
+    /**
+     * Gets the meta_query fields to find orders by their remote ID.
+     *
+     * @param array<string, mixed> $data
+     * @return array<int, array<string, mixed>>
+     */
+    protected function getFindOrderForPayloadMetaQuery(array $data) : array
+    {
+        return [
+            [
+                'key'     => '_poynt_order_remoteId',
+                'value'   => ArrayHelper::get($data, 'resourceId'),
+                'compare' => '=',
+            ],
+        ];
     }
 
     /**

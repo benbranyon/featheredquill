@@ -1,5 +1,8 @@
 <?php
 
+use GoDaddy\WordPress\MWC\Common\DataSources\WordPress\Adapters\ImageAdapter;
+use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
+
 /*
  *--------------------------------------------------------------------------
  * WordPress Information
@@ -8,9 +11,6 @@
  * General Information about WooCommerce itself.
  *
  */
-
-use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
-
 return [
 
     /* The absolute path for the WordPress instance */
@@ -27,4 +27,10 @@ return [
 
     /* The WordPress instance locale setting */
     'locale' => function_exists('get_locale') ? get_locale() : 'en_US',
+
+    'media' => [
+        'adapters' => [
+            'image' => ImageAdapter::class,
+        ],
+    ],
 ];

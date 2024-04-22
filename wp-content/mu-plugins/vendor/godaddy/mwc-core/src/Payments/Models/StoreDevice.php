@@ -29,6 +29,9 @@ class StoreDevice extends AbstractModel
     /** @var string Newland Terminal Serial begins with */
     public const NEWLAND_TERMINAL_SERIAL_BEGINS = 'N7';
 
+    /** @var string VT Terminal Serial begins with */
+    public const VT_TERMINAL_SERIAL_BEGINS = 'VT';
+
     /** @var string store device type - terminal */
     const TYPE_TERMINAL = 'TERMINAL';
 

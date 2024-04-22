@@ -8,12 +8,15 @@ use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\CommerceException;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\Contracts\CommerceExceptionContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataSources\WooOrderCartIdProvider;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Services\Contracts\OrdersMappingServiceContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Traits\CanCheckWooCommerceOrderTrait;
 use GoDaddy\WordPress\MWC\Core\Interceptors\Handlers\AbstractInterceptorHandler;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Models\Orders\Order;
 use WC_Order;
 
 class NewOrderHandler extends AbstractInterceptorHandler
 {
+    use CanCheckWooCommerceOrderTrait;
+
     protected OrdersMappingServiceContract $ordersMappingService;
     protected WooOrderCartIdProvider $wooOrderCartIdProvider;
 
@@ -32,7 +35,8 @@ class NewOrderHandler extends AbstractInterceptorHandler
     {
         $wooOrder = ArrayHelper::get($args, '1');
 
-        if (! $wooOrder instanceof WC_Order) {
+        if (! $this->canWriteWooCommerceOrderInPlatform($wooOrder) ||
+            $this->isWooCommerceOrderIncomplete($wooOrder)) {
             return;
         }
 

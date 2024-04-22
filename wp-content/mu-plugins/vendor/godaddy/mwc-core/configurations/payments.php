@@ -4,7 +4,7 @@ return [
 
     'api' => [
         'productionRoot' => defined('MWC_PAYMENTS_API_ROOT') ? MWC_PAYMENTS_API_ROOT : 'https://api.mwc.secureserver.net/v1/payments',
-        'stagingRoot'    => defined('MWC_PAYMENTS_API_ROOT') ? MWC_PAYMENTS_API_ROOT : 'https://api-dev.mwc.secureserver.net/v1/payments',
+        'stagingRoot'    => defined('MWC_PAYMENTS_API_ROOT') ? MWC_PAYMENTS_API_ROOT : 'https://api-test.mwc.secureserver.net/v1/payments',
     ],
 
     /*
@@ -107,6 +107,8 @@ return [
                 'syncedCatalogIds' => get_option('mwc_payments_sync_push_syncedCatalogIds', []),
             ],
         ],
+        // whether to trigger a one-time event that broadcasts synced products
+        'broadcastSyncedProducts' => defined('MWC_PAYMENTS_POYNT_BROADCAST_SYNCED_PRODUCTS') && MWC_PAYMENTS_POYNT_BROADCAST_SYNCED_PRODUCTS,
     ],
 
     /*

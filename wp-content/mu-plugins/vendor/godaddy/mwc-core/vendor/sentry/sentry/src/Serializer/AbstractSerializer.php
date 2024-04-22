@@ -20,7 +20,6 @@ declare(strict_types=1);
 
 namespace Sentry\Serializer;
 
-use Sentry\Exception\InvalidArgumentException;
 use Sentry\Options;
 
 /**
@@ -77,7 +76,7 @@ abstract class AbstractSerializer
     {
         $this->maxDepth = $maxDepth;
 
-        if (null != $mbDetectOrder) {
+        if ($mbDetectOrder != null) {
             $this->mbDetectOrder = $mbDetectOrder;
         }
 
@@ -236,19 +235,25 @@ abstract class AbstractSerializer
      */
     protected function serializeValue($value)
     {
-        if ((null === $value) || \is_bool($value) || is_numeric($value)) {
+        if (($value === null) || \is_bool($value) || is_numeric($value)) {
             return $value;
         }
 
         if (\is_object($value)) {
+            $reflection = new \ReflectionObject($value);
+
             $objectId = null;
-            if (isset($value->id)) {
-                $objectId = $value->id;
-            } elseif (\is_callable([$value, 'getId']) && method_exists($value, 'getId')) {
-                $objectId = $value->getId();
+            if ($reflection->hasProperty('id') && ($idProperty = $reflection->getProperty('id'))->isPublic()) {
+                $objectId = $idProperty->getValue($value);
+            } elseif ($reflection->hasMethod('getId') && ($getIdMethod = $reflection->getMethod('getId'))->isPublic()) {
+                try {
+                    $objectId = $getIdMethod->invoke($value);
+                } catch (\Throwable $e) {
+                    // Do nothing on purpose
+                }
             }
 
-            return 'Object ' . \get_class($value) . ((null !== $objectId) ? '(#' . $objectId . ')' : '');
+            return 'Object ' . $reflection->getName() . (\is_scalar($objectId) ? '(#' . $objectId . ')' : '');
         }
 
         if (\is_resource($value)) {
@@ -280,7 +285,7 @@ abstract class AbstractSerializer
         }
 
         if (!\is_callable($callable)) {
-            throw new InvalidArgumentException(sprintf('Expecting callable, got %s', \is_object($callable) ? \get_class($callable) : \gettype($callable)));
+            throw new \InvalidArgumentException(sprintf('Expecting callable, got %s', \is_object($callable) ? \get_class($callable) : \gettype($callable)));
         }
 
         try {

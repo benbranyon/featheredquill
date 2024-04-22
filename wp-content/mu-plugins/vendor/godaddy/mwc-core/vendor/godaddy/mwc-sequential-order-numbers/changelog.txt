@@ -1,8 +1,31 @@
 *** WooCommerce Sequential Order Numbers Pro Changelog ***
 
-2021.nn.nn - version 2.0.0
+2023.08.01 - version 2.1.0
+ * Misc - Current MWC release
+
+2023.08.01 - version 1.20.3
+ * Tweak - Also set sequential order numbers for orders sent via the WooCommerce Checkout Block
+ * Fix - Ensure that searching orders in the admin screen by order number can return consistent results when using HPOS
+
+2023.07.28 - version 1.20.2
+ * Fix - Ensure that sequential order numbers can be persisted on sites with HPOS enabled
+ * FIx - Ensure that admin orders in sites using HPOS can set a sequential order number
+
+2023.07.18 - version 1.20.1
+ * Fix - Address a database query issue with auto-draft admin orders
+
+2023.07.03 - version 1.20.0
+ * Misc - Add compatibility for WooCommerce High Performance Order Storage (HPOS)
+
+2022.11.22 - version 1.19.0
+ * Misc - Require PHP 7.4 and WordPress 5.6
+
+2022.02.07 - version 1.18.1
+ * Fix - Replace deprecated `is_ajax()` usages with `wp_doing_ajax()`
+ * Misc - Require WooCommerce 3.9.4 or higher
+
+2021.07.29 - version 1.18.0
  * Tweak - Optimize plugin's settings layout
- * Misc - Remove legacy woo-includes functions
 
 2020.12.07 - version 1.17.0
  * Misc - Add compatibility for WooCommerce 4.7

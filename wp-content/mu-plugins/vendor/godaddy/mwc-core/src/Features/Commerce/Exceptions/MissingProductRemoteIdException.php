@@ -24,6 +24,6 @@ class MissingProductRemoteIdException extends BaseException implements CommerceE
      */
     public static function withDefaultMessage(?Throwable $previous = null)
     {
-        return new static('The returned customer data has no UUID.', $previous);
+        return new static('The returned product data has no UUID.', $previous);
     }
 }

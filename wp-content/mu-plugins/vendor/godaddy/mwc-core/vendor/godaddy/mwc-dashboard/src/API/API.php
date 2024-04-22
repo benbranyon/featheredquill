@@ -6,9 +6,8 @@ use Exception;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
 use GoDaddy\WordPress\MWC\Common\Traits\Features\IsConditionalFeatureTrait;
-use GoDaddy\WordPress\MWC\Dashboard\API\Controllers\AccountController;
+use GoDaddy\WordPress\MWC\Dashboard\API\Controllers\AbstractController;
 use GoDaddy\WordPress\MWC\Dashboard\API\Controllers\ExtensionsController;
-use GoDaddy\WordPress\MWC\Dashboard\API\Controllers\FeaturesController;
 use GoDaddy\WordPress\MWC\Dashboard\API\Controllers\MessagesController;
 use GoDaddy\WordPress\MWC\Dashboard\API\Controllers\Orders\ItemsController;
 use GoDaddy\WordPress\MWC\Dashboard\API\Controllers\Orders\OrdersController;
@@ -25,9 +24,9 @@ class API
     /**
      * All available API controllers.
      *
-     * @var array
+     * @var array<string, AbstractController>
      */
-    protected $controllers;
+    protected array $controllers;
 
     /**
      * Class constructor.
@@ -47,13 +46,11 @@ class API
     /**
      * Registers all available API controllers.
      *
-     * @throws Exception
+     * @return void
      */
-    protected function setControllers()
+    protected function setControllers() : void
     {
         $this->controllers = [
-            AccountController::class  => new AccountController(),
-            FeaturesController::class => new FeaturesController(),
             MessagesController::class => new MessagesController(),
             PluginsController::class  => new PluginsController(),
             ShopController::class     => new ShopController(),
@@ -74,7 +71,7 @@ class API
     /**
      * Registers the routes for all available API controllers.
      */
-    public function registerRoutes()
+    public function registerRoutes() : void
     {
         foreach ($this->controllers as $controller) {
             $controller->registerRoutes();

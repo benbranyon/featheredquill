@@ -3,55 +3,93 @@
 namespace GoDaddy\WordPress\MWC\Core\Configuration;
 
 use GoDaddy\WordPress\MWC\Common\Configuration\Configuration;
+use GoDaddy\WordPress\MWC\Common\Container\ContainerFactory;
+use GoDaddy\WordPress\MWC\Common\Container\Contracts\ContainerContract;
+use GoDaddy\WordPress\MWC\Common\Container\Exceptions\ContainerException;
+use GoDaddy\WordPress\MWC\Common\Container\Exceptions\EntryNotFoundException;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
-use GoDaddy\WordPress\MWC\Common\Models\Contracts\HostingPlanContract;
-use GoDaddy\WordPress\MWC\Common\Platforms\Exceptions\PlatformRepositoryException;
-use GoDaddy\WordPress\MWC\Common\Platforms\PlatformRepositoryFactory;
 use GoDaddy\WordPress\MWC\Common\Traits\IsSingletonTrait;
-use GoDaddy\WordPress\MWC\Core\Features\CartRecoveryEmails\Configuration\Contracts\RuntimeConfigurationContract as CartRecoveryEmailsRuntimeConfigurationContract;
+use GoDaddy\WordPress\MWC\Core\Configuration\Contracts\FeatureRuntimeConfigurationContract;
+use GoDaddy\WordPress\MWC\Core\Features\CartRecoveryEmails\Configuration\Contracts\CartRecoveryEmailsFeatureRuntimeConfigurationContract;
 use GoDaddy\WordPress\MWC\Core\Features\CartRecoveryEmails\Exceptions\CartRecoveryException;
+use RuntimeException;
 
 class RuntimeConfigurationFactory
 {
     use IsSingletonTrait;
 
     /**
-     * Returns an instance of Cart Recovery Emails feature runtime configuration.
+     * Gets the desired feature's runtime configuration.
      *
-     * @return CartRecoveryEmailsRuntimeConfigurationContract
-     * @throws CartRecoveryException
-     * @throws PlatformRepositoryException
+     * @param string $featureName
+     * @return FeatureRuntimeConfigurationContract
+     * @throws ContainerException|RuntimeException
      */
-    public function getCartRecoveryEmailsRuntimeConfiguration() : CartRecoveryEmailsRuntimeConfigurationContract
+    public function getFeatureRuntimeConfiguration(string $featureName) : FeatureRuntimeConfigurationContract
     {
-        $className = TypeHelper::string(Configuration::get('features.cart_recovery_emails.runtime_configuration'), '');
-
-        if (! $className) {
-            throw new CartRecoveryException('Runtime configuration for cart recovery emails feature is not set.');
+        if (! $className = TypeHelper::string(Configuration::get("features.{$featureName}.runtime_configuration"), '')) {
+            return $this->createGenericFeatureRuntimeConfiguration($featureName);
         }
 
         if (! class_exists($className)) {
-            throw new CartRecoveryException("Class {$className} does not exist.");
+            throw new RuntimeException("Class {$className} does not exist.");
         }
 
         $classInterfaces = class_implements($className);
 
-        if (! is_array($classInterfaces) || ! in_array(CartRecoveryEmailsRuntimeConfigurationContract::class, $classInterfaces, true)) {
-            throw new CartRecoveryException("{$className} must implement CartRecoveryEmailsRuntimeConfigurationContract.");
+        if (! is_array($classInterfaces) ||
+            ! in_array(FeatureRuntimeConfigurationContract::class, $classInterfaces, true)) {
+            throw new RuntimeException("{$className} must implement FeatureRuntimeConfigurationContract.");
         }
 
-        /* @phpstan-ignore-next-line */
-        return new $className($this->getHostingPlan());
+        /** @var FeatureRuntimeConfigurationContract $configuration */
+        $configuration = $this->getDiContainer()->get($className);
+
+        return $configuration;
     }
 
     /**
-     * Gets site's hosting plan object.
+     * Creates a generic feature runtime configuration with the given feature name.
      *
-     * @return HostingPlanContract
-     * @throws PlatformRepositoryException
+     * @param string $featureName
+     *
+     * @return FeatureRuntimeConfigurationContract
+     *
+     * @throws ContainerException|EntryNotFoundException
      */
-    protected function getHostingPlan() : HostingPlanContract
+    protected function createGenericFeatureRuntimeConfiguration(string $featureName) : FeatureRuntimeConfigurationContract
     {
-        return PlatformRepositoryFactory::getNewInstance()->getPlatformRepository()->getPlan();
+        /** @var FeatureRuntimeConfiguration $genericFeatureRuntimeConfiguration */
+        $genericFeatureRuntimeConfiguration = $this->getDiContainer()->get(FeatureRuntimeConfiguration::class);
+
+        return $genericFeatureRuntimeConfiguration->setFeatureName($featureName);
+    }
+
+    /**
+     * Gets the Dependency Injection shared container.
+     *
+     * @return ContainerContract
+     */
+    protected function getDiContainer() : ContainerContract
+    {
+        return ContainerFactory::getInstance()->getSharedContainer();
+    }
+
+    /**
+     * Returns an instance of Cart Recovery Emails feature runtime configuration.
+     *
+     * @return CartRecoveryEmailsFeatureRuntimeConfigurationContract
+     *
+     * @throws CartRecoveryException|ContainerException|RuntimeException
+     */
+    public function getCartRecoveryEmailsRuntimeConfiguration() : CartRecoveryEmailsFeatureRuntimeConfigurationContract
+    {
+        $configuration = $this->getFeatureRuntimeConfiguration('cart_recovery_emails');
+
+        if (! $configuration instanceof CartRecoveryEmailsFeatureRuntimeConfigurationContract) {
+            throw new CartRecoveryException('Configuration must implement CartRecoveryEmailsFeatureRuntimeConfigurationContract.');
+        }
+
+        return $configuration;
     }
 }

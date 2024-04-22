@@ -55,11 +55,25 @@ abstract class AbstractWebhookReceivedSubscriber implements SubscriberContract
         }
 
         $payload = $event->getPayloadDecoded();
+        $action = $this->getAction($payload);
 
-        $this->handleAction(
-            $this->getAction($payload),
-            $this->getResource($this->getResourceId($payload))
-        );
+        if ($this->shouldHandleAction($action)) {
+            $this->handleAction(
+                $action,
+                $this->getResource($this->getResourceId($payload))
+            );
+        }
+    }
+
+    /**
+     * Determines whether the supplied action should be handled.
+     *
+     * @param string $action
+     * @return bool
+     */
+    protected function shouldHandleAction(string $action) : bool
+    {
+        return true;
     }
 
     /**

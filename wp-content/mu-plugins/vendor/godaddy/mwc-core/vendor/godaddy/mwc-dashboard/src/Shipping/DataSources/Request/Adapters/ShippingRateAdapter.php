@@ -11,6 +11,8 @@ use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
 use GoDaddy\WordPress\MWC\Shipping\Contracts\ShippingServiceContract;
 use GoDaddy\WordPress\MWC\Shipping\Models\Carrier;
 use GoDaddy\WordPress\MWC\Shipping\Models\Contracts\CarrierContract;
+use GoDaddy\WordPress\MWC\Shipping\Models\Contracts\PackageType;
+use GoDaddy\WordPress\MWC\Shipping\Models\Contracts\PackageTypeContract;
 use GoDaddy\WordPress\MWC\Shipping\Models\Contracts\ShippingRateContract;
 use GoDaddy\WordPress\MWC\Shipping\Models\Contracts\ShippingRateItemContract;
 use GoDaddy\WordPress\MWC\Shipping\Models\ShippingRate;
@@ -44,6 +46,7 @@ class ShippingRateAdapter implements DataSourceAdapterContract
         $shippingRate = (new ShippingRate())
             ->setId($this->convertIdFromSource())
             ->setCarrier($this->convertCarrierFromSource())
+            ->setPackageType($this->convertPackageTypeFromSource())
             ->setService($this->convertShippingServiceFromSource())
             ->setItems(...$this->convertShippingRateItemsFromSource())
             ->setTotal($this->convertTotalFromSource())
@@ -55,6 +58,36 @@ class ShippingRateAdapter implements DataSourceAdapterContract
         }
 
         return $shippingRate;
+    }
+
+    /**
+     * Converts the package type from the source, if possible.
+     *
+     * @return PackageTypeContract|null
+     */
+    protected function convertPackageTypeFromSource() : ?PackageTypeContract
+    {
+        if (! $code = $this->getStringValueFromSource('packageType.code')) {
+            return null;
+        }
+
+        return PackageType::seed([
+            'code'        => $code,
+            'name'        => $this->getStringValueFromSource('packageType.name'),
+            'description' => $this->getStringValueFromSource('packageType.description'),
+        ]);
+    }
+
+    /**
+     * Converts the package type to the source array, if possible.
+     *
+     * @param PackageTypeContract|null $packageType
+     *
+     * @return array<string, mixed>|null
+     */
+    protected function convertPackageTypeToSource(?PackageTypeContract $packageType) : ?array
+    {
+        return $packageType ? $packageType->toArray() : null;
     }
 
     /**
@@ -158,6 +191,7 @@ class ShippingRateAdapter implements DataSourceAdapterContract
         return [
             'rateId'       => $shippingRate->getId(),
             'carrier'      => $this->convertCarrierToSource($shippingRate->getCarrier()),
+            'packageType'  => $this->convertPackageTypeToSource($shippingRate->getPackageType()),
             'service'      => $this->convertServiceToSource($shippingRate->getService()),
             'total'        => $this->convertCurrencyAmountToSource($shippingRate->getTotal()),
             'items'        => $this->convertShippingRateItemsToSource($shippingRate->getItems()),

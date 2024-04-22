@@ -2,41 +2,17 @@
 
 namespace GoDaddy\WordPress\MWC\Common\Models;
 
-use GoDaddy\WordPress\MWC\Common\DataSources\WordPress\Adapters\ImageAdapter;
-use GoDaddy\WordPress\MWC\Common\Exceptions\AdapterException;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Models\Contracts\ImageContract;
 use GoDaddy\WordPress\MWC\Common\Models\Exceptions\ImageSizeNotFound;
-use GoDaddy\WordPress\MWC\Common\Repositories\WordPress\MediaRepository;
-use GoDaddy\WordPress\MWC\Common\Traits\CanBulkAssignPropertiesTrait;
-use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
-use GoDaddy\WordPress\MWC\Common\Traits\HasLabelTrait;
-use GoDaddy\WordPress\MWC\Common\Traits\HasNumericIdentifierTrait;
 
 /**
  * A model for handling image files.
- *
- * @method static static getNewInstance(array $properties = [])
  */
-class Image extends AbstractModel implements ImageContract
+class Image extends AbstractAttachment implements ImageContract
 {
-    use CanBulkAssignPropertiesTrait;
-    use CanGetNewInstanceTrait;
-    use HasLabelTrait;
-    use HasNumericIdentifierTrait;
-
     /** @var ImageSize[] */
-    protected $sizes = [];
-
-    /**
-     * Image constructor.
-     *
-     * @param array<string, mixed> $properties
-     */
-    public function __construct(array $properties = [])
-    {
-        $this->setProperties($properties);
-    }
+    protected array $sizes = [];
 
     /**
      * Gets the image sizes.
@@ -88,22 +64,5 @@ class Image extends AbstractModel implements ImageContract
         $this->sizes = $value;
 
         return $this;
-    }
-
-    /**
-     * Fetches an image by its identifier.
-     *
-     * @param int $identifier image ID
-     * @return Image|null
-     */
-    public static function get($identifier) : ?Image
-    {
-        $sourceImage = MediaRepository::getImage((int) $identifier);
-
-        try {
-            return $sourceImage ? ImageAdapter::getNewInstance($sourceImage)->convertFromSource() : null;
-        } catch (AdapterException $exception) {
-            return null;
-        }
     }
 }

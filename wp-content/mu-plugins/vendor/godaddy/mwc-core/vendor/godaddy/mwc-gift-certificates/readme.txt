@@ -1,9 +1,9 @@
 === WooCommerce PDF Product Vouchers ===
 Author: skyverge
 Tags: woocommerce
-Requires at least: 5.2
-Tested up to: 5.8.2
-Requires PHP: 7.1
+Requires at least: 5.6
+Tested up to: 6.2.2
+Requires PHP: 7.4
 
 Adds printable vouchers and certificates to WooCommerce.
 

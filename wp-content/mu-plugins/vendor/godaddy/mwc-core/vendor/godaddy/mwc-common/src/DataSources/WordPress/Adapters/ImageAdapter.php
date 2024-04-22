@@ -3,9 +3,10 @@
 namespace GoDaddy\WordPress\MWC\Common\DataSources\WordPress\Adapters;
 
 use Exception;
-use GoDaddy\WordPress\MWC\Common\DataSources\Contracts\DataSourceAdapterContract;
+use GoDaddy\WordPress\MWC\Common\DataSources\WordPress\Contracts\AttachmentAdapterContract;
 use GoDaddy\WordPress\MWC\Common\Exceptions\AdapterException;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Models\Image;
 use GoDaddy\WordPress\MWC\Common\Models\ImageSize;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPress\MediaRepository;
@@ -14,10 +15,8 @@ use WP_Post;
 
 /**
  * Adapts a WordPress image attachment into a native {@see Image} model.
- *
- * @method static static getNewInstance(WP_Post $image)
  */
-class ImageAdapter implements DataSourceAdapterContract
+class ImageAdapter implements AttachmentAdapterContract
 {
     use CanGetNewInstanceTrait;
 
@@ -48,9 +47,13 @@ class ImageAdapter implements DataSourceAdapterContract
 
         $sizes = [];
         $image = Image::getNewInstance()
-            ->setId((int) $this->source->ID)
-            ->setName((string) $this->source->post_name ?: '')
-            ->setLabel((string) $this->source->post_title ?: '');
+            ->setId(TypeHelper::int($this->source->ID, 0))
+            ->setName(TypeHelper::string($this->source->post_name ?: '', ''))
+            ->setLabel(TypeHelper::string($this->source->post_title ?: '', ''))
+            ->setAuthorId(TypeHelper::int($this->source->post_author, 0))
+            ->setParentPostId(TypeHelper::int($this->source->post_parent, 0))
+            ->setMimeType(TypeHelper::string($this->source->post_mime_type, ''))
+            ->setGuid(TypeHelper::string($this->source->guid, ''));
 
         try {
             foreach ($this->getImageSizesToAdapt() as $imageSize) {

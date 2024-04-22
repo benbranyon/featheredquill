@@ -3,31 +3,38 @@
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Services;
 
 use GoDaddy\WordPress\MWC\Common\Contracts\CanConvertToArrayContract;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
+use GoDaddy\WordPress\MWC\Common\Providers\Jitter\Contracts\PercentageJitterProviderContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\Contracts\CommerceExceptionContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Services\Contracts\CachingServiceContract;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Services\Contracts\CachingStrategyContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Services\Contracts\CachingStrategyFactoryContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Services\Exceptions\CachingStrategyException;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Services\Strategies\Contracts\CachingStrategyContract;
 
 /**
  * Abstract caching service for remote entities.
  */
 abstract class AbstractCachingService implements CachingServiceContract
 {
-    /** @var CachingStrategyContract caching strategy */
-    protected CachingStrategyContract $cachingStrategy;
+    /** @var CachingStrategyFactoryContract caching strategy */
+    protected CachingStrategyFactoryContract $cachingStrategyFactory;
 
     /** @var string plural name of the resource type (e.g. 'products' or 'customers') -- to be set by concrete implementations */
     protected string $resourceType;
 
     /** @var int cache TTL (in seconds) for entries */
-    protected int $cacheTtl = 30;
+    protected int $cacheTtl = DAY_IN_SECONDS;
+    protected ?PercentageJitterProviderContract $jitterProvider = null;
+    protected float $jitterRate = 0.1;
 
     /**
      * Constructor.
      *
-     * @param CachingStrategyContract $cachingStrategy
+     * @param CachingStrategyFactoryContract $cachingStrategyFactory
      */
-    public function __construct(CachingStrategyContract $cachingStrategy)
+    public function __construct(CachingStrategyFactoryContract $cachingStrategyFactory)
     {
-        $this->cachingStrategy = $cachingStrategy;
+        $this->cachingStrategyFactory = $cachingStrategyFactory;
     }
 
     /**
@@ -37,39 +44,62 @@ abstract class AbstractCachingService implements CachingServiceContract
      */
     protected function getCacheGroup() : string
     {
-        // @TODO to be implemented in MWC-12144 {agibson 2023-05-10}
-        return '';
+        return "godaddy-commerce-{$this->resourceType}";
     }
 
     /**
-     * Gets an item from the cache if it exists, otherwise executes the loader and caches the result.
+     * Get cache TTL with random jitter subtracted.
      *
-     * @param string $remoteId
-     * @param callable $loader
-     * @return object
+     * @return int
      */
-    public function remember(string $remoteId, callable $loader) : object
+    protected function getCacheTtl() : int
     {
-        // @TODO to be implemented in MWC-12144 {agibson 2023-05-10}
-        return (object) [];
+        if ($this->jitterProvider) {
+            return $this->cacheTtl + $this->jitterProvider->setRate($this->jitterRate)->getJitter($this->cacheTtl);
+        }
+
+        return $this->cacheTtl;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function get(string $remoteId) : ?object
+    public function remember(string $resourceIdentifier, callable $loader) : object
     {
-        // TODO to be implemented in MWC-12145 {agibson 2023-05-10}
-        return null;
+        $resource = $this->get($resourceIdentifier);
+
+        if (! $resource) {
+            $this->set($resource = $loader());
+        }
+
+        return $resource;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getMany(array $remoteIds) : array
+    public function get(string $resourceIdentifier) : ?object
     {
-        // TODO to be implemented in MWC-12145 {agibson 2023-05-10}
-        return [];
+        $jsonResource = $this->getCachingStrategy()->get($resourceIdentifier, $this->getCacheGroup());
+
+        if (empty($jsonResource) || ! is_string($jsonResource)) {
+            return null;
+        }
+
+        return $this->convertJsonResource($jsonResource);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getMany(array $resourceIdentifiers) : array
+    {
+        return array_filter(
+            array_map(
+                [$this, 'convertJsonResource'],
+                TypeHelper::arrayOfStrings($this->getCachingStrategy()->getMany($resourceIdentifiers, $this->getCacheGroup()))
+            )
+        );
     }
 
     /**
@@ -77,7 +107,19 @@ abstract class AbstractCachingService implements CachingServiceContract
      */
     public function set(CanConvertToArrayContract $resource) : void
     {
-        // TODO to be implemented in MWC-12146 {agibson 2023-05-10}
+        $resourceRemoteId = $this->getResourceIdentifier($resource);
+
+        $jsonEncodedResource = json_encode($resource->toArray());
+        if (! is_string($jsonEncodedResource)) {
+            throw new CachingStrategyException("Failed to JSON-encode resource ID {$resourceRemoteId}");
+        }
+
+        $this->getCachingStrategy()->set(
+            $resourceRemoteId,
+            $this->getCacheGroup(),
+            $jsonEncodedResource,
+            $this->getCacheTtl()
+        );
     }
 
     /**
@@ -85,15 +127,28 @@ abstract class AbstractCachingService implements CachingServiceContract
      */
     public function setMany(array $resources) : void
     {
-        // TODO to be implemented in MWC-12146 {agibson 2023-05-10}
+        $jsonResources = [];
+        foreach ($resources as $resource) {
+            $jsonEncodedResource = json_encode($resource->toArray());
+
+            if ($jsonEncodedResource) {
+                $jsonResources[$this->getResourceIdentifier($resource)] = $jsonEncodedResource;
+            }
+        }
+
+        $this->getCachingStrategy()->setMany(
+            $this->getCacheGroup(),
+            $jsonResources,
+            $this->getCacheTtl()
+        );
     }
 
     /**
      * {@inheritDoc}
      */
-    public function remove(string $remoteId) : void
+    public function remove(string $resourceIdentifier) : void
     {
-        // TODO to be implemented in MWC-12147 {agibson 2023-05-10}
+        $this->getCachingStrategy()->remove($resourceIdentifier, $this->getCacheGroup());
     }
 
     /**
@@ -104,8 +159,23 @@ abstract class AbstractCachingService implements CachingServiceContract
      */
     protected function convertJsonResource(string $jsonResource) : ?object
     {
-        // TODO to be implemented in MWC-12147 {agibson 2023-05-10}
-        return null;
+        $resourceArray = json_decode($jsonResource, true);
+
+        if (! is_array($resourceArray)) {
+            return null;
+        }
+
+        return $this->makeResourceFromArray($resourceArray);
+    }
+
+    /**
+     * Gets the configured caching strategy.
+     *
+     * @return CachingStrategyContract
+     */
+    protected function getCachingStrategy() : CachingStrategyContract
+    {
+        return $this->cachingStrategyFactory->makeCachingStrategy();
     }
 
     /**
@@ -117,10 +187,11 @@ abstract class AbstractCachingService implements CachingServiceContract
     abstract protected function makeResourceFromArray(array $resourceArray) : object;
 
     /**
-     * Gets the unique remote ID for a given resource.
+     * Gets the unique identifier for a given resource.
      *
      * @param object $resource
-     * @return string
+     * @return non-empty-string
+     * @throws CommerceExceptionContract
      */
-    abstract protected function getResourceRemoteId(object $resource) : string;
+    abstract protected function getResourceIdentifier(object $resource) : string;
 }

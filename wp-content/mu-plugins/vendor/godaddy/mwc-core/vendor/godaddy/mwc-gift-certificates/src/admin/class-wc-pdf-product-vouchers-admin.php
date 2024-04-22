@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/woocommerce-pdf-product-vouchers/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2012-2021, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright Copyright (c) 2012-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -29,7 +29,7 @@ use Automattic\WooCommerce\Admin\Features\Navigation\Menu as Enhanced_Navigation
 use Automattic\WooCommerce\Admin\Features\Navigation\Screen as Enhanced_Navigation_Screen;
 use GoDaddy\WordPress\MWC\GiftCertificates\MWC_Gift_Certificates;
 use function GoDaddy\WordPress\MWC\GiftCertificates\wc_pdf_product_vouchers;
-use SkyVerge\WooCommerce\PluginFramework\v5_10_12 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v5_11_0 as Framework;
 
 /**
  * PDF Product Vouchers Voucher Admin
@@ -200,27 +200,35 @@ class MWC_Gift_Certificates_Admin {
 	/**
 	 * Enqueues the vouchers admin scripts
 	 *
+	 * @internal
+	 *
 	 * @since 1.2.0
 	 */
 	public function enqueue_scripts() {
 		global $typenow;
 
 		// Get admin screen id
-		$screen = get_current_screen();
+		$screen = Framework\SV_WC_Helper::get_current_screen();
+
+		if ( ! $screen ) {
+			return;
+		}
+
+		$is_orders_screen = Framework\SV_WC_Order_Compatibility::is_order_edit_screen() || Framework\SV_WC_Order_Compatibility::is_orders_screen();
 
 		// make sure the woocommerce admin styles are available for both voucher template and voucher pages
-		if ( in_array( $screen->id, array( 'wc_voucher_template', 'wc_voucher' ) ) ) {
+		if ( in_array( $screen->id, ['wc_voucher_template', 'wc_voucher'], true ) ) {
 			wp_enqueue_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css' );
 		}
 
-		if ( in_array( $screen->id, array( 'wc_voucher', 'edit-wc_voucher' ) ) ) {
+		if ( in_array( $screen->id, ['wc_voucher', 'edit-wc_voucher'], true ) ) {
 
 			// load the WP Pointers script on some screens
 			wp_enqueue_style( 'wp-pointer' );
 			wp_enqueue_script( 'wp-pointer' );
 		}
 
-		$deps = array( 'jquery', 'jquery-tiptip' );
+		$deps = ['jquery', 'jquery-tiptip'];
 
 		if ( 'wc_voucher' === $screen->id ) {
 
@@ -235,7 +243,7 @@ class MWC_Gift_Certificates_Admin {
 			$deps[] = 'jquery-ui-datepicker';
 		}
 
-		if ( in_array( $screen->id, array_merge( [ 'product', 'shop_order', 'wc_voucher', 'edit-wc_voucher' ], $this->redeem_voucher_screen_ids ), true ) ) {
+		if ( $is_orders_screen || in_array( $screen->id, array_merge( [ 'product', 'shop_order', 'wc_voucher', 'edit-wc_voucher' ], $this->redeem_voucher_screen_ids ), true ) ) {
 
 			if ( ! wp_script_is( 'accounting', 'enqueued' ) ) {
 

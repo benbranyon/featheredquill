@@ -102,22 +102,40 @@ class RedirectToShippingDashboardInterceptor extends AbstractInterceptor
      *
      * @param AccountContract $account
      * @return void
+     * @throws InvalidUrlException
+     * @throws InvalidUrlSchemeException
      * @throws ShippingExceptionContract
      * @throws Exception
      */
     protected function redirectToShippingDashboard(AccountContract $account) : void
     {
-        Redirect::to($this->getDashboardUrl($account))->setSafe(false)->execute();
+        Redirect::to($this->buildDashboardUrl($account))->setSafe(false)->execute();
     }
 
     /**
-     * Gets the URL for the Shipping Dashboard of the given account.
+     * Builds a URL for the Shipping Dashboard of the given account.
+     *
+     * @param AccountContract $account
+     * @return string
+     * @throws InvalidUrlException
+     * @throws InvalidUrlSchemeException
+     * @throws ShippingExceptionContract
+     */
+    protected function buildDashboardUrl(AccountContract $account) : string
+    {
+        return Url::fromString($this->requestDashboardUrl($account))
+            ->addQueryParameter('brand', $this->getBrandName($account))
+            ->toString();
+    }
+
+    /**
+     * Issues a request to get the URL for the Shipping Dashboard of the given account.
      *
      * @param AccountContract $account
      * @return string
      * @throws ShippingExceptionContract
      */
-    protected function getDashboardUrl(AccountContract $account) : string
+    protected function requestDashboardUrl(AccountContract $account) : string
     {
         $operation = $this->getShippingAccountService()->getDashboardUrl(
             (new GetDashboardUrlOperation())
@@ -126,6 +144,17 @@ class RedirectToShippingDashboardInterceptor extends AbstractInterceptor
         );
 
         return $operation->getDashboardUrl();
+    }
+
+    /**
+     * Gets the brand name that should be included as a parameter of the Shipping Dashboard URL.
+     *
+     * @param AccountContract $account
+     * @return string
+     */
+    protected function getBrandName(AccountContract $account) : string
+    {
+        return _x('GoDaddy', 'GoDaddy name sent as brand name for the ShipEngine integration', 'mwc-core');
     }
 
     /**

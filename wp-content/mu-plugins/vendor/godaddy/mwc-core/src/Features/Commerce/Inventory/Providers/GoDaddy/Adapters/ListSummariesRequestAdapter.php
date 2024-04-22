@@ -9,6 +9,7 @@ use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\DataObjects\ListSummariesInput;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\DataObjects\Summary;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\GoDaddy\Adapters\Traits\CanConvertSummaryResponseTrait;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\GoDaddy\Adapters\Traits\CanGetProductIdsAsStringTrait;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\GoDaddy\Http\Requests\Request;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\Adapters\AbstractGatewayRequestAdapter;
 
@@ -16,6 +17,7 @@ class ListSummariesRequestAdapter extends AbstractGatewayRequestAdapter
 {
     use CanConvertSummaryResponseTrait;
     use CanGetNewInstanceTrait;
+    use CanGetProductIdsAsStringTrait;
 
     protected ListSummariesInput $input;
 
@@ -52,8 +54,19 @@ class ListSummariesRequestAdapter extends AbstractGatewayRequestAdapter
      */
     public function convertFromSource() : Request
     {
-        return Request::withAuth()
+        $queryArgs = [];
+        if ($productIds = $this->getProductIdsAsString($this->input->productIds)) {
+            $queryArgs['productIds'] = $productIds;
+        }
+
+        $request = Request::withAuth()
             ->setStoreId($this->input->storeId)
             ->setPath('/inventory-summaries');
+
+        if ($queryArgs) {
+            $request->setQuery($queryArgs);
+        }
+
+        return $request;
     }
 }

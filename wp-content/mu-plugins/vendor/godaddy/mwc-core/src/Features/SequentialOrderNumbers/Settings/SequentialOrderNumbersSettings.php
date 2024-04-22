@@ -2,6 +2,7 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Features\SequentialOrderNumbers\Settings;
 
+use Exception;
 use GoDaddy\WordPress\MWC\Common\Settings\Models\Control;
 use GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\Traits\CanGetWooCommerceSettingsDataStoreTrait;
 use GoDaddy\WordPress\MWC\Core\Settings\Models\SettingGroup;
@@ -46,6 +47,7 @@ class SequentialOrderNumbersSettings extends SettingGroup
      * Gets the initial settings.
      *
      * @return SequentialOrderNumbersSetting[]
+     * @throws Exception
      */
     protected function getInitialSettings() : array
     {
@@ -57,7 +59,7 @@ class SequentialOrderNumbersSettings extends SettingGroup
                 ->setName(static::SETTING_ID_STARTING_NUMBER)
                 ->setLabel(__('Starting number', 'mwc-core'))
                 ->setType(SequentialOrderNumbersSetting::TYPE_STRING)
-                ->setValue($plugin->get_order_number_start())
+                ->setValue((string) $plugin->get_order_number_start())
                 ->setControl((new Control())
                     ->setType(Control::TYPE_TEXT)
                 ),

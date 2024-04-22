@@ -8,6 +8,7 @@ use GoDaddy\WordPress\MWC\Common\Http\Url;
 use GoDaddy\WordPress\MWC\Common\Models\Cart;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\LineItem;
 use GoDaddy\WordPress\MWC\Common\Models\User;
+use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPressRepository;
 use GoDaddy\WordPress\MWC\Core\Features\CartRecoveryEmails\CartRecoveryEmails;
 use GoDaddy\WordPress\MWC\Core\Features\CartRecoveryEmails\Contracts\CheckoutEmailNotificationContract;
@@ -52,7 +53,7 @@ class CheckoutDataProvider implements DataProviderContract
         $customer = $checkout->getCustomer();
 
         return [
-            'customer_first_name' => $customer ? $customer->getFirstName() : _x('there', 'subject of greeting when name is not known', 'mwc-core'),
+            'customer_first_name' => $customer ? $customer->getFirstName() : _x('there', 'Subject of greeting when name is not known (this can be translated to empty string for languages where "Hi there!" cannot be rendered as in English and it will result in just "Hi!")', 'mwc-core'),
             'customer_last_name'  => $customer ? $customer->getLastName() : '',
             'internal'            => [
                 'cart_details' => $this->getCartDetails($checkout->getCart()),
@@ -82,11 +83,13 @@ class CheckoutDataProvider implements DataProviderContract
      */
     protected function getCartDetails(Cart $cart) : array
     {
+        $totalAmount = $cart->getTotalAmount();
+
         return [
             'cart_recovery_link' => $this->buildCartRecoveryLink(),
-            'currency'           => $cart->getTotalAmount()->getCurrencyCode(),
+            'currency'           => $totalAmount ? $totalAmount->getCurrencyCode() : WooCommerceRepository::getCurrency(),
             'total'              => (new CurrencyAmountAdapter(0, 'USD'))->convertToSource($cart->getTotalAmount()),
-            'total_formatted'    => $cart->getTotalAmount()->toFormattedString(),
+            'total_formatted'    => $totalAmount ? $totalAmount->toFormattedString() : '',
             'line_items'         => $this->getLineItemsData($cart->getLineItems()),
         ];
     }

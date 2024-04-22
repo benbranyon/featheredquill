@@ -7,7 +7,10 @@ use GoDaddy\WordPress\MWC\Common\Configuration\Configuration;
 use GoDaddy\WordPress\MWC\Common\Events\Contracts\ProducerContract;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\DeprecationHelper;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
+use GoDaddy\WordPress\MWC\Common\Http\Exceptions\InvalidMethodException;
 use GoDaddy\WordPress\MWC\Common\Http\Response;
+use GoDaddy\WordPress\MWC\Common\Http\Url\Exceptions\InvalidUrlException;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\LineItem;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerce\OrdersRepository;
@@ -18,15 +21,19 @@ use GoDaddy\WordPress\MWC\Core\Payments\Exceptions\MissingOrderException;
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt;
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Http\Adapters\ProductAdapter;
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Http\CreateOrderRequest;
+use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Traits\CanGetOrderRemoteIdForPoyntReferenceTrait;
 use GoDaddy\WordPress\MWC\Core\Sync\Jobs\PushSyncJob;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Adapters\OrderAdapter;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Models\Orders\Order as CoreOrder;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Models\Products\Product;
+use WC_Order;
 use WC_Product;
 use WC_Product_Variation;
 
 class PushOrdersProducer implements ProducerContract
 {
+    use CanGetOrderRemoteIdForPoyntReferenceTrait;
+
     /** @var string pickup mode */
     const PICKUP_MODE = 'PICKUP';
 
@@ -118,20 +125,41 @@ class PushOrdersProducer implements ProducerContract
             return;
         }
 
-        $order = (new OrderAdapter($wcOrder))->convertFromSource();
+        $order = OrderAdapter::getNewInstance($wcOrder)->convertFromSource();
 
-        $response = (new CreateOrderRequest())
+        // Return early if the order already exists in the Commerce platform. If we create the order in
+        // Poynt, they will create a duplicate of the order in the Commerce platform.
+        if ($this->getCommerceRemoteId($order)) {
+            return;
+        }
+
+        return $this->sendCreateOrderRequest($order, $wcOrder);
+    }
+
+    /**
+     * Sends a create order request to Poynt.
+     *
+     * @param CoreOrder $order
+     * @param WC_Order $wcOrder
+     * @return Response
+     * @throws FailedOrderException
+     * @throws InvalidMethodException
+     * @throws InvalidUrlException
+     * @throws Exception
+     */
+    protected function sendCreateOrderRequest(CoreOrder $order, WC_Order $wcOrder) : Response
+    {
+        $response = CreateOrderRequest::getNewInstance()
             ->setBody($this->buildCreateOrderBody($order))
             ->send();
 
         if ($response->isSuccess()) {
-            if (! $this->addPoyntOrderId($response, $orderId)) {
-                throw new FailedOrderException('Could not create order meta for poynt order ID.');
-            }
+            $this->addPoyntOrderId($response, $wcOrder);
         }
 
         if ($response->isError() || $response->getStatus() !== 201) {
-            $errorMessage = ArrayHelper::get($response->getBody(), 'developerMessage');
+            $errorMessage = TypeHelper::string(ArrayHelper::get($response->getBody(), 'developerMessage'), '');
+
             throw new FailedOrderException("Could not send the create order ({$response->getStatus()}): {$errorMessage}");
         }
 
@@ -415,11 +443,10 @@ class PushOrdersProducer implements ProducerContract
 
     /**
      * Adds Poynt OrderId to the WC_Order meta.
-     *
-     * @return bool WC order meta to the remote Poynt Order ID.
      */
-    protected function addPoyntOrderId(Response $response, int $orderId) : bool
+    protected function addPoyntOrderId(Response $response, WC_Order $wcOrder) : void
     {
-        return update_post_meta($orderId, '_poynt_order_remoteId', ArrayHelper::get($response->getBody(), 'id'));
+        $wcOrder->update_meta_data('_poynt_order_remoteId', TypeHelper::string(ArrayHelper::get($response->getBody(), 'id'), ''));
+        $wcOrder->save_meta_data();
     }
 }

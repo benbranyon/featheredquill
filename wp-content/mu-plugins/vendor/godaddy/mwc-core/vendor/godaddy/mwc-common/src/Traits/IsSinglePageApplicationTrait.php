@@ -7,8 +7,6 @@ use GoDaddy\WordPress\MWC\Common\Enqueue\Enqueue;
 
 /**
  * A trait for handling single page application pages.
- *
- * @since 1.0.0
  */
 trait IsSinglePageApplicationTrait
 {
@@ -21,7 +19,7 @@ trait IsSinglePageApplicationTrait
     /** @var string ID of the div element inside which the page will be rendered */
     protected $divId;
 
-    /** @var array Array of properties to be added to the host div */
+    /** @var array<mixed> array of properties to be added to the host div */
     protected $divProperties = [];
 
     /** @var string String of styles to apply to the div hosting the application */
@@ -30,9 +28,9 @@ trait IsSinglePageApplicationTrait
     /**
      * Renders the page HTML.
      *
-     * @since 1.0.0
+     * @return void
      */
-    public function render()
+    public function render() : void
     {
         ?>
         <div id="<?php echo $this->divId; ?>" style="<?php echo $this->divStyles; ?>"></div>
@@ -42,11 +40,10 @@ trait IsSinglePageApplicationTrait
     /**
      * Enqueues the single page application script.
      *
-     * @since 1.0.0
-     *
+     * @return void
      * @throws Exception
      */
-    public function enqueueApp()
+    public function enqueueApp() : void
     {
         $script = Enqueue::script()
             ->setHandle($this->appHandle)

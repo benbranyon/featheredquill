@@ -4,16 +4,13 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit9918065c10e9060be8e53b2d1a910533
+class ComposerStaticInit821a79ad78d8f271024fc8c282886ff5
 {
     public static $files = array (
-        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
+        '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '0d59ee240a4cd96ddbb4ff164fccea4d' => __DIR__ . '/..' . '/symfony/polyfill-php73/bootstrap.php',
-        '9c67151ae59aff4788964ce8eb2a0f43' => __DIR__ . '/..' . '/clue/stream-filter/src/functions_include.php',
-        '8cff32064859f4559445b89279f3199c' => __DIR__ . '/..' . '/php-http/message/src/filters.php',
-        '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
-        'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
+        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -25,10 +22,7 @@ class ComposerStaticInit9918065c10e9060be8e53b2d1a910533
         array (
             'Symfony\\Polyfill\\Php80\\' => 23,
             'Symfony\\Polyfill\\Php73\\' => 23,
-            'Symfony\\Contracts\\Service\\' => 26,
-            'Symfony\\Contracts\\HttpClient\\' => 29,
             'Symfony\\Component\\OptionsResolver\\' => 34,
-            'Symfony\\Component\\HttpClient\\' => 29,
             'Svg\\' => 4,
             'Stripe\\' => 7,
             'Sentry\\' => 7,
@@ -38,54 +32,37 @@ class ComposerStaticInit9918065c10e9060be8e53b2d1a910533
         array (
             'Psr\\Log\\' => 8,
             'Psr\\Http\\Message\\' => 17,
-            'Psr\\Http\\Client\\' => 16,
-            'Psr\\Container\\' => 14,
         ),
         'M' => 
         array (
             'McAskill\\Composer\\' => 18,
             'Masterminds\\' => 12,
         ),
-        'L' => 
-        array (
-            'League\\Container\\' => 17,
-        ),
         'J' => 
         array (
             'Jean85\\' => 7,
         ),
-        'H' => 
-        array (
-            'Http\\Promise\\' => 13,
-            'Http\\Message\\' => 13,
-            'Http\\Factory\\Guzzle\\' => 20,
-            'Http\\Discovery\\' => 15,
-            'Http\\Client\\Common\\' => 19,
-            'Http\\Client\\' => 12,
-        ),
         'G' => 
         array (
             'GuzzleHttp\\Psr7\\' => 16,
-            'GuzzleHttp\\Promise\\' => 19,
             'GoDaddy\\WordPress\\MWC\\Shipping\\' => 31,
             'GoDaddy\\WordPress\\MWC\\Payments\\' => 31,
+            'GoDaddy\\WordPress\\MWC\\GoogleAnalytics\\' => 38,
             'GoDaddy\\WordPress\\MWC\\Dashboard\\' => 32,
+            'GoDaddy\\WordPress\\MWC\\Core\\Vendor\\Firebase\\JWT\\' => 47,
             'GoDaddy\\WordPress\\MWC\\Core\\' => 27,
+            'GoDaddy\\WordPress\\MWC\\Common\\Vendor\\Psr\\Container\\' => 50,
+            'GoDaddy\\WordPress\\MWC\\Common\\Vendor\\League\\Container\\' => 53,
             'GoDaddy\\WordPress\\MWC\\Common\\Tests\\' => 35,
             'GoDaddy\\WordPress\\MWC\\Common\\' => 29,
         ),
         'F' => 
         array (
             'FontLib\\' => 8,
-            'Firebase\\JWT\\' => 13,
         ),
         'D' => 
         array (
             'Dompdf\\' => 7,
-        ),
-        'C' => 
-        array (
-            'Clue\\StreamFilter\\' => 18,
         ),
     );
 
@@ -102,21 +79,9 @@ class ComposerStaticInit9918065c10e9060be8e53b2d1a910533
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php73',
         ),
-        'Symfony\\Contracts\\Service\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/service-contracts',
-        ),
-        'Symfony\\Contracts\\HttpClient\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/http-client-contracts',
-        ),
         'Symfony\\Component\\OptionsResolver\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/options-resolver',
-        ),
-        'Symfony\\Component\\HttpClient\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/http-client',
         ),
         'Svg\\' => 
         array (
@@ -143,14 +108,6 @@ class ComposerStaticInit9918065c10e9060be8e53b2d1a910533
             0 => __DIR__ . '/..' . '/psr/http-message/src',
             1 => __DIR__ . '/..' . '/psr/http-factory/src',
         ),
-        'Psr\\Http\\Client\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/psr/http-client/src',
-        ),
-        'Psr\\Container\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/psr/container/src',
-        ),
         'McAskill\\Composer\\' => 
         array (
             0 => __DIR__ . '/..' . '/mcaskill/composer-exclude-files/src',
@@ -159,46 +116,13 @@ class ComposerStaticInit9918065c10e9060be8e53b2d1a910533
         array (
             0 => __DIR__ . '/..' . '/masterminds/html5/src',
         ),
-        'League\\Container\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/league/container/src',
-        ),
         'Jean85\\' => 
         array (
             0 => __DIR__ . '/..' . '/jean85/pretty-package-versions/src',
         ),
-        'Http\\Promise\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/php-http/promise/src',
-        ),
-        'Http\\Message\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/php-http/message-factory/src',
-            1 => __DIR__ . '/..' . '/php-http/message/src',
-        ),
-        'Http\\Factory\\Guzzle\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/http-interop/http-factory-guzzle/src',
-        ),
-        'Http\\Discovery\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/php-http/discovery/src',
-        ),
-        'Http\\Client\\Common\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/php-http/client-common/src',
-        ),
-        'Http\\Client\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/php-http/httplug/src',
-        ),
         'GuzzleHttp\\Psr7\\' => 
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/psr7/src',
-        ),
-        'GuzzleHttp\\Promise\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/guzzlehttp/promises/src',
         ),
         'GoDaddy\\WordPress\\MWC\\Shipping\\' => 
         array (
@@ -208,13 +132,29 @@ class ComposerStaticInit9918065c10e9060be8e53b2d1a910533
         array (
             0 => __DIR__ . '/..' . '/godaddy/mwc-payments/src',
         ),
+        'GoDaddy\\WordPress\\MWC\\GoogleAnalytics\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/godaddy/mwc-google-analytics/src',
+        ),
         'GoDaddy\\WordPress\\MWC\\Dashboard\\' => 
         array (
             0 => __DIR__ . '/..' . '/godaddy/mwc-dashboard/src',
         ),
+        'GoDaddy\\WordPress\\MWC\\Core\\Vendor\\Firebase\\JWT\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/scoped/packages/firebase/php-jwt/src',
+        ),
         'GoDaddy\\WordPress\\MWC\\Core\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
+        ),
+        'GoDaddy\\WordPress\\MWC\\Common\\Vendor\\Psr\\Container\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/godaddy/mwc-common/scoped/packages/psr/container/src',
+        ),
+        'GoDaddy\\WordPress\\MWC\\Common\\Vendor\\League\\Container\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/godaddy/mwc-common/scoped/packages/league/container/src',
         ),
         'GoDaddy\\WordPress\\MWC\\Common\\Tests\\' => 
         array (
@@ -228,17 +168,9 @@ class ComposerStaticInit9918065c10e9060be8e53b2d1a910533
         array (
             0 => __DIR__ . '/..' . '/phenx/php-font-lib/src/FontLib',
         ),
-        'Firebase\\JWT\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/firebase/php-jwt/src',
-        ),
         'Dompdf\\' => 
         array (
             0 => __DIR__ . '/..' . '/dompdf/dompdf/src',
-        ),
-        'Clue\\StreamFilter\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/clue/stream-filter/src',
         ),
     );
 
@@ -256,9 +188,9 @@ class ComposerStaticInit9918065c10e9060be8e53b2d1a910533
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit9918065c10e9060be8e53b2d1a910533::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit9918065c10e9060be8e53b2d1a910533::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit9918065c10e9060be8e53b2d1a910533::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit821a79ad78d8f271024fc8c282886ff5::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit821a79ad78d8f271024fc8c282886ff5::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit821a79ad78d8f271024fc8c282886ff5::$classMap;
 
         }, null, ClassLoader::class);
     }

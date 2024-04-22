@@ -53,12 +53,32 @@ class PaymentForm extends WooCommercePaymentForm
      */
     public function registerHooks()
     {
+        if (! $this->shouldRegisterHooks()) {
+            return;
+        }
+
         parent::registerHooks();
 
         Register::action()
                 ->setGroup('wp_enqueue_scripts')
                 ->setHandler([$this, 'enqueueScripts'])
                 ->execute();
+    }
+
+    /**
+     * Determines whether the hooks for Stripe should be registered or not.
+     *
+     * @NOTE: In its implementation, when the payments.stripe.enabled configuration is true, it means
+     *        Stripe::isConnected() is also true. The configuration is checked before the static method for
+     *        optimization purposes given that it's cheaper. At the same time, the static method is kept
+     *        to cover cases when the enabled configuration is set to true but the gateway is not connected or
+     *        even when it's still cached.
+     *
+     * @return bool
+     */
+    protected function shouldRegisterHooks() : bool
+    {
+        return Configuration::get('payments.stripe.enabled', false) && Stripe::isConnected();
     }
 
     /**

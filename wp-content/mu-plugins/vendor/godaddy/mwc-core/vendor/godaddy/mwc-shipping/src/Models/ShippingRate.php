@@ -9,6 +9,7 @@ use GoDaddy\WordPress\MWC\Common\Traits\HasStringIdentifierTrait;
 use GoDaddy\WordPress\MWC\Common\Traits\HasStringRemoteIdentifierTrait;
 use GoDaddy\WordPress\MWC\Shipping\Contracts\ShippingServiceContract;
 use GoDaddy\WordPress\MWC\Shipping\Models\Contracts\CarrierContract;
+use GoDaddy\WordPress\MWC\Shipping\Models\Contracts\PackageTypeContract;
 use GoDaddy\WordPress\MWC\Shipping\Models\Contracts\ShippingRateContract;
 use GoDaddy\WordPress\MWC\Shipping\Models\Contracts\ShippingRateItemContract;
 
@@ -31,6 +32,9 @@ class ShippingRate extends AbstractModel implements ShippingRateContract
 
     /** @var CarrierContract */
     protected $carrier;
+
+    /** @var PackageTypeContract|null */
+    protected ?PackageTypeContract $packageType = null;
 
     /** @var ShippingServiceContract */
     protected $service;
@@ -134,6 +138,24 @@ class ShippingRate extends AbstractModel implements ShippingRateContract
     public function setCarrier(CarrierContract $value)
     {
         $this->carrier = $value;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getPackageType() : ?PackageTypeContract
+    {
+        return $this->packageType;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setPackageType(?PackageTypeContract $value)
+    {
+        $this->packageType = $value;
 
         return $this;
     }

@@ -4,7 +4,6 @@ namespace GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Interceptors;
 
 use Exception;
 use GoDaddy\WordPress\MWC\Common\Exceptions\SentryException;
-use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
 use GoDaddy\WordPress\MWC\Common\Interceptors\AbstractInterceptor;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
@@ -49,22 +48,6 @@ class OrderInterceptor extends AbstractInterceptor
             ->setGroup('update_postmeta')
             ->setHandler([$this, 'maybeAddWalmartOrderStatusNote'])
             ->setArgumentsCount(4)
-            ->execute();
-
-        $this->addOrderStatusesFilterHook();
-    }
-
-    /**
-     * Sets a filter for the order statuses.
-     *
-     * @return void
-     * @throws Exception
-     */
-    protected function addOrderStatusesFilterHook() : void
-    {
-        Register::filter()
-            ->setGroup('wc_order_statuses')
-            ->setHandler([$this, 'removeOrderStatusesForMarketplacesOrders'])
             ->execute();
     }
 
@@ -119,48 +102,6 @@ class OrderInterceptor extends AbstractInterceptor
         }
 
         return $shouldRenderRefunds;
-    }
-
-    /**
-     * Removes refund and failed statuses for Marketplaces orders.
-     *
-     * @see \wc_get_order_statuses() but in the context of {@see WC_Meta_Box_Order_Data::output()}
-     *
-     * @internal
-     *
-     * @param string[]|mixed $statuses
-     * @return string[]|mixed
-     */
-    public function removeOrderStatusesForMarketplacesOrders($statuses)
-    {
-        global $theorder;
-
-        if (! $theorder instanceof WC_Order || is_a($theorder, 'WC_Subscription') || ! ArrayHelper::accessible($statuses) || ! WordPressRepository::isAdmin()) {
-            return $statuses;
-        }
-
-        // prevents circular loops within this filter while adapting the order
-        remove_filter('wc_order_statuses', [$this, 'removeOrderStatusesForMarketplacesOrders']);
-
-        try {
-            $order = OrderAdapter::getNewInstance($theorder)->convertFromSource();
-
-            if ($order->hasMarketplacesChannel()) {
-                unset($statuses['wc-failed']);
-
-                // orders that have been returned can be marked as refunded
-                if ('returned' !== $order->getMarketplacesStatus()) {
-                    unset($statuses['wc-refunded']);
-                }
-            }
-
-            $this->addOrderStatusesFilterHook();
-        } catch (Exception $exception) {
-            // since we are in a callback context, we should catch any exceptions and just report them to Sentry
-            new SentryException($exception->getMessage(), $exception);
-        }
-
-        return $statuses;
     }
 
     /**

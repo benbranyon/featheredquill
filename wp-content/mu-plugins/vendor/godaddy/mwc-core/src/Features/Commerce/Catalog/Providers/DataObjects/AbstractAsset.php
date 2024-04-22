@@ -11,6 +11,9 @@ use GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\DataObjects\AbstractD
  *
  * @see ImageAsset
  * @see VideoAsset
+ * @see UnsupportedAsset
+ *
+ * @method static static getNewInstance(array $data)
  */
 abstract class AbstractAsset extends AbstractDataObject
 {

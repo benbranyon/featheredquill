@@ -2,7 +2,6 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Features\GoDaddyPayments\Interceptors;
 
-use Exception;
 use GoDaddy\WordPress\MWC\Core\Admin\Notices\Notice;
 use GoDaddy\WordPress\MWC\Core\Admin\Notices\Notices;
 use GoDaddy\WordPress\MWC\Core\Features\GoDaddyPayments\Notices\BusinessConnectedNotice;
@@ -28,7 +27,6 @@ class EnqueueBusinessStatusNoticeInterceptor extends AbstractGoDaddyPaymentsNoti
 
     /**
      * {@inheritDoc}
-     * @throws Exception
      */
     public function enqueueNotice() : void
     {

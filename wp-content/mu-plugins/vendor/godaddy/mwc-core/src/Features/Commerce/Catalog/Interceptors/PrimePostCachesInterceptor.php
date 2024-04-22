@@ -6,6 +6,7 @@ use Exception;
 use GoDaddy\WordPress\MWC\Common\Interceptors\AbstractInterceptor;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Interceptors\Handlers\PrimePostCachesHandler;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Enums\CustomWordPressCoreHook;
 
 /**
  * Interceptor for priming product post caches.
@@ -22,7 +23,7 @@ class PrimePostCachesInterceptor extends AbstractInterceptor
     {
         /* @see _prime_post_caches() */
         Register::filter()
-            ->setGroup('godaddy/prime_post_caches/posts')
+            ->setGroup(CustomWordPressCoreHook::PrimePostCaches_Posts)
             ->setHandler([PrimePostCachesHandler::class, 'handle'])
             ->setArgumentsCount(2)
             ->execute();

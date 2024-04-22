@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/woocommerce-pdf-product-vouchers/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2012-2021, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright Copyright (c) 2012-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -30,7 +30,7 @@ use GoDaddy\WordPress\MWC\GiftCertificates\Customizer\MWC_Gift_Certificates_Cust
 use GoDaddy\WordPress\MWC\GiftCertificates\Emails\MWC_Gift_Certificates_Email_Voucher_Purchaser;
 use GoDaddy\WordPress\MWC\GiftCertificates\Emails\MWC_Gift_Certificates_Email_Voucher_Recipient;
 use GoDaddy\WordPress\MWC\GiftCertificates\Frontend\MWC_Gift_Certificates_Frontend;
-use SkyVerge\WooCommerce\PluginFramework\v5_10_12 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v5_11_0 as Framework;
 
 /**
  * MWC Gift Certificates Main Plugin Class
@@ -41,7 +41,7 @@ class MWC_Gift_Certificates extends Framework\SV_WC_Plugin {
 
 
 	/** version number */
-	const VERSION = '4.0.0';
+	const VERSION = '4.1.0'; // 3.12.1 of PDF Product Vouchers
 
 	/** @var MWC_Gift_Certificates single instance of this plugin */
 	protected static $instance;
@@ -51,6 +51,9 @@ class MWC_Gift_Certificates extends Framework\SV_WC_Plugin {
 
 	/** Voucher image thumbnail width */
 	const VOUCHER_IMAGE_THUMB_WIDTH = 100;
+
+	/** int Recommended memory in bytes */
+	const RECOMMENDED_MEMORY = 536870912; // 512MB
 
 	/** @var MWC_Gift_Certificates_AJAX ajax class */
 	private $ajax;
@@ -88,6 +91,9 @@ class MWC_Gift_Certificates extends Framework\SV_WC_Plugin {
 	/** @var MWC_Gift_Certificates_Redemption_Handler instance */
 	protected $redemption_handler;
 
+	/** @var Integrations instance */
+	protected $integrations;
+
 
 	/**
 	 * Sets up the main plugin class.
@@ -99,16 +105,17 @@ class MWC_Gift_Certificates extends Framework\SV_WC_Plugin {
 		parent::__construct(
 			self::PLUGIN_ID,
 			self::VERSION,
-			array(
+			[
 				'text_domain'        => 'woocommerce-pdf-product-vouchers',
-				'dependencies'       => array(
-					'php_extensions' => array(
+				'supports_hpos'      => true,
+				'dependencies'       => [
+					'php_extensions' => [
 						'dom',
 						'gd',
 						'mbstring',
-					),
-				),
-			)
+					],
+				],
+			]
 		);
 
 		// generate voucher pdf, attach to emails, handle downloads
@@ -1078,6 +1085,16 @@ class MWC_Gift_Certificates extends Framework\SV_WC_Plugin {
 	public function get_support_url() {
 
 		return 'https://woocommerce.com/my-account/marketplace-ticket-form/';
+	}
+
+
+	/**
+	 * Handles HPOS compatibility.
+	 *
+	 * @return void
+	 */
+	public function handle_hpos_compatibility() {
+		// no-op for MWC dependencies
 	}
 
 

@@ -2,8 +2,6 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\GoDaddy\Adapters\Traits;
 
-use DateTime;
-use Exception;
 use GoDaddy\WordPress\MWC\Common\Exceptions\SentryException;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
@@ -17,9 +15,12 @@ use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\L
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ManufacturerData;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ProductBase;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ShippingWeightAndDimensions;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\UnsupportedAsset;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\VariantListOption;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\VariantOptionMapping;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\VideoAsset;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\Weight;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataSources\Adapters\ExternalIdsAdapter;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\MissingProductRemoteIdException;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\DataObjects\ExternalId;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\DataObjects\SimpleMoney;
@@ -30,6 +31,9 @@ use GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\DataObjects\Value;
  */
 trait CanConvertProductResponseTrait
 {
+    use CanParseNullableStringPropertyTrait;
+    use CanConvertDateTimeFromTimestampTrait;
+
     /**
      * Converts a Commerce product response to a {@see ProductBase} object.
      *
@@ -45,10 +49,11 @@ trait CanConvertProductResponseTrait
             'altId'                       => $this->parseNullableStringProperty($responseData, 'altId'),
             'assets'                      => $this->convertAssets($responseData),
             'brand'                       => $this->parseNullableStringProperty($responseData, 'brand'),
-            'categoryIds'                 => [], // @TODO to be adapted when we handle categories (no story yet) {agibson 2023-04-03}
+            'categoryIds'                 => TypeHelper::arrayOfStrings(ArrayHelper::get($responseData, 'categoryIds')),
             'channelIds'                  => TypeHelper::arrayOfStrings(ArrayHelper::get($responseData, 'channelIds', [])),
             'condition'                   => $this->parseNullableStringProperty($responseData, 'condition'),
             'createdAt'                   => $this->convertDateTimeFromTimestamp($responseData, 'createdAt'),
+            'deletedAt'                   => $this->convertDateTimeFromTimestamp($responseData, 'deletedAt'),
             'description'                 => $this->parseNullableStringProperty($responseData, 'description'),
             'ean'                         => $this->parseNullableStringProperty($responseData, 'ean'),
             'externalIds'                 => $this->convertExternalIds($responseData),
@@ -67,28 +72,62 @@ trait CanConvertProductResponseTrait
             'taxCategory'                 => $this->parseNullableStringProperty($responseData, 'taxCategory'),
             'type'                        => $this->parseNullableStringProperty($responseData, 'type'),
             'updatedAt'                   => $this->convertDateTimeFromTimestamp($responseData, 'updatedAt'),
+            'variantOptionMapping'        => $this->convertVariantOptionMappingToSource($responseData),
+            'variants'                    => $this->parseNullableArrayOfStringsProperty($responseData, 'variants'),
         ]);
     }
 
     /**
-     * Parses a simple nullable property from a Commerce response to string or null.
+     * Convert the variant option mapping.
+     *
+     * @param array<mixed> $responseData
+     * @return ?VariantOptionMapping[]
+     */
+    protected function convertVariantOptionMappingToSource(array $responseData) : ?array
+    {
+        /** @var array<array<string, string>> $mapping */
+        $mapping = TypeHelper::array(ArrayHelper::get($responseData, 'variantOptionMapping', []), []);
+
+        if (empty($mapping)) {
+            return null;
+        }
+
+        $finalMapping = [];
+        foreach ($mapping as $optionMap) {
+            if (ArrayHelper::accessible($optionMap) && ! empty($optionMap['name']) && ! empty($optionMap['value'])) {
+                $finalMapping[] = VariantOptionMapping::getNewInstance([
+                    'name'  => $optionMap['name'],
+                    'value' => $optionMap['value'],
+                ]);
+            }
+        }
+
+        return $finalMapping ?: null;
+    }
+
+    /**
+     * Parses a simple nullable property from a Commerce response to array of strings or null.
      *
      * @param array<string, mixed> $responseData
      * @param string $key
-     * @return string|null
+     * @return string[]|null
      */
-    protected function parseNullableStringProperty(array $responseData, string $key) : ?string
+    protected function parseNullableArrayOfStringsProperty(array $responseData, string $key) : ?array
     {
         $value = ArrayHelper::get($responseData, $key);
 
-        return $value ? TypeHelper::string($value, '') : null;
+        if (null === $value) {
+            return null;
+        }
+
+        return TypeHelper::arrayOfStrings($value, false);
     }
 
     /**
      * Convert product assets from a Commerce response into corresponding {@see AbstractAsset} objects.
      *
      * @param array<string, mixed> $responseData
-     * @return ?array<AbstractAsset|ImageAsset|VideoAsset>
+     * @return ?array<AbstractAsset|ImageAsset|VideoAsset|UnsupportedAsset>
      */
     protected function convertAssets(array $responseData) : ?array
     {
@@ -127,35 +166,14 @@ trait CanConvertProductResponseTrait
                     $asset = VideoAsset::getNewInstance($assetArgs);
                     break;
                 default:
-                    continue 2;
+                    $asset = UnsupportedAsset::getNewInstance(array_merge($assetArgs, ['type' => $type]));
+                    break;
             }
 
             $assets[] = $asset;
         }
 
         return $assets;
-    }
-
-    /**
-     * Converts a timestamp from a Commerce response to a datetime object.
-     *
-     * @param array<string, mixed> $responseData
-     * @param string $key
-     * @return string|null
-     */
-    protected function convertDateTimeFromTimestamp(array $responseData, string $key) : ?string
-    {
-        $dateTime = TypeHelper::string(ArrayHelper::get($responseData, $key), '');
-
-        if (empty($dateTime)) {
-            return null;
-        }
-
-        try {
-            return (new DateTime($dateTime))->format('Y-m-d\TH:i:s\Z');
-        } catch (Exception $e) {
-            return null;
-        }
     }
 
     /**
@@ -166,24 +184,10 @@ trait CanConvertProductResponseTrait
      */
     protected function convertExternalIds(array $responseData) : ?array
     {
+        /** @var array<array<string, string>> $externalIdsData */
         $externalIdsData = TypeHelper::array(ArrayHelper::get($responseData, 'externalIds'), []);
-        $externalIds = [];
 
-        foreach ($externalIdsData as $externalId) {
-            $type = TypeHelper::string(ArrayHelper::get($externalId, 'type'), '');
-            $value = TypeHelper::string(ArrayHelper::get($externalId, 'value'), '');
-
-            if (empty($type) || empty($value)) {
-                continue;
-            }
-
-            $externalIds[] = new ExternalId([
-                'type'  => $type,
-                'value' => $value,
-            ]);
-        }
-
-        return $externalIds ?: null;
+        return ExternalIdsAdapter::getNewInstance()->convertToSourceFromArray($externalIdsData);
     }
 
     /**
@@ -242,18 +246,12 @@ trait CanConvertProductResponseTrait
             return null;
         }
 
-        $backorderable = TypeHelper::bool(ArrayHelper::get($inventoryData, 'backorderable'), false);
         $externalService = TypeHelper::bool(ArrayHelper::get($inventoryData, 'externalService'), false);
         $tracking = TypeHelper::bool(ArrayHelper::get($inventoryData, 'tracking'), false);
-        // account for quantity to be null when not set for a WooCommerce product (not 0)
-        $quantity = ArrayHelper::get($inventoryData, 'quantity');
-        $quantity = null !== $quantity ? TypeHelper::float($quantity, 0) : null;
 
         return Inventory::getNewInstance([
-            'backorderable'   => $backorderable,
             'externalService' => $externalService,
             'tracking'        => $tracking,
-            'quantity'        => $quantity,
         ]);
     }
 
@@ -389,8 +387,7 @@ trait CanConvertProductResponseTrait
         $value = TypeHelper::array(ArrayHelper::get($responseData, $key), []);
 
         if (! $value) {
-            new SentryException(sprintf('Missing %s data', $key));
-
+            // sale prices are expected to be nullable
             return null;
         }
 

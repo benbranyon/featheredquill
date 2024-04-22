@@ -1,5 +1,14 @@
 <?php
 
+use GoDaddy\WordPress\MWC\Common\HostingPlans\Enums\HostingPlanNamesEnum;
+use GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Adapters\Webhooks\ChannelWebhookPayloadAdapter;
+use GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Adapters\Webhooks\GoogleAdsTrackingWebhookPayloadAdapter;
+use GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Adapters\Webhooks\GoogleVerificationWebhookPayloadAdapter;
+use GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Adapters\Webhooks\ListingWebhookPayloadAdapter;
+use GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Adapters\Webhooks\MerchantProvisionedViaChatterboxWebhookPayloadAdapter;
+use GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Adapters\Webhooks\OrderWebhookPayloadAdapter;
+use GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Models\Channel;
+
 return [
     /*
      *--------------------------------------------------------------------------
@@ -16,10 +25,16 @@ return [
      *--------------------------------------------------------------------------
      */
     'plan_limits' => [
-        'essentials' => 1000,
-        'flex'       => 1000,
-        'expand'     => 2500,
-        'premier'    => 5000,
+        HostingPlanNamesEnum::Essentials         => 1000,
+        HostingPlanNamesEnum::EssentialsCA       => 1000,
+        HostingPlanNamesEnum::EssentialsWorldpay => 1000,
+        HostingPlanNamesEnum::Flex               => 1000,
+        HostingPlanNamesEnum::FlexCA             => 1000,
+        HostingPlanNamesEnum::FlexWorldpay       => 1000,
+        HostingPlanNamesEnum::Expand             => 2500,
+        HostingPlanNamesEnum::ExpandCA           => 2500,
+        HostingPlanNamesEnum::ExpandWorldpay     => 2500,
+        HostingPlanNamesEnum::Premier            => 5000,
     ],
 
     /*
@@ -31,12 +46,12 @@ return [
         'types' => defined('MWC_GDM_CHANNEL_TYPES')
             ? (array) MWC_GDM_CHANNEL_TYPES
             : [
-                \GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Models\Channel::TYPE_AMAZON => 'Amazon',
-                \GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Models\Channel::TYPE_EBAY   => 'eBay',
-                // \GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Models\Channel::TYPE_FACEBOOK => 'Facebook', // @TODO uncomment when available {unfulvio 2022-08-17}
-                \GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Models\Channel::TYPE_WALMART => 'Walmart',
-                \GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Models\Channel::TYPE_ETSY    => 'Etsy',
-                \GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Models\Channel::TYPE_GOOGLE  => 'Google',
+                Channel::TYPE_AMAZON   => 'Amazon',
+                Channel::TYPE_EBAY     => 'eBay',
+                Channel::TYPE_FACEBOOK => 'Facebook',
+                Channel::TYPE_WALMART  => 'Walmart',
+                Channel::TYPE_ETSY     => 'Etsy',
+                Channel::TYPE_GOOGLE   => 'Google',
             ],
 
         /* Google channel specific settings */
@@ -53,12 +68,12 @@ return [
      */
     'webhooks' => [
         'adapters' => [
-            'chatterboxProvisioned' => \GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Adapters\Webhooks\MerchantProvisionedViaChatterboxWebhookPayloadAdapter::class,
-            'googleTracking'        => \GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Adapters\Webhooks\GoogleAdsTrackingWebhookPayloadAdapter::class,
-            'googleVerification'    => \GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Adapters\Webhooks\GoogleVerificationWebhookPayloadAdapter::class,
-            'listing'               => \GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Adapters\Webhooks\ListingWebhookPayloadAdapter::class,
-            'channel'               => \GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Adapters\Webhooks\ChannelWebhookPayloadAdapter::class,
-            'order'                 => \GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Adapters\Webhooks\OrderWebhookPayloadAdapter::class,
+            'chatterboxProvisioned' => MerchantProvisionedViaChatterboxWebhookPayloadAdapter::class,
+            'googleTracking'        => GoogleAdsTrackingWebhookPayloadAdapter::class,
+            'googleVerification'    => GoogleVerificationWebhookPayloadAdapter::class,
+            'listing'               => ListingWebhookPayloadAdapter::class,
+            'channel'               => ChannelWebhookPayloadAdapter::class,
+            'order'                 => OrderWebhookPayloadAdapter::class,
         ],
     ],
 

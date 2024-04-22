@@ -4,6 +4,7 @@ namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Operations;
 
 use GoDaddy\WordPress\MWC\Common\Traits\CanSeedTrait;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Operations\Contracts\CreateOrUpdateProductOperationContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ChannelIds;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Models\Products\Product;
 
 /**
@@ -19,6 +20,9 @@ class CreateOrUpdateProductOperation implements CreateOrUpdateProductOperationCo
     /** @var int the product's local WooCommerce ID */
     protected int $localId;
 
+    /** @var ChannelIds Channel IDs to add or remove */
+    protected ChannelIds $channelIds;
+
     /**
      * Creates an operation from a given Product.
      *
@@ -28,8 +32,9 @@ class CreateOrUpdateProductOperation implements CreateOrUpdateProductOperationCo
     public static function fromProduct(Product $product) : CreateOrUpdateProductOperation
     {
         return static::seed([
-            'product' => $product,
-            'localId' => $product->getId(),
+            'product'    => $product,
+            'localId'    => $product->getId(),
+            'channelIds' => new ChannelIds([]),
         ]);
     }
 
@@ -77,5 +82,28 @@ class CreateOrUpdateProductOperation implements CreateOrUpdateProductOperationCo
     public function getLocalId() : int
     {
         return $this->localId;
+    }
+
+    /**
+     * Sets the ChannelIds DTO for POST and PATCH requests.
+     *
+     * @param ChannelIds $value
+     * @return CreateOrUpdateProductOperation
+     */
+    public function setChannelIds(ChannelIds $value) : CreateOrUpdateProductOperation
+    {
+        $this->channelIds = $value;
+
+        return $this;
+    }
+
+    /**
+     * Gets the ChannelIds DTO for POST and PATCH requests.
+     *
+     * @return ChannelIds
+     */
+    public function getChannelIds() : ChannelIds
+    {
+        return $this->channelIds;
     }
 }

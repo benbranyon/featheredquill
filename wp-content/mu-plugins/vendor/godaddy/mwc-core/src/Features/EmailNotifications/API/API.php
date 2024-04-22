@@ -3,7 +3,6 @@
 namespace GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\API;
 
 use Exception;
-use Firebase\JWT\ExpiredException;
 use GoDaddy\WordPress\MWC\Common\API\API as CommonAPI;
 use GoDaddy\WordPress\MWC\Common\Components\Traits\HasComponentsTrait;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
@@ -16,6 +15,7 @@ use GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\API\Controllers\Email
 use GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\API\Controllers\SendersController;
 use GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\API\Controllers\SettingsController;
 use GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\EmailsPage;
+use GoDaddy\WordPress\MWC\Core\Vendor\Firebase\JWT\ExpiredException;
 use WP_Error;
 use WP_REST_Request;
 

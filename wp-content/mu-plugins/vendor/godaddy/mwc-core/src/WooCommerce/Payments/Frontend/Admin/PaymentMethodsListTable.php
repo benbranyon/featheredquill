@@ -357,7 +357,6 @@ class PaymentMethodsListTable
      * @internal
      *
      * @param mixed $gateway
-     * @throws Exception
      */
     public function renderActionCell($gateway)
     {
@@ -438,7 +437,6 @@ class PaymentMethodsListTable
      * @param mixed $description
      * @param mixed $gateway
      * @return string|null
-     * @throws Exception
      */
     public function renderDescriptionCell($description, $gateway)
     {
@@ -448,7 +446,7 @@ class PaymentMethodsListTable
             /* translators: Placeholders: %1$s - <a> tag for the GoDaddy MWC Care mailto link, %2$s - </a> tag, %3$s - <img> tag with email icon */
             $questionText = sprintf(
                 __('Have a question? %1$sAsk the GoDaddy Team%3$s%2$s', 'mwc-core'),
-                '<a href="'.esc_url('mailto:mwccare@godaddy.com?subject="GoDaddy Payments Signup Question"').'" target="_blank" style="text-decoration:underline">',
+                '<a href="'.esc_url('mailto:commerce@services.godaddy.com?subject="GoDaddy Payments Signup Question"').'" target="_blank" style="text-decoration:underline">',
                 '</a>',
                 '<img src="'.esc_url(WordPressRepository::getAssetsUrl('images/mail-icon.svg')).'" alt="'.esc_attr__('E-mail icon', 'mwc-core').'"/>'
             );

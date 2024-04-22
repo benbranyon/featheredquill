@@ -3,6 +3,7 @@
 namespace GoDaddy\WordPress\MWC\Core\Payments\Poynt\Http;
 
 use Exception;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Http\Response;
 use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
 
@@ -38,7 +39,7 @@ class GenerateTokenRequest extends Request
         $this->validate();
 
         return new Response(wp_remote_request($this->buildUrlString(), [
-            'body'      => http_build_query($this->body, '', '&'),
+            'body'      => http_build_query(TypeHelper::array($this->body, []), '', '&'),
             'headers'   => $this->headers,
             'method'    => $this->method,
             'sslverify' => $this->sslVerify,

@@ -1,5 +1,16 @@
 <?php
 
+$mwcEcommerceAllowedHostingPlans = [
+    'ecommerce',
+    'essentials',
+    'essentials_GDGCPP',
+    'flex',
+    'flex_GDGCPP',
+    'expand',
+    'expand_GDGCPP',
+    'premier',
+];
+
 return [
 
     /*
@@ -39,6 +50,11 @@ return [
                 'USD',
             ],
         ],
+        /*
+         * Elavon gateway is excluded, as MWP doesn't support static IPs, and Elavon doesn't do domain-based
+         * validation.
+         */
+        'woocommerce-gateway-elavon'                  => true,
         'woocommerce-gateway-paypal-express-checkout' => [
             'countries' => [
                 'US',
@@ -60,9 +76,7 @@ return [
              * Only MWC sites get the native feature and should have the plugin excluded
              * @see \GoDaddy\WordPress\MWC\Core\Features\CostOfGoods\CostOfGoods::shouldLoadConditionalFeature()
              */
-            'plans' => [
-                'ecommerce',
-            ],
+            'plans' => $mwcEcommerceAllowedHostingPlans,
         ],
         'woocommerce-email-customizer' => [
             /*
@@ -70,9 +84,7 @@ return [
              * get the native feature and should have the plugin excluded
              * @see \GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\EmailNotifications::shouldLoadConditionalFeature()
              */
-            'plans' => [
-                'ecommerce',
-            ],
+            'plans'    => $mwcEcommerceAllowedHostingPlans,
             'reseller' => (defined('DISABLE_ACCOUNT_RESTRICTION_FOR_MWC_FEATURES') && DISABLE_ACCOUNT_RESTRICTION_FOR_MWC_FEATURES) ? null : false,
         ],
         'woocommerce-url-coupons' => [
@@ -80,45 +92,35 @@ return [
              * Only MWC sites get the native feature and should have the plugin excluded
              * @see \GoDaddy\WordPress\MWC\Core\Features\UrlCoupons\UrlCoupons::shouldLoad()
              */
-            'plans' => [
-                'ecommerce',
-            ],
+            'plans' => $mwcEcommerceAllowedHostingPlans,
         ],
         'woocommerce-google-analytics-pro' => [
             /*
              * Only MWC sites get the native feature and should have the plugin excluded
              * @see \GoDaddy\WordPress\MWC\Core\Features\GoogleAnalytics\GoogleAnalytics::shouldLoad()
              */
-            'plans' => [
-                'ecommerce',
-            ],
+            'plans' => $mwcEcommerceAllowedHostingPlans,
         ],
         'woocommerce-sequential-order-numbers-pro' => [
             /*
              * Only MWC sites get the native feature and should have the plugin excluded
              * @see \GoDaddy\WordPress\MWC\Core\Features\SequentialOrderNumbers\SequentialOrderNumbers::shouldLoad()
              */
-            'plans' => [
-                'ecommerce',
-            ],
+            'plans' => $mwcEcommerceAllowedHostingPlans,
         ],
         'woocommerce-shipment-tracking' => [
             /*
              * Only MWC sites get the native feature and should have the plugin excluded
              * @see \GoDaddy\WordPress\MWC\Core\WooCommerce\Shipping\ShipmentTracking::shouldLoadConditionalFeature()
              */
-            'plans' => [
-                'ecommerce',
-            ],
+            'plans' => $mwcEcommerceAllowedHostingPlans,
         ],
         'woocommerce-pdf-product-vouchers' => [
             /*
              * Only non-reseller MWC sites get the native feature and should have the plugin excluded
              * @see \GoDaddy\WordPress\MWC\Core\Features\GiftCertificates\GiftCertificates::shouldLoad()
              */
-            'plans' => [
-                'ecommerce',
-            ],
+            'plans'    => $mwcEcommerceAllowedHostingPlans,
             'reseller' => false,
         ],
         'enhanced-checkout-woocommerce' => [

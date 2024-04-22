@@ -8,9 +8,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2022-10-18T03:23:23+00:00\n"
+"POT-Creation-Date: 2023-06-26T03:11:45+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.7.1\n"
+"X-Generator: WP-CLI 2.8.1\n"
 "X-Domain: mwc-payments\n"
 
 #: src/Models/Orders/Statuses/CancelledOrderStatus.php:17
@@ -88,7 +88,7 @@ msgctxt "card brand name"
 msgid "Visa"
 msgstr "Visa"
 
-#: src/Models/Transactions/Statuses/ApprovedTransactionStatus.php:26
+#: src/Models/Transactions/Statuses/ApprovedTransactionStatus.php:25
 msgid "Approved"
 msgstr "Approuvé"
 

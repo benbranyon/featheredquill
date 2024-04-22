@@ -2,6 +2,7 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\GoDaddy\Adapters;
 
+use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\GoDaddy\Http\Requests\Request;
 
 class CreateLevelRequestAdapter extends AbstractUpsertLevelRequestAdapter
@@ -24,6 +25,16 @@ class CreateLevelRequestAdapter extends AbstractUpsertLevelRequestAdapter
             'quantity'            => $level->quantity,
             'cost'                => isset($level->cost) ? $level->cost->toArray() : null,
         ];
+
+        if ($summary = $this->input->level->summary) {
+            ArrayHelper::set($data, 'summaryData', [
+                'isBackorderable' => $summary->isBackorderable,
+            ]);
+
+            if (isset($level->summary->lowInventoryThreshold)) {
+                ArrayHelper::set($data, 'summaryData.lowInventoryThreshold', $level->summary->lowInventoryThreshold);
+            }
+        }
 
         return $this->getBaseRequest()
             ->setPath('/inventory-levels')

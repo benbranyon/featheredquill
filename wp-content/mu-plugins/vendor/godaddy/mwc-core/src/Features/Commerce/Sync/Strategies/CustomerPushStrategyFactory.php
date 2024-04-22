@@ -5,6 +5,7 @@ namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Sync\Strategies;
 use GoDaddy\WordPress\MWC\Common\Models\Contracts\CustomerContract;
 use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Customers\Services\CustomersService;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\Contracts\CommerceExceptionContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Sync\Strategies\Contracts\CustomerPushStrategyContract;
 
 class CustomerPushStrategyFactory
@@ -17,6 +18,7 @@ class CustomerPushStrategyFactory
      * @param CustomerContract $customer
      *
      * @return CustomerPushStrategyContract
+     * @throws CommerceExceptionContract
      */
     public function getStrategyFor(CustomerContract $customer) : CustomerPushStrategyContract
     {

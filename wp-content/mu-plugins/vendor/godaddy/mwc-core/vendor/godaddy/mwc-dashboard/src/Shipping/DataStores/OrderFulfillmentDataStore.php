@@ -11,6 +11,7 @@ use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerce\OrdersRepository;
 use GoDaddy\WordPress\MWC\Dashboard\Shipping\Adapters\LineItemFulfillmentStatusAdapter;
 use GoDaddy\WordPress\MWC\Dashboard\Shipping\Adapters\OrderFulfillmentStatusAdapter;
 use GoDaddy\WordPress\MWC\Dashboard\Shipping\DataSources\WooCommerce\Adapters\ShipmentAdapter;
+use GoDaddy\WordPress\MWC\Dashboard\Shipping\DataStores\Traits\CanManipulateOrderMetaDataTrait;
 use GoDaddy\WordPress\MWC\Shipping\Contracts\ShipmentContract;
 use GoDaddy\WordPress\MWC\Shipping\Models\Orders\FulfillmentStatuses\FulfilledFulfillmentStatus;
 use GoDaddy\WordPress\MWC\Shipping\Models\Orders\FulfillmentStatuses\PartiallyFulfilledFulfillmentStatus;
@@ -24,6 +25,14 @@ use WC_Order_Item_Product;
  */
 class OrderFulfillmentDataStore
 {
+    use CanManipulateOrderMetaDataTrait;
+
+    /** @var string */
+    protected const FULFILLMENT_STATUS_META_KEY = '_mwc_fulfillment_status';
+
+    /** @var string */
+    protected const ORDER_FULFILLMENT_META_KEY = '_mwc_order_fulfillment';
+
     /** @var DataSourceAdapterContract[] an array of class names for provider specific implementations of DataSourceAdapterContract */
     protected $adapters = [];
 
@@ -132,7 +141,10 @@ class OrderFulfillmentDataStore
         }
 
         $this->updateFulfillmentOrderStatuses($fulfillment, $wcOrderInstance);
-        $this->addOrderMeta($wcOrderInstance, '_mwc_order_fulfillment', $this->getOrderShipmentsArray($fulfillment));
+        $this->addOrderMeta($wcOrderInstance, static::ORDER_FULFILLMENT_META_KEY, $this->getOrderShipmentsArray($fulfillment));
+
+        // TODO: remove this call to WC_Order::save() in https://godaddy-corp.atlassian.net/browse/MWC-13394
+        $wcOrderInstance->save();
     }
 
     /**
@@ -216,9 +228,7 @@ class OrderFulfillmentDataStore
     /**
      * Deletes the fulfillment metadata for the associated order.
      *
-     * @since x.y.z
-     *
-     * @param OrderFulfillment $fulfillment
+     * @param OrderFulfillment|null $fulfillment
      * @return bool
      */
     public function delete(OrderFulfillment $fulfillment = null) : bool
@@ -228,12 +238,12 @@ class OrderFulfillmentDataStore
         }
 
         foreach ($fulfillment->getLineItemsThatNeedShipping() as $item) {
-            delete_post_meta($item->getId(), '_mwc_fulfillment_status');
+            $this->deleteOrderItemMetaData($item->getId(), static::FULFILLMENT_STATUS_META_KEY);
         }
 
-        delete_post_meta($fulfillment->getOrder()->getId(), '_mwc_fulfillment_status');
+        $this->deleteOrderMetaData((int) $fulfillment->getOrder()->getId(), [static::FULFILLMENT_STATUS_META_KEY, static::ORDER_FULFILLMENT_META_KEY]);
 
-        return delete_post_meta($fulfillment->getOrder()->getId(), '_mwc_order_fulfillment');
+        return true;
     }
 
     /**

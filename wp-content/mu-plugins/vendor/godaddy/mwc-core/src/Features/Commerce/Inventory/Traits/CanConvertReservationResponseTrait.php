@@ -31,6 +31,7 @@ trait CanConvertReservationResponseTrait
                 'type'                   => ArrayHelper::get($reservationData, 'type'),
                 'status'                 => ArrayHelper::get($reservationData, 'status'),
                 'quantity'               => ArrayHelper::get($reservationData, 'quantity'),
+                'productId'              => ArrayHelper::get($reservationData, 'productId'),
             ],
             $this->convertExternalIds($reservationData),
             $this->convertDateTime($reservationData, 'expiresAt'),

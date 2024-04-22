@@ -5,6 +5,7 @@ namespace GoDaddy\WordPress\MWC\Core\WooCommerce\Payments;
 use Exception;
 use GoDaddy\WordPress\MWC\Common\Configuration\Configuration;
 use GoDaddy\WordPress\MWC\Common\DataSources\WooCommerce\Adapters\CurrencyAmountAdapter;
+use GoDaddy\WordPress\MWC\Common\Events\Events;
 use GoDaddy\WordPress\MWC\Common\Exceptions\BaseException;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
@@ -22,6 +23,7 @@ use GoDaddy\WordPress\MWC\Core\Payments\DataStores\WooCommerce\OrderRefundTransa
 use GoDaddy\WordPress\MWC\Core\Payments\DataStores\WooCommerce\OrderTransactionDataStore;
 use GoDaddy\WordPress\MWC\Core\Payments\DataStores\WooCommerce\OrderVoidTransactionDataStore;
 use GoDaddy\WordPress\MWC\Core\Payments\DataStores\WooCommerce\PaymentMethodDataStore;
+use GoDaddy\WordPress\MWC\Core\Payments\Exceptions\InvalidTransactionAvsException;
 use GoDaddy\WordPress\MWC\Core\Payments\Models\Transactions\PaymentTransaction;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Adapters\OrderAdapter;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Exceptions\FailedRemoteParentIdException;
@@ -30,6 +32,7 @@ use GoDaddy\WordPress\MWC\Core\WooCommerce\Exceptions\FailedVoidOrderException;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Exceptions\InvalidTransactionException;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Exceptions\MissingOrderException;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Models\Orders\Order;
+use GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\Events\InvalidTransactionAvsEvent;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\Integrations\Contracts\IntegrationContract;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\Traits\CanAutoEnablePaymentGatewayTrait;
 use GoDaddy\WordPress\MWC\Payments\DataSources\WooCommerce\Adapters\CustomerAdapter;
@@ -743,10 +746,27 @@ abstract class AbstractPaymentGateway extends WC_Payment_Gateway
                 'redirect' => $this->get_return_url($wooOrder),
             ], $wooOrder, $transaction);
         } catch (Exception $exception) {
+            if ($exception instanceof InvalidTransactionAvsException && isset($transaction)) {
+                $this->handleInvalidTransactionAvsException($exception, $transaction);
+            }
+
             return [
                 'result'  => 'failure',
                 'message' => $exception->getMessage(),
             ];
+        }
+    }
+
+    /**
+     * Handles a {@see InvalidTransactionAvsException}.
+     *
+     * @param PaymentTransaction|null $paymentTransaction
+     * @param InvalidTransactionAvsException $exception
+     */
+    protected function handleInvalidTransactionAvsException(InvalidTransactionAvsException $exception, ?PaymentTransaction $paymentTransaction = null) : void
+    {
+        if (isset($paymentTransaction) && $paymentMethod = $exception->getPaymentMethod()) {
+            Events::broadcast(new InvalidTransactionAvsEvent($paymentTransaction->setPaymentMethod($paymentMethod)));
         }
     }
 
@@ -793,7 +813,7 @@ abstract class AbstractPaymentGateway extends WC_Payment_Gateway
             $wooOrder->payment_complete($transaction->getRemoteId());
         } else {
             $wooOrder->update_status('on-hold');
-            wc_reduce_stock_levels($wooOrder->get_id());
+            wc_maybe_reduce_stock_levels($wooOrder->get_id());
         }
 
         if (! Configuration::get('payments.poynt.onboarding.hasFirstPayment')) {

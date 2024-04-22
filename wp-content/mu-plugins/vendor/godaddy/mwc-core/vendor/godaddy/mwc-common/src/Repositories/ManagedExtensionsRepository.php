@@ -5,14 +5,19 @@ namespace GoDaddy\WordPress\MWC\Common\Repositories;
 use Exception;
 use GoDaddy\WordPress\MWC\Common\Cache\Cache;
 use GoDaddy\WordPress\MWC\Common\Configuration\Configuration;
+use GoDaddy\WordPress\MWC\Common\Container\ContainerFactory;
+use GoDaddy\WordPress\MWC\Common\Container\Exceptions\ContainerException;
 use GoDaddy\WordPress\MWC\Common\DataSources\Contracts\ExtensionAdapterContract;
 use GoDaddy\WordPress\MWC\Common\DataSources\MWC\Adapters\ExtensionAdapter;
+use GoDaddy\WordPress\MWC\Common\Exceptions\SentryException;
 use GoDaddy\WordPress\MWC\Common\Extensions\AbstractExtension;
+use GoDaddy\WordPress\MWC\Common\Extensions\Configuration\Contracts\ManagedExtensionsRuntimeConfigurationContract;
 use GoDaddy\WordPress\MWC\Common\Extensions\Types\PluginExtension;
 use GoDaddy\WordPress\MWC\Common\Extensions\Types\ThemeExtension;
 use GoDaddy\WordPress\MWC\Common\Features\EnabledFeaturesCache;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Http\GoDaddyRequest;
 
 /**
@@ -139,14 +144,47 @@ class ManagedExtensionsRepository
     protected static function getExtensionsRequestQuery() : array
     {
         $queryArgs = ['method' => 'GET'];
-        /** @var array<mixed> $excludedBrands */
-        $excludedBrands = Configuration::get('mwc.extensions.api.excludedBrands');
 
-        if ($excludedBrands && ArrayHelper::accessible($excludedBrands)) {
+        if ($excludedBrands = static::getExcludedExtensionBrands()) {
             $queryArgs['excludedBrands'] = implode(',', $excludedBrands);
         }
 
         return $queryArgs;
+    }
+
+    /**
+     * Gets a list of extension brands that should be excluded from the query results.
+     *
+     * @return non-empty-string[]
+     */
+    protected static function getExcludedExtensionBrands() : array
+    {
+        if ($runtimeConfiguration = static::getExtensionsRuntimeConfiguration()) {
+            return $runtimeConfiguration->getExcludedBrands();
+        }
+
+        return array_values(array_filter(TypeHelper::arrayOfStrings(Configuration::get('mwc.extensions.api.excludedBrands'))));
+    }
+
+    /**
+     * Gets the Managed Extensions runtime configuration instance.
+     *
+     * @return ManagedExtensionsRuntimeConfigurationContract|null
+     */
+    protected static function getExtensionsRuntimeConfiguration() : ?ManagedExtensionsRuntimeConfigurationContract
+    {
+        $container = ContainerFactory::getInstance()->getSharedContainer();
+
+        try {
+            return $container->get(ManagedExtensionsRuntimeConfigurationContract::class);
+        } catch (ContainerException $exception) {
+            SentryException::getNewInstance(
+                'Could not resolve concrete implementation of '.ManagedExtensionsRuntimeConfigurationContract::class,
+                $exception
+            );
+        }
+
+        return null;
     }
 
     /**
@@ -251,10 +289,15 @@ class ManagedExtensionsRepository
         });
 
         /** @throws Exception */
-        $versions = $allVersions[$extension->getId()];
+        $versions = ArrayHelper::wrap(
+            $extension->getId() ? ArrayHelper::get($allVersions, $extension->getId(), []) : []
+        );
 
         usort($versions, static function ($a, $b) {
-            return version_compare(ArrayHelper::get($a, 'version'), ArrayHelper::get($b, 'version'));
+            $aVersion = ArrayHelper::get(TypeHelper::array($a, []), 'version', 1);
+            $bVersion = ArrayHelper::get(TypeHelper::array($b, []), 'version', 1);
+
+            return version_compare($aVersion, $bVersion);
         });
 
         return static::addExtensionDataToVersionData($extension, $versions);

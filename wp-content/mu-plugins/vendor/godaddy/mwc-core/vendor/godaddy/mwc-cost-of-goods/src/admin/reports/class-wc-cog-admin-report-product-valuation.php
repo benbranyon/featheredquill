@@ -17,7 +17,7 @@
  * needs please refer to http://docs.woocommerce.com/document/cost-of-goods/ for more information.
  *
  * @author      SkyVerge
- * @copyright   Copyright (c) 2013-2020, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright   Copyright (c) 2013-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -27,7 +27,7 @@ defined( 'ABSPATH' ) or exit;
 
 use GoDaddy\WordPress\MWC\CostOfGoods\WC_COG;
 use GoDaddy\WordPress\MWC\CostOfGoods\WC_COG_Product;
-use SkyVerge\WooCommerce\PluginFramework\v5_10_12 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v5_11_0 as Framework;
 use stdClass;
 use WC_Report_Stock;
 use function GoDaddy\WordPress\MWC\CostOfGoods\wc_cog;
@@ -166,8 +166,8 @@ class WC_COG_Admin_Report_Product_Valuation extends WC_Report_Stock {
 		$columns = parent::get_columns();
 
 		$new_columns = [
-			'value_at_retail' => __( 'Value at Retail', 'mwc-cost-of-goods' ),
-			'value_at_cost'   => __( 'Value at Cost', 'mwc-cost-of-goods' ),
+			'value_at_retail' => __( 'Value at Retail', 'woocommerce-cost-of-goods' ),
+			'value_at_cost'   => __( 'Value at Cost', 'woocommerce-cost-of-goods' ),
 		];
 
 		$columns = Framework\SV_WC_Helper::array_insert_after( $columns, 'parent', $new_columns );
@@ -192,17 +192,17 @@ class WC_COG_Admin_Report_Product_Valuation extends WC_Report_Stock {
 
 		$defaults = [
 			'filename' => sprintf( 'product-valuation-report-%1$s.csv', date_i18n( 'Y-m-d', current_time( 'timestamp' ) ) ),
-			'xaxes'    => __( 'Product', 'mwc-cost-of-goods' ),
+			'xaxes'    => __( 'Product', 'woocommerce-cost-of-goods' ),
 		];
 		?>
 		<form method="post">
 			<?php wp_enqueue_style( 'wc-cog-valuation', wc_cog()->get_plugin_url() . '/assets/css/admin/wc-cog-valuation.min.css', [], WC_COG::VERSION ); ?>
 			<a href="#" data-filename="<?php echo esc_attr( $defaults['filename'] ); ?>" class="export_product_valuation_csv button" data-xaxes="<?php echo esc_attr( $defaults['xaxes'] ); ?>">
-				<?php esc_html_e( 'Export CSV', 'mwc-cost-of-goods' ); ?>
+				<?php esc_html_e( 'Export CSV', 'woocommerce-cost-of-goods' ); ?>
 			</a>
 			<div class="wc-cog-product-valuation-progress hide">
 				<p>
-					<?php esc_html_e( 'Note: Product Valuation export is in progress, please do not refresh the page! When the export is complete, the download will start automatically.', 'mwc-cost-of-goods' ); ?>
+					<?php esc_html_e( 'Note: Product Valuation export is in progress, please do not refresh the page! When the export is complete, the download will start automatically.', 'woocommerce-cost-of-goods' ); ?>
 				</p>
 				<section class="wc-cog-progressbar-section">
 					<progress class="wc-cog-progress" max="100" value="0"></progress>
@@ -214,7 +214,7 @@ class WC_COG_Admin_Report_Product_Valuation extends WC_Report_Stock {
 				'product_valuation_nonce' => wp_create_nonce( 'wc-cog-product-valuation' ),
 			] );
 
-			echo $this->search_box( __( 'Search for a product', 'mwc-cost-of-goods' ), 'wc-cog-product-valuation' ); ?>
+			echo $this->search_box( __( 'Search for a product', 'woocommerce-cost-of-goods' ), 'wc-cog-product-valuation' ); ?>
 		</form>
 		<?php
 	}

@@ -238,14 +238,17 @@ class User extends AbstractModel
      * @return bool
      * @throws SentryException
      */
-    public function delete() : bool
+    public function delete(?int $reassignUserId = null) : bool
     {
         if (! $this->getId()) {
             // @TODO: Update to specific exception after deciding the folder location of where that should live {JO: 2021-03-26}
             throw new SentryException('Deleting a user requires a valid user ID');
         }
 
-        if (! wp_delete_user($this->getId())) {
+        // the `wp_delete_user()` function is not available until the user administration API is loaded
+        WordPressRepository::requireWordPressUserAdministrationAPI();
+
+        if (! wp_delete_user($this->getId(), $reassignUserId)) {
             // @TODO: Update to specific exception after deciding the folder location of where that should live {JO: 2021-03-26}
             throw new SentryException('User could not be deleted');
         }
@@ -330,7 +333,7 @@ class User extends AbstractModel
     public static function getByEmail(string $email)
     {
         if ($user = get_user_by('email', $email)) {
-            return static::seed((new UserAdapter($user))->convertFromSource());
+            return static::seed(UserAdapter::getNewInstance($user)->convertFromSource());
         }
 
         return null;
@@ -345,7 +348,7 @@ class User extends AbstractModel
     public static function getByHandle(string $handle)
     {
         if ($user = get_user_by('login', $handle)) {
-            return static::seed((new UserAdapter($user))->convertFromSource());
+            return static::seed(UserAdapter::getNewInstance($user)->convertFromSource());
         }
 
         return null;
@@ -360,7 +363,7 @@ class User extends AbstractModel
     public static function getById(int $id)
     {
         if ($user = get_user_by('id', $id)) {
-            return static::seed((new UserAdapter($user))->convertFromSource());
+            return static::seed(UserAdapter::getNewInstance($user)->convertFromSource());
         }
 
         return null;
@@ -373,7 +376,7 @@ class User extends AbstractModel
      */
     public static function getCurrent()
     {
-        $user = (new UserAdapter(wp_get_current_user()))->convertFromSource();
+        $user = UserAdapter::getNewInstance(wp_get_current_user())->convertFromSource();
 
         if (ArrayHelper::get($user, 'id', 0) > 0) {
             return static::seed($user);

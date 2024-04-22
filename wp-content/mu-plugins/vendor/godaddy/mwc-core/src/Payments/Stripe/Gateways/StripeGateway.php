@@ -3,6 +3,7 @@
 namespace GoDaddy\WordPress\MWC\Core\Payments\Stripe\Gateways;
 
 use GoDaddy\WordPress\MWC\Common\Configuration\Configuration;
+use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Models\AbstractModel;
 use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
 use GoDaddy\WordPress\MWC\Core\Payments\Stripe;
@@ -102,5 +103,25 @@ class StripeGateway extends AbstractGateway
     protected function logEntry(string $logEntry) : void
     {
         wc_get_logger()->info($logEntry, ['source' => 'mwc-stripe']);
+    }
+
+    /**
+     * Returns whether the Stripe payment gateway is enabled in WooCommerce.
+     *
+     * @return bool
+     */
+    public static function isStripeGatewayEnabled() : bool
+    {
+        /* @phpstan-ignore-next-line */
+        if (! $woocommerce = WC()) {
+            return false;
+        }
+
+        /* @phpstan-ignore-next-line */
+        if (! $gateways = $woocommerce->payment_gateways()) {
+            return false;
+        }
+
+        return ArrayHelper::exists($gateways->get_available_payment_gateways(), 'stripe');
     }
 }

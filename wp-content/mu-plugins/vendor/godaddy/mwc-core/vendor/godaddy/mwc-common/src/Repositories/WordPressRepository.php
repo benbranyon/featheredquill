@@ -13,9 +13,12 @@ use GoDaddy\WordPress\MWC\Common\Helpers\DeprecationHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Http\Redirect;
+use GoDaddy\WordPress\MWC\Common\Http\Url;
+use GoDaddy\WordPress\MWC\Common\Http\Url\Exceptions\InvalidUrlException;
 use GoDaddy\WordPress\MWC\Common\Models\User;
 use WP;
 use WP_Comment;
+use WP_Error;
 use WP_Screen;
 
 /**
@@ -72,6 +75,26 @@ class WordPressRepository
     }
 
     /**
+     * Gets the default email address used as From address by {@see wp_mail()}.
+     */
+    public static function getDefaultEmailAddress() : string
+    {
+        $emailAddress = 'wordpress@';
+
+        if (! $url = static::getNetworkHomeUrl()) {
+            return $emailAddress;
+        }
+
+        $host = $url->getHost();
+
+        if (StringHelper::startsWith($host, 'www.')) {
+            return $emailAddress.StringHelper::after($host, 'www.');
+        }
+
+        return $emailAddress.$host;
+    }
+
+    /**
      * Gets the WordPress Filesystem instance.
      *
      * @return array|ArrayAccess|mixed
@@ -93,6 +116,26 @@ class WordPressRepository
     }
 
     /**
+     * Gets the home URL for the current network.
+     *
+     * If multisite is disabled, the home URL of the current network is the URL where the front of site is accessible.
+     *
+     * @return Url|null
+     */
+    public static function getNetworkHomeUrl() : ?Url
+    {
+        if (! function_exists('network_home_url')) {
+            return null;
+        }
+
+        try {
+            return Url::fromString(network_home_url());
+        } catch (InvalidUrlException $exception) {
+            return null;
+        }
+    }
+
+    /**
      * Gets the current WordPress Version.
      *
      * @return string|null
@@ -111,7 +154,7 @@ class WordPressRepository
      */
     public static function hasWordPressInstance() : bool
     {
-        return (bool) Configuration::get('wordpress.absolute_path');
+        return (bool) static::getWordPressAbsolutePath();
     }
 
     /**
@@ -182,10 +225,21 @@ class WordPressRepository
      *
      * @param mixed $value
      * @return bool
+     * @phpstan-assert-if-true WP_Error $value
      */
     public static function isError($value) : bool
     {
         return (bool) is_wp_error($value);
+    }
+
+    /**
+     * Gets the WordPress absolute path.
+     *
+     * @return string
+     */
+    public static function getWordPressAbsolutePath() : string
+    {
+        return TypeHelper::string(Configuration::get('wordpress.absolute_path'), '');
     }
 
     /**
@@ -196,7 +250,7 @@ class WordPressRepository
      */
     public static function requireWordPressInstance() : void
     {
-        if (! self::hasWordPressInstance()) {
+        if (! static::hasWordPressInstance()) {
             // @TODO setting to throw an exception for now, may have to be revisited later (or possibly with a less generic exception) {FN 2020-12-18}
             throw new Exception('Unable to find the required WordPress instance');
         }
@@ -212,7 +266,7 @@ class WordPressRepository
      */
     public static function requireWordPressFilesystem() : void
     {
-        $base = TypeHelper::string(Configuration::get('wordpress.absolute_path'), '');
+        $base = static::getWordPressAbsolutePath();
 
         require_once "{$base}wp-admin/includes/file.php";
         require_once "{$base}wp-admin/includes/plugin-install.php";
@@ -241,9 +295,21 @@ class WordPressRepository
      */
     public static function requireWordPressUpgradeAPI() : void
     {
-        $base = Configuration::get('wordpress.absolute_path');
+        $base = static::getWordPressAbsolutePath();
 
         require_once "{$base}wp-admin/includes/upgrade.php";
+    }
+
+    /**
+     * Requires the WordPress User Administration API.
+     *
+     * @return void
+     */
+    public static function requireWordPressUserAdministrationAPI() : void
+    {
+        $base = static::getWordPressAbsolutePath();
+
+        require_once "{$base}wp-admin/includes/user.php";
     }
 
     /**
@@ -296,11 +362,13 @@ class WordPressRepository
      * Gets a WP_Comment object given a comment ID.
      *
      * @param int $commentId
-     * @return WP_Comment
+     * @return WP_Comment|null
      */
-    public static function getComment(int $commentId)
+    public static function getComment(int $commentId) : ?WP_Comment
     {
-        return get_comment($commentId);
+        $comment = get_comment($commentId);
+
+        return $comment instanceof WP_Comment ? $comment : null;
     }
 
     /**
@@ -311,6 +379,30 @@ class WordPressRepository
     public static function getActivePlugins() : array
     {
         return get_option('active_plugins', []);
+    }
+
+    /**
+     * Gets the basename (e.g. "plugin/plugin.php") from the slug (e.g. "plugin").
+     *
+     * This will only return a value if the supplied slug is an _installed_ plugin (not necessarily activated).
+     *
+     * @param string $slug slug (directory name) of the plugin to check
+     * @return string|null basename if found, otherwise null
+     */
+    public static function getPluginBasenameFromSlug(string $slug) : ?string
+    {
+        if (! function_exists('get_plugins')) {
+            return null;
+        }
+
+        $installedPlugins = array_keys(get_plugins());
+        foreach ($installedPlugins as $installedPluginBasename) {
+            if (StringHelper::startsWith($installedPluginBasename, "{$slug}/")) {
+                return $installedPluginBasename;
+            }
+        }
+
+        return null;
     }
 
     /**

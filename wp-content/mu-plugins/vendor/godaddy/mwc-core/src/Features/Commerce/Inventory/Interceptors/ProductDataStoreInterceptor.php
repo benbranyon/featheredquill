@@ -4,17 +4,22 @@ namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Interceptors;
 
 use Exception;
 use GoDaddy\WordPress\MWC\Common\Exceptions\SentryException;
+use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
+use GoDaddy\WordPress\MWC\Core\Admin\Notices\Notices;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Commerce;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\Contracts\CommerceExceptionContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Interceptors\AbstractDataStoreInterceptor;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Interceptors\Handlers\ProductDataStoreHandler;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\InventoryIntegration;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Notices\Flags\ProductInventoryUpdateFailedNoticeFlag;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Notices\ProductInventoryUpdateFailedNotice;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\Contracts\InventoryProviderContract;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\DataObjects\ListSummariesInput;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Models\Contracts\CommerceContextContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services\Contracts\SummariesServiceContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services\Operations\ListSummariesOperation;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Repositories\ProductMapRepository;
 use WC_Product;
+use WP_Post;
 
 class ProductDataStoreInterceptor extends AbstractDataStoreInterceptor
 {
@@ -23,21 +28,21 @@ class ProductDataStoreInterceptor extends AbstractDataStoreInterceptor
 
     protected ProductMapRepository $productMapRepository;
     protected InventoryProviderContract $inventoryProvider;
-    protected CommerceContextContract $commerceContext;
+    protected SummariesServiceContract $summariesService;
 
     /**
      * @param ProductMapRepository $productMapRepository
      * @param InventoryProviderContract $inventoryProvider
-     * @param CommerceContextContract $commerceContext
+     * @param SummariesServiceContract $summariesService
      */
     public function __construct(
         ProductMapRepository $productMapRepository,
         InventoryProviderContract $inventoryProvider,
-        CommerceContextContract $commerceContext
+        SummariesServiceContract $summariesService
     ) {
         $this->productMapRepository = $productMapRepository;
         $this->inventoryProvider = $inventoryProvider;
-        $this->commerceContext = $commerceContext;
+        $this->summariesService = $summariesService;
     }
 
     /**
@@ -52,10 +57,16 @@ class ProductDataStoreInterceptor extends AbstractDataStoreInterceptor
             ->setHandler([$this, 'maybeFilterStockQuantity'])
             ->setArgumentsCount(2)
             ->execute();
+
         Register::filter()
             ->setGroup('woocommerce_product_variation_get_stock_quantity')
             ->setHandler([$this, 'maybeFilterStockQuantity'])
             ->setArgumentsCount(2)
+            ->execute();
+
+        Register::action()
+            ->setGroup('admin_init')
+            ->setHandler([$this, 'onAdminInit'])
             ->execute();
     }
 
@@ -84,14 +95,14 @@ class ProductDataStoreInterceptor extends AbstractDataStoreInterceptor
         }
 
         try {
-            $summaries = $this->inventoryProvider->summaries()->list(new ListSummariesInput([
-                'storeId' => $this->commerceContext->getStoreId(),
+            $summaries = $this->summariesService->list(ListSummariesOperation::seed([
+                'productIds' => [$remoteProductId],
             ]));
 
-            // the summaries endpoint doesn't yet allow querying for a specific product ID
-            foreach ($summaries as $summary) {
+            foreach ($summaries->getSummaries() as $summary) {
                 if ($summary->productId === $remoteProductId) {
-                    $quantity = $summary->totalAvailable;
+                    $filteredQuantity = $this->isProductIndexOrEditPage() ? $summary->totalOnHand : $summary->totalAvailable;
+                    $quantity = $product->backorders_allowed() ? $filteredQuantity : max($filteredQuantity, 0);
                     break;
                 }
             }
@@ -100,5 +111,38 @@ class ProductDataStoreInterceptor extends AbstractDataStoreInterceptor
         }
 
         return $quantity;
+    }
+
+    /**
+     * Determines whether Products index screen or Product edit screen is loaded.
+     *
+     * @return bool
+     */
+    protected function isProductIndexOrEditPage() : bool
+    {
+        /** @var int|WP_Post|null $post * */
+        $post = ArrayHelper::get($_GET, 'post');
+
+        return (ArrayHelper::get($GLOBALS, 'pagenow') === 'edit.php'
+                && ArrayHelper::get($_GET, 'post_type') === 'product') ||
+            (ArrayHelper::get($GLOBALS, 'pagenow') === 'post.php'
+                && ArrayHelper::get($_GET, 'action') === 'edit'
+                && get_post_type($post) === 'product');
+    }
+
+    /**
+     * Callback for the admin_init hook.
+     *
+     * @return void
+     */
+    public function onAdminInit() : void
+    {
+        $failFlag = ProductInventoryUpdateFailedNoticeFlag::getNewInstance();
+
+        if ($failFlag->isOn()) {
+            Notices::enqueueAdminNotice(ProductInventoryUpdateFailedNotice::getNewInstance($failFlag->getFailReason()));
+
+            $failFlag->turnOff();
+        }
     }
 }

@@ -25,7 +25,7 @@ class RequestDebugNoticeSubscriber extends AbstractDebugNoticeSubscriber
      */
     protected function getFormattedBody(array $body) : string
     {
-        return htmlspecialchars(ArrayHelper::jsonEncode($body));
+        return htmlspecialchars(ArrayHelper::jsonEncode($body), ENT_COMPAT);
     }
 
     /**
@@ -37,7 +37,7 @@ class RequestDebugNoticeSubscriber extends AbstractDebugNoticeSubscriber
      */
     protected function getFormattedHeaders(array $headers) : string
     {
-        return str_replace("\n", '<br />', htmlspecialchars(print_r($headers, true)));
+        return str_replace("\n", '<br />', htmlspecialchars(print_r($headers, true), ENT_COMPAT));
     }
 
     /**

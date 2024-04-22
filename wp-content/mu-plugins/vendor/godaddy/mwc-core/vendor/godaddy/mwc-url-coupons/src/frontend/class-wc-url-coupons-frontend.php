@@ -17,7 +17,7 @@
  * needs please refer to http://docs.woocommerce.com/document/url-coupons/ for more information.
  *
  * @author      SkyVerge
- * @copyright   Copyright (c) 2013-2020, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright   Copyright (c) 2013-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -311,6 +311,7 @@ class WC_URL_Coupons_Frontend {
 			$coupon_added         = __( 'Coupon added but not yet applied:', 'woocommerce-url-coupons' );
 			$coupon_already_added = __( 'Coupon already added but not yet applied:', 'woocommerce-url-coupons' );
 			$deferred_notice      = isset( $this->deferred_coupons[ $coupon_id ] ) ? $coupon_already_added : $coupon_added;
+			$error_message        = __( 'Discount will be applied when a valid product is added to the cart.', 'woocommerce-url-coupons' );
 
 			$error_message = $deferred_notice . '<br />' . $error_message;
 		}

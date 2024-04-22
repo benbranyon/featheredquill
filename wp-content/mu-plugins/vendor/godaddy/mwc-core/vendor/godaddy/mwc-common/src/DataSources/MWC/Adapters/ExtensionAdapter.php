@@ -7,6 +7,7 @@ use GoDaddy\WordPress\MWC\Common\DataSources\Contracts\ExtensionAdapterContract;
 use GoDaddy\WordPress\MWC\Common\Extensions\Types\PluginExtension;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
+use GoDaddy\WordPress\MWC\Common\Repositories\WordPressRepository;
 
 /**
  * The extension adapter.
@@ -68,7 +69,7 @@ class ExtensionAdapter implements ExtensionAdapterContract
             'homepageUrl'               => ArrayHelper::get($this->data, 'links.homepage.href'),
             'documentationUrl'          => ArrayHelper::get($this->data, 'links.documentation.href'),
             'imageUrls'                 => $this->getImageUrls(),
-            'brand'                     => strtolower(! empty($brand = ArrayHelper::get($this->data, 'brand')) ? $brand : 'godaddy'),
+            'brand'                     => strtolower(TypeHelper::string(ArrayHelper::get($this->data, 'brand') ?: 'godaddy', 'godaddy')),
         ];
     }
 
@@ -95,7 +96,16 @@ class ExtensionAdapter implements ExtensionAdapterContract
             return null;
         }
 
-        return is_string($slug) ? "{$slug}/{$slug}.php" : null;
+        if (! is_string($slug)) {
+            return null;
+        }
+
+        /*
+         * We don't know a plugin's real basename until after it's installed. Calling `WordPressRepository::getPluginBasenameFromSlug()`
+         * first will ensure we get the real basename value for installed extensions. If the extension is not installed
+         * then that will return null and we will default to our "guess" value, which is correct in most cases.
+         */
+        return WordPressRepository::getPluginBasenameFromSlug($slug) ?? "{$slug}/{$slug}.php";
     }
 
     /**

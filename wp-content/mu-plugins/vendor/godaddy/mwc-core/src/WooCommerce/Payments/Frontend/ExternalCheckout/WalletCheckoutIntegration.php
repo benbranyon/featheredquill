@@ -87,7 +87,9 @@ class WalletCheckoutIntegration extends AbstractExternalCheckoutIntegration
             ->attachInlineScriptObject('poyntPaymentFormI18n')
             ->attachInlineScriptVariables([
                 'errorMessages' => [
-                    'genericError' => __('An error occurred, please try again or try an alternate form of payment.', 'mwc-core'),
+                    'genericError'          => __('An error occurred, please try again or try an alternate form of payment.', 'mwc-core'),
+                    'missingCardDetails'    => __('Missing card details.', 'mwc-core'),
+                    'missingBillingDetails' => __('Missing billing details.', 'mwc-core'),
                 ],
             ])
             ->execute();

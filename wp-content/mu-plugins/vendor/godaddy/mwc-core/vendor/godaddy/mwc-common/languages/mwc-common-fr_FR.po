@@ -8,9 +8,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2023-02-13T20:22:10+00:00\n"
+"POT-Creation-Date: 2023-12-05T04:20:45+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.7.1\n"
+"X-Generator: WP-CLI 2.9.0\n"
 "X-Domain: mwc-common\n"
 
 #: src/Email/Email.php:68
@@ -33,9 +33,27 @@ msgstr "Aucun destinataire n’est défini pour l'e-mail"
 msgid "A usable email service could not be found for %s"
 msgstr "Aucun service e-mail utilisable n'a pu être trouvé pour %s."
 
+#. translators: A list of items, for example: "US or Canada", or "US, Canada, or Mexico". English uses Oxford comma before the conjunction ("or") if there are at least 2 items preceding it - hence the use of plural forms. If your locale does not use Oxford comma, you can just provide the same translation to all plural forms. Placeholders: %1$s - a comma-separated list of item, %2$s - the final item in the list
+#: src/Helpers/ArrayHelper.php:610
+msgid "%1$s or %2$s"
+msgid_plural "%1$s, or %2$s"
+msgstr[0] "%1$s ou %2$s"
+msgstr[1] "%1$s, ou %2$s"
+
+#. translators: A list of items, for example: "US and Canada", or "US, Canada, and Mexico". English uses Oxford comma before the conjunction ("and") if there are at least 2 items preceding it - hence the use of plural forms. If your locale does not use Oxford comma, you can just provide the same translation to all plural forms. Placeholders: %1$s - a comma-separated list of items, %2$s - the final item in the list
+#: src/Helpers/ArrayHelper.php:616
+msgid "%1$s and %2$s"
+msgid_plural "%1$s, and %2$s"
+msgstr[0] "%1$s et %2$s"
+msgstr[1] "%1$s, et %2$s"
+
 #: src/Models/Orders/Statuses/CancelledOrderStatus.php:20
 msgid "Cancelled"
 msgstr "Annulé"
+
+#: src/Models/Orders/Statuses/CheckoutDraftOrderStatus.php:17
+msgid "Checkout Draft"
+msgstr "Brouillon de la procédure de paiement"
 
 #: src/Models/Orders/Statuses/CompletedOrderStatus.php:20
 msgid "Completed"
@@ -62,17 +80,17 @@ msgid "Refunded"
 msgstr "Remboursé"
 
 #: src/Repositories/WooCommerce/CartRepository.php:25
-#: src/Repositories/WooCommerceRepository.php:46
+#: src/Repositories/WooCommerceRepository.php:47
 msgid "WooCommerce cart is not available"
 msgstr "Le panier WooCommerce n'est pas disponible"
 
 #: src/Repositories/WooCommerce/CartRepository.php:126
-msgid "The product could not be added to cart the cart."
+msgid "The product could not be added to the cart."
 msgstr "Impossible d’ajouter le produit au panier."
 
 #: src/Repositories/WooCommerce/CountriesRepository.php:25
-msgid "WooCommerce countries are not available"
-msgstr "Les pays WooCommerce ne sont pas disponibles"
+msgid "The WC_Countries class is not available."
+msgstr "La classe WC_Countries n’est pas disponible."
 
 #. translators: Placeholder: %s - error message
 #: src/Repositories/WooCommerce/RefundsRepository.php:54
@@ -100,11 +118,11 @@ msgstr "Impossible de charger le gestionnaire de rôles de WordPress."
 msgid "User role does not exist."
 msgstr "Le rôle utilisateur n'existe pas."
 
-#: src/Repositories/WordPressRepository.php:360
+#: src/Repositories/WordPressRepository.php:428
 msgid "User does not have a valid ID."
 msgstr "L'utilisateur ne dispose pas d'un ID valide."
 
-#: src/Repositories/WordPressRepository.php:372
+#: src/Repositories/WordPressRepository.php:440
 msgid "User could not be logged in."
 msgstr "L'utilisateur n'a pas pu se connecter."
 
@@ -112,23 +130,23 @@ msgstr "L'utilisateur n'a pas pu se connecter."
 msgid "Invalid value for updating the setting type of %1s: must be one of %2$s, %3$s given."
 msgstr "Valeur non valide pour la mise à jour du type de paramètre de %1s : doit être l'un des %2$s, %3$s donnés."
 
-#: src/Settings/Models/AbstractSetting.php:254
+#: src/Settings/Models/AbstractSetting.php:255
 msgid "Invalid option to set for %1$s: %2$s"
 msgstr "Option non valide à définir pour %1$s : %2$s"
 
-#: src/Settings/Models/AbstractSetting.php:285
+#: src/Settings/Models/AbstractSetting.php:286
 msgid "Invalid default value to set for %1$s: %2$s"
 msgstr "Valeur par défaut non valide à définir pour %1$s : %2$s"
 
-#: src/Settings/Models/AbstractSetting.php:315
+#: src/Settings/Models/AbstractSetting.php:316
 msgid "Invalid value to set for %1$s: %2$s"
 msgstr "Valeur non valide à définir pour %1$s : %2$s"
 
-#: src/Settings/Models/AbstractSetting.php:392
+#: src/Settings/Models/AbstractSetting.php:393
 msgid "Value must be one of the allowed options."
 msgstr "La valeur doit être l'une des options autorisées."
 
-#: src/Settings/Models/AbstractSetting.php:416
+#: src/Settings/Models/AbstractSetting.php:417
 msgid "Value should be type of %1$s, %2$s given."
 msgstr "La valeur doit être un type de %1$s, %2$s donné."
 
@@ -148,7 +166,7 @@ msgstr "Le nom du sous-groupe de réglages est obligatoire."
 msgid "%s is not a valid setting."
 msgstr "%s n'est pas un paramètre valide."
 
-#: src/Settings/Traits/HasSettingsTrait.php:273
+#: src/Settings/Traits/HasSettingsTrait.php:275
 msgid "The settings objects must be an instance of SettingContract"
 msgstr "Les objets réglages doivent être une instance de SettingContract"
 

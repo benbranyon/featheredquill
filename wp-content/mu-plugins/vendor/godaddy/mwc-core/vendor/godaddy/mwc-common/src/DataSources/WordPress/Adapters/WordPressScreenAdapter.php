@@ -7,6 +7,9 @@ use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\DeprecationHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\SanitizationHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
+use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerce\OrdersRepository;
+use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
+use WC_Order;
 use WP_Screen;
 
 /**
@@ -15,7 +18,7 @@ use WP_Screen;
 class WordPressScreenAdapter implements DataSourceAdapterContract
 {
     /** @var WP_Screen WordPress screen object */
-    protected $screen;
+    protected WP_Screen $screen;
 
     /**
      * Adapter constructor.
@@ -29,6 +32,8 @@ class WordPressScreenAdapter implements DataSourceAdapterContract
 
     /**
      * Gets the data for the post list page.
+     *
+     * For example, the 'product' post type would yield a pageId value of 'product_list' in the resulting array.
      *
      * @return array<string, string|string[]>
      */
@@ -71,7 +76,7 @@ class WordPressScreenAdapter implements DataSourceAdapterContract
             'pageContexts' => ["edit_{$this->getNormalizedPostType()}"],
             'objectId'     => $postId,
             'objectType'   => $this->getNormalizedPostType(),
-            'objectStatus' => $this->getNormalizedPostStatus((string) $postId),
+            'objectStatus' => $this->normalizePostStatus(TypeHelper::string(get_post_status($postId), '')),
         ];
     }
 
@@ -144,11 +149,12 @@ class WordPressScreenAdapter implements DataSourceAdapterContract
     /**
      * Gets the data for a generic page.
      *
+     * @param string|null $id
      * @return array<string, string|string[]>
      */
-    protected function getGenericPageData() : array
+    protected function getGenericPageData(string $id = null) : array
     {
-        $id = $this->getGenericId();
+        $id = $id ?? $this->getGenericId();
 
         return [
             'pageId'       => $id,
@@ -227,24 +233,55 @@ class WordPressScreenAdapter implements DataSourceAdapterContract
     }
 
     /**
+     * Attempts to retrieve the order being edited in the HPOS Edit Order page.
+     *
+     * @return WC_Order|null
+     */
+    protected function getWooCommerceOrderForHPOSEditOrderPage() : ?WC_Order
+    {
+        if ($orderId = TypeHelper::int(ArrayHelper::get($_GET, 'id'), 0)) {
+            return OrdersRepository::get($orderId);
+        }
+
+        return null;
+    }
+
+    /**
+     * Gets information for the Edit Order page used when WooCommerce’s HPOS feature is enabled.
+     *
+     * @return array<string, mixed>
+     */
+    protected function getHPOSEditOrderPageData(WC_Order $order) : array
+    {
+        return [
+            'pageId'       => 'edit_order',
+            'pageContexts' => ['edit_order'],
+            'objectId'     => $order->get_id(),
+            'objectType'   => 'order',
+            // TODO: change this to call normalizePostStatus
+            'objectStatus' => $this->normalizePostStatus(TypeHelper::string($order->get_status(), '')),
+        ];
+    }
+
+    /**
      * Gets the normalized post type for the current screen.
      *
      * @return string
      */
     protected function getNormalizedPostType() : string
     {
-        return str_replace('shop_', '', (string) $this->screen->post_type);
+        return str_replace('shop_', '', TypeHelper::string($this->screen->post_type, ''));
     }
 
     /**
-     * Gets the normalized post status for the current screen.
+     * Modifies the given post status to remove the WooCommerce prefix.
      *
-     * @param string $postId
+     * @param string $postStatus
      * @return string
      */
-    protected function getNormalizedPostStatus(string $postId) : string
+    protected function normalizePostStatus(string $postStatus) : string
     {
-        return str_replace('wc-', '', TypeHelper::string((string) get_post_status((int) $postId), ''));
+        return str_replace('wc-', '', $postStatus);
     }
 
     /**
@@ -255,6 +292,10 @@ class WordPressScreenAdapter implements DataSourceAdapterContract
     public function convertFromSource() : array
     {
         $id = $this->getGenericId();
+
+        if ($this->shouldGetHPOSOrdersData($id)) {
+            return $this->getWooCommerceHPOSOrdersPageData();
+        }
 
         if (ArrayHelper::contains(['admin-wc-admin', 'woocommerce-wc-admin'], $id)) {
             return $this->getWooCommerceAdminPageData();
@@ -276,6 +317,28 @@ class WordPressScreenAdapter implements DataSourceAdapterContract
         }
 
         return $this->getGenericPageData();
+    }
+
+    /**
+     * Determines whether we are on the Orders or Edit Order pages while WooCommerce is using the custom order tables.
+     */
+    protected function shouldGetHPOSOrdersData(string $screenId) : bool
+    {
+        return $screenId === 'admin-wc-orders' && WooCommerceRepository::isCustomOrdersTableUsageEnabled();
+    }
+
+    /**
+     * Gets the data for the WooCommerce HPOS Orders and Edit Order pages.
+     *
+     * @return array<string, mixed>
+     */
+    protected function getWooCommerceHPOSOrdersPageData() : array
+    {
+        if ($order = $this->getWooCommerceOrderForHPOSEditOrderPage()) {
+            return $this->getHPOSEditOrderPageData($order);
+        }
+
+        return $this->getGenericPageData('order_list');
     }
 
     /**

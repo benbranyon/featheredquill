@@ -1,6 +1,23 @@
 *** WooCommerce URL Coupons Changelog ***
 
-2020.nn.nn - version 3.0.0
+2023.07.21 - version 3.1.0
+ * Misc - Current MWC Release
+
+2023.05.10 - version 2.15.0
+ * Misc - Add compatibility for WooCommerce High Performance Order Storage (HPOS)
+ * Misc - Replace `FILTER_SANITIZE_STRING` deprecated in PHP 8.1 in favor of `FILTER_SANITIZE_FULL_SPECIAL_CHARS` when saving coupon options in admin
+
+2022.12.01 - version 2.14.0
+ * Misc - Require PHP 7.4 and WordPress 5.6
+
+2022.11.04 - version 2.13.2
+ * Tweak - Clarify messaging for defer apply coupon notices
+
+2022.02.07 - version 2.13.1
+ * Fix - Replace deprecated `is_ajax()` usages with `wp_doing_ajax()`
+ * Misc - Require WooCommerce 3.9.4 or above
+
+2021.08.09 - version 2.13.0
  * Tweak - Tweak the admin UI
 
 2020.12.07 - version 2.12.0

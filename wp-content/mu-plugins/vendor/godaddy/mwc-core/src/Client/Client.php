@@ -11,14 +11,15 @@ use GoDaddy\WordPress\MWC\Common\Auth\Exceptions\CredentialsCreateFailedExceptio
 use GoDaddy\WordPress\MWC\Common\Configuration\Configuration;
 use GoDaddy\WordPress\MWC\Common\Enqueue\Enqueue;
 use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
-use GoDaddy\WordPress\MWC\Common\Platforms\Exceptions\PlatformRepositoryException;
-use GoDaddy\WordPress\MWC\Common\Platforms\PlatformRepositoryFactory;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
+use GoDaddy\WordPress\MWC\Common\Models\Contracts\HostingPlanContract;
+use GoDaddy\WordPress\MWC\Common\Platforms\Contracts\PlatformRepositoryContract;
 use GoDaddy\WordPress\MWC\Common\Providers\Contracts\ProviderContract;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPressRepository;
+use GoDaddy\WordPress\MWC\Common\Stores\Contracts\StoreRepositoryContract;
 use GoDaddy\WordPress\MWC\Core\Admin\Views\Components\PlatformContainerElement;
-use GoDaddy\WordPress\MWC\Core\Configuration\RuntimeConfigurationFactory;
-use GoDaddy\WordPress\MWC\Core\Features\CartRecoveryEmails\Exceptions\CartRecoveryException;
+use GoDaddy\WordPress\MWC\Core\Features\CartRecoveryEmails\Configuration\Contracts\CartRecoveryEmailsFeatureRuntimeConfigurationContract;
 use GoDaddy\WordPress\MWC\Core\HostingPlans\Repositories\HostingPlanRepository;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\GoDaddyPayments\Frontend\Admin\Notices;
 use GoDaddy\WordPress\MWC\Dashboard\Menu\GetHelpMenu;
@@ -32,20 +33,36 @@ use GoDaddy\WordPress\MWC\Shipping\Shipping;
 class Client
 {
     /** @var string the app source, normally a URL */
-    protected $appSource;
+    protected string $appSource;
 
     /** @var string the identifier of the application */
-    protected $appHandle;
+    protected string $appHandle;
+
+    protected CartRecoveryEmailsFeatureRuntimeConfigurationContract $cartRecoveryEmailsFeatureRuntimeConfiguration;
+
+    protected PlatformRepositoryContract $platformRepository;
+
+    protected HostingPlanContract $hostingPlan;
+
+    protected StoreRepositoryContract $storeRepository;
 
     /**
      * MWC Client constructor.
      *
      * @throws Exception
      */
-    public function __construct()
-    {
+    public function __construct(
+        CartRecoveryEmailsFeatureRuntimeConfigurationContract $cartRecoveryEmailsFeatureRuntimeConfiguration,
+        PlatformRepositoryContract $platformRepository,
+        HostingPlanContract $hostingPlan,
+        StoreRepositoryContract $storeRepository
+    ) {
+        $this->hostingPlan = $hostingPlan;
+        $this->platformRepository = $platformRepository;
+        $this->cartRecoveryEmailsFeatureRuntimeConfiguration = $cartRecoveryEmailsFeatureRuntimeConfiguration;
+        $this->storeRepository = $storeRepository;
         $this->appHandle = 'mwcClient';
-        $this->appSource = Configuration::get('mwc.client.index.url');
+        $this->appSource = TypeHelper::string(Configuration::get('mwc.client.index.url'), '');
 
         $this->registerHooks();
     }
@@ -196,6 +213,7 @@ class Client
 
         $this->enqueueApp();
         $this->enqueueNoticesAssets();
+        $this->maybeEnqueueFullStoryAssets();
     }
 
     /**
@@ -353,12 +371,10 @@ class Client
      * Gets the inline script variables related to the site plan.
      *
      * @return array<string, mixed>
-     * @throws PlatformRepositoryException
      */
     protected function getPlanContextVariables() : array
     {
-        $plan = PlatformRepositoryFactory::getNewInstance()->getPlatformRepository()->getPlan()->toArray();
-
+        $plan = $this->hostingPlan->toArray();
         $plan['lastUpgradeTimestamp'] = $this->getContextualUpgradeDate();
 
         return ['plan' => $plan];
@@ -368,14 +384,13 @@ class Client
      * Gets the inline script variables related to the site's plan permissions.
      *
      * @return array<string, array<string, bool>>
-     * @throws PlatformRepositoryException
      */
     protected function getPlanPermissionsContextVariables() : array
     {
         return [
             'planPermissions' => [
                 // @TODO Replace this upload check with a more general permission call when that is added in MWC-8327 {agibson 2022-09-26}
-                'canUploadExtensions' => ! PlatformRepositoryFactory::getNewInstance()->getPlatformRepository()->getPlan()->isTrial(),
+                'canUploadExtensions' => ! $this->hostingPlan->isTrial(),
             ],
         ];
     }
@@ -445,13 +460,7 @@ class Client
      */
     protected function getAllowedSeriesLength() : int
     {
-        try {
-            $runtimeConfiguration = RuntimeConfigurationFactory::getInstance()->getCartRecoveryEmailsRuntimeConfiguration();
-        } catch (PlatformRepositoryException|CartRecoveryException $e) {
-            return 1;
-        }
-
-        return $runtimeConfiguration->getNumberOfCartRecoveryEmails();
+        return $this->cartRecoveryEmailsFeatureRuntimeConfiguration->getNumberOfCartRecoveryEmails();
     }
 
     /**
@@ -461,7 +470,7 @@ class Client
      */
     protected function isDelayReadOnly() : bool
     {
-        return (bool) Configuration::get('features.cart_recovery_emails.isDelayReadOnly');
+        return $this->cartRecoveryEmailsFeatureRuntimeConfiguration->isDelayReadOnly();
     }
 
     /**
@@ -471,11 +480,7 @@ class Client
      */
     protected function getStoreVariables() : array
     {
-        try {
-            $storeId = PlatformRepositoryFactory::getNewInstance()->getPlatformRepository()->getStoreRepository()->getStoreId();
-        } catch (Exception $e) {
-            $storeId = null;
-        }
+        $storeId = $this->storeRepository->getStoreId();
 
         return [
             'store' => [
@@ -521,6 +526,31 @@ class Client
             ->attachInlineScriptObject('MWCNotices')
             ->attachInlineScriptVariables([
                 'dismissNoticeAction' => Notices::ACTION_DISMISS_NOTICE,
+            ])
+            ->execute();
+    }
+
+    /**
+     * Enqueues the FullStory script, if it's enabled.
+     *
+     * @return void
+     * @throws Exception
+     */
+    protected function maybeEnqueueFullStoryAssets() : void
+    {
+        Enqueue::script()
+            ->setHandle("{$this->appHandle}-fullstory")
+            ->setSource(WordPressRepository::getAssetsUrl('js/fullstory.js'))
+            ->setDeferred(true)
+            ->setCondition(function () {
+                return true === Configuration::get('mwc.fullStory.enabled');
+            })
+            ->attachInlineScriptObject('MWCFullStory')
+            ->attachInlineScriptVariables([
+                'customerId' => $this->platformRepository->getGoDaddyCustomerId(),
+                'channelId'  => $this->platformRepository->getChannelId(),
+                'siteId'     => $this->platformRepository->getPlatformSiteId(),
+                'storeId'    => $this->storeRepository->getStoreId(),
             ])
             ->execute();
     }

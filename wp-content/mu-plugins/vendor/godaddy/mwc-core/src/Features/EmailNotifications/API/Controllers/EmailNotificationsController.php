@@ -7,9 +7,11 @@ use GoDaddy\WordPress\MWC\Common\Components\Contracts\ComponentContract;
 use GoDaddy\WordPress\MWC\Common\Events\Events;
 use GoDaddy\WordPress\MWC\Common\Events\ModelEvent;
 use GoDaddy\WordPress\MWC\Common\Exceptions\BaseException;
+use GoDaddy\WordPress\MWC\Common\Exceptions\SentryException;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\SanitizationHelper;
-use GoDaddy\WordPress\MWC\Common\Helpers\UrlHelper;
+use GoDaddy\WordPress\MWC\Common\Http\Url;
+use GoDaddy\WordPress\MWC\Common\Http\Url\Exceptions\InvalidUrlException;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerce\TemplatesRepository;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPress\SiteRepository;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPressRepository;
@@ -177,7 +179,13 @@ class EmailNotificationsController extends AbstractController implements Compone
     {
         $route = SiteRepository::getRestUrl(WordPressRepository::getCurrentBlogId(), "{$this->namespace}/{$this->route}/{$emailNotificationId}/{$path}");
 
-        return UrlHelper::addQuery($route, array_map('urlencode', $queryArgs));
+        try {
+            return Url::fromString($route)->addQueryParameters($queryArgs);
+        } catch (InvalidUrlException $exception) {
+            SentryException::getNewInstance($exception->getMessage(), $exception);
+
+            return '';
+        }
     }
 
     /**
@@ -670,7 +678,7 @@ class EmailNotificationsController extends AbstractController implements Compone
         $variables = ArrayHelper::wrap($request->get_param('variables'));
 
         if ($subject = ArrayHelper::get($variables, 'subject')) {
-            $variables['subject'] = "[TEST] ${subject}";
+            $variables['subject'] = "[TEST] {$subject}";
         }
 
         return $variables;

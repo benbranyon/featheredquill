@@ -102,7 +102,7 @@ class CustomerAdapter implements DataSourceAdapterContract
 
         if ($address = ArrayHelper::get($data, 'address')) {
             $billingAddress = $this->getConvertedAddress($address);
-            $billingAddress->setPhone(ArrayHelper::get($data, 'phone', ''));
+            $billingAddress->setPhone(TypeHelper::string(ArrayHelper::get($data, 'phone', ''), ''));
             $this->source->setBillingAddress($billingAddress);
         }
 

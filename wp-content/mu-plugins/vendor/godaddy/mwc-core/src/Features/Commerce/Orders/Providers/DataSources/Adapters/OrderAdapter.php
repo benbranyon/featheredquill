@@ -2,11 +2,13 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataSources\Adapters;
 
+use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\LineItem;
 use GoDaddy\WordPress\MWC\Common\Traits\HasStringRemoteIdentifierTrait;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Contracts\HasStoreIdentifierContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataObjects\LineItem as LineItemDataObject;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataObjects\Note as NoteDataObject;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataObjects\Order as OrderDataObject;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataObjects\OrderContext;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataSources\Adapters\Factories\OrderContextAdapterFactory;
@@ -20,7 +22,11 @@ class OrderAdapter implements DataObjectAdapterContract, HasStoreIdentifierContr
     use HasStoreIdentifierTrait;
     use HasStringRemoteIdentifierTrait;
 
+    protected BillingInfoAdapter $billingInfoAdapter;
+
     protected OrderContextAdapterFactory $orderContextAdapterFactory;
+
+    protected CustomerRemoteIdAdapter $customerRemoteIdAdapter;
 
     protected LineItemAdapter $lineItemAdapter;
 
@@ -30,26 +36,41 @@ class OrderAdapter implements DataObjectAdapterContract, HasStoreIdentifierContr
 
     protected DateTimeAdapter $dateTimeAdapter;
 
+    protected NoteAdapter $noteAdapter;
+
     public function __construct(
+        BillingInfoAdapter $billingInfoAdapter,
         OrderContextAdapterFactory $orderContextAdapter,
+        CustomerRemoteIdAdapter $customerRemoteIdAdapter,
         LineItemAdapter $lineItemAdapter,
+        NoteAdapter $noteAdapter,
         OrderStatusesAdapter $orderStatusesAdapter,
         OrderTotalsAdapter $orderTotalsAdapter,
         DateTimeAdapter $dateTimeAdapter
     ) {
+        $this->billingInfoAdapter = $billingInfoAdapter;
         $this->orderContextAdapterFactory = $orderContextAdapter;
+        $this->customerRemoteIdAdapter = $customerRemoteIdAdapter;
         $this->lineItemAdapter = $lineItemAdapter;
+        $this->noteAdapter = $noteAdapter;
         $this->orderStatusesAdapter = $orderStatusesAdapter;
         $this->orderTotalsAdapter = $orderTotalsAdapter;
         $this->dateTimeAdapter = $dateTimeAdapter;
     }
 
     /**
-     * {@inheritDoc}
+     * Converts from the Order data source format.
+     *
+     * @param OrderDataObject $source
+     * @return Order
      */
     public function convertFromSource($source)
     {
-        // No-op
+        $order = Order::getNewInstance();
+
+        $this->orderStatusesAdapter->convertFromSource($source->statuses, $order);
+
+        return $order;
     }
 
     /**
@@ -61,13 +82,18 @@ class OrderAdapter implements DataObjectAdapterContract, HasStoreIdentifierContr
     public function convertToSource($target)
     {
         return new OrderDataObject([
-            'id'          => $this->getOrderId(),
-            'cartId'      => $this->getCartId($target),
-            'context'     => $this->getContextFromOrder($target),
-            'lineItems'   => $this->convertLineItemsToSource($target),
-            'processedAt' => $this->getProcessedAtFromOrder($target),
-            'statuses'    => $this->orderStatusesAdapter->convertToSource($target),
-            'totals'      => $this->orderTotalsAdapter->convertToSource($target),
+            'billing'       => $this->billingInfoAdapter->convertToSource($target),
+            'cartId'        => $this->getCartId($target),
+            'context'       => $this->getContextFromOrder($target),
+            'customerId'    => $this->customerRemoteIdAdapter->convertToSource($target),
+            'id'            => $this->getOrderId(),
+            'lineItems'     => $this->convertLineItemsToSource($target),
+            'notes'         => $this->convertNotesToSource($target),
+            'number'        => $this->convertNumberToSource($target),
+            'numberDisplay' => $this->getNumberDisplay($target),
+            'processedAt'   => $this->getProcessedAtFromOrder($target),
+            'statuses'      => $this->orderStatusesAdapter->convertToSource($target),
+            'totals'        => $this->orderTotalsAdapter->convertToSource($target),
         ]);
     }
 
@@ -86,10 +112,23 @@ class OrderAdapter implements DataObjectAdapterContract, HasStoreIdentifierContr
      */
     protected function convertLineItemsToSource(Order $order) : array
     {
+        $this->lineItemAdapter->setOrder($order);
+
         return array_map(
             fn (LineItem $lineItem) => $this->lineItemAdapter->convertToSource($lineItem),
             $order->getLineItems()
         );
+    }
+
+    /**
+     * Converts order's notes to Commerce {@see NoteDataObject}.
+     * @param Order $order
+     *
+     * @return NoteDataObject[]
+     */
+    protected function convertNotesToSource(Order $order) : array
+    {
+        return array_map([$this->noteAdapter, 'convertToSource'], $order->getNotes());
     }
 
     /**
@@ -130,5 +169,35 @@ class OrderAdapter implements DataObjectAdapterContract, HasStoreIdentifierContr
     protected function getCartId(Order $order) : ?string
     {
         return $this->nonEmptyStringOrNull($order->getCartId());
+    }
+
+    /**
+     * Convert order number value for commerce order, with cartId as fallback value.
+     *
+     * @param Order $order
+     *
+     * @return non-empty-string|null
+     */
+    protected function convertNumberToSource(Order $order) : ?string
+    {
+        return $this->nonEmptyStringOrNull($order->getNumber() ?: $order->getCartId());
+    }
+
+    /**
+     * Get order numberDisplay value for commerce order. If it is cartId, trim it.
+     *
+     * @param Order $order
+     *
+     * @return non-empty-string|null
+     */
+    protected function getNumberDisplay(Order $order) : ?string
+    {
+        $number = $this->convertNumberToSource($order);
+
+        if ($number && $order->getCartId() === $number) {
+            return $this->nonEmptyStringOrNull(StringHelper::substring($number, 0, 8));
+        }
+
+        return $number;
     }
 }

@@ -131,7 +131,7 @@ class PushProductsActionInterceptor extends AbstractInterceptor
 
             return $this->getDataStore()->save($this->getProductsGateway()->upsert($product));
         } catch (Exception $exception) {
-            $job->addErrors(ArrayHelper::wrap("Unable to push product ${productId} to Poynt: {$exception->getMessage()}"));
+            $job->addErrors(ArrayHelper::wrap("Unable to push product {$productId} to Poynt: {$exception->getMessage()}"));
 
             Push::setIsHealthy(false);
         }
@@ -173,7 +173,7 @@ class PushProductsActionInterceptor extends AbstractInterceptor
                 )
             );
         } catch (Exception $exception) {
-            $job->addErrors(ArrayHelper::wrap("Unable to add products to Poynt catalog ${catalogId}: {$exception->getMessage()}"));
+            $job->addErrors(ArrayHelper::wrap("Unable to add products to Poynt catalog {$catalogId}: {$exception->getMessage()}"));
 
             Push::setIsHealthy(false);
         }

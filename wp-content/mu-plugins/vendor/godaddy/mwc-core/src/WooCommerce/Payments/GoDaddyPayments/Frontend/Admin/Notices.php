@@ -7,8 +7,6 @@ use GoDaddy\WordPress\MWC\Common\Configuration\Configuration;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Models\User;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
-use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
-use GoDaddy\WordPress\MWC\Common\Repositories\WordPressRepository;
 use GoDaddy\WordPress\MWC\Core\Admin\Notices\Notices as AdminNotices;
 use GoDaddy\WordPress\MWC\Core\Features\Worldpay\Worldpay;
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt;
@@ -16,9 +14,6 @@ use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Interceptors\AutoConnectIntercepto
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Models\Business;
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Onboarding;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\Events\Producers\OnboardingEventsProducer;
-use GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\GoDaddyPayments\ApplePayGateway;
-use GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\GoDaddyPayments\GooglePayGateway;
-use WC_Shipping_Zones;
 
 /**
  * Class Notices.
@@ -154,11 +149,6 @@ class Notices
             return;
         }
 
-        $this->registerApplePayNotices();
-        $this->registerGooglePayNotices();
-
-        $this->registerGdpRecommendationNotices();
-
         $this->maybeRegisterConnectedAccountNotice();
     }
 
@@ -196,160 +186,6 @@ class Notices
     public static function isBOPITFeatureEnabled() : bool
     {
         return Configuration::get('features.bopit', false);
-    }
-
-    /**
-     * Registers admin notices to display GoDaddy Payments Recommendation.
-     *
-     * @throws Exception
-     */
-    protected function registerGdpRecommendationNotices()
-    {
-        if (! $this->shouldRegisterGdpRecommendationNotices()) {
-            return;
-        }
-
-        $this->registerNotice([
-            'dismissible' => true,
-            'classes'     => 'mwc-godaddy-payments-recommendation',
-            'id'          => 'mwc-godaddy-payments-recommendation',
-            'message'     => sprintf(
-                '<img src="%1$s" alt="'.esc_attr__('Provided by GoDaddy', 'mwc-core').'"/>
-                <h3>'.esc_html__('GoDaddy Payments', 'mwc-core').'</h3>
-                <p>'.esc_html__('Sell online and in person with GoDaddy Payments. Sync local pickup and delivery orders right to your Smart Terminal, then get paid fast with next-day deposits.', 'mwc-core').'</p>
-                <a href="%2$s" class="mwc-button">'.esc_html__('Get Started', 'mwc-core').'</a>',
-                esc_url(WordPressRepository::getAssetsUrl('images/branding/gd-icon.svg')),
-                esc_url(admin_url('admin.php?page=wc-settings&tab=checkout&gdpsetup=true'))
-            ),
-            'type' => 'info',
-        ]);
-    }
-
-    /**
-     * Determines whether GoDaddy Payments Recommendation Notice should be registered.
-     *
-     * @return bool
-     * @throws Exception
-     */
-    protected function shouldRegisterGdpRecommendationNotices() : bool
-    {
-        /* @NOTE we are not past `admin_init` context, and we can't use {@see WordPressRepository::isCurrentScreen()} here {unfulvio 2022-02-10} */
-        if (! self::isBOPITFeatureEnabled()
-            || '' !== Onboarding::getStatus()
-            || 'wc-settings' !== ArrayHelper::get($_GET, 'page')
-        ) {
-            return false;
-        }
-
-        return ArrayHelper::contains(static::GDP_RECOMMENDATION_SECTIONS, ArrayHelper::get($_GET, 'section'))
-            || (ArrayHelper::contains(static::GDP_RECOMMENDATION_TABS, ArrayHelper::get($_GET, 'tab')) && ($this->isLocalPickupEnabled() || $this->isLocalDeliveryEnabled()));
-    }
-
-    /**
-     * Registers Apple Pay notices.
-     *
-     * @throws Exception
-     */
-    protected function registerApplePayNotices()
-    {
-        if (true !== Configuration::get('payments.applePay.enabled', false) || ! ApplePayGateway::isActive()) {
-            return;
-        }
-
-        if (ApplePayGateway::isDomainRegisteredWithApple()) {
-            $this->registerNotice([
-                'dismissible' => true,
-                'id'          => 'mwc-payments-godaddy-payments-apple-pay-enabled',
-                'message'     => sprintf(
-                    __('GoDaddy Payments - Apple Pay has been enabled on your selected pages and shows %1$sin Safari on supported devices%2$s.', 'mwc-core'),
-                    '<a href="https://support.apple.com/en-us/HT208531" target="_blank">',
-                    ' <span class="dashicons dashicons-external"></span></a>'
-                ),
-                'type' => 'success',
-            ]);
-        } else {
-            $this->registerNotice([
-                'dismissible' => false,
-                'id'          => 'mwc-payments-godaddy-payments-apple-pay-registration-failed',
-                'message'     => sprintf(
-                    __('There was a problem registering your site with Apple Pay. Please disable Apple Pay and try re-enabling, or %1$scontact support%2$s.', 'mwc-core'),
-                    '<a href="'.esc_url(admin_url('admin.php?page=godaddy-get-help')).'">',
-                    '</a>'
-                ),
-                'type' => 'error',
-            ]);
-        }
-
-        $page = ArrayHelper::get($_GET, 'page');
-        $section = ArrayHelper::get($_GET, 'section');
-        $hasEnabledPages = ! empty(Configuration::get('payments.applePay.enabledPages'));
-
-        // only display this notice on the Apple Pay settings page
-        if ($hasEnabledPages || 'wc-settings' !== $page || 'godaddy-payments-apple-pay' !== $section) {
-            return;
-        }
-
-        $this->registerNotice([
-            'dismissible' => false,
-            'id'          => 'mwc-payments-godaddy-payments-apple-pay-no-enabled-pages',
-            'message'     => __('Please select the pages where Apple Pay should show.', 'mwc-core'),
-            'type'        => 'error',
-        ]);
-    }
-
-    /**
-     * Registers Google Pay notices.
-     *
-     * @throws Exception
-     */
-    protected function registerGooglePayNotices() : void
-    {
-        if (true !== Configuration::get('payments.googlePay.enabled', false) || ! GooglePayGateway::isActive()) {
-            return;
-        }
-
-        $this->registerGooglePayEnabledNotice();
-
-        $page = ArrayHelper::get($_GET, 'page');
-        $section = ArrayHelper::get($_GET, 'section');
-
-        $isGooglePaySettingsPage = 'wc-settings' === $page && 'godaddy-payments-google-pay' === $section;
-
-        // only display this notice on the Google Pay settings page
-        if (! GooglePayGateway::hasEnabledPages() && $isGooglePaySettingsPage) {
-            $this->registerGooglePaySelectPagesNotice();
-        }
-    }
-
-    /**
-     * Registers the Google Pay enabled notice.
-     */
-    protected function registerGooglePayEnabledNotice() : void
-    {
-        $this->registerNotice([
-            'dismissible' => true,
-            'id'          => 'mwc-payments-godaddy-payments-google-pay-enabled',
-            'message'     => sprintf(
-                /* translators: Placeholders: %1$s - <a> tag for the Google Pay docs link, %2$s - </a> tag */
-                __('GoDaddy Payments - Google Pay has been enabled on your selected pages and shows %1$sin supported browsers and devices%2$s.', 'mwc-core'),
-                '<a href="https://developers.google.com/pay/api/web/guides/test-and-deploy/integration-checklist#test-using-browser-developer-console" target="_blank">',
-                ' <span class="dashicons dashicons-external"></span></a>'
-            ),
-            'type' => 'success',
-        ]);
-    }
-
-    /**
-     * Registers the Google Pay notice to indicate that the user must select an enabled page.
-     */
-    protected function registerGooglePaySelectPagesNotice() : void
-    {
-        $this->registerNotice([
-            'dismissible' => false,
-            'id'          => 'mwc-payments-godaddy-payments-google-pay-no-enabled-pages',
-            'message'     => __('Please select the pages where Google Pay should show.', 'mwc-core'),
-            'type'        => 'error',
-        ]);
     }
 
     /**
@@ -442,7 +278,8 @@ class Notices
                 __('GoDaddy Payments is now connected with the account %1$s %2$s. (Not right? %3$sSwitch account%4$s.)', 'mwc-core'),
                 $business->getDoingBusinessAs(),
                 $business->getEmailAddress(),
-                '<a href="'.esc_url(OnboardingEventsProducer::getSwitchStartUrl()).'">', '</a>'
+                '<a href="'.esc_url(OnboardingEventsProducer::getSwitchStartUrl()).'">',
+                '</a>'
             );
         }
 
@@ -453,7 +290,8 @@ class Notices
             $message .= ' '.sprintf(
                 /* translators: Placeholders: %1$s - <a> tag, %2$s - </a> */
                 __('To get your funds deposited to your bank account, verify your identity and add your banking info. %1$sSet up payouts%2$s', 'mwc-core'),
-                '<a href="'.esc_url(Onboarding::getApplicationUrl()).'" target="_blank">', '</a>'
+                '<a href="'.esc_url(Onboarding::getApplicationUrl()).'" target="_blank">',
+                '</a>'
             );
         }
 
@@ -462,51 +300,10 @@ class Notices
             __('The connected GoDaddy Payments account is %1$s %2$s (Not the business owner\'s account? %3$sSwitch account%4$s).', 'mwc-core'),
             $business->getDoingBusinessAs(),
             $business->getEmailAddress(),
-            '<a href="'.esc_url(OnboardingEventsProducer::getSwitchStartUrl()).'">', '</a>'
+            '<a href="'.esc_url(OnboardingEventsProducer::getSwitchStartUrl()).'">',
+            '</a>'
         );
 
         return $message;
-    }
-
-    /**
-     * Determines whether the zones have Local Pickup Method enabled.
-     *
-     * @return bool
-     * @throws Exception
-     */
-    protected function isLocalPickupEnabled() : bool
-    {
-        $shippingZones = WooCommerceRepository::isWooCommerceActive() ? WC_Shipping_Zones::get_zones() : [];
-
-        foreach (ArrayHelper::wrap($shippingZones) as $zone) {
-            $localPickupShippingMethods = ArrayHelper::where(ArrayHelper::get($zone, 'shipping_methods', []), static function ($method) {
-                return static::WC_LOCAL_PICKUP === $method->id;
-            });
-
-            return ! empty($localPickupShippingMethods);
-        }
-
-        return false;
-    }
-
-    /**
-     * Determines whether the zones have Local Delivery Method enabled.
-     *
-     * @return bool
-     * @throws Exception
-     */
-    protected function isLocalDeliveryEnabled() : bool
-    {
-        $shippingZones = WooCommerceRepository::isWooCommerceActive() ? WC_Shipping_Zones::get_zones() : [];
-
-        foreach (ArrayHelper::wrap($shippingZones) as $zone) {
-            $localDeliveryShippingMethods = ArrayHelper::where(ArrayHelper::get($zone, 'shipping_methods', []), static function ($method) {
-                return 'mwc_local_delivery' === $method->id;
-            });
-
-            return ! empty($localDeliveryShippingMethods);
-        }
-
-        return false;
     }
 }

@@ -6,19 +6,37 @@ use GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\DataObjects\AbstractD
 
 class Order extends AbstractDataObject
 {
-    /** @var non-empty-string|null */
-    public ?string $id = null;
+    public BillingInfo $billing;
 
     /** @var non-empty-string|null */
     public ?string $cartId = null;
 
     public OrderContext $context;
 
+    /** @var non-empty-string|null */
+    public ?string $customerId = null;
+
     /** @var LineItem[] */
     public array $lineItems;
 
+    /** @var non-empty-string|null */
+    public ?string $id = null;
+
     /** @var Note[] */
     public array $notes = [];
+
+    /**
+     * Order number.
+     *
+     * This property is nullable because we don't always have a value. However, null and
+     * empty strings are not accepted values for input to the commerce order API.
+     *
+     * @var non-empty-string|null
+     */
+    public ?string $number = null;
+
+    /** @var string|null */
+    public ?string $numberDisplay = null;
 
     /** @var non-empty-string */
     public string $processedAt;
@@ -31,11 +49,15 @@ class Order extends AbstractDataObject
      * Constructor.
      *
      * @param array{
-     *     id?: ?non-empty-string,
+     *     billing: BillingInfo,
      *     cartId?: ?non-empty-string,
      *     context: OrderContext,
+     *     customerId?: ?non-empty-string,
      *     lineItems: LineItem[],
+     *     id?: ?non-empty-string,
      *     notes?: Note[],
+     *     number?: ?non-empty-string,
+     *     numberDisplay?: ?string,
      *     processedAt: non-empty-string,
      *     statuses: OrderStatuses,
      *     totals: OrderTotals

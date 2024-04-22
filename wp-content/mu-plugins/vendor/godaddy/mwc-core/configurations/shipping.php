@@ -27,7 +27,10 @@ return [
     ],
     'shipengine' => [
         'api' => [
-            'url' => defined('MWC_SHIPENGINE_API_URL') ? MWC_SHIPENGINE_API_URL : (defined('MWC_EXTENSIONS_API_URL') ? MWC_EXTENSIONS_API_URL : 'https://api.mwc.secureserver.net/v1'),
+            'url' => [
+                'prod' => defined('MWC_SHIPENGINE_API_URL') ? MWC_SHIPENGINE_API_URL : (defined('MWC_EXTENSIONS_API_URL') ? MWC_EXTENSIONS_API_URL : 'https://api.mwc.secureserver.net/v1'),
+                'dev'  => defined('MWC_SHIPENGINE_API_URL') ? MWC_SHIPENGINE_API_URL : (defined('MWC_EXTENSIONS_API_URL') ? MWC_EXTENSIONS_API_URL : 'https://api-test.mwc.secureserver.net/v1'),
+            ],
         ],
         'account' => [
             'maxCompanyNameLength' => 50,

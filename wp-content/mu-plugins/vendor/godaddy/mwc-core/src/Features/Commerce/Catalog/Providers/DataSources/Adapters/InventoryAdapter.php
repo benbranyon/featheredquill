@@ -26,24 +26,9 @@ class InventoryAdapter implements DataSourceAdapterContract
             return null;
         }
 
-        $stockStatus = $product->getStockStatus();
-        $hasStockManagementEnabled = $product->hasStockManagementEnabled();
-        $backordersAllowed = $product->getBackordersAllowed() === 'yes' || $stockStatus == 'onbackorder';
-
-        /*
-         * Commerce does not have an equivalent of "not tracking inventory" but also specifying something is out of stock.
-         * In order to simulate this, we map this to:
-         *
-         * tracking = true
-         * quantity = 0
-         *
-         * Also, tracking needs to be true whenever backorderable is true.
-         */
         return new Inventory([
-            'externalService' => $hasStockManagementEnabled,
-            'backorderable'   => $backordersAllowed,
-            'quantity'        => ! $hasStockManagementEnabled && in_array($stockStatus, ['onbackorder', 'outofstock'], true) ? 0 : $product->getCurrentStock(),
-            'tracking'        => $hasStockManagementEnabled || in_array($stockStatus, ['onbackorder', 'outofstock'], true) || $backordersAllowed,
+            'externalService' => true,
+            'tracking'        => $product->hasStockManagementEnabled(),
         ]);
     }
 

@@ -243,7 +243,7 @@ class OrdersController extends AbstractController
                         'type'        => 'object',
                         'properties'  => [
                             'amount' => [
-                                'description' => __('The full order amount, in the smallest unit of the given currencyCode.', 'mwc-dashboard'),
+                                'description' => __('The full order amount, in the smallest unit of the given currency code.', 'mwc-dashboard'),
                                 'type'        => 'integer',
                                 'context'     => ['view', 'edit'],
                                 'readonly'    => true,

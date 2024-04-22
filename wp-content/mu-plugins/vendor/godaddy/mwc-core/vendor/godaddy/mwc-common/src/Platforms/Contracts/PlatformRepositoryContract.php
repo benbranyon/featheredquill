@@ -105,6 +105,13 @@ interface PlatformRepositoryContract
     public function isTemporaryDomain() : bool;
 
     /**
+     * Determines if the site is originating from an internal TLA account.
+     *
+     * @return bool
+     */
+    public function isTlaSite() : bool;
+
+    /**
      * Gets the channel ID.
      *
      * @return string

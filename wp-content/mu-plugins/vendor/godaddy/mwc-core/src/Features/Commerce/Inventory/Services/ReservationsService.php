@@ -3,8 +3,11 @@
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services;
 
 use Exception;
+use GoDaddy\WordPress\MWC\Common\Models\Orders\LineItem;
+use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerce\ProductsRepository;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Services\Contracts\ProductsMappingServiceContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\CommerceException;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\MissingProductRemoteIdException;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\Contracts\InventoryProviderContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\DataObjects\ReadReservationInput;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\DataObjects\Reservation;
@@ -21,19 +24,13 @@ use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services\Responses\Re
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Models\Contracts\CommerceContextContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\DataObjects\ExternalId;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Adapters\ProductAdapter;
+use GoDaddy\WordPress\MWC\Core\WooCommerce\Models\Products\Product;
 
 class ReservationsService implements ReservationsServiceContract
 {
-    /** @var CommerceContextContract */
     protected CommerceContextContract $commerceContext;
-
-    /** @var InventoryProviderContract the inventory provider instance */
     protected InventoryProviderContract $provider;
-
-    /** @var ReservationMappingServiceContract */
     protected ReservationMappingServiceContract $reservationMappingService;
-
-    /** @var ProductsMappingServiceContract */
     protected ProductsMappingServiceContract $productMappingService;
 
     /**
@@ -53,7 +50,6 @@ class ReservationsService implements ReservationsServiceContract
 
     /**
      * {@inheritDoc}
-     * @throws Exception
      */
     public function createOrUpdateReservation(CreateOrUpdateReservationOperationContract $operation) : CreateOrUpdateReservationResponseContract
     {
@@ -76,7 +72,9 @@ class ReservationsService implements ReservationsServiceContract
      * Instantiates a reservation object that will be different if a remote ID can be found or not.
      *
      * @param CreateOrUpdateReservationOperationContract $operation
+     *
      * @return ?Reservation
+     * @throws MissingProductRemoteIdException
      * @throws Exception
      */
     protected function instantiateReservation(CreateOrUpdateReservationOperationContract $operation) : ?Reservation
@@ -92,15 +90,11 @@ class ReservationsService implements ReservationsServiceContract
         if ($remoteReservationId) {
             $reservation->inventoryReservationId = $remoteReservationId;
         } else {
-            $wcProduct = $operation->getLineItem()->getProduct();
-
-            if (! $wcProduct) {
+            if (! $product = $this->getProductForReservation($operation->getLineItem())) {
                 return null;
             }
 
-            $product = ProductAdapter::getNewInstance($wcProduct)->convertFromSource();
-
-            $remoteProductId = $this->productMappingService->getRemoteId($product);
+            $remoteProductId = $this->getProductRemoteId($product);
 
             $reservation->productId = $remoteProductId;
 
@@ -113,6 +107,40 @@ class ReservationsService implements ReservationsServiceContract
         }
 
         return $reservation;
+    }
+
+    /**
+     * Get remote ID for the given product, or throw if there is no remote ID for it.
+     *
+     * @throws MissingProductRemoteIdException
+     */
+    protected function getProductRemoteId(Product $product) : string
+    {
+        if ($remoteId = $this->productMappingService->getRemoteId($product)) {
+            return $remoteId;
+        }
+
+        throw new MissingProductRemoteIdException('Product remote ID was not found.');
+    }
+
+    /**
+     * Gets the product for creating/updating a reservation.
+     *
+     * @param LineItem $lineItem
+     *
+     * @return Product|null
+     * @throws Exception
+     */
+    protected function getProductForReservation(LineItem $lineItem) : ?Product
+    {
+        $wooProduct = $lineItem->getProduct();
+
+        // if the stock is managed by another product, get that product instead
+        if ($wooProduct && $wooProduct->get_id() !== $wooProduct->get_stock_managed_by_id()) {
+            $wooProduct = ProductsRepository::get($wooProduct->get_stock_managed_by_id());
+        }
+
+        return $wooProduct ? ProductAdapter::getNewInstance($wooProduct)->convertFromSource() : null;
     }
 
     /**

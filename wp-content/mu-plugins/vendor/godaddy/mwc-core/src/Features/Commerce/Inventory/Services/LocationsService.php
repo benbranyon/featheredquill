@@ -3,6 +3,8 @@
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services;
 
 use Exception;
+use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\MissingLocationInformationException;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\MissingLocationRemoteIdException;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\Contracts\InventoryProviderContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\DataObjects\ListLocationsInput;
@@ -45,9 +47,13 @@ class LocationsService implements LocationsServiceContract
     {
         $existingRemoteId = $this->locationMappingService->getRemoteId();
 
-        $location = $this->provider->locations()->createOrUpdate(
-            $this->getUpsertLocationInput($existingRemoteId)
-        );
+        $upsertLocationInput = $this->getUpsertLocationInput($existingRemoteId);
+
+        if (! $this->hasValidAddress($upsertLocationInput)) {
+            throw MissingLocationInformationException::withDefaultMessage();
+        }
+
+        $location = $this->provider->locations()->createOrUpdate($upsertLocationInput);
 
         if (! $location->inventoryLocationId) {
             throw MissingLocationRemoteIdException::withDefaultMessage();
@@ -58,6 +64,26 @@ class LocationsService implements LocationsServiceContract
         }
 
         return new CreateOrUpdateLocationResponse($location);
+    }
+
+    /**
+     * Determines whether the input has a valid address inside its location object.
+     *
+     * @param UpsertLocationInput $input
+     * @return bool
+     */
+    protected function hasValidAddress(UpsertLocationInput $input) : bool
+    {
+        $data = $input->toArray();
+
+        $address1 = ArrayHelper::get($data, 'location.address.address1', null);
+        $city = ArrayHelper::get($data, 'location.address.city', null);
+        $postalCode = ArrayHelper::get($data, 'location.address.postalCode', null);
+
+        return
+            ! empty($address1) &&
+            ! empty($city) &&
+            ! empty($postalCode);
     }
 
     /**

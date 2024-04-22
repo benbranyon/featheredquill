@@ -8,6 +8,7 @@ use Exception;
 use GoDaddy\WordPress\MWC\Common\DataSources\Contracts\ExtensionAdapterContract;
 use GoDaddy\WordPress\MWC\Common\Extensions\Types\PluginExtension;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 
 /**
  * WooCommerce extension adapter.
@@ -95,13 +96,13 @@ class WooCommerceExtensionAdapter implements ExtensionAdapterContract
      * Sometimes extensions have a non-standard basename so we need this helper method to ensure those are dealt with appropriately.
      * If more are discovered they should be added to the map array in this method.
      *
-     * @since 1.0.0
-     *
      * @return string|null
      */
     private function getPluginBasename()
     {
-        if (! $slug = ArrayHelper::get($this->data, 'slug')) {
+        $slug = TypeHelper::stringOrNull(ArrayHelper::get($this->data, 'slug'));
+
+        if (! $slug) {
             return null;
         }
 
@@ -110,7 +111,7 @@ class WooCommerceExtensionAdapter implements ExtensionAdapterContract
             'woocommerce-product-enquiry-form' => 'product-enquiry-form',
         ];
 
-        $filename = ArrayHelper::get($map, $slug, $slug);
+        $filename = TypeHelper::string(ArrayHelper::get($map, $slug, $slug), '');
 
         return "{$slug}/{$filename}.php";
     }

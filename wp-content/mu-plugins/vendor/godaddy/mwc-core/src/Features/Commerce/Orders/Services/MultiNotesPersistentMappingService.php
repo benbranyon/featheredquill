@@ -2,12 +2,12 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Services;
 
-use GoDaddy\WordPress\MWC\Common\Models\Orders\Note;
+use GoDaddy\WordPress\MWC\Common\Models\Orders\Contracts\NoteContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Services\Contracts\MultiNotesPersistentMappingServiceContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Services\Contracts\NoteMappingServiceContract;
 
 /**
- * @extends AbstractMultiItemsPersistentMappingService<Note>
+ * @extends AbstractMultiItemsPersistentMappingService<NoteContract>
  */
 class MultiNotesPersistentMappingService extends AbstractMultiItemsPersistentMappingService implements MultiNotesPersistentMappingServiceContract
 {

@@ -222,7 +222,7 @@ class CartAdapter implements DataSourceAdapterContract
             $lineItems[] = (new LineItem())
                 ->setQuantity(ArrayHelper::get($lineItem, 'quantity', 1))
                 ->setProduct($product)
-                ->setVariationId(ArrayHelper::get($lineItem, 'variation_id', 0))
+                ->setVariationId(ArrayHelper::getIntValueForKey($lineItem, 'variation_id'))
                 ->setTaxAmount($this->convertAmountFromSource($lineItem, 'line_tax'))
                 ->setTotalAmount($this->convertAmountFromSource($lineItem, 'line_total'))
                 ->setSubTotalAmount($this->convertAmountFromSource($lineItem, 'line_subtotal'))

@@ -110,6 +110,16 @@ class Product extends AbstractModel
     }
 
     /**
+     * Determines whether the product is published.
+     *
+     * @return bool
+     */
+    public function isPublished() : bool
+    {
+        return 'publish' === $this->getStatus();
+    }
+
+    /**
      * Gets any attributes for the product.
      *
      * @return Attribute[]|null

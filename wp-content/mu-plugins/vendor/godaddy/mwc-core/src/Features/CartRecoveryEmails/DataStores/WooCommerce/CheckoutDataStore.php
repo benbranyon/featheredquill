@@ -8,6 +8,7 @@ use Exception;
 use GoDaddy\WordPress\MWC\Common\Exceptions\BaseException;
 use GoDaddy\WordPress\MWC\Common\Exceptions\WordPressDatabaseTableDoesNotExistException;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
+use GoDaddy\WordPress\MWC\Common\Models\Cart;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPress\DatabaseRepository;
 use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
 use GoDaddy\WordPress\MWC\Core\Features\CartRecoveryEmails\Collections\CheckoutCollection;
@@ -169,11 +170,37 @@ class CheckoutDataStore implements DataStoreContract
         }
 
         if (empty($checkout)) {
-            $checkout = new Checkout();
+            $checkout = $this->buildEmptyCheckout();
         }
 
         // populates the object with the data from the database row and returns it
-        return $this->readFromCustomTable($checkout, $databaseRowData);
+        $checkout = $this->readFromCustomTable($checkout, $databaseRowData);
+
+        /*
+         * If the cart has no line items, then this indicates that the WooCommerce cart record no longer exists,
+         * is empty, or is otherwise invalid. We need to explicitly wipe the cart hash value, otherwise we can end
+         * up handling an outdated cart hash later down the line and send out emails for empty carts.
+         */
+        if (empty($checkout->getCart()->getLineItems())) {
+            $checkout->setWcCartHash('');
+        }
+
+        return $checkout;
+    }
+
+    /**
+     * Builds a checkout instance with an empty cart.
+     *
+     * @return Checkout
+     */
+    protected function buildEmptyCheckout() : Checkout
+    {
+        /** @var Checkout $checkout */
+        $checkout = (new Checkout())
+            ->setCart(new Cart())
+            ->setCreatedAt(new DateTime());
+
+        return $checkout;
     }
 
     /**

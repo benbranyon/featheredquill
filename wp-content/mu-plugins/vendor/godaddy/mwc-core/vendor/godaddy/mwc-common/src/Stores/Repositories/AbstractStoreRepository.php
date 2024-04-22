@@ -56,9 +56,10 @@ abstract class AbstractStoreRepository implements StoreRepositoryContract
      * Registers a store to a customer channel.
      *
      * @param string $storeId
+     * @param string $businessId
      * @return void
      */
-    public function registerStore(string $storeId) : void
+    public function registerStore(string $storeId, string $businessId) : void
     {
         // no-op: individual store repositories can override this method or throw an exception as appropriate
     }

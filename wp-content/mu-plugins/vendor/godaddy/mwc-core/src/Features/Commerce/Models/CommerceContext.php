@@ -67,7 +67,7 @@ class CommerceContext extends AbstractModel implements CommerceContextContract
     protected function findOrCreateContext() : ?int
     {
         try {
-            return CommerceContextRepository::getInstance()->findOrCreateContext($this->storeId);
+            return CommerceContextRepository::getInstance()->findOrCreateContextWithCache($this->storeId);
         } catch (InvalidArgumentException|WordPressDatabaseException $exception) {
             return null;
         }

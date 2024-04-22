@@ -14,15 +14,21 @@ use GoDaddy\WordPress\MWC\Common\Exceptions\AdapterException;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Models\CurrencyAmount;
+use GoDaddy\WordPress\MWC\Common\Models\Orders\AbstractOrderItem;
+use GoDaddy\WordPress\MWC\Common\Models\Orders\FeeItem;
+use GoDaddy\WordPress\MWC\Common\Models\Orders\LineItem;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\Note;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\Order;
+use GoDaddy\WordPress\MWC\Common\Models\Orders\ShippingItem;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\Statuses\CancelledOrderStatus;
+use GoDaddy\WordPress\MWC\Common\Models\Orders\Statuses\CheckoutDraftOrderStatus;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\Statuses\CompletedOrderStatus;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\Statuses\FailedOrderStatus;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\Statuses\HeldOrderStatus;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\Statuses\PendingOrderStatus;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\Statuses\ProcessingOrderStatus;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\Statuses\RefundedOrderStatus;
+use GoDaddy\WordPress\MWC\Common\Models\Orders\TaxItem;
 use stdClass;
 use WC_Order;
 use WC_Order_Item;
@@ -39,20 +45,21 @@ use WC_Order_Item_Tax;
 class OrderAdapter implements DataSourceAdapterContract
 {
     /** @var WC_Order WooCommerce order object */
-    protected $source;
+    protected WC_Order $source;
 
-    /** @var string the order class name */
+    /** @var class-string<Order> the order class name */
     protected $orderClass = Order::class;
 
-    /** @var array order status relationships */
-    protected $statuses = [
-        'cancelled'  => CancelledOrderStatus::class,
-        'completed'  => CompletedOrderStatus::class,
-        'failed'     => FailedOrderStatus::class,
-        'on-hold'    => HeldOrderStatus::class,
-        'pending'    => PendingOrderStatus::class,
-        'processing' => ProcessingOrderStatus::class,
-        'refunded'   => RefundedOrderStatus::class,
+    /** @var array<string, class-string<OrderStatusContract>> order status relationships */
+    protected array $statuses = [
+        'cancelled'      => CancelledOrderStatus::class,
+        'completed'      => CompletedOrderStatus::class,
+        'failed'         => FailedOrderStatus::class,
+        'on-hold'        => HeldOrderStatus::class,
+        'pending'        => PendingOrderStatus::class,
+        'processing'     => ProcessingOrderStatus::class,
+        'refunded'       => RefundedOrderStatus::class,
+        'checkout-draft' => CheckoutDraftOrderStatus::class,
     ];
 
     /** @var class-string<LineItemAdapter> class that is used as line item adapter. Can be overwritten by inheritors. */
@@ -97,7 +104,11 @@ class OrderAdapter implements DataSourceAdapterContract
             if ($completedAt = $this->source->get_date_completed()) {
                 $order->setCompletedAt(new DateTime($completedAt->format('c')));
             }
-            if ($paidAt = $this->source->get_date_paid()) {
+
+            // we pass 'edit' as the context parameter for get_date_paid() to prevent the `woocommerce_payment_complete_order_status`
+            // filter from being triggered for orders that haven't been saved
+            // https://godaddy-corp.atlassian.net/browse/MWC-13191
+            if ($paidAt = $this->source->get_date_paid('edit')) {
                 $order->setPaidAt(new DateTime($paidAt->format('c')));
             }
         } catch (Exception $exception) {
@@ -161,23 +172,20 @@ class OrderAdapter implements DataSourceAdapterContract
 
         foreach (['fee', 'line_item', 'shipping', 'tax'] as $itemsKey) {
             foreach ($this->source->get_items($itemsKey) as $item) {
-                switch (get_class($item)) {
-                    case WC_Order_Item_Fee::class:
-                        /* @var WC_Order_Item_Fee $item */
-                        $feeItems[] = (new FeeItemAdapter($item))->convertFromSource();
-                        break;
-                    case WC_Order_Item_Product::class:
-                        /* @var WC_Order_Item_Product $item */
-                        $lineItems[] = (new $this->lineItemAdapterClass($item))->convertFromSource();
-                        break;
-                    case WC_Order_Item_Shipping::class:
-                        /* @var WC_Order_Item_Shipping $item */
-                        $shippingItems[] = (new ShippingItemAdapter($item))->convertFromSource();
-                        break;
-                    case WC_Order_Item_Tax::class:
-                        /* @var WC_Order_Item_Tax $item */
-                        $taxItems[] = (new TaxItemAdapter($item))->convertFromSource();
-                        break;
+                if ($item instanceof WC_Order_Item_Fee) {
+                    $feeItems[] = FeeItemAdapter::for($item, $this->source)->convertFromSource();
+                }
+
+                if ($item instanceof WC_Order_Item_Product) {
+                    $lineItems[] = $this->lineItemAdapterClass::for($item, $this->source)->convertFromSource();
+                }
+
+                if ($item instanceof WC_Order_Item_Shipping) {
+                    $shippingItems[] = ShippingItemAdapter::for($item, $this->source)->convertFromSource();
+                }
+
+                if ($item instanceof WC_Order_Item_Tax) {
+                    $taxItems[] = TaxItemAdapter::for($item, $this->source)->convertFromSource();
                 }
             }
         }
@@ -268,27 +276,88 @@ class OrderAdapter implements DataSourceAdapterContract
      * @param Order $order
      * @throws AdapterException
      */
-    private function convertOrderItemsToSource(Order $order)
+    protected function convertOrderItemsToSource(Order $order) : void
     {
         try {
             foreach ($order->getFeeItems() as $feeItem) {
-                $this->source->add_item((new FeeItemAdapter($this->getWooCommerceOrderItemInstance(WC_Order_Item_Fee::class, $order->getId())))->convertToSource($feeItem));
+                $this->source->add_item($this->convertFeeItemToSource($order, $feeItem));
             }
 
             foreach ($order->getLineItems() as $lineItem) {
-                $this->source->add_item((new $this->lineItemAdapterClass($this->getWooCommerceOrderItemInstance(WC_Order_Item_Product::class, $order->getId())))->convertToSource($lineItem));
+                $this->source->add_item($this->convertLineItemToSource($order, $lineItem));
             }
 
             foreach ($order->getShippingItems() as $shippingItem) {
-                $this->source->add_item((new ShippingItemAdapter($this->getWooCommerceOrderItemInstance(WC_Order_Item_Shipping::class, $order->getId())))->convertToSource($shippingItem));
+                $this->source->add_item($this->convertShippingItemToSource($order, $shippingItem));
             }
 
             foreach ($order->getTaxItems() as $taxItem) {
-                $this->source->add_item((new TaxItemAdapter($this->getWooCommerceOrderItemInstance(WC_Order_Item_Tax::class, $order->getId())))->convertToSource($taxItem));
+                $this->source->add_item($this->convertTaxItemToSource($order, $taxItem));
             }
         } catch (Exception $exception) {
             throw new AdapterException($exception->getMessage(), $exception);
         }
+    }
+
+    /**
+     * Converts a {@see FeeItem} instance into a {@see WC_Order_Item_Fee} instance.
+     *
+     * @param Order $order
+     * @param FeeItem $feeItem
+     *
+     * @return WC_Order_Item_Fee
+     */
+    protected function convertFeeItemToSource(Order $order, FeeItem $feeItem) : WC_Order_Item_Fee
+    {
+        $wooFeeItem = $this->getWooCommerceOrderItemInstanceFromSource($order, $feeItem, 'fee', WC_Order_Item_Fee::class);
+
+        return FeeItemAdapter::for($wooFeeItem, $this->source)->convertToSource($feeItem);
+    }
+
+    /**
+     * Converts a {@see LineItem} instance into a {@see WC_Order_Item_Product} instance.
+     *
+     * @param Order $order
+     * @param LineItem $lineItem
+     *
+     * @return WC_Order_Item_Product
+     */
+    protected function convertLineItemToSource(Order $order, LineItem $lineItem) : WC_Order_Item_Product
+    {
+        $wooLineItem = $this->getWooCommerceOrderItemInstanceFromSource($order, $lineItem, 'line_item', WC_Order_Item_Product::class);
+
+        return $this->lineItemAdapterClass::for($wooLineItem, $this->source)->convertToSource($lineItem);
+    }
+
+    /**
+     * Converts a {@see ShippingItem} instance into a {@see WC_Order_Item_Shipping} instance.
+     *
+     * @param Order $order
+     * @param ShippingItem $shippingItem
+     *
+     * @return WC_Order_Item_Shipping
+     * @throws AdapterException
+     */
+    protected function convertShippingItemToSource(Order $order, ShippingItem $shippingItem) : WC_Order_Item_Shipping
+    {
+        $wooShippingItem = $this->getWooCommerceOrderItemInstanceFromSource($order, $shippingItem, 'shipping', WC_Order_Item_Shipping::class);
+
+        return ShippingItemAdapter::for($wooShippingItem, $this->source)->convertToSource($shippingItem);
+    }
+
+    /**
+     * Converts a {@see TaxItem} instance into a {@see WC_Order_Item_Tax} instance.
+     *
+     * @param Order $order
+     * @param TaxItem $taxItem
+     *
+     * @return WC_Order_Item_Tax
+     */
+    protected function convertTaxItemToSource(Order $order, TaxItem $taxItem) : WC_Order_Item_Tax
+    {
+        $wooTaxItem = $this->getWooCommerceOrderItemInstanceFromSource($order, $taxItem, 'tax', WC_Order_Item_Tax::class);
+
+        return TaxItemAdapter::for($wooTaxItem, $this->source)->convertToSource($taxItem);
     }
 
     /**
@@ -299,10 +368,9 @@ class OrderAdapter implements DataSourceAdapterContract
      */
     protected function convertStatusToSource(OrderStatusContract $status) : string
     {
-        $statusName = $status->getName();
         $statuses = array_flip($this->statuses);
 
-        return $statuses[$statusName] ?? $statusName;
+        return $statuses[get_class($status)] ?? $status->getName();
     }
 
     /**
@@ -310,11 +378,12 @@ class OrderAdapter implements DataSourceAdapterContract
      *
      * @internal
      *
-     * @param string $itemClass class name of the item to instantiate
+     * @template TOrderItemClass of WC_Order_Item
+     * @param class-string<TOrderItemClass> $itemClass class name of the item to instantiate
      * @param int $orderId associated Order ID
-     * @return WC_Order_Item|WC_Order_Item_Fee|WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Tax
+     * @return TOrderItemClass
      */
-    public function getWooCommerceOrderItemInstance(string $itemClass, int $orderId) : WC_Order_Item
+    public function getWooCommerceOrderItemInstance(string $itemClass, int $orderId)
     {
         $item = new $itemClass();
 
@@ -323,6 +392,34 @@ class OrderAdapter implements DataSourceAdapterContract
         }
 
         return $item;
+    }
+
+    /**
+     * Gets a WooCommerce order item from the list of items in the source order.
+     * @note When an existing WooCommerce order is used as source, it's important to use existing order item instances
+     *    as the source for the line item adapters as well, to make sure that all the original values that the adapters
+     *    don't change are preserved.
+     *
+     * @template TOrderItemClass of WC_Order_Item
+     * @param Order $order
+     * @param AbstractOrderItem $orderItem
+     * @param non-empty-string $itemType
+     * @param class-string<TOrderItemClass> $itemClass
+     * @return TOrderItemClass
+     */
+    protected function getWooCommerceOrderItemInstanceFromSource(
+        Order $order,
+        AbstractOrderItem $orderItem,
+        string $itemType,
+        string $itemClass
+    ) {
+        $item = ArrayHelper::get($this->source->get_items($itemType), (string) $orderItem->getId());
+
+        if ($item instanceof $itemClass) {
+            return $item;
+        }
+
+        return $this->getWooCommerceOrderItemInstance($itemClass, (int) $order->getId());
     }
 
     /**

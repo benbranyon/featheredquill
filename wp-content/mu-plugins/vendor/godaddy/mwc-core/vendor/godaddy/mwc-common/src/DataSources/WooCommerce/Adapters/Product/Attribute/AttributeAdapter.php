@@ -3,10 +3,12 @@
 namespace GoDaddy\WordPress\MWC\Common\DataSources\WooCommerce\Adapters\Product\Attribute;
 
 use GoDaddy\WordPress\MWC\Common\DataSources\Contracts\DataSourceAdapterContract;
+use GoDaddy\WordPress\MWC\Common\Helpers\SanitizationHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Models\Products\Attributes\Attribute;
 use GoDaddy\WordPress\MWC\Common\Models\Products\Attributes\AttributeValue;
 use GoDaddy\WordPress\MWC\Common\Models\Taxonomy;
+use GoDaddy\WordPress\MWC\Common\Models\Term;
 use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
 use WC_Product_Attribute;
 
@@ -42,6 +44,10 @@ class AttributeAdapter implements DataSourceAdapterContract
         $attributeName = TypeHelper::string($attributeTaxonomy ? $attributeTaxonomy->getName() : $this->source->get_name(), '');
         $attributeLabel = TypeHelper::string($attributeTaxonomy ? $attributeTaxonomy->getLabel() : $this->source->get_name(), '');
 
+        if (! $attributeTaxonomy) {
+            $attributeName = SanitizationHelper::slug($attributeName);
+        }
+
         $attribute = Attribute::seed()
             ->setId(TypeHelper::int($this->source->get_id(), 0))
             ->setName(strtolower($attributeName))
@@ -69,11 +75,21 @@ class AttributeAdapter implements DataSourceAdapterContract
         $nativeValues = [];
 
         foreach ($this->source->get_options() as $sourceValue) {
-            $nativeValue = AttributeValue::getNewInstance($attribute)->setId(strtolower((string) $sourceValue));
+            $sourceValueString = (string) $sourceValue; // we need to retain the original $sourceValue to use in an int comparison later!
+            $nativeValue = AttributeValue::getNewInstance($attribute)->setId(strtolower($sourceValueString));
 
             if (! $attribute->hasTaxonomy()) {
-                $nativeValue->setLabel((string) $sourceValue);
-                $nativeValue->setName(strtolower((string) $sourceValue));
+                $nativeValue->setLabel($sourceValueString);
+                $nativeValue->setName(strtolower(SanitizationHelper::slug($sourceValueString)));
+            } elseif (! is_int($sourceValue) && $term = Term::get(strtolower($sourceValueString), $attribute->getTaxonomy())) {
+                /*
+                 * Accounts for scenarios where an attribute has a taxonomy, but the `$sourceValue` is unexpectedly a
+                 * term name/slug instead of the term ID. This is the case in product CSV imports.
+                 *
+                 * We use an `! is_int()` comparison instead of `! is_numeric()` in case `$sourceValue` is a term name that
+                 * just so happens to be a number (e.g. `'456'` <-- string as a number).
+                 */
+                $nativeValue->setId((string) $term->getId() ?: strtolower($sourceValueString));
             }
 
             $nativeValues[] = $nativeValue;

@@ -117,7 +117,7 @@ class GetHelpMenu
      */
     public function addMenuItem()
     {
-        $pageTitle = __('Get Help', 'mwc-dashboard');
+        $pageTitle = _x('Get Help', 'Page title for requesting GoDaddy support assistance via form', 'mwc-dashboard');
         $pageIcon = 'dashicons-sos';
 
         // since we are in a hook callback context, we should catch any exceptions

@@ -12,6 +12,8 @@ trait FulfillableTrait
     /** @var FulfillmentStatusContract fulfillment status */
     protected $fulfillmentStatus;
 
+    protected ?string $fulfillmentChannelId = null;
+
     /** @var bool whether the represented entity needs shipping or not */
     protected $needsShipping;
 
@@ -34,6 +36,28 @@ trait FulfillableTrait
     public function setFulfillmentStatus(FulfillmentStatusContract $fulfillmentStatus)
     {
         $this->fulfillmentStatus = $fulfillmentStatus;
+
+        return $this;
+    }
+
+    /**
+     * Gets the fulfillment channel ID.
+     *
+     * @return string|null
+     */
+    public function getFulfillmentChannelId() : ?string
+    {
+        return $this->fulfillmentChannelId;
+    }
+
+    /**
+     * Sets the fulfillment channel ID.
+     *
+     * @return $this
+     */
+    public function setFulfillmentChannelId(string $value)
+    {
+        $this->fulfillmentChannelId = $value;
 
         return $this;
     }

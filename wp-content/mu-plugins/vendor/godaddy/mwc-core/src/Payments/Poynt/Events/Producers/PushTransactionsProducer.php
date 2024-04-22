@@ -16,6 +16,7 @@ use GoDaddy\WordPress\MWC\Core\Payments\Exceptions\FailedTransactionException;
 use GoDaddy\WordPress\MWC\Core\Payments\Exceptions\InvalidTransactionException;
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt;
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Http\PutTransactionRequest;
+use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Traits\CanGetOrderRemoteIdForPoyntReferenceTrait;
 use GoDaddy\WordPress\MWC\Core\Sync\Jobs\PushSyncJob;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Adapters\OrderAdapter;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Models\Orders\Order;
@@ -23,6 +24,8 @@ use WC_Order;
 
 class PushTransactionsProducer implements ProducerContract
 {
+    use CanGetOrderRemoteIdForPoyntReferenceTrait;
+
     const SALE_ACTION = 'SALE';
     const AUTHORIZATION_ACTION = 'AUTHORIZE';
     const CAPTURE_ACTION = 'CAPTURE';
@@ -65,26 +68,34 @@ class PushTransactionsProducer implements ProducerContract
      */
     public function handlePushTransactionsJob(int $jobId, array $orderIds)
     {
-        $job = PushSyncJob::get($jobId);
+        if (! $job = PushSyncJob::get($jobId)) {
+            return;
+        }
+
         if (
-            ! $job
-            || ! WooCommerceRepository::isWooCommerceActive()
+            ! WooCommerceRepository::isWooCommerceActive()
             || empty($orderIds)
             || 'order' !== $job->getObjectType()
         ) {
+            $job->delete();
+
             return;
         }
 
         try {
             if (! $wcOrder = OrdersRepository::get(ArrayHelper::get($orderIds, 0))) {
+                $job->delete();
+
                 return;
             }
 
-            $order = (new OrderAdapter($wcOrder))->convertFromSource();
+            $order = OrderAdapter::getNewInstance($wcOrder)->convertFromSource();
 
             // the order was not sent to Poynt yet, reschedule the action to try again later
             if ($this->shouldRescheduleJob($order)) {
                 $this->rescheduleJob($order);
+
+                $job->delete();
 
                 return;
             }
@@ -99,9 +110,7 @@ class PushTransactionsProducer implements ProducerContract
             return;
         }
 
-        $job->update([
-            'status' => 'complete',
-        ]);
+        $job->delete();
     }
 
     /**
@@ -110,9 +119,9 @@ class PushTransactionsProducer implements ProducerContract
      * @param Order $order
      * @return bool
      */
-    protected function shouldRescheduleJob(Order $order)
+    protected function shouldRescheduleJob(Order $order) : bool
     {
-        return empty($order->getRemoteId());
+        return ! $this->getOrderRemoteIdForPoyntReference($order);
     }
 
     /**
@@ -168,7 +177,7 @@ class PushTransactionsProducer implements ProducerContract
 
         if ($response->isError() || $response->getStatus() !== 201) {
             $errorMessage = ArrayHelper::get($response->getBody(), 'developerMessage');
-            throw new FailedTransactionException("Could not send {$action} transaction to Poynt for order {$order->getRemoteId()}: ({$response->getStatus()}) {$errorMessage}");
+            throw new FailedTransactionException("Could not send {$action} transaction to Poynt for order {$this->getOrderRemoteIdForPoyntReference($order)}: ({$response->getStatus()}) {$errorMessage}");
         }
 
         $wcOrder->update_meta_data('_poynt_payment_remoteId', $remoteTransactionId);
@@ -195,7 +204,7 @@ class PushTransactionsProducer implements ProducerContract
 
         if ($response->isError() || $response->getStatus() !== 201) {
             $errorMessage = ArrayHelper::get($response->getBody(), 'developerMessage');
-            throw new InvalidTransactionException("Could not send CAPTURE transaction to Poynt for order {$order->getRemoteId()}: ({$response->getStatus()}) {$errorMessage}");
+            throw new InvalidTransactionException("Could not send CAPTURE transaction to Poynt for order {$this->getOrderRemoteIdForPoyntReference($order)}: ({$response->getStatus()}) {$errorMessage}");
         }
 
         $wcOrder->update_meta_data('_poynt_capture_remoteId', $remoteTransactionId);
@@ -213,7 +222,7 @@ class PushTransactionsProducer implements ProducerContract
      * @param string|null $transactionId transaction ID generated for this new transaction
      *
      * @return array the transaction request body
-     * @throws \Exception
+     * @throws Exception
      */
     protected function buildTransactionRequestBody(string $action, Order $order, WC_Order $wcOrder, string $transactionId = null)
     {
@@ -245,10 +254,7 @@ class PushTransactionsProducer implements ProducerContract
                 'transactionId' => static::CAPTURE_ACTION !== $action ? $wcOrder->get_transaction_id() : $transactionId,
             ],
             'references' => [
-                [
-                    'type' => 'POYNT_ORDER',
-                    'id'   => $order->getRemoteId(),
-                ],
+                $this->getOrderReferenceForPoynt($order),
             ],
             'context' => [
                 'storeId' => Configuration::get('payments.poynt.storeId', ''),
@@ -261,11 +267,13 @@ class PushTransactionsProducer implements ProducerContract
                     $body['processorResponse']['providerVerification'] = [
                         'signature' => 'none',
                     ];
+                    /* translators: Placeholder: %s - payment method name */
                     $body['notes'] = sprintf(__('Paid in WooCommerce checkout by "%s"', 'mwc-core'), $wcOrder->get_payment_method_title());
                     break;
                 }
             case static::SALE_ACTION:
                 {
+                    /* translators: Placeholder: %s - payment method name */
                     $body['notes'] = sprintf(__('Paid in WooCommerce checkout by "%s"', 'mwc-core'), $wcOrder->get_payment_method_title());
                     break;
                 }

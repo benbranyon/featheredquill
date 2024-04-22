@@ -115,7 +115,7 @@ class ReviewAdapter implements DataSourceAdapterContract
         ];
 
         try {
-            // combines the status map with its flipped version to allow converting back and forth
+            /** @var array<string, string> $statusMap combines the status map with its flipped version to allow converting back and forth */
             $statusMap = ArrayHelper::combine($statusMap, array_flip($statusMap));
         } catch (Exception $exception) {
             throw new AdapterException($exception->getMessage(), $exception);

@@ -6,15 +6,7 @@ use GoDaddy\WordPress\MWC\Common\Components\Contracts\ConditionalComponentContra
 use GoDaddy\WordPress\MWC\Common\Exceptions\WordPressDatabaseException;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPress\DatabaseRepository;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Repositories\NoteMapRepository;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Repositories\OrderMapRepository;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Repositories\CustomerMapRepository;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Repositories\GuestCustomerMapRepository;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Repositories\LevelMapRepository;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Repositories\LineItemMapRepository;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Repositories\LocationMapRepository;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Repositories\ProductMapRepository;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Repositories\ReservationMapRepository;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Enums\CommerceResourceTypes;
 use GoDaddy\WordPress\MWC\Core\Repositories\AbstractResourceMapRepository;
 
 class InsertResourceTypesAction implements ConditionalComponentContract
@@ -35,11 +27,13 @@ class InsertResourceTypesAction implements ConditionalComponentContract
     /**
      * Gets the time of the latest run of the action using YmdHis format.
      *
+     * @note This version was set with an extra zero at the end of YmdHis format, now we have to keep using a bigger number.
+     *
      * @return int
      */
     protected static function getVersion() : int
     {
-        return 202305010000000;
+        return 202402081155000;
     }
 
     /**
@@ -81,15 +75,19 @@ class InsertResourceTypesAction implements ConditionalComponentContract
     protected function run() : void
     {
         $resourceTypes = [
-            CustomerMapRepository::RESOURCE_TYPE,
-            GuestCustomerMapRepository::RESOURCE_TYPE,
-            ProductMapRepository::RESOURCE_TYPE,
-            LevelMapRepository::RESOURCE_TYPE,
-            LocationMapRepository::RESOURCE_TYPE,
-            ReservationMapRepository::RESOURCE_TYPE,
-            OrderMapRepository::RESOURCE_TYPE,
-            LineItemMapRepository::RESOURCE_TYPE,
-            NoteMapRepository::RESOURCE_TYPE,
+            CommerceResourceTypes::CatalogAsset,
+            CommerceResourceTypes::CatalogAssetUrl,
+            CommerceResourceTypes::Customer,
+            CommerceResourceTypes::CustomerOrderNote,
+            CommerceResourceTypes::GuestOrderCustomer,
+            CommerceResourceTypes::InventoryLevel,
+            CommerceResourceTypes::InventoryLocation,
+            CommerceResourceTypes::InventoryReservation,
+            CommerceResourceTypes::LineItem,
+            CommerceResourceTypes::Order,
+            CommerceResourceTypes::OrderNote,
+            CommerceResourceTypes::Product,
+            CommerceResourceTypes::ProductCategory,
         ];
 
         foreach ($resourceTypes as $name) {

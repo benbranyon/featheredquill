@@ -17,7 +17,7 @@
  * needs please refer to http://docs.woocommerce.com/document/cost-of-goods/ for more information.
  *
  * @author      SkyVerge
- * @copyright   Copyright (c) 2013-2020, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright   Copyright (c) 2013-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -122,7 +122,7 @@ class WC_COG_Admin_Report_Profit_by_Category extends WC_COG_Admin_Report {
 
 			$legend[] = [
 				/* translators: Placeholders: %1$s - formatted total profit amount surrounded by <strong> tags, e.g. <strong>$66.77</strong>, %1$s - product category name, e.g. t-shirts */
-				'title'            => sprintf( __( '%1$s total profit in %2$s', 'mwc-cost-of-goods' ), '<strong>' . wc_price( ( ! empty( $data->total_profit ) ? $data->total_profit : 0 ) ) . '</strong>', $category->name ),
+				'title'            => sprintf( __( '%1$s total profit in %2$s', 'woocommerce-cost-of-goods' ), '<strong>' . wc_price( ( ! empty( $data->total_profit ) ? $data->total_profit : 0 ) ) . '</strong>', $category->name ),
 				'color'            => isset( $this->chart_colors[ $index ] ) ? $this->chart_colors[ $index ] : $this->chart_colors[0],
 				'highlight_series' => $index,
 			];
@@ -149,7 +149,7 @@ class WC_COG_Admin_Report_Profit_by_Category extends WC_COG_Admin_Report {
 
 		return [
 			[
-				'title'    => __( 'Categories', 'mwc-cost-of-goods' ),
+				'title'    => __( 'Categories', 'woocommerce-cost-of-goods' ),
 				'callback' => [ $this, 'output_category_widget' ],
 			],
 		];
@@ -167,7 +167,7 @@ class WC_COG_Admin_Report_Profit_by_Category extends WC_COG_Admin_Report {
 		?>
 		<form method="GET">
 			<div>
-				<select multiple="multiple" data-placeholder="<?php _e( 'Select categories&hellip;', 'mwc-cost-of-goods' ); ?>" class="wc-enhanced-select" id="category_ids" name="category_ids[]" style="width: 205px;">
+				<select multiple="multiple" data-placeholder="<?php _e( 'Select categories&hellip;', 'woocommerce-cost-of-goods' ); ?>" class="wc-enhanced-select" id="category_ids" name="category_ids[]" style="width: 205px;">
 					<?php
 					$r                 = [];
 					$r['pad_counts']   = 1;
@@ -181,9 +181,9 @@ class WC_COG_Admin_Report_Profit_by_Category extends WC_COG_Admin_Report {
 					echo wc_walk_category_dropdown_tree( $categories, 0, $r );
 					?>
 				</select>
-				<a href="#" class="select_none"><?php esc_html_e( 'None', 'mwc-cost-of-goods' ); ?></a>
-				<a href="#" class="select_all"><?php esc_html_e( 'All', 'mwc-cost-of-goods' ); ?></a>
-				<input type="submit" class="submit button" value="<?php esc_attr_e( 'Show', 'mwc-cost-of-goods' ); ?>" />
+				<a href="#" class="select_none"><?php esc_html_e( 'None', 'woocommerce-cost-of-goods' ); ?></a>
+				<a href="#" class="select_all"><?php esc_html_e( 'All', 'woocommerce-cost-of-goods' ); ?></a>
+				<input type="submit" class="submit button" value="<?php esc_attr_e( 'Show', 'woocommerce-cost-of-goods' ); ?>" />
 				<input type="hidden" name="range" value="<?php if ( ! empty( $_GET['range'] ) )
 					echo esc_attr( $_GET['range'] ) ?>" />
 				<input type="hidden" name="start_date" value="<?php if ( ! empty( $_GET['start_date'] ) )
@@ -243,7 +243,7 @@ class WC_COG_Admin_Report_Profit_by_Category extends WC_COG_Admin_Report {
 		if ( empty( $this->category_ids ) ) {
 			?>
 			<div class="chart-container">
-				<p class="chart-prompt"><?php _e( '&larr; Choose a category to view stats', 'mwc-cost-of-goods' ); ?></p>
+				<p class="chart-prompt"><?php _e( '&larr; Choose a category to view stats', 'woocommerce-cost-of-goods' ); ?></p>
 			</div>
 			<?php
 		}

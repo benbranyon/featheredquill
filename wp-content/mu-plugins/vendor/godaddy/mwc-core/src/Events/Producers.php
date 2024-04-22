@@ -3,6 +3,8 @@
 namespace GoDaddy\WordPress\MWC\Core\Events;
 
 use GoDaddy\WordPress\MWC\Common\Components\Contracts\ConditionalComponentContract;
+use GoDaddy\WordPress\MWC\Common\Components\Exceptions\ComponentClassesNotDefinedException;
+use GoDaddy\WordPress\MWC\Common\Components\Exceptions\ComponentLoadFailedException;
 use GoDaddy\WordPress\MWC\Common\Components\Traits\HasComponentsTrait;
 use GoDaddy\WordPress\MWC\Common\Configuration\Configuration;
 use GoDaddy\WordPress\MWC\Common\Platforms\Exceptions\PlatformRepositoryException;
@@ -34,6 +36,7 @@ class Producers implements ConditionalComponentContract
      * TODO: remove this method when {@see Package} is converted to use {@see HasComponentsTrait} {nmolham 2021-10-27}
      *
      * @return bool
+     * @throws PlatformRepositoryException
      */
     public static function shouldLoadConditionalFeature() : bool
     {
@@ -44,7 +47,7 @@ class Producers implements ConditionalComponentContract
      * {@inheritdoc}
      * @throws ComponentClassesNotDefinedException|ComponentLoadFailedException
      */
-    public function load()
+    public function load() : void
     {
         $this->loadComponents();
     }

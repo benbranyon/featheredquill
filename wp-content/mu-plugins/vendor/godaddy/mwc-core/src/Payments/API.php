@@ -73,10 +73,10 @@ class API extends CommonAPI
      * @see \Automattic\WooCommerce\StoreApi\Authentication
      * @internal
      *
-     * @param bool|null $result
-     * @return bool|null
+     * @param mixed $result
+     * @return mixed
      */
-    public function checkAuthentication(?bool $result) : ?bool
+    public function checkAuthentication($result)
     {
         if ($result !== null) {
             return $result;

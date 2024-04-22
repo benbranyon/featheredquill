@@ -7,6 +7,7 @@ use GoDaddy\WordPress\MWC\Common\Auth\Contracts\AuthMethodContract;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Http\Contracts\RequestContract;
 use GoDaddy\WordPress\MWC\Common\Http\Contracts\ResponseContract;
+use GoDaddy\WordPress\MWC\Common\Http\Exceptions\InvalidMethodException;
 use GoDaddy\WordPress\MWC\Common\Http\Url\Exceptions\InvalidUrlException;
 use GoDaddy\WordPress\MWC\Common\Repositories\ManagedWooCommerceRepository;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPress\HttpRepository;
@@ -16,26 +17,26 @@ use GoDaddy\WordPress\MWC\Common\Repositories\WordPress\HttpRepository;
  */
 class Request implements RequestContract
 {
-    /** @var array<mixed> request body */
-    public $body;
+    /** @var array<int|string, mixed>|null request body */
+    public $body = null;
 
     /** @var array<string, mixed> request headers */
-    public $headers;
+    public $headers = [];
 
-    /** @var string request method */
-    public $method;
+    /** @var string|null request method */
+    public $method = null;
 
-    /** @var array<mixed>|null request query parameters */
-    public $query;
+    /** @var array<string, mixed>|null request query parameters */
+    public $query = null;
 
-    /** @var bool whether should verify SSL */
+    /** @var bool whether it should verify SSL when sending */
     public $sslVerify;
 
     /** @var int default timeout in seconds */
-    public $timeout;
+    public $timeout = 3;
 
     /** @var string|null the URL to send the request to */
-    public $url;
+    public $url = null;
 
     /** @var string[] allowed request method types */
     protected $allowedMethodTypes = ['GET', 'POST', 'HEAD', 'PUT', 'DELETE', 'TRACE', 'OPTIONS', 'PATCH'];
@@ -49,8 +50,8 @@ class Request implements RequestContract
     /** @var AuthMethodContract|null The authentication method for this request. */
     protected $authMethod;
 
-    /** @var string */
-    protected $path;
+    /** @var string|null */
+    protected $path = null;
 
     /**
      * Request constructor.
@@ -62,8 +63,7 @@ class Request implements RequestContract
     {
         $this->setHeaders()
              ->setMethod()
-             ->sslVerify()
-             ->setTimeout();
+             ->sslVerify();
 
         if ($url) {
             $this->setUrl($url);
@@ -73,7 +73,7 @@ class Request implements RequestContract
     /**
      * @deprecated Please use setBody()
      *
-     * @param array<mixed> $body
+     * @param array<int|string, mixed> $body
      * @return $this
      */
     public function body(array $body) : Request
@@ -119,11 +119,11 @@ class Request implements RequestContract
     /**
      * Sets Request headers.
      *
-     * @param array<string, mixed>|null $additionalHeaders
+     * @param array<string, mixed> $additionalHeaders
      * @return $this
      * @throws Exception
      */
-    public function headers($additionalHeaders = []) : Request
+    public function headers(array $additionalHeaders = []) : Request
     {
         return $this->setHeaders($additionalHeaders);
     }
@@ -137,7 +137,7 @@ class Request implements RequestContract
     public function setMethod(string $method = null) : RequestContract
     {
         if (! $method || ! ArrayHelper::contains($this->allowedMethodTypes, strtoupper($method))) {
-            $method = $this->defaultAllowedMethod ?? 'get';
+            $method = $this->defaultAllowedMethod ?: 'get';
         }
 
         $this->method = strtoupper($method);
@@ -148,7 +148,7 @@ class Request implements RequestContract
     /**
      * @deprecated use setQuery()
      *
-     * @param array<mixed> $params
+     * @param array<string, mixed> $params
      * @return $this
      */
     public function query(array $params) : Request
@@ -160,7 +160,7 @@ class Request implements RequestContract
      * Sends the request.
      *
      * @return ResponseContract
-     * @throws Exception
+     * @throws InvalidUrlException|InvalidMethodException|Exception
      */
     public function send()
     {
@@ -173,7 +173,7 @@ class Request implements RequestContract
                 'headers'   => $this->headers,
                 'method'    => $this->method,
                 'sslverify' => $this->sslVerify,
-                'timeout'   => $this->timeout,
+                'timeout'   => $this->getTimeout(),
             ]
         ));
     }
@@ -181,10 +181,10 @@ class Request implements RequestContract
     /**
      * Sets the body of the request.
      *
-     * @param array<mixed> $body
+     * @param array<int|string, mixed> $body
      * @return $this
      */
-    public function setBody(array $body) : RequestContract
+    public function setBody(array $body) : Request
     {
         $this->body = $body;
 
@@ -194,16 +194,19 @@ class Request implements RequestContract
     /**
      * Sets Request headers.
      *
-     * @param array<string, mixed>|null $additionalHeaders
+     * @param array<string, mixed> $additionalHeaders
      * @return $this
      * @throws Exception
      */
-    public function setHeaders($additionalHeaders = []) : RequestContract
+    public function setHeaders(?array $additionalHeaders = []) : RequestContract
     {
-        $this->headers = ArrayHelper::combine([
-            'Content-Type' => 'application/json',
-            'Accept'       => 'application/json',
-        ], $additionalHeaders);
+        $this->headers = ArrayHelper::combine(
+            [
+                'Content-Type' => 'application/json',
+                'Accept'       => 'application/json',
+            ],
+            ArrayHelper::accessible($additionalHeaders) ? $additionalHeaders : []
+        );
 
         return $this;
     }
@@ -225,14 +228,22 @@ class Request implements RequestContract
     /**
      * Sets query parameters.
      *
-     * @param array<mixed> $params
+     * @param array<string, mixed>|null $params
      * @return $this
      */
-    public function setQuery(array $params) : RequestContract
+    public function setQuery(?array $params = []) : RequestContract
     {
         $this->query = $params;
 
         return $this;
+    }
+
+    /**
+     * Returns the configured timeout for the request.
+     */
+    public function getTimeout() : int
+    {
+        return $this->timeout;
     }
 
     /**
@@ -241,7 +252,7 @@ class Request implements RequestContract
      * @param int $seconds
      * @return $this
      */
-    public function setTimeout(int $seconds = 3) : RequestContract
+    public function setTimeout(int $seconds = 3) : Request
     {
         $this->timeout = $seconds;
 
@@ -254,7 +265,7 @@ class Request implements RequestContract
      * @param string $url
      * @return $this
      */
-    public function setUrl(string $url) : RequestContract
+    public function setUrl(string $url) : Request
     {
         $this->url = $url;
 
@@ -264,9 +275,9 @@ class Request implements RequestContract
     /**
      * Gets the request path.
      *
-     * @return string
+     * @return string|null
      */
-    public function getPath() : string
+    public function getPath() : ?string
     {
         return $this->path;
     }
@@ -297,7 +308,7 @@ class Request implements RequestContract
     /**
      * @deprecated use setTimeout()
      */
-    public function timeout(int $seconds = 3) : Request
+    public function timeout(int $seconds = 3) : RequestContract
     {
         return $this->setTimeout($seconds);
     }
@@ -305,7 +316,7 @@ class Request implements RequestContract
     /**
      * @deprecated use setUrl()
      */
-    public function url(string $url) : Request
+    public function url(string $url) : RequestContract
     {
         return $this->setUrl($url);
     }
@@ -314,12 +325,16 @@ class Request implements RequestContract
      * {@inheritDoc}
      *
      * @return void
-     * @throws InvalidUrlException
+     * @throws InvalidUrlException|InvalidMethodException
      */
     public function validate() : void
     {
         if (! $this->url) {
-            throw new InvalidUrlException('You must provide a url for an outgoing request');
+            throw new InvalidUrlException('You must provide a URL for an outgoing request');
+        }
+
+        if (! $this->method || ! ArrayHelper::contains($this->allowedMethodTypes, $this->method)) {
+            throw new InvalidMethodException('You must provide a valid method for an outgoing request');
         }
     }
 }

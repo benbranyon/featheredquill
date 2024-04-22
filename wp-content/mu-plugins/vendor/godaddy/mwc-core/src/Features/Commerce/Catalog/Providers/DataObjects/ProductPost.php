@@ -2,8 +2,8 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects;
 
-use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataSources\Adapters\ProductPostAdapter;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Traits\CanConvertToWordPressDatabaseArrayTrait;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Providers\DataObjects\AbstractDataObject;
 use stdClass;
 use WP_Post;
@@ -18,6 +18,8 @@ use WP_Post;
  */
 class ProductPost extends AbstractDataObject
 {
+    use CanConvertToWordPressDatabaseArrayTrait;
+
     /** @var string {@see WP_Post::$post_title} */
     public string $postTitle;
 
@@ -115,33 +117,5 @@ class ProductPost extends AbstractDataObject
         }
 
         return (object) $this->toDatabaseArray((array) $object);
-    }
-
-    /**
-     * Converts the object to array with snake-case properties.
-     *
-     * This will result in data that is compatible with the output of a WPDB wp_posts row as array data.
-     *
-     * @param array<string, mixed>|null $data optional array to overlay data upon
-     * @return array<string, mixed>
-     */
-    public function toDatabaseArray(?array $data = null) : array
-    {
-        if (! $data) {
-            $data = [];
-        }
-
-        foreach (parent::toArray() as $dtoProperty => $dtoValue) {
-            if (null !== $dtoValue) {
-                $data[StringHelper::snakeCase($dtoProperty)] = $dtoValue;
-            }
-        }
-
-        // force publish status if the post data contains a password property
-        if (! empty($data['post_password'])) {
-            $data['post_status'] = 'publish';
-        }
-
-        return $data;
     }
 }

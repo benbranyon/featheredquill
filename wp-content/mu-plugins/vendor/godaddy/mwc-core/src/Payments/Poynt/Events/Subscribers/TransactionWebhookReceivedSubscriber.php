@@ -2,6 +2,7 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Payments\Poynt\Events\Subscribers;
 
+use Closure;
 use Exception;
 use GoDaddy\WordPress\MWC\Common\DataSources\Contracts\DataSourceAdapterContract;
 use GoDaddy\WordPress\MWC\Common\DataSources\WooCommerce\Adapters\CurrencyAmountAdapter;
@@ -12,8 +13,10 @@ use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Http\Response;
 use GoDaddy\WordPress\MWC\Common\Models\CurrencyAmount;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
+use GoDaddy\WordPress\MWC\Common\Register\Types\RegisterFilter;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerce\OrdersRepository;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerce\RefundsRepository;
+use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
 use GoDaddy\WordPress\MWC\Core\Events\BeforeCreateRefundEvent;
 use GoDaddy\WordPress\MWC\Core\Events\BeforeCreateVoidEvent;
 use GoDaddy\WordPress\MWC\Core\Payments\DataStores\WooCommerce\OrderCaptureTransactionDataStore;
@@ -21,6 +24,7 @@ use GoDaddy\WordPress\MWC\Core\Payments\DataStores\WooCommerce\OrderPaymentTrans
 use GoDaddy\WordPress\MWC\Core\Payments\DataStores\WooCommerce\OrderTransactionDataStore;
 use GoDaddy\WordPress\MWC\Core\Payments\Exceptions\InvalidTransactionException;
 use GoDaddy\WordPress\MWC\Core\Payments\Models\Transactions\PaymentTransaction;
+use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Enums\TransactionReferenceType;
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Events\WebhookReceivedEvent;
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Http\Adapters\AuthorizationTransactionAdapter;
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Http\Adapters\CaptureTransactionAdapter;
@@ -225,7 +229,7 @@ class TransactionWebhookReceivedSubscriber implements SubscriberContract
      * @return Order|null
      * @throws Exception
      */
-    protected function getTransactionOrder(string $remoteId, string $type)
+    protected function getTransactionOrder(string $remoteId, string $type) : ?Order
     {
         // bail if the required meta values are missing
         if (! $remoteId || ! $type) {
@@ -237,21 +241,10 @@ class TransactionWebhookReceivedSubscriber implements SubscriberContract
             ->setHandler([$this, 'filterOrdersByTransactionRemoteId'])
             ->setArgumentsCount(2);
 
-        $filter->execute();
-
-        $foundOrders = OrdersRepository::query([
-            'limit' => 1,
-            'mwc'   => [
-                'transaction' => [
-                    'providerName' => 'poynt',
-                    'remoteId'     => $remoteId,
-                    'type'         => $type,
-                ],
-            ],
-            'type' => 'shop_order',
-        ]);
-
-        $filter->deregister();
+        $foundOrders = $this->queryWithOrdersQueryCustomArgumentFilter(
+            fn () => OrdersRepository::query($this->getOrdersQueryArgs($remoteId, $type)),
+            $filter
+        );
 
         if (! empty($foundOrders)) {
             $transactionOrder = current($foundOrders);
@@ -274,7 +267,7 @@ class TransactionWebhookReceivedSubscriber implements SubscriberContract
      *
      * @param mixed $queryVars
      * @param mixed $customVars
-     * @return array|mixed may be filtered by third parties
+     * @return mixed may be filtered by third parties
      */
     public function filterOrdersByTransactionRemoteId($queryVars, $customVars)
     {
@@ -282,19 +275,8 @@ class TransactionWebhookReceivedSubscriber implements SubscriberContract
         $remoteId = ArrayHelper::get($customVars, 'mwc.transaction.remoteId');
         $type = ArrayHelper::get($customVars, 'mwc.transaction.type');
 
-        if (is_string($providerName) && is_string($type)) {
-            // account for existing meta query key in the query arguments
-            if (! ArrayHelper::exists($queryVars, 'meta_query') || ! ArrayHelper::accessible($queryVars['meta_query'])) {
-                $queryVars['meta_query'] = [];
-            } elseif (! ArrayHelper::exists($queryVars['meta_query'], 'relation')) {
-                $queryVars['meta_query']['relation'] = 'AND';
-            }
-
-            $queryVars['meta_query'][] = [
-                'key'     => sprintf('_%1$s_%2$s_remoteId', $providerName, $type),
-                'value'   => $remoteId,
-                'compare' => '=',
-            ];
+        if (ArrayHelper::accessible($queryVars) && is_string($providerName) && is_string($remoteId) && is_string($type)) {
+            $queryVars = $this->setOrdersQueryMetaQuery($queryVars, $providerName, $remoteId, $type);
         }
 
         return $queryVars;
@@ -510,7 +492,10 @@ class TransactionWebhookReceivedSubscriber implements SubscriberContract
         $transaction = $this->getAdaptedTransaction($response, PaymentTransaction::class);
 
         $remoteOrderReference = current(ArrayHelper::where(ArrayHelper::get($response->getBody() ?? [], 'references', []), function ($value) {
-            return 'POYNT_ORDER' === ArrayHelper::get($value, 'type');
+            return TransactionReferenceType::PoyntOrder === ArrayHelper::get(
+                $value,
+                'type'
+            );
         }));
 
         if (! $order = $this->getTransactionOrder(ArrayHelper::get($remoteOrderReference, 'id', ''), 'order')) {
@@ -739,27 +724,17 @@ class TransactionWebhookReceivedSubscriber implements SubscriberContract
      * @return WC_Order_Refund|null
      * @throws Exception
      */
-    protected function findTransactionRefund(VoidTransaction $transaction)
+    protected function findTransactionRefund(VoidTransaction $transaction) : ?WC_Order_Refund
     {
         $filter = Register::filter()
             ->setGroup('woocommerce_order_data_store_cpt_get_orders_query')
             ->setHandler([$this, 'filterOrdersByTransactionRemoteId'])
             ->setArgumentsCount(2);
 
-        $filter->execute();
-
-        $foundRefunds = RefundsRepository::query([
-            'limit' => 1,
-            'mwc'   => [
-                'transaction' => [
-                    'providerName' => 'poynt',
-                    'remoteId'     => $transaction->getRemoteParentId(),
-                    'type'         => 'refund',
-                ],
-            ],
-        ]);
-
-        $filter->deregister();
+        $foundRefunds = $this->queryWithOrdersQueryCustomArgumentFilter(
+            fn () => RefundsRepository::query($this->getOrdersQueryArgs((string) $transaction->getRemoteParentId(), 'refund')),
+            $filter
+        );
 
         if (empty($foundRefunds)) {
             return null;
@@ -966,5 +941,78 @@ class TransactionWebhookReceivedSubscriber implements SubscriberContract
         }
 
         return __('From GoDaddy Payments Hub. Order partially refunded.', 'mwc-core');
+    }
+
+    /**
+     * Executes the given query conditionally registering and deregistering the filter before and after running the query.
+     *
+     * @template T of object
+     * @param Closure() : T[] $query
+     * @param RegisterFilter $filter
+     * @return T[]
+     * @throws Exception
+     */
+    protected function queryWithOrdersQueryCustomArgumentFilter(Closure $query, RegisterFilter $filter) : array
+    {
+        if (WooCommerceRepository::isCustomOrdersTableUsageEnabled()) {
+            return $query();
+        }
+
+        $filter->execute();
+        $result = $query();
+        $filter->deregister();
+
+        return $result;
+    }
+
+    /**
+     * Updates the given query with meta_query parameters to find orders that include a remote ID of the specified type.
+     *
+     * @param array<string, mixed> $query
+     * @param string $providerName
+     * @param string $remoteId
+     * @param string $type type of remote record (e.g. order, payment, refund)
+     * @return array<string, mixed>
+     */
+    protected function setOrdersQueryMetaQuery(array $query, string $providerName, string $remoteId, string $type) : array
+    {
+        // account for existing meta query key in the query arguments
+        if (! ArrayHelper::exists($query, 'meta_query') || ! ArrayHelper::accessible($query['meta_query'])) {
+            $query['meta_query'] = [];
+        } elseif (! ArrayHelper::exists($query['meta_query'], 'relation')) {
+            $query['meta_query']['relation'] = 'AND';
+        }
+
+        $query['meta_query'][] = [
+            'key'     => sprintf('_%1$s_%2$s_remoteId', $providerName, $type),
+            'value'   => $remoteId,
+            'compare' => '=',
+        ];
+
+        return $query;
+    }
+
+    /**
+     * Gets the orders query arguments.
+     *
+     * @param string $remoteId
+     * @param string $type
+     * @param string $providerName
+     * @return array<string, mixed>
+     */
+    protected function getOrdersQueryArgs(string $remoteId, string $type, string $providerName = 'poynt') : array
+    {
+        $args = [
+            'limit' => 1,
+            'type'  => 'shop_order',
+        ];
+
+        if (WooCommerceRepository::isCustomOrdersTableUsageEnabled()) {
+            return $this->setOrdersQueryMetaQuery($args, $providerName, $remoteId, $type);
+        }
+
+        ArrayHelper::set($args, 'mwc.transaction', compact('providerName', 'remoteId', 'type'));
+
+        return $args;
     }
 }

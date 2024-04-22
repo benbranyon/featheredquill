@@ -2,7 +2,9 @@
 
 namespace GoDaddy\WordPress\MWC\Common\Repositories\WooCommerce;
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Repositories\Traits\HasWooCommerceDataAccessorsTrait;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
 use WC_Order;
@@ -92,5 +94,28 @@ class OrdersRepository
         $this->object->add_item($item);
 
         return $this;
+    }
+
+    /**
+     * Gets order type for the given WooCommerce order ID.
+     *
+     * @param int $orderId
+     * @return string
+     */
+    public static function getOrderType(int $orderId) : string
+    {
+        $orderType = WooCommerceRepository::isCustomOrdersTableUsageEnabled() ?
+            OrderUtil::get_order_type($orderId) :
+            get_post_type($orderId);
+
+        return TypeHelper::string($orderType, '');
+    }
+
+    /**
+     * Checks whether the given ID belongs to a regular order (shop_order).
+     */
+    public static function isRegularOrder(int $orderId) : bool
+    {
+        return static::getOrderType($orderId) === 'shop_order';
     }
 }

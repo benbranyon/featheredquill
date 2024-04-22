@@ -5,6 +5,7 @@ namespace GoDaddy\WordPress\MWC\Core\Payments\Poynt\Http\Adapters;
 use GoDaddy\WordPress\MWC\Common\DataSources\Contracts\DataSourceAdapterContract;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Http\Response;
+use GoDaddy\WordPress\MWC\Core\Payments\Exceptions\InvalidTransactionAvsException;
 use GoDaddy\WordPress\MWC\Core\Payments\Exceptions\InvalidTransactionException;
 use GoDaddy\WordPress\MWC\Core\Payments\Poynt\Http\TokenizeRequest;
 use GoDaddy\WordPress\MWC\Payments\Contracts\CardBrandContract;
@@ -57,12 +58,9 @@ class CardPaymentMethodAdapter implements DataSourceAdapterContract
     /**
      * Converts to Data Source format.
      *
-     * @since 2.10.0
-     *
-     * @param Response $response
-     *
+     * @param Response|null $response
      * @return CardPaymentMethod
-     * @throws InvalidTransactionException
+     * @throws InvalidTransactionException|InvalidTransactionAvsException
      */
     public function convertToSource(Response $response = null) : CardPaymentMethod
     {
@@ -83,11 +81,15 @@ class CardPaymentMethodAdapter implements DataSourceAdapterContract
         $responseBody = $response->getBody() ?? [];
         $cardData = ArrayHelper::get($responseBody, 'card', []);
 
-        return $this->source->setRemoteId((string) ArrayHelper::get($responseBody, 'paymentToken', ''))
-                            ->setBrand($this->normalizeCardBrand((string) ArrayHelper::get($cardData, 'type', '')))
-                            ->setLastFour((string) ArrayHelper::get($cardData, 'numberLast4', ''))
-                            ->setExpirationMonth(str_pad((string) ArrayHelper::get($cardData, 'expirationMonth', ''), 2, '0', STR_PAD_LEFT))
-                            ->setExpirationYear((string) ArrayHelper::get($cardData, 'expirationYear', ''));
+        $cardPaymentMethod = $this->source->setRemoteId((string) ArrayHelper::get($responseBody, 'paymentToken', ''))
+            ->setBrand($this->normalizeCardBrand((string) ArrayHelper::get($cardData, 'type', '')))
+            ->setLastFour((string) ArrayHelper::get($cardData, 'numberLast4', ''))
+            ->setExpirationMonth(str_pad((string) ArrayHelper::get($cardData, 'expirationMonth', ''), 2, '0', STR_PAD_LEFT))
+            ->setExpirationYear((string) ArrayHelper::get($cardData, 'expirationYear', ''));
+
+        $this->checkAvsResponse($responseBody, $cardPaymentMethod);
+
+        return $cardPaymentMethod;
     }
 
     /**
@@ -112,5 +114,29 @@ class CardPaymentMethodAdapter implements DataSourceAdapterContract
         ];
 
         return $cardBrands[$brand] ?? new CreditCardBrand();
+    }
+
+    /**
+     * Performs an AVS check to determine whether the gateway should process the payment or not.
+     *
+     * @param array<string, mixed> $responseBody
+     * @param CardPaymentMethod $paymentMethod
+     * @return void
+     * @throws InvalidTransactionAvsException
+     */
+    protected function checkAvsResponse(array $responseBody, CardPaymentMethod $paymentMethod) : void
+    {
+        $addressResult = ArrayHelper::get($responseBody, 'avsResponse.addressResult', '');
+        $postalCodeResult = ArrayHelper::get($responseBody, 'avsResponse.postalCodeResult', '');
+
+        if (in_array('NO_MATCH', [$addressResult, $postalCodeResult])) {
+            if (function_exists('wc_add_notice')) {
+                wc_add_notice(__("Your billing address doesn't match your payment card information. Please update the billing address to submit your order.", 'mwc-core'), 'error');
+            }
+
+            $exception = new InvalidTransactionAvsException('AVS has a NO_MATCH result');
+            $exception->setPaymentMethod($paymentMethod);
+            throw $exception;
+        }
     }
 }

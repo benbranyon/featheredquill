@@ -1,6 +1,51 @@
 *** Google Analytics ***
 
-2021.nn.nn - version 2.0.0
+2024.02.09 - version 3.0.7
+ * Misc - Add support for new authentication proxy service
+
+2023.09.07 - version 3.0.6
+ * Fix - Harden code when parsing cart and product item event data to avoid potential errors in specific situations
+
+2023.08.29 - version 3.0.5
+ * Tweak - Add setting to control whether order revenue is tracked in GA4 with tax & shipping included or excluded
+ * Fix - Include all required data in `view_item` events to support Google's default purchase reporting
+
+2023.07.17 - version 3.0.4
+ * Tweak - Enabling debug mode will now show events in GA4 DebugView
+ * Tweak - Pass visitor session ID & number to GA4 when tracking events via API to improve session attribution in reports
+ * Fix - Only check for duplicate tracking codes if UA tracking is enabled
+ * Fix - Prevent a JS error when product name contains quotes by ensuring double quotes are escaped in event parameters
+
+2023.07.10 - version 3.0.3
+ * Fix - Do not set the `user_id` parameter to `0` when tracking events for non-logged-in users
+
+2023.06.29 - version 3.0.2
+ * Fix - Ensure refund events are tracked using positive amounts
+
+2023.06.21 - version 3.0.1
+ * Feature - Automatically create a web data stream & API secret for the selected GA4 property
+ * Tweak - Avoid clearing selected GA properties when re-authenticating with Google using an account that has access to selected properties
+ * Tweak - Pass visitor user-agent to GA4 when tracking events via API
+ * Tweak - Include full order data in GA4 `place_order` event
+ * Tweak - Ensure product names include variation name when tracking product events
+ * Fix - Address an issue where tracked item variant details were incomplete
+
+2023.06.19 - version 3.0.0
+ * Feature - Add support for GA4
+ * Tweak - Track login event for all users regardless of role & remove the `wc_google_analytics_pro_signed_in_user_roles` filter
+ * Tweak - Track "viewed sign up" event on WooCommerce My Account registration page
+ * Tweak - Display notice if the connected Google account has no Analytics accounts set up
+ * Tweak - Ensure auth button follows Google branding guidelines
+ * Fix - Ensure "clicked product", "updated address", "changed password", "tracked order" events are tracked in Universal Analytics
+ * Fix - Ensure "signed up" event properly tracks user ID in Universal Analytics
+ * Fix - Ensure "subscription expiration" event is tracked
+ * Dev - Completely rewrite & restructure the plugin to use PSR-4 autoloading & namespaces
+ * Dev - Remove the `wc_google_analytics_pro_tracking_id` in favor of `wc_google_analytics_pro_ua_tracking_id`
+ * Misc - Update the SkyVerge Plugin Framework to v5.11.0
+ * Misc - Remove MonsterInsights compatibility
+ * Misc - Require PHP 7.4 and WordPress 5.6
+
+2021.09.21 - version 2.0.0
  * Misc - Add support for 404 events
  * Misc - Remove support for setting the tracking ID manually
  * Misc - Improve text, links to help articles, tooltips and settings layout

@@ -87,7 +87,7 @@ trait CanConvertLocationResponseTrait
         $data = ArrayHelper::combine(
             [
                 'channelId' => ArrayHelper::get($locationData, 'id'),
-                'alias'     => ArrayHelper::get($locationData, 'location.alias', ''),
+                'alias'     => ArrayHelper::get($locationData, 'location.alias', ArrayHelper::get($locationData, 'name', '')),
             ],
             $this->convertContacts(TypeHelper::array(ArrayHelper::get($locationData, 'location.contacts'), [])),
             $this->convertAddress(TypeHelper::array(ArrayHelper::get($locationData, 'location'), [])),

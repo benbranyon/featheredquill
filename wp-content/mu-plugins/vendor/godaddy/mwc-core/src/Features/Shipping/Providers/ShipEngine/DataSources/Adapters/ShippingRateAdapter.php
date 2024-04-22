@@ -6,13 +6,12 @@ use BadMethodCallException;
 use GoDaddy\WordPress\MWC\Common\DataSources\Contracts\DataSourceAdapterContract;
 use GoDaddy\WordPress\MWC\Common\DataSources\WooCommerce\Adapters\CurrencyAmountAdapter;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
-use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
 use GoDaddy\WordPress\MWC\Common\Models\CurrencyAmount;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
 use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
 use GoDaddy\WordPress\MWC\Shipping\Contracts\ShippingServiceContract;
-use GoDaddy\WordPress\MWC\Shipping\Models\Carrier;
 use GoDaddy\WordPress\MWC\Shipping\Models\Contracts\CarrierContract;
+use GoDaddy\WordPress\MWC\Shipping\Models\Contracts\PackageTypeContract;
 use GoDaddy\WordPress\MWC\Shipping\Models\Contracts\ShippingRateContract;
 use GoDaddy\WordPress\MWC\Shipping\Models\Contracts\ShippingRateItemContract;
 use GoDaddy\WordPress\MWC\Shipping\Models\ShippingRate;
@@ -24,7 +23,10 @@ class ShippingRateAdapter implements DataSourceAdapterContract
     use CanGetNewInstanceTrait;
 
     /** @var array<string, mixed> */
-    protected $source;
+    protected array $source;
+
+    /** @var array<string, CarrierContract> */
+    protected array $carriers;
 
     /**
      * @param array<string, mixed> $source
@@ -42,12 +44,14 @@ class ShippingRateAdapter implements DataSourceAdapterContract
     public function convertFromSource() : ShippingRateContract
     {
         $items = $this->convertItemsFromSource();
+        $carrier = $this->convertCarrierFromSource();
 
         return (new ShippingRate())
-            ->setId($this->getStringValue($this->source, 'rate_id'))
-            ->setRemoteId($this->getStringValue($this->source, 'rate_id'))
+            ->setId(ArrayHelper::getStringValueForKey($this->source, 'rate_id'))
+            ->setRemoteId(ArrayHelper::getStringValueForKey($this->source, 'rate_id'))
             ->setService($this->convertServiceFromSource())
-            ->setCarrier($this->convertCarrierFromSource())
+            ->setCarrier($carrier)
+            ->setPackageType($this->getPackageTypeFromSource($carrier))
             ->addItems(...$items)
             ->setIsTrackable((bool) ArrayHelper::get($this->source, 'trackable', false))
             ->setDeliveryDays((int) ArrayHelper::get($this->source, 'delivery_days', 0))
@@ -98,27 +102,13 @@ class ShippingRateAdapter implements DataSourceAdapterContract
     {
         $price = (new CurrencyAmountAdapter(
             $this->getFloatValue($data, 'amount'),
-            $this->getStringValue($data, 'currency')
+            ArrayHelper::getStringValueForKey($data, 'currency')
         ))->convertFromSource();
 
         return (new ShippingRateItem())
             ->setName($name)
             ->setLabel($label)
             ->setPrice($price);
-    }
-
-    /**
-     * Gets a string value from the given array.
-     *
-     * Returns an empty string if the value cannot be converted to string.
-     *
-     * @param array<string, mixed> $stored
-     * @param string $key
-     * @return string
-     */
-    protected function getStringValue(array $stored, string $key) : string
-    {
-        return (string) StringHelper::ensureScalar(ArrayHelper::get($stored, $key));
     }
 
     /**
@@ -145,8 +135,8 @@ class ShippingRateAdapter implements DataSourceAdapterContract
     protected function convertServiceFromSource() : ShippingServiceContract
     {
         return (new ShippingService())
-            ->setName($this->getStringValue($this->source, 'service_code'))
-            ->setLabel($this->getStringValue($this->source, 'service_type'));
+            ->setName(ArrayHelper::getStringValueForKey($this->source, 'service_code'))
+            ->setLabel(ArrayHelper::getStringValueForKey($this->source, 'service_type'));
     }
 
     /**
@@ -156,10 +146,21 @@ class ShippingRateAdapter implements DataSourceAdapterContract
      */
     protected function convertCarrierFromSource() : CarrierContract
     {
-        return (new Carrier())
-            ->setId($this->getStringValue($this->source, 'carrier_id'))
-            ->setName($this->getStringValue($this->source, 'carrier_code'))
-            ->setLabel($this->getStringValue($this->source, 'carrier_friendly_name'));
+        return $this->getCarrierByIdFromSource() ?? CarrierAdapter::getNewInstance($this->source)->convertFromSource();
+    }
+
+    /**
+     * Get matching {@see CarrierContract} instance based on `carrier_id` from the source data.
+     *
+     * @return CarrierContract|null
+     */
+    protected function getCarrierByIdFromSource() : ?CarrierContract
+    {
+        if (! $carrierId = ArrayHelper::getStringValueForKey($this->source, 'carrier_id')) {
+            return null;
+        }
+
+        return $this->getCarrierById($carrierId);
     }
 
     /**
@@ -198,5 +199,55 @@ class ShippingRateAdapter implements DataSourceAdapterContract
     public function convertToSource(?ShippingRateContract $shippingRate = null) : array
     {
         throw new BadMethodCallException('Not implemented.');
+    }
+
+    /**
+     * Index given carriers by their IDs.
+     *
+     * @param CarrierContract[] $carriers
+     *
+     * @return array<string, CarrierContract>
+     */
+    protected function indexCarriersById(array $carriers) : array
+    {
+        return ArrayHelper::indexBy($carriers, static fn (CarrierContract $carrier) => $carrier->getId());
+    }
+
+    /**
+     * Sets the carriers’ property value.
+     *
+     * @param CarrierContract[] $carriers
+     *
+     * @return $this
+     */
+    public function setCarriers(array $carriers) : ShippingRateAdapter
+    {
+        $this->carriers = $this->indexCarriersById($carriers);
+
+        return $this;
+    }
+
+    /**
+     * Gets carrier by the given ID.
+     *
+     * @param string $id
+     *
+     * @return CarrierContract|null
+     */
+    protected function getCarrierById(string $id) : ?CarrierContract
+    {
+        return $this->carriers[$id] ?? null;
+    }
+
+    /**
+     * Gets package type from source based on given carrier.
+     *
+     * @param CarrierContract $carrier
+     *
+     * @return PackageTypeContract|null
+     */
+    protected function getPackageTypeFromSource(CarrierContract $carrier) : ?PackageTypeContract
+    {
+        return $carrier->getPackageByCode(ArrayHelper::getStringValueForKey($this->source, 'package_type'));
     }
 }

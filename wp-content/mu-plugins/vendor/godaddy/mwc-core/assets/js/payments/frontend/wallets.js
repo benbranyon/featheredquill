@@ -591,8 +591,11 @@ jQuery(($) => {
 				shippingAddress: this.getAdaptedAddress(event.shippingAddress),
 			};
 
-			if (event.shippingAddress?.emailAddress) {
-				data.emailAddress = event.shippingAddress.emailAddress;
+			let emailAddress = event.shippingAddress?.emailAddress || event.billingAddress?.emailAddress
+
+			// set the email address (only if it's available - otherwise we might overwrite a valid email address already present in cart)
+			if (emailAddress) {
+				data.emailAddress = emailAddress
 			}
 
 			// Poynt provides the phone number as a part of shipping address, whereas WooCommerce expects it as part of

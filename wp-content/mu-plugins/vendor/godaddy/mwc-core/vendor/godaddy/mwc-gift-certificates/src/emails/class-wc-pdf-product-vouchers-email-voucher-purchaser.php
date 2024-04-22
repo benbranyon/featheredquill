@@ -17,7 +17,7 @@
  * needs please refer to https://docs.woocommerce.com/document/woocommerce-pdf-product-vouchers/ for more information.
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2012-2021, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright Copyright (c) 2012-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -29,7 +29,7 @@ use GoDaddy\WordPress\MWC\GiftCertificates\MWC_Gift_Certificates_Order;
 use WC_Email;
 use function GoDaddy\WordPress\MWC\GiftCertificates\wc_pdf_product_vouchers;
 use function GoDaddy\WordPress\MWC\GiftCertificates\wc_pdf_product_vouchers_get_voucher;
-use SkyVerge\WooCommerce\PluginFramework\v5_10_12 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v5_11_0 as Framework;
 
 /**
  * Voucher Purchaser Email
@@ -103,21 +103,19 @@ class MWC_Gift_Certificates_Email_Voucher_Purchaser extends WC_Email {
 	 *
 	 * @since 3.2.2
 	 *
-	 * @param int $object_id order or voucher identifier
+	 * @param int|mixed $object_id order or voucher identifier
 	 */
 	public function trigger( $object_id ) {
 
-		// nothingtodohere
 		if ( ! $object_id || ! $this->is_enabled() ) {
 			return;
 		}
 
-		if ( 'shop_order' === get_post_type( $object_id ) ) {
+		if ( Framework\SV_WC_Order_Compatibility::is_order( $object_id ) ) {
 			$this->trigger_order( $object_id );
 		} else {
 			$this->trigger_voucher( $object_id );
 		}
-
 	}
 
 

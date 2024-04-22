@@ -22,7 +22,7 @@ class CountriesRepository
         $wc = WooCommerceRepository::getInstance();
 
         if (! $wc || empty($wc->countries) || ! $wc->countries instanceof WC_Countries) {
-            throw new Exception(__('WooCommerce countries are not available', 'mwc-common'));
+            throw new Exception(__('The WC_Countries class is not available.', 'mwc-common'));
         }
 
         return $wc->countries;

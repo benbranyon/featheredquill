@@ -2,7 +2,7 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataObjects\Enums;
 
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Traits\EnumTrait;
+use GoDaddy\WordPress\MWC\Core\Traits\EnumTrait;
 
 class LineItemType
 {

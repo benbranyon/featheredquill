@@ -28,10 +28,13 @@ class ResponseDebugNoticeSubscriber extends AbstractDebugNoticeSubscriber
         /** @var Response $request */
         $response = $event->getResponse();
 
-        $body = htmlspecialchars(ArrayHelper::jsonEncode($this->maskData($response->body ?? [], [
-            'accessToken',
-            'refreshToken',
-        ])));
+        $body = htmlspecialchars(
+            ArrayHelper::jsonEncode($this->maskData($response->body ?? [], [
+                'accessToken',
+                'refreshToken',
+            ])),
+            ENT_COMPAT,
+        );
 
         return "Response<br />Body:<br />{$body}";
     }

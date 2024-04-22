@@ -5,6 +5,7 @@ namespace GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\DataSources\Woo
 use Exception;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerce\EmailsRepository;
 use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
 use GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\Contracts\EmailNotificationContract;
@@ -336,7 +337,13 @@ class EmailNotificationAdapter implements EmailNotificationAdapterContract
      */
     protected function adaptUnformattedFilteredProperty(string $filterPrefix, string $optionKey, string $defaultValue, WC_Email $email) : string
     {
-        return (string) apply_filters("woocommerce_email_{$filterPrefix}_{$email->id}", $email->get_option($optionKey, $defaultValue), $email);
+        $value = $email->get_option($optionKey, $defaultValue);
+
+        if (! $email->object) {
+            return $value;
+        }
+
+        return TypeHelper::string(apply_filters("woocommerce_email_{$filterPrefix}_{$email->id}", $value, $email->object, $email), '');
     }
 
     /**

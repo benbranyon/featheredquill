@@ -2,6 +2,8 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Customers\Services;
 
+use Exception;
+use GoDaddy\WordPress\MWC\Common\Container\ContainerFactory;
 use GoDaddy\WordPress\MWC\Common\Models\Contracts\CustomerContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Commerce;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Customers\Providers\Contracts\CustomersProviderContract;
@@ -200,6 +202,7 @@ abstract class AbstractCustomersService implements CustomersServiceContract
      * @param CustomersProviderContract|null $customersProvider
      * @param CustomersMappingServiceContract|null $customersMappingService
      * @return AbstractCustomersService
+     * @throws CommerceExceptionContract
      */
     public static function getNewInstance(
         CommerceContextContract $commerceContext = null,
@@ -211,7 +214,25 @@ abstract class AbstractCustomersService implements CustomersServiceContract
         return new static(
             $commerceContext,
             $customersProvider ?? CustomersProvider::getNewInstance(),
-            $customersMappingService ?? new CustomersMappingService(new CustomerMappingStrategyFactory($commerceContext))
+            $customersMappingService ?? new CustomersMappingService(static::getCustomerMappingStrategyFactory())
         );
+    }
+
+    /**
+     * Gets an instance of {@see CustomerMappingStrategyFactory} from the container.
+     *
+     * @return CustomerMappingStrategyFactory
+     * @throws CommerceExceptionContract
+     */
+    protected static function getCustomerMappingStrategyFactory() : CustomerMappingStrategyFactory
+    {
+        try {
+            /** @var CustomerMappingStrategyFactory $factory */
+            $factory = ContainerFactory::getInstance()->getSharedContainer()->get(CustomerMappingStrategyFactory::class);
+
+            return $factory;
+        } catch(Exception $e) {
+            throw new CommerceException($e->getMessage(), $e);
+        }
     }
 }

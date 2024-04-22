@@ -1,3 +1,4 @@
 module.exports = {
-	framework: 'v5'
+	framework: 'v5',
+	autoload: true
 }

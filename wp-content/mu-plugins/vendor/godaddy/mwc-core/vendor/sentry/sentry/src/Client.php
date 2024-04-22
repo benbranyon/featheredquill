@@ -4,23 +4,20 @@ declare(strict_types=1);
 
 namespace Sentry;
 
-use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Sentry\Integration\IntegrationInterface;
 use Sentry\Integration\IntegrationRegistry;
 use Sentry\Serializer\RepresentationSerializer;
 use Sentry\Serializer\RepresentationSerializerInterface;
-use Sentry\Serializer\SerializerInterface;
 use Sentry\State\Scope;
+use Sentry\Transport\Result;
 use Sentry\Transport\TransportInterface;
 
 /**
  * Default implementation of the {@see ClientInterface} interface.
- *
- * @author Stefano Arlandini <sarlandini@alice.it>
  */
-final class Client implements ClientInterface
+class Client implements ClientInterface
 {
     /**
      * The version of the protocol to communicate with the Sentry server.
@@ -35,7 +32,7 @@ final class Client implements ClientInterface
     /**
      * The version of the SDK.
      */
-    public const SDK_VERSION = '3.13.0';
+    public const SDK_VERSION = '4.3.1';
 
     /**
      * @var Options The client options
@@ -60,11 +57,6 @@ final class Client implements ClientInterface
     private $integrations;
 
     /**
-     * @var RepresentationSerializerInterface The representation serializer of the client
-     */
-    private $representationSerializer;
-
-    /**
      * @var StacktraceBuilder
      */
     private $stacktraceBuilder;
@@ -86,7 +78,6 @@ final class Client implements ClientInterface
      * @param TransportInterface                     $transport                The transport
      * @param string|null                            $sdkIdentifier            The Sentry SDK identifier
      * @param string|null                            $sdkVersion               The Sentry SDK version
-     * @param SerializerInterface|null               $serializer               The serializer
      * @param RepresentationSerializerInterface|null $representationSerializer The serializer for function arguments
      * @param LoggerInterface|null                   $logger                   The PSR-3 logger
      */
@@ -95,18 +86,17 @@ final class Client implements ClientInterface
         TransportInterface $transport,
         ?string $sdkIdentifier = null,
         ?string $sdkVersion = null,
-        ?SerializerInterface $serializer = null,
         ?RepresentationSerializerInterface $representationSerializer = null,
         ?LoggerInterface $logger = null
     ) {
         $this->options = $options;
         $this->transport = $transport;
-        $this->logger = $logger ?? new NullLogger();
-        $this->integrations = IntegrationRegistry::getInstance()->setupIntegrations($options, $this->logger);
-        $this->representationSerializer = $representationSerializer ?? new RepresentationSerializer($this->options);
-        $this->stacktraceBuilder = new StacktraceBuilder($options, $this->representationSerializer);
         $this->sdkIdentifier = $sdkIdentifier ?? self::SDK_IDENTIFIER;
         $this->sdkVersion = $sdkVersion ?? self::SDK_VERSION;
+        $this->stacktraceBuilder = new StacktraceBuilder($options, $representationSerializer ?? new RepresentationSerializer($this->options));
+        $this->logger = $logger ?? new NullLogger();
+
+        $this->integrations = IntegrationRegistry::getInstance()->setupIntegrations($options, $this->logger);
     }
 
     /**
@@ -124,7 +114,7 @@ final class Client implements ClientInterface
     {
         $dsn = $this->options->getDsn();
 
-        if (null === $dsn) {
+        if ($dsn === null) {
             return null;
         }
 
@@ -160,7 +150,7 @@ final class Client implements ClientInterface
     {
         $hint = $hint ?? new EventHint();
 
-        if (null === $hint->exception) {
+        if ($hint->exception === null) {
             $hint->exception = $exception;
         }
 
@@ -174,19 +164,23 @@ final class Client implements ClientInterface
     {
         $event = $this->prepareEvent($event, $hint, $scope);
 
-        if (null === $event) {
+        if ($event === null) {
             return null;
         }
 
         try {
-            /** @var Response $response */
-            $response = $this->transport->send($event)->wait();
-            $event = $response->getEvent();
+            /** @var Result $result */
+            $result = $this->transport->send($event);
+            $event = $result->getEvent();
 
-            if (null !== $event) {
+            if ($event !== null) {
                 return $event->getId();
             }
         } catch (\Throwable $exception) {
+            $this->logger->error(
+                sprintf('Failed to send the event to Sentry. Reason: "%s".', $exception->getMessage()),
+                ['exception' => $exception, 'event' => $event]
+            );
         }
 
         return null;
@@ -199,7 +193,7 @@ final class Client implements ClientInterface
     {
         $error = error_get_last();
 
-        if (null === $error || !isset($error['message'][0])) {
+        if ($error === null || !isset($error['message'][0])) {
             return null;
         }
 
@@ -222,7 +216,7 @@ final class Client implements ClientInterface
     /**
      * {@inheritdoc}
      */
-    public function flush(?int $timeout = null): PromiseInterface
+    public function flush(?int $timeout = null): Result
     {
         return $this->transport->close($timeout);
     }
@@ -246,12 +240,12 @@ final class Client implements ClientInterface
      */
     private function prepareEvent(Event $event, ?EventHint $hint = null, ?Scope $scope = null): ?Event
     {
-        if (null !== $hint) {
-            if (null !== $hint->exception && empty($event->getExceptions())) {
+        if ($hint !== null) {
+            if ($hint->exception !== null && empty($event->getExceptions())) {
                 $this->addThrowableToEvent($event, $hint->exception, $hint);
             }
 
-            if (null !== $hint->stacktrace && null === $event->getStacktrace()) {
+            if ($hint->stacktrace !== null && $event->getStacktrace() === null) {
                 $event->setStacktrace($hint->stacktrace);
             }
         }
@@ -260,38 +254,41 @@ final class Client implements ClientInterface
 
         $event->setSdkIdentifier($this->sdkIdentifier);
         $event->setSdkVersion($this->sdkVersion);
-        $event->setTags(array_merge($this->options->getTags(false), $event->getTags()));
+        $event->setTags(array_merge($this->options->getTags(), $event->getTags()));
 
-        if (null === $event->getServerName()) {
+        if ($event->getServerName() === null) {
             $event->setServerName($this->options->getServerName());
         }
 
-        if (null === $event->getRelease()) {
+        if ($event->getRelease() === null) {
             $event->setRelease($this->options->getRelease());
         }
 
-        if (null === $event->getEnvironment()) {
+        if ($event->getEnvironment() === null) {
             $event->setEnvironment($this->options->getEnvironment() ?? Event::DEFAULT_ENVIRONMENT);
         }
 
-        if (null === $event->getLogger()) {
-            $event->setLogger($this->options->getLogger(false));
-        }
-
-        $isTransaction = EventType::transaction() === $event->getType();
+        $isEvent = EventType::event() === $event->getType();
         $sampleRate = $this->options->getSampleRate();
 
-        if (!$isTransaction && $sampleRate < 1 && mt_rand(1, 100) / 100.0 > $sampleRate) {
+        // only sample with the `sample_rate` on errors/messages
+        if ($isEvent && $sampleRate < 1 && mt_rand(1, 100) / 100.0 > $sampleRate) {
             $this->logger->info('The event will be discarded because it has been sampled.', ['event' => $event]);
 
             return null;
         }
 
-        if (null !== $scope) {
-            $beforeEventProcessors = $event;
-            $event = $scope->applyToEvent($event, $hint);
+        $event = $this->applyIgnoreOptions($event);
 
-            if (null === $event) {
+        if ($event === null) {
+            return null;
+        }
+
+        if ($scope !== null) {
+            $beforeEventProcessors = $event;
+            $event = $scope->applyToEvent($event, $hint, $this->options);
+
+            if ($event === null) {
                 $this->logger->info(
                     'The event will be discarded because one of the event processors returned "null".',
                     ['event' => $beforeEventProcessors]
@@ -304,7 +301,7 @@ final class Client implements ClientInterface
         $beforeSendCallback = $event;
         $event = $this->applyBeforeSendCallback($event, $hint);
 
-        if (null === $event) {
+        if ($event === null) {
             $this->logger->info(
                 sprintf(
                     'The event will be discarded because the "%s" callback returned "null".',
@@ -312,6 +309,49 @@ final class Client implements ClientInterface
                 ),
                 ['event' => $beforeSendCallback]
             );
+        }
+
+        return $event;
+    }
+
+    private function applyIgnoreOptions(Event $event): ?Event
+    {
+        if ($event->getType() === EventType::event()) {
+            $exceptions = $event->getExceptions();
+
+            if (empty($exceptions)) {
+                return $event;
+            }
+
+            foreach ($exceptions as $exception) {
+                foreach ($this->options->getIgnoreExceptions() as $ignoredException) {
+                    if (is_a($exception->getType(), $ignoredException, true)) {
+                        $this->logger->info(
+                            'The event will be discarded because it matches an entry in "ignore_exceptions".',
+                            ['event' => $event]
+                        );
+
+                        return null;
+                    }
+                }
+            }
+        }
+
+        if ($event->getType() === EventType::transaction()) {
+            $transactionName = $event->getTransaction();
+
+            if ($transactionName === null) {
+                return $event;
+            }
+
+            if (\in_array($transactionName, $this->options->getIgnoreTransactions(), true)) {
+                $this->logger->info(
+                    'The event will be discarded because it matches a entry in "ignore_transactions".',
+                    ['event' => $event]
+                );
+
+                return null;
+            }
         }
 
         return $event;
@@ -353,7 +393,7 @@ final class Client implements ClientInterface
         }
 
         // We should not add a stacktrace when the event already has one or contains exceptions
-        if (null !== $event->getStacktrace() || !empty($event->getExceptions())) {
+        if ($event->getStacktrace() !== null || !empty($event->getExceptions())) {
             return;
         }
 
@@ -373,7 +413,7 @@ final class Client implements ClientInterface
      */
     private function addThrowableToEvent(Event $event, \Throwable $exception, EventHint $hint): void
     {
-        if ($exception instanceof \ErrorException && null === $event->getLevel()) {
+        if ($exception instanceof \ErrorException && $event->getLevel() === null) {
             $event->setLevel(Severity::fromError($exception->getSeverity()));
         }
 

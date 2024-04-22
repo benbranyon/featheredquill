@@ -12,7 +12,7 @@ use GoDaddy\WordPress\MWC\Common\Repositories\WordPressRepository;
 use GoDaddy\WordPress\MWC\Core\Features\GiftCertificates\Adapters\GiftCertificateAdapter;
 use GoDaddy\WordPress\MWC\Core\Features\GiftCertificates\GiftCertificates;
 use GoDaddy\WordPress\MWC\Core\Features\GiftCertificates\Models\GiftCertificate;
-use GoDaddy\WordPress\MWC\Core\WooCommerce\NewWooCommerceObjectFlag;
+use GoDaddy\WordPress\MWC\Core\WordPress\NewPostObjectFlag;
 use function GoDaddy\WordPress\MWC\GiftCertificates\wc_pdf_product_vouchers;
 use GoDaddy\WordPress\MWC\GiftCertificates\WC_Voucher;
 use WP_Post;
@@ -98,9 +98,9 @@ class GiftCertificateInterceptor extends AbstractInterceptor
      *
      * @param GiftCertificate $giftCertificate
      */
-    protected function saveOrUpdateFromAdmin(GiftCertificate $giftCertificate)
+    protected function saveOrUpdateFromAdmin(GiftCertificate $giftCertificate) : void
     {
-        $flag = NewWooCommerceObjectFlag::getNewInstance($giftCertificate->getId());
+        $flag = NewPostObjectFlag::getNewInstance($giftCertificate->getId());
 
         if ($giftCertificate->isDraft()) {
             $flag->turnOn();

@@ -9,6 +9,7 @@ use GoDaddy\WordPress\MWC\Common\Auth\Exceptions\AuthProviderException;
 use GoDaddy\WordPress\MWC\Common\Auth\Exceptions\CredentialsCreateFailedException;
 use GoDaddy\WordPress\MWC\Common\Cache\Contracts\CacheableContract;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Http\Contracts\RequestContract;
 use GoDaddy\WordPress\MWC\Common\Http\Contracts\ResponseContract;
 
@@ -114,7 +115,7 @@ abstract class AbstractAuthProvider implements AuthProviderContract
     protected function requestCredentialsWithErrorCache() : AuthCredentialsContract
     {
         if ($errorMessage = $this->getCredentialsErrorCache()->get()) {
-            throw new CredentialsCreateFailedException("Could not create credentials: {$errorMessage}");
+            throw new CredentialsCreateFailedException('Could not create credentials: '.TypeHelper::string($errorMessage, ''));
         }
 
         try {

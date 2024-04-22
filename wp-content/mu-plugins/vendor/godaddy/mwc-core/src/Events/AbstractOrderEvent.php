@@ -2,7 +2,6 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Events;
 
-use Exception;
 use GoDaddy\WordPress\MWC\Common\Events\Contracts\EventBridgeEventContract;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
 use GoDaddy\WordPress\MWC\Common\Traits\IsEventBridgeEventTrait;
@@ -52,14 +51,13 @@ abstract class AbstractOrderEvent implements EventBridgeEventContract
      * TODO: remove this method when a native Order object is available in the Common package {IT 2021-03-24}
      *
      * @param WC_Order $order
-     * @return array
-     * @throws Exception
+     * @return array<string, mixed>
      */
     protected function getOrderData(WC_Order $order) : array
     {
         return [
             'id'                 => $order->get_id(),
-            'product_total_cost' => get_post_meta($order->get_id(), '_wc_cog_order_total_cost', true),
+            'product_total_cost' => $order->get_meta('_wc_cog_order_total_cost'),
             'currency'           => WooCommerceRepository::getCurrency(),
             'order_status'       => $order->get_status(),
             'payment_method'     => $order->get_payment_method(),
@@ -72,8 +70,7 @@ abstract class AbstractOrderEvent implements EventBridgeEventContract
     /**
      * Builds the initial data for the event.
      *
-     * @return array
-     * @throws Exception
+     * @return array<string, mixed>
      */
     protected function buildInitialData() : array
     {

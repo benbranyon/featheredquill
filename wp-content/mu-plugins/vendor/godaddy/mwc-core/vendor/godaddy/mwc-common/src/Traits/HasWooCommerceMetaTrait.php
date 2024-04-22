@@ -2,25 +2,29 @@
 
 namespace GoDaddy\WordPress\MWC\Common\Traits;
 
+use WC_Data;
+
 /**
  * A trait used for handling WooCommerce metadata.
+ *
+ * @deprecated use {@see HasWooCommerceObjectMetaTrait} or {@see HasPostMetaTrait} instead.
  */
 trait HasWooCommerceMetaTrait
 {
-    /** @var \WC_Data|int data object instance or ID of the object that owns the metadata */
+    /** @var WC_Data|int data object instance or ID of the object that owns the metadata */
     protected $objectOrObjectId;
 
     /** @var string meta key used to store the metadata */
     protected $metaKey;
 
-    /** @var string|array|int|float|bool|null value to be stored as meta data */
+    /** @var string|array<mixed>|int|float|bool|null value to be stored as meta data */
     protected $metaValue;
 
     /**
      * Loads and returns the value stored in the metadata.
      *
-     * @param string|array|int|float|bool|null $defaultValue optional, defaults to
-     * @return string|array|int|float|bool|null
+     * @param string|array<mixed>|int|float|bool|null $defaultValue optional, defaults to
+     * @return string|array<mixed>|int|float|bool|null
      */
     protected function loadWooCommerceMeta($defaultValue = null)
     {
@@ -38,7 +42,7 @@ trait HasWooCommerceMetaTrait
     /**
      * Gets the meta data value.
      *
-     * @return string|array|int|float|bool|null
+     * @return string|array<mixed>|int|float|bool|null
      */
     protected function getWooCommerceMeta()
     {
@@ -48,7 +52,7 @@ trait HasWooCommerceMetaTrait
     /**
      * Sets the metadata value.
      *
-     * @param string|array|int|float|bool|null $value metadata value
+     * @param string|array<mixed>|int|float|bool|null $value metadata value
      * @return self
      */
     protected function setWooCommerceMeta($value = null) : self

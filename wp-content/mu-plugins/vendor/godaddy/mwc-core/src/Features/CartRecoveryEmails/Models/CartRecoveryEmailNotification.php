@@ -5,11 +5,11 @@ namespace GoDaddy\WordPress\MWC\Core\Features\CartRecoveryEmails\Models;
 use DateInterval;
 use DateTime;
 use Exception;
+use GoDaddy\WordPress\MWC\Common\Container\Exceptions\ContainerException;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Models\Cart;
 use GoDaddy\WordPress\MWC\Common\Models\User;
-use GoDaddy\WordPress\MWC\Common\Platforms\Exceptions\PlatformRepositoryException;
 use GoDaddy\WordPress\MWC\Core\Configuration\RuntimeConfigurationFactory;
 use GoDaddy\WordPress\MWC\Core\Email\EmailService;
 use GoDaddy\WordPress\MWC\Core\Features\CartRecoveryEmails\CartRecoveryEmails;
@@ -27,6 +27,7 @@ use GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\Contracts\DelayableEm
 use GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\Models\EmailNotification;
 use GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\Models\EmailNotificationSetting;
 use GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\Traits\IsDelayableEmailNotificationTrait;
+use RuntimeException;
 
 /**
  * Email notification for cart recovery emails.
@@ -140,7 +141,7 @@ class CartRecoveryEmailNotification extends EmailNotification implements
     {
         try {
             $runtimeConfiguration = RuntimeConfigurationFactory::getInstance()->getCartRecoveryEmailsRuntimeConfiguration();
-        } catch (PlatformRepositoryException|CartRecoveryException $e) {
+        } catch (CartRecoveryException|ContainerException|RuntimeException $e) {
             return false;
         }
 

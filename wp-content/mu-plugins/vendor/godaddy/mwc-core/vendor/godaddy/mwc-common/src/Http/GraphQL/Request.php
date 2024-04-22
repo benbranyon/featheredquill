@@ -18,7 +18,7 @@ class Request extends BaseRequest
     protected $defaultAllowedMethod = 'post';
 
     /** @var GraphQLOperationContract operation class */
-    protected $operation;
+    protected GraphQLOperationContract $operation;
 
     /** @var class-string<Response> the type of response the request should return */
     protected $responseClass = Response::class;
@@ -44,7 +44,7 @@ class Request extends BaseRequest
      */
     public function buildUrlString() : string
     {
-        return $this->url;
+        return $this->url ?: '';
     }
 
     /**

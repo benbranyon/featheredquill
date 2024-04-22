@@ -223,7 +223,7 @@ class ExtensionsController extends AbstractController
             return $category;
         }
 
-        return ArrayHelper::get(Configuration::get('mwc_extensions.categories', []), $extension->getSlug());
+        return ArrayHelper::get(TypeHelper::array(Configuration::get('mwc_extensions.categories'), []), (string) $extension->getSlug());
     }
 
     /**
@@ -332,7 +332,7 @@ class ExtensionsController extends AbstractController
      */
     private function isFeaturedExtension(AbstractExtension $extension) : bool
     {
-        return ArrayHelper::has(Configuration::get('mwc_extensions.featured'), $extension->getSlug());
+        return ArrayHelper::has(TypeHelper::array(Configuration::get('mwc_extensions.featured'), []), (string) $extension->getSlug());
     }
 
     /**
@@ -400,12 +400,8 @@ class ExtensionsController extends AbstractController
     /**
      * Gets the extension identified with the given slug.
      *
-     * @since 1.0.0
-     *
      * @param string $slug extension slug
-     *
      * @return AbstractExtension
-     *
      * @throws Exception
      */
     private function getManagedExtension(string $slug) : AbstractExtension
@@ -415,6 +411,7 @@ class ExtensionsController extends AbstractController
         });
 
         if (! $extensions) {
+            /* translators: Placeholder: %s - Extension slug identifier (untranslated) */
             throw new Exception(sprintf(__('Could not find an extension with the given slug: %s.', 'mwc-dashboard'), $slug));
         }
 
@@ -612,13 +609,9 @@ class ExtensionsController extends AbstractController
     /**
      * Gets a specific version of the given extension.
      *
-     * @since 1.0.0
-     *
      * @param AbstractExtension $extension extension object
      * @param string $version
-     *
      * @return AbstractExtension
-     *
      * @throws Exception
      */
     private function getManageExtensionVersion(AbstractExtension $extension, string $version) : AbstractExtension
@@ -628,6 +621,7 @@ class ExtensionsController extends AbstractController
         });
 
         if (! $versions) {
+            /* translators: Placeholders: %1$s - Version number, %2$s - Extension name */
             throw new Exception(sprintf(__('Could not find version %1$s of %2$s.', 'mwc-dashboard'), $version, $extension->getName()));
         }
 
@@ -676,7 +670,7 @@ class ExtensionsController extends AbstractController
     /**
      * Returns the schema for REST items provided by the controller.
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function getItemSchema() : array
     {

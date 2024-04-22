@@ -17,7 +17,7 @@
  * needs please refer to http://docs.woocommerce.com/document/cost-of-goods/ for more information.
  *
  * @author      SkyVerge
- * @copyright   Copyright (c) 2013-2020, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright   Copyright (c) 2013-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -32,7 +32,7 @@ use GoDaddy\WordPress\MWC\CostOfGoods\Admin\WC_COG_Admin_Reports;
 use GoDaddy\WordPress\MWC\CostOfGoods\Integrations\WC_COG_Integrations;
 use GoDaddy\WordPress\MWC\CostOfGoods\Utilities\Previous_Orders_Handler;
 use GoDaddy\WordPress\MWC\CostOfGoods\Utilities\WC_COG_Import_Export_Handler;
-use SkyVerge\WooCommerce\PluginFramework\v5_10_12 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v5_11_0 as Framework;
 use WC_Order;
 use WC_Order_Item;
 use WC_Order_Item_Product;
@@ -50,7 +50,7 @@ class WC_COG extends Framework\SV_WC_Plugin {
 
 
 	/** plugin version number */
-	const VERSION = '3.0.0';
+	const VERSION = '3.1.0';
 
 	/** @var WC_COG single instance of this plugin */
 	protected static $instance;
@@ -91,7 +91,8 @@ class WC_COG extends Framework\SV_WC_Plugin {
 			self::PLUGIN_ID,
 			self::VERSION,
 			[
-				'text_domain' => 'mwc-cost-of-goods',
+				'text_domain'   => 'woocommerce-cost-of-goods',
+				'supports_hpos' => true,
 			]
 		);
 
@@ -135,7 +136,7 @@ class WC_COG extends Framework\SV_WC_Plugin {
 		if ( $screen && 'plugins' === $screen->id && 'yes' === get_option( 'mwc_cost_of_goods_show_notice_reactivation_cogs' ) ) {
 
 			$this->get_admin_notice_handler()->add_admin_notice(
-				__( 'This plugin cannot be reactivated. All features of Cost of Goods are included in your hosting, no plugin needed.', 'mwc-cost-of-goods' ),
+				__( 'This plugin cannot be reactivated. All features of Cost of Goods are included in your hosting, no plugin needed.', 'woocommerce-cost-of-goods' ),
 				$this->get_id_dasherized() . '-reactivation-cogs',
 				[
 					'always_show_on_settings' => false,
@@ -153,7 +154,7 @@ class WC_COG extends Framework\SV_WC_Plugin {
 
 			$this->get_admin_notice_handler()->add_admin_notice(
 				/* translators: Placeholders: %1$s - opening <a> link tag, %2$s - closing </a> link tag */
-				sprintf( __( 'Cost of Goods settings are now included with your hosting account. %1$sYou can find them in Orders%2$s.', 'mwc-cost-of-goods' ),
+				sprintf( __( 'Cost of Goods settings are now included with your hosting account. %1$sYou can find them in Orders%2$s.', 'woocommerce-cost-of-goods' ),
 					'<a target="_blank" href="' . esc_url( $this->get_settings_url() ) . '">', '</a>' ),
 				$this->get_id_dasherized() . '-migration-cogs',
 				[
@@ -354,10 +355,11 @@ class WC_COG extends Framework\SV_WC_Plugin {
 	/**
 	 * Registers module settings page with WooCommerce.
 	 *
+	 * @internal
+	 *
 	 * @since 3.0.0
 	 *
 	 * @param array $pages
-	 *
 	 * @return array
 	 */
 	public function register_settings_page( $pages ) {
@@ -628,7 +630,7 @@ class WC_COG extends Framework\SV_WC_Plugin {
 	 */
 	public function get_plugin_name() : string {
 
-		return __( 'WooCommerce Cost of Goods', 'mwc-cost-of-goods' );
+		return __( 'WooCommerce Cost of Goods', 'woocommerce-cost-of-goods' );
 	}
 
 
@@ -696,7 +698,7 @@ class WC_COG extends Framework\SV_WC_Plugin {
 	 */
 	public function is_reports_page() : bool {
 
-		return 'wc-reports' === filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
+		return isset( $_GET['page'] ) && 'wc-reports' === $_GET['page'];
 	}
 
 
@@ -745,6 +747,16 @@ class WC_COG extends Framework\SV_WC_Plugin {
 		}
 
 		return self::$instance;
+	}
+
+
+	/**
+	 * Handles HPOS compatibility.
+	 *
+	 * @return void
+	 */
+	public function handle_hpos_compatibility() {
+		// no-op for MWC dependencies
 	}
 
 

@@ -20,6 +20,28 @@ class TypeHelper
     }
 
     /**
+     * Returns the given value if it is string or null otherwise.
+     *
+     * @param mixed $value
+     * @return string|null
+     */
+    public static function stringOrNull($value) : ?string
+    {
+        return is_string($value) ? $value : null;
+    }
+
+    /**
+     * Returns the given value if it is a non-empty string or null otherwise.
+     *
+     * @param mixed $value
+     * @return non-empty-string|null
+     */
+    public static function nonEmptyStringOrNull($value) : ?string
+    {
+        return TypeHelper::string($value, '') ?: null;
+    }
+
+    /**
      * Returns the array value or default.
      *
      * @param mixed $value

@@ -5,6 +5,7 @@ namespace GoDaddy\WordPress\MWC\Core\Repositories;
 use GoDaddy\WordPress\MWC\Common\Configuration\Configuration;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Models\Contracts\GoDaddyCustomerContract;
 use GoDaddy\WordPress\MWC\Common\Models\Contracts\HostingPlanContract;
 use GoDaddy\WordPress\MWC\Common\Models\GoDaddyCustomer;
@@ -22,6 +23,13 @@ use GoDaddy\WordPress\MWC\Core\Stores\Repositories\StoreRepository;
  */
 class ManagedWordPressPlatformRepository extends AbstractPlatformRepository
 {
+    /** @var array<string> list of available essentials plans */
+    protected array $essentialsPlans = [
+        'essentials',
+        'essentialsca',
+        'essentials_gdgcpp',
+    ];
+
     /**
      * {@inheritDoc}
      */
@@ -81,7 +89,17 @@ class ManagedWordPressPlatformRepository extends AbstractPlatformRepository
      */
     public function hasEcommercePlan() : bool
     {
-        return Configuration::get('godaddy.account.plan.name') === Configuration::get('mwc.plan_name');
+        return Configuration::get('godaddy.account.plan.name') === Configuration::get('mwc.plan_name') || $this->isEssentialsPlan();
+    }
+
+    /**
+     * Determines if the current site is part of an essentials plan.
+     *
+     * @return bool
+     */
+    protected function isEssentialsPlan() : bool
+    {
+        return in_array(strtolower($this->getPlan()->getName()), $this->essentialsPlans, true);
     }
 
     /**
@@ -175,5 +193,11 @@ class ManagedWordPressPlatformRepository extends AbstractPlatformRepository
     public function getStoreRepository() : StoreRepositoryContract
     {
         return new StoreRepository();
+    }
+
+    /** {@inheritDoc} */
+    public function getChannelId() : string
+    {
+        return TypeHelper::string(Configuration::get('godaddy.store.channelId', ''), '');
     }
 }

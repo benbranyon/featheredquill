@@ -33,9 +33,10 @@ interface StoreRepositoryContract
      * Registers a store to a customer channel.
      *
      * @param string $storeId
+     * @param string $businessId
      * @return void
      */
-    public function registerStore(string $storeId) : void;
+    public function registerStore(string $storeId, string $businessId) : void;
 
     /**
      * Lists stores for a customer channel.

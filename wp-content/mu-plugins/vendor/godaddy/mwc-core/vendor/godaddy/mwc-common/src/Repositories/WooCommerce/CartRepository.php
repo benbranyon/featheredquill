@@ -123,7 +123,7 @@ class CartRepository
 
         if (! is_string($cartItemKey)) {
             // WooCommerce will automatically print a notice in the front end with more details which are not available here
-            throw new Exception(__('The product could not be added to cart the cart.', 'mwc-common'));
+            throw new Exception(__('The product could not be added to the cart.', 'mwc-common'));
         }
 
         return $cartItemKey;

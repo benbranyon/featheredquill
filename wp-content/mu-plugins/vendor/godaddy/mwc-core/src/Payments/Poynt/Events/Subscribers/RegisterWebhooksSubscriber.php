@@ -33,7 +33,6 @@ class RegisterWebhooksSubscriber implements SubscriberContract
      * @param EventContract $event
      *
      * @return bool
-     * @throws Exception
      */
     public function shouldHandle(EventContract $event) : bool
     {

@@ -5,6 +5,7 @@ namespace GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\Traits;
 use DOMDocument;
 use Exception;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
 use GoDaddy\WordPress\MWC\Common\Register\Types\RegisterFilter;
 use GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\Contracts\EmailTemplateContract;
@@ -438,12 +439,12 @@ trait CanGetWooCommerceEmailOutputTrait
      * Filters the value of the given option if it is one of the WooCommerce email template options with overrides.
      *
      * @param mixed $value the current value of the option
-     * @param string $option the name of the option that we are filtering
-     * @return array<mixed>
+     * @param string|mixed $option the name of the option that we are filtering
+     * @return array<mixed>|mixed
      */
     public function overrideWooCommerceTemplateOption($value, $option)
     {
-        if (! $setting = ArrayHelper::get($this->wooCommerceTemplateOptions, $option)) {
+        if (! $setting = TypeHelper::string(ArrayHelper::get($this->wooCommerceTemplateOptions, TypeHelper::string($option, '')), '')) {
             return $value;
         }
 

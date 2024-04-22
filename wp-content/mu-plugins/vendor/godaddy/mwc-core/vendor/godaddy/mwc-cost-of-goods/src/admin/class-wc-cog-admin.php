@@ -17,7 +17,7 @@
  * needs please refer to http://docs.woocommerce.com/document/cost-of-goods/ for more information.
  *
  * @author      SkyVerge
- * @copyright   Copyright (c) 2013-2020, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright   Copyright (c) 2013-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -118,15 +118,15 @@ class WC_COG_Admin {
 
 			// section start
 			[
-				'name' => __( 'Cost of Goods Options', 'mwc-cost-of-goods' ),
+				'name' => __( 'Cost of Goods Options', 'woocommerce-cost-of-goods' ),
 				'type' => 'title',
 				'id'   => 'wc_cog_global_settings',
 			],
 
 			// include fees
 			[
-				'title'         => __( 'Exclude these item(s) from income when calculating profit. ', 'mwc-cost-of-goods' ),
-				'desc'          => __( 'Fees charged to customer (e.g. Checkout Add-Ons, Payment Gateway Based Fees)', 'mwc-cost-of-goods' ),
+				'title'         => __( 'Exclude these item(s) from income when calculating profit. ', 'woocommerce-cost-of-goods' ),
+				'desc'          => __( 'Fees charged to customer (e.g. Checkout Add-Ons, Payment Gateway Based Fees)', 'woocommerce-cost-of-goods' ),
 				'id'            => 'wc_cog_profit_report_exclude_gateway_fees',
 				'default'       => 'yes',
 				'type'          => 'checkbox',
@@ -135,7 +135,7 @@ class WC_COG_Admin {
 
 			// include shipping costs
 			[
-				'desc'          => __( 'Shipping charged to customer', 'mwc-cost-of-goods' ),
+				'desc'          => __( 'Shipping charged to customer', 'woocommerce-cost-of-goods' ),
 				'id'            => 'wc_cog_profit_report_exclude_shipping_costs',
 				'default'       => 'yes',
 				'type'          => 'checkbox',
@@ -144,7 +144,7 @@ class WC_COG_Admin {
 
 			// include taxes
 			[
-				'desc'          => __( 'Tax charged to customer', 'mwc-cost-of-goods' ),
+				'desc'          => __( 'Tax charged to customer', 'woocommerce-cost-of-goods' ),
 				'id'            => 'wc_cog_profit_report_exclude_taxes',
 				'default'       => 'yes',
 				'type'          => 'checkbox',

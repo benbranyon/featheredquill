@@ -2,6 +2,7 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Features\GoDaddyPayments;
 
+use Exception;
 use GoDaddy\WordPress\MWC\Common\Components\Contracts\ComponentContract;
 use GoDaddy\WordPress\MWC\Common\Components\Exceptions\ComponentClassesNotDefinedException;
 use GoDaddy\WordPress\MWC\Common\Components\Exceptions\ComponentLoadFailedException;
@@ -11,15 +12,18 @@ use GoDaddy\WordPress\MWC\Common\Features\AbstractFeature;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
+use GoDaddy\WordPress\MWC\Common\Platforms\PlatformRepositoryFactory;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPressRepository;
+use GoDaddy\WordPress\MWC\Core\Features\GoDaddyPayments\Interceptors\EnqueueApplePayNoticeInterceptor;
 use GoDaddy\WordPress\MWC\Core\Features\GoDaddyPayments\Interceptors\EnqueueBusinessStatusNoticeInterceptor;
 use GoDaddy\WordPress\MWC\Core\Features\GoDaddyPayments\Interceptors\EnqueueCompleteProfileNoticeInterceptor;
 use GoDaddy\WordPress\MWC\Core\Features\GoDaddyPayments\Interceptors\EnqueueGdpNoticeInterceptor;
+use GoDaddy\WordPress\MWC\Core\Features\GoDaddyPayments\Interceptors\EnqueueGdpRegisterRecommendationNoticeInterceptor;
 use GoDaddy\WordPress\MWC\Core\Features\GoDaddyPayments\Interceptors\EnqueueGdpSipRecommendationNoticeInterceptor;
+use GoDaddy\WordPress\MWC\Core\Features\GoDaddyPayments\Interceptors\EnqueueGooglePayNoticeInterceptor;
 use GoDaddy\WordPress\MWC\Core\Features\GoDaddyPayments\Interceptors\EnqueueOnboardingErrorNoticeInterceptor;
 use GoDaddy\WordPress\MWC\Core\Features\GoDaddyPayments\Interceptors\EnqueuePoyntPluginNoticeInterceptor;
-use GoDaddy\WordPress\MWC\Core\Features\GoDaddyPayments\Interceptors\EnqueueWooStagingNoticeInterceptor;
 
 /**
  * The GoDaddy Payments feature.
@@ -30,11 +34,14 @@ class GoDaddyPayments extends AbstractFeature
 
     /** @var class-string<ComponentContract>[] alphabetically ordered list of components to load */
     protected array $componentClasses = [
+        EnqueueApplePayNoticeInterceptor::class,
         EnqueueBusinessStatusNoticeInterceptor::class,
         EnqueueCompleteProfileNoticeInterceptor::class,
+        EnqueueGooglePayNoticeInterceptor::class,
         EnqueueOnboardingErrorNoticeInterceptor::class,
         EnqueuePoyntPluginNoticeInterceptor::class,
         EnqueueGdpNoticeInterceptor::class,
+        EnqueueGdpRegisterRecommendationNoticeInterceptor::class,
         EnqueueGdpSipRecommendationNoticeInterceptor::class,
         //        EnqueueWooStagingNoticeInterceptor::class,
     ];
@@ -116,6 +123,34 @@ class GoDaddyPayments extends AbstractFeature
         }
 
         return 'https://www.godaddy.com/legal/agreements/commerce-services-agreement';
+    }
+
+    /**
+     * Determines if a shop is eligible for GDP.
+     *
+     * @return bool
+     * @throws Exception
+     */
+    public static function isSiteEligible() : bool
+    {
+        if (PlatformRepositoryFactory::getNewInstance()->getPlatformRepository()->isReseller()) {
+            return false;
+        }
+
+        return self::isEligibleCountryAndCurrency();
+    }
+
+    /**
+     * Determines whether country + currency are eligible for GDP.
+     *
+     * @return bool
+     */
+    public static function isEligibleCountryAndCurrency() : bool
+    {
+        $country = WooCommerceRepository::getBaseCountry();
+        $currency = WooCommerceRepository::getCurrency();
+
+        return GoDaddyPayments::isSupportedCountry($country) && GoDaddyPayments::isSupportedCurrency($currency, $country);
     }
 
     /**

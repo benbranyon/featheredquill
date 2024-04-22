@@ -14,7 +14,7 @@ abstract class AbstractReservationFailHandlerSubscriber extends AbstractFailHand
     /**
      * {@inheritDoc}
      */
-    public function getNotice() : Notice
+    public function getNotice(string $failReason = null) : Notice
     {
         return OrderInventoryUpsertFailedNotice::getNewInstance();
     }

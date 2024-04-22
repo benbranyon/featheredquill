@@ -6,6 +6,7 @@ use Exception;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerce\OrdersRepository;
 use GoDaddy\WordPress\MWC\Dashboard\Shipping\DataSources\ShipmentTracking\Adapters\ShipmentAdapter;
 use GoDaddy\WordPress\MWC\Dashboard\Shipping\DataStores\OrderFulfillmentDataStore as WoocommerceOrderFulfillmentDataStore;
+use GoDaddy\WordPress\MWC\Dashboard\Shipping\DataStores\Traits\CanManipulateOrderMetaDataTrait;
 use GoDaddy\WordPress\MWC\Shipping\Contracts\ShipmentContract;
 use GoDaddy\WordPress\MWC\Shipping\Models\Orders\OrderFulfillment;
 use GoDaddy\WordPress\MWC\Shipping\Models\Packages\Package;
@@ -16,6 +17,8 @@ use GoDaddy\WordPress\MWC\Shipping\Models\Shipment;
  */
 class OrderFulfillmentDataStore
 {
+    use CanManipulateOrderMetaDataTrait;
+
     /** @var WoocommerceOrderFulfillmentDataStore */
     protected $datastore;
 
@@ -346,7 +349,8 @@ class OrderFulfillmentDataStore
         if ($wcOrder) {
             $wcOrder->update_meta_data($this->tracking_items_meta_key, $data);
             $wcOrder->update_meta_data($this->tracking_items_hash_meta_key, $this->getPluginDataHash($data));
-            $wcOrder->save_meta_data();
+            // TODO: replace this call to WC_Order::save() with a call to WC_Order::save_meta_data() in https://godaddy-corp.atlassian.net/browse/MWC-13394
+            $wcOrder->save();
         }
     }
 
@@ -363,11 +367,10 @@ class OrderFulfillmentDataStore
             return false;
         }
 
-        $orderId = $fulfillment->getOrder()->getId();
+        $orderId = (int) $fulfillment->getOrder()->getId();
 
         if (! $this->hasNewPluginData($orderId, $this->getPluginData($orderId))) {
-            delete_post_meta($orderId, '_mwc_shipment_tracking_items_hash');
-            delete_post_meta($orderId, '_wc_shipment_tracking_items');
+            $this->deleteOrderMetaData($orderId, [$this->tracking_items_hash_meta_key, $this->tracking_items_meta_key]);
         }
 
         return $this->datastore->delete($fulfillment);

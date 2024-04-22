@@ -22,7 +22,6 @@ interface RequestContract
      * Sets the request method.
      *
      * @param string|null $method
-     *
      * @return $this
      */
     public function setMethod(string $method = null) : RequestContract;
@@ -38,45 +37,40 @@ interface RequestContract
     /**
      * Sets the body of the request.
      *
-     * @param array $body
-     *
-     * @return RequestContract
+     * @param array<string, mixed> $body
+     * @return $this
      */
     public function setBody(array $body) : RequestContract;
 
     /**
      * Sets Request headers.
      *
-     * @param array|null $additionalHeaders
-     *
-     * @return RequestContract
+     * @param array<string, mixed>|null $additionalHeaders
+     * @return $this
      */
-    public function setHeaders($additionalHeaders = []) : RequestContract;
+    public function setHeaders(?array $additionalHeaders = []) : RequestContract;
 
     /**
      * Merges the provided Request headers with the headers already set.
      *
-     * @param array $additionalHeaders
-     *
-     * @return RequestContract
+     * @param array<string, mixed> $additionalHeaders
+     * @return $this
      */
     public function addHeaders(array $additionalHeaders) : RequestContract;
 
     /**
      * Sets query parameters.
      *
-     * @param array $params
-     *
-     * @return RequestContract
+     * @param array<mixed>|null $params
+     * @return $this
      */
-    public function setQuery(array $params) : RequestContract;
+    public function setQuery(?array $params = []) : RequestContract;
 
     /**
      * Sets the request timeout.
      *
      * @param int $seconds
-     *
-     * @return RequestContract
+     * @return $this
      */
     public function setTimeout(int $seconds = 30) : RequestContract;
 
@@ -84,8 +78,7 @@ interface RequestContract
      * Sets the url of the request.
      *
      * @param string $url
-     *
-     * @return RequestContract
+     * @return $this
      */
     public function setUrl(string $url) : RequestContract;
 
@@ -93,16 +86,14 @@ interface RequestContract
      * Sets SSL verify.
      *
      * @param bool $default
-     *
      * @return $this
      */
-    public function sslVerify(bool $default = false) : self;
+    public function sslVerify(bool $default = false) : RequestContract;
 
     /**
      * Sets the auth method for this request.
      *
-     * @param AuthMethodContract $value The auth method to set.
-     *
+     * @param AuthMethodContract $value the auth method to set
      * @return $this
      */
     public function setAuthMethod(AuthMethodContract $value);
@@ -110,7 +101,7 @@ interface RequestContract
     /**
      * Gets the authentication method for this request.
      *
-     * @return AuthMethodContract|null Auth method instance if it is set, otherwise null.
+     * @return AuthMethodContract|null auth method instance if it is set, otherwise null
      */
     public function getAuthMethod() : ?AuthMethodContract;
 
@@ -118,8 +109,7 @@ interface RequestContract
      * Sets the request path.
      *
      * @param string $value
-     *
-     * @return RequestContract
+     * @return $this
      */
     public function setPath(string $value) : RequestContract;
 
@@ -133,6 +123,7 @@ interface RequestContract
     /**
      * Validates the request.
      *
+     * @return void|mixed
      * @throws Exception
      */
     public function validate();

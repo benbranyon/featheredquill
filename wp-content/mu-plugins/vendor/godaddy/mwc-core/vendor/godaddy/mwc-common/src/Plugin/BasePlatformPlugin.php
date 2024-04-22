@@ -6,6 +6,7 @@ use Exception;
 use GoDaddy\WordPress\MWC\Common\Components\Traits\HasComponentsTrait;
 use GoDaddy\WordPress\MWC\Common\Configuration\Configuration;
 use GoDaddy\WordPress\MWC\Common\Container\ContainerFactory;
+use GoDaddy\WordPress\MWC\Common\Container\Exceptions\ContainerException;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
 use GoDaddy\WordPress\MWC\Common\Migrations\MigrationHandler;
@@ -13,7 +14,6 @@ use GoDaddy\WordPress\MWC\Common\Plugin\Contracts\PlatformPluginContract;
 use GoDaddy\WordPress\MWC\Common\Repositories\SentryRepository;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPressRepository;
 use GoDaddy\WordPress\MWC\Common\Traits\Features\IsConditionalFeatureTrait;
-use Psr\Container\ContainerExceptionInterface;
 use ReflectionClass;
 
 /**
@@ -259,7 +259,7 @@ class BasePlatformPlugin implements PlatformPluginContract
             $instance = ContainerFactory::getInstance()->getSharedContainer()->get($classOrAbstractName);
 
             return is_object($instance) ? $instance : null;
-        } catch (ContainerExceptionInterface $e) {
+        } catch (ContainerException $e) {
             return null;
         }
     }

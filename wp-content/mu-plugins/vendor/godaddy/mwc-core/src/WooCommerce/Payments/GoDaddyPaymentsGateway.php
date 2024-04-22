@@ -17,6 +17,7 @@ use GoDaddy\WordPress\MWC\Common\Repositories\WordPressRepository;
 use GoDaddy\WordPress\MWC\Core\Events\BeforeCreateRefundEvent;
 use GoDaddy\WordPress\MWC\Core\Events\BeforeCreateVoidEvent;
 use GoDaddy\WordPress\MWC\Core\Features\GoDaddyPayments\GoDaddyPayments;
+use GoDaddy\WordPress\MWC\Core\Features\GoDaddyPayments\Traits\HasGoDaddyPaymentsUrlsTrait;
 use GoDaddy\WordPress\MWC\Core\Features\Worldpay\Worldpay;
 use GoDaddy\WordPress\MWC\Core\Payments\DataStores\WooCommerce\OrderTransactionDataStore;
 use GoDaddy\WordPress\MWC\Core\Payments\Models\Transactions\PaymentTransaction;
@@ -51,6 +52,8 @@ use WC_Order;
  */
 class GoDaddyPaymentsGateway extends AbstractPaymentGateway implements SubscriberContract
 {
+    use HasGoDaddyPaymentsUrlsTrait;
+
     /** Sends through sale and request for funds to be charged to cardholder's credit card. */
     const TRANSACTION_TYPE_CHARGE = 'charge';
 
@@ -83,7 +86,7 @@ class GoDaddyPaymentsGateway extends AbstractPaymentGateway implements Subscribe
         $this->id = $this->providerName;
         $this->method_description = $this->getDescription();
 
-        $this->view_transaction_url = StringHelper::trailingSlash(Poynt::getHubUrl()).'transactions/%s';
+        $this->view_transaction_url = StringHelper::trailingSlash($this->getHubUrl()).'transactions/%s';
 
         if (Worldpay::shouldLoad()) {
             $this->method_title = __('Credit/Debit Card', 'mwc-core');
@@ -142,41 +145,9 @@ class GoDaddyPaymentsGateway extends AbstractPaymentGateway implements Subscribe
     }
 
     /**
-     * Get Menu Label.
-     *
-     * @return null|string
-     * @throws Exception
-     */
-    public function getMenuLabel() : ?string
-    {
-        return Worldpay::shouldLoad() ? __('Payments Dashboard', 'mwc-core') : __('GoDaddy Payments', 'mwc-core');
-    }
-
-    /**
-     * Get Menu URL.
-     *
-     * @return null|string
-     * @throws Exception
-     */
-    public function getMenuUrl() : ?string
-    {
-        $url = StringHelper::trailingSlash(Poynt::getHubUrl());
-
-        if (Worldpay::shouldLoad()) {
-            $url .= 'dashboard';
-        }
-
-        return add_query_arg([
-            'businessId' => Poynt::getBusinessId(),
-            'storeId'    => Poynt::getSiteStoreId(),
-        ], $url);
-    }
-
-    /**
      * Determines if a menu item should be added.
      *
      * @return bool
-     * @throws Exception
      */
     public function shouldAddMenuItem() : bool
     {
@@ -223,35 +194,7 @@ class GoDaddyPaymentsGateway extends AbstractPaymentGateway implements Subscribe
             return true;
         }
 
-        return self::isEligibleCountryAndCurrency();
-    }
-
-    /**
-     * Determines if a shop is eligible for GDP.
-     *
-     * @return bool
-     * @throws Exception
-     */
-    public static function isSiteEligible() : bool
-    {
-        if (PlatformRepositoryFactory::getNewInstance()->getPlatformRepository()->isReseller()) {
-            return false;
-        }
-
-        return self::isEligibleCountryAndCurrency();
-    }
-
-    /**
-     * Determines whether country + currency are eligible for GDP.
-     *
-     * @return bool
-     */
-    public static function isEligibleCountryAndCurrency() : bool
-    {
-        $country = WooCommerceRepository::getBaseCountry();
-        $currency = WooCommerceRepository::getCurrency();
-
-        return GoDaddyPayments::isSupportedCountry($country) && GoDaddyPayments::isSupportedCurrency($currency, $country);
+        return GoDaddyPayments::isEligibleCountryAndCurrency();
     }
 
     /**
@@ -340,8 +283,7 @@ class GoDaddyPaymentsGateway extends AbstractPaymentGateway implements Subscribe
     public function admin_options()
     {
         $manageLinkText = Worldpay::shouldLoad() ? __('Manage your account settings in the %1$spayments dashboard%2$s', 'mwc-core') : __('Manage your GoDaddy Payments account settings in the %1$sPayments Hub%2$s', 'mwc-core');
-        $hubUrl = StringHelper::trailingSlash(Poynt::getHubUrl());
-        $manageLinkUrl = Worldpay::shouldLoad() ? $hubUrl.'dashboard' : $hubUrl.'settings'; ?>
+        $manageLinkUrl = $this->getSettingsUrl(); ?>
 
         <h2 class="mwc-payments-godaddy-settings-title">
             <?php echo esc_html($this->get_method_title()); ?>

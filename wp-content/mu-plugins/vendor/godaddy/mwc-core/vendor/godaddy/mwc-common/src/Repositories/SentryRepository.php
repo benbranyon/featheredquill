@@ -6,6 +6,7 @@ use GoDaddy\WordPress\MWC\Common\Configuration\Configuration;
 use GoDaddy\WordPress\MWC\Common\Exceptions\SentryException;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
+use GoDaddy\WordPress\MWC\Common\Platforms\Contracts\PlatformRepositoryContract;
 use GoDaddy\WordPress\MWC\Common\Platforms\Exceptions\PlatformRepositoryException;
 use GoDaddy\WordPress\MWC\Common\Platforms\PlatformRepositoryFactory;
 use Jean85\PrettyVersions;
@@ -37,14 +38,8 @@ class SentryRepository
             'environment'     => $currentEnv,
             'max_breadcrumbs' => 50, // Amount of trace breadcrumbs -- default is 100
             'release'         => Configuration::get('mwc.version'), // @TODO: Replace version with commit hash {JO 2021-03-03}
-            'sample_rate'     => 0.2, // Sample Rate to 20% overall -- can override per platform
-            'before_send'     => function (SentryEvent $event) {
-                if (static::hasSentryException($event)) {
-                    return $event;
-                }
-
-                return null;
-            },
+            'sample_rate'     => 1.0, // Keep at 100%. {@see SentrySampleRateRepository} for overrides.
+            'before_send'     => [static::class, 'beforeSend'],
         ]);
 
         // Set scopes
@@ -68,6 +63,22 @@ class SentryRepository
         }
 
         return true;
+    }
+
+    /**
+     * Checks whether the event should be sent to sentry. Applies sample rate logic.
+     *
+     * @param SentryEvent $event
+     *
+     * @return SentryEvent|null
+     */
+    public static function beforeSend(SentryEvent $event) : ?SentryEvent
+    {
+        if (static::hasSentryException($event) && SentrySampleRateRepository::getInstance()->canSampleEvent($event)) {
+            return $event;
+        }
+
+        return null;
     }
 
     /**
@@ -124,7 +135,7 @@ class SentryRepository
     {
         // Use domain as unique identifier
         $scope->setUser(['id' => ArrayHelper::get($_SERVER, 'HTTP_HOST', '')]);
-        $scope->setTag('account_plan', TypeHelper::string(Configuration::get('godaddy.account.plan.name'), ''));
+        $scope->setTag('account_plan', static::getAccountPlanName());
         $scope->setTag('cdn_enabled', Configuration::get('godaddy.cdn.enabled') ? 'yes' : 'no');
         $scope->setTag('request_type', TypeHelper::string(Configuration::get('mwc.mode', 'web'), ''));
         $scope->setTag('managed_woocommerce_version', TypeHelper::string(Configuration::get('mwc.version'), ''));
@@ -133,6 +144,32 @@ class SentryRepository
         $scope->setTag('wordpress_version', WordPressRepository::getVersion() ?? '');
         $scope->setTag('wordpress_cli_mode', WordPressRepository::isCliMode() ? 'yes' : 'no');
         $scope->setTags(static::getHostingPlatformTags());
+    }
+
+    /**
+     * Gets the name of the hosting plan associated with the current site.
+     *
+     * @return string
+     */
+    protected static function getAccountPlanName() : string
+    {
+        $platformRepository = static::getPlatformRepository();
+
+        return $platformRepository ? $platformRepository->getPlan()->getName() : '';
+    }
+
+    /**
+     * Attempts to get an instance of {@see PlatformRepositoryContract}.
+     *
+     * @return PlatformRepositoryContract|null
+     */
+    protected static function getPlatformRepository() : ?PlatformRepositoryContract
+    {
+        try {
+            return PlatformRepositoryFactory::getNewInstance()->getPlatformRepository();
+        } catch (PlatformRepositoryException $e) {
+            return null;
+        }
     }
 
     /**

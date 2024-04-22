@@ -5,8 +5,11 @@ namespace GoDaddy\WordPress\MWC\Core\WooCommerce\Models\Orders;
 use GoDaddy\WordPress\MWC\Common\Events\Events;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Models\CurrencyAmount;
+use GoDaddy\WordPress\MWC\Common\Models\Orders\Contracts\NoteContract;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\Order as CommonOrder;
 use GoDaddy\WordPress\MWC\Core\Channels\Traits\HasOriginatingChannelTrait;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Models\CustomerNote;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataSources\Builders\CustomerNoteBuilder;
 use GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Models\Traits\HasMarketplacesDataTrait;
 
 /**
@@ -32,7 +35,13 @@ class Order extends CommonOrder
     /** @var CurrencyAmount|null */
     protected $discountAmount;
 
-    /** @var string note the customer added to the order */
+    /**
+     * Note that the customer added to the order.
+     *
+     * This property is kept so that Order events remain backward-compatible with subscribers that may rely on customerNote.
+     *
+     * @var string
+     */
     protected $customerNote;
 
     /** @var bool whether the order is ready to have a payment captured */
@@ -83,7 +92,30 @@ class Order extends CommonOrder
      */
     public function getCustomerNote() : ?string
     {
-        return $this->customerNote;
+        if ($customerNote = $this->findCustomerNote($this->getNotes())) {
+            return $customerNote->getContent();
+        }
+
+        return '';
+    }
+
+    /**
+     * Gets a {@see CustomerNote} instance from the given array of notes.
+     *
+     * Returns null if there are no customer notes in the array.
+     *
+     * @param NoteContract[] $notes
+     * @return CustomerNote|null
+     */
+    protected function findCustomerNote(array $notes) : ?CustomerNote
+    {
+        foreach ($notes as $note) {
+            if ($note instanceof CustomerNote) {
+                return $note;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -96,7 +128,41 @@ class Order extends CommonOrder
     {
         $this->customerNote = $value;
 
+        if ($customerNote = $this->findCustomerNote($this->getNotes())) {
+            return $this->updateCustomerNote($customerNote, $value);
+        }
+
+        return $this->addCustomerNote($value);
+    }
+
+    /**
+     * Updates the given customer note instance with the given content.
+     *
+     * @return $this
+     */
+    protected function updateCustomerNote(CustomerNote $customerNote, string $value)
+    {
+        $customerNote->setContent($value);
+
         return $this;
+    }
+
+    /**
+     * Adds an new customer note to the list of notes using the given value as the note's content.
+     *
+     * @return $this
+     */
+    protected function addCustomerNote(string $value)
+    {
+        return $this->addNotes($this->buildCustomerNote($value));
+    }
+
+    /**
+     * Builds a new customer note for this order with the given value as the note's content.
+     */
+    protected function buildCustomerNote(string $value) : CustomerNote
+    {
+        return CustomerNoteBuilder::getNewInstance()->setOrderId($this->getId())->build($value);
     }
 
     /**

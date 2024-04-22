@@ -11,8 +11,6 @@ use GoDaddy\WordPress\MWC\Shipping\Models\ShippingRate;
  * Provides methods to an object to estimate shipping rates.
  *
  * @see ShippingRate
- *
- * @since 0.1.0
  */
 trait CanEstimateShippingRatesTrait
 {
@@ -24,10 +22,8 @@ trait CanEstimateShippingRatesTrait
     /**
      * Estimates shipping rates for shipments.
      *
-     * @since 0.1.0
-     *
      * @param ShipmentContract[] $shipments
-     * @return mixed[]
+     * @return array<mixed>
      * @throws ShippingExceptionContract
      */
     public function estimate(array $shipments) : array

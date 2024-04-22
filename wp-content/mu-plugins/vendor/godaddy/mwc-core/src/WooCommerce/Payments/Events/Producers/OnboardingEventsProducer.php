@@ -52,6 +52,7 @@ use GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\Events\PaymentTransactionCre
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\GoDaddyPayments\AbstractWalletGateway;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\GoDaddyPayments\API\Controllers\Onboarding\OnboardingStartController;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\GoDaddyPayments\Onboarding\ReturnUrl;
+use function Sentry\captureException;
 use WC_Payment_Gateway;
 
 /**
@@ -155,7 +156,7 @@ class OnboardingEventsProducer implements ProducerContract
             Redirect::to(Onboarding::getSwitchAccountUrl())->setSafe(false)->execute();
         } catch (Exception $exception) {
             if (SentryRepository::loadSDK()) {
-                \Sentry\captureException(new SentryException($exception->getMessage(), $exception));
+                captureException(new SentryException($exception->getMessage(), $exception));
             }
 
             try {
@@ -421,7 +422,7 @@ class OnboardingEventsProducer implements ProducerContract
             Redirect::to($signupUrl)->setSafe(false)->execute();
         } catch (Exception $exception) {
             if (SentryRepository::loadSDK()) {
-                \Sentry\captureException(new SentryException($exception->getMessage(), $exception));
+                captureException(new SentryException($exception->getMessage(), $exception));
             }
             if (Configuration::get('wordpress.debug')) {
                 error_log('There was an issue starting GD Payments onboarding: '.$exception->getMessage());
@@ -439,8 +440,6 @@ class OnboardingEventsProducer implements ProducerContract
      * Schedules an Action Scheduler event to update the account status.
      *
      * @internal
-     *
-     * @throws Exception
      */
     public function scheduleAccountUpdate()
     {
@@ -636,8 +635,6 @@ class OnboardingEventsProducer implements ProducerContract
 
     /**
      * Handles the request to enable the GoDaddy Payments payment method and redirect to its settings page.
-     *
-     * @throws Exception
      */
     public function handleEnablePaymentMethod()
     {

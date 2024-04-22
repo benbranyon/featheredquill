@@ -6,12 +6,15 @@ use Exception;
 use GoDaddy\WordPress\MWC\Common\Components\Contracts\ComponentContract;
 use GoDaddy\WordPress\MWC\Common\Components\Traits\HasComponentsTrait;
 use GoDaddy\WordPress\MWC\Common\Exceptions\BaseException;
+use GoDaddy\WordPress\MWC\Common\Exceptions\SentryException;
 use GoDaddy\WordPress\MWC\Common\Exceptions\WordPressDatabaseException;
 use GoDaddy\WordPress\MWC\Common\Features\AbstractFeature;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Platforms\Exceptions\PlatformRepositoryException;
 use GoDaddy\WordPress\MWC\Common\Platforms\PlatformRepositoryFactory;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\CatalogIntegration;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Configuration\DisableIncompatibleFeaturesAction;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Interceptors\PaymentSettingsInterceptor;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\InventoryIntegration;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Locations\LocationsIntegration;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\OrdersIntegration;
@@ -26,6 +29,8 @@ class Commerce extends AbstractFeature
 
     public const CAPABILITY_READ = 'read';
     public const CAPABILITY_WRITE = 'write';
+    public const CAPABILITY_EVENTS = 'events';
+    public const CAPABILITY_DETECT_UPSTREAM_CHANGES = 'detect_upstream_changes';
 
     /** @var string transient that disables the feature */
     public const TRANSIENT_DISABLE_FEATURE = 'godaddy_mwc_commerce_disabled';
@@ -42,7 +47,9 @@ class Commerce extends AbstractFeature
         CreateCommerceContextsTableAction::class,
         CreateCommerceMapResourceTypesTableAction::class,
         CreateCommerceMapIdsTableAction::class,
+        CreateCommerceSkippedResourcesTableAction::class,
         InsertResourceTypesAction::class,
+        CreateCommerceResourceUpdatesTableAction::class,
 
         // integrations
         CatalogIntegration::class,
@@ -50,6 +57,10 @@ class Commerce extends AbstractFeature
         InventoryIntegration::class,
         LocationsIntegration::class,
         OrdersIntegration::class,
+
+        // misc.
+        DisableIncompatibleFeaturesAction::class,
+        PaymentSettingsInterceptor::class,
     ];
 
     /**
@@ -136,5 +147,21 @@ class Commerce extends AbstractFeature
         $capabilities = TypeHelper::array(static::getConfiguration('capabilities', []), []);
 
         return $capabilities;
+    }
+
+    /**
+     * Gets the channel ID.
+     *
+     * @return string
+     */
+    public static function getChannelId() : string
+    {
+        try {
+            return PlatformRepositoryFactory::getNewInstance()->getPlatformRepository()->getChannelId();
+        } catch (PlatformRepositoryException $exception) {
+            SentryException::getNewInstance($exception->getMessage(), $exception);
+
+            return '';
+        }
     }
 }

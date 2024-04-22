@@ -15,13 +15,17 @@ class LineItemDetails extends AbstractDataObject
     /** @var non-empty-string|null Product's unit of measure */
     public ?string $unitOfMeasure = null;
 
+    /** @var LineItemOption[] */
+    public array $selectedOptions = [];
+
     /**
      * Constructor.
      *
      * @param array{
      *     sku?: ?non-empty-string,
      *     productAssetUrl?: string,
-     *     unitOfMeasure?: ?non-empty-string
+     *     unitOfMeasure?: ?non-empty-string,
+     *     selectedOptions?: LineItemOption[]
      * } $data
      */
     public function __construct(array $data)

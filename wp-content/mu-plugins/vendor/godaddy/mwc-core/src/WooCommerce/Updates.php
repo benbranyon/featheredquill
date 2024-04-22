@@ -7,6 +7,7 @@ use GoDaddy\WordPress\MWC\Common\Configuration\Configuration;
 use GoDaddy\WordPress\MWC\Common\Enqueue\Enqueue;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Platforms\Exceptions\PlatformRepositoryException;
 use GoDaddy\WordPress\MWC\Common\Platforms\PlatformRepositoryFactory;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
@@ -80,7 +81,7 @@ class Updates
         }
 
         foreach (ManagedExtensionsRepository::getInstalledManagedPlugins() as $plugin) {
-            if (ArrayHelper::has($list->checked, $plugin->getBasename())) {
+            if (ArrayHelper::has($list->checked, TypeHelper::string($plugin->getBasename(), ''))) {
                 $itemVersion = $list->checked[$plugin->getBasename()];
                 if ($itemVersion && version_compare($itemVersion, $plugin->getVersion(), '<')) {
                     // @TODO: Should be removed in favor of ->toArray from the CanConvertToArrayTrait when parity confirmed {JO: 2021-02-21}

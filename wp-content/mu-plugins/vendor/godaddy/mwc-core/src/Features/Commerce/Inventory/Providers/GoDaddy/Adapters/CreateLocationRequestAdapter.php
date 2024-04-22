@@ -26,7 +26,7 @@ class CreateLocationRequestAdapter extends AbstractUpsertLocationRequestAdapter
         ];
 
         if (isset($location->address)) {
-            ArrayHelper::set($data, 'address', $location->address->toArray());
+            ArrayHelper::set($data, 'address', array_filter($location->address->toArray()));
         }
 
         return $this->getBaseRequest()

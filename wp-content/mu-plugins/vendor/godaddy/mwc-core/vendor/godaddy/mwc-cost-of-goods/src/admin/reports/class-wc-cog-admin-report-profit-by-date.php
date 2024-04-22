@@ -17,7 +17,7 @@
  * needs please refer to http://docs.woocommerce.com/document/cost-of-goods/ for more information.
  *
  * @author      SkyVerge
- * @copyright   Copyright (c) 2013-2020, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright   Copyright (c) 2013-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -62,8 +62,8 @@ class WC_COG_Admin_Report_Profit_by_Date extends WC_COG_Admin_Report {
 			// total sales
 			[
 				/* translators: Placeholders: %1$s is the formatted net sales amount with surrounding <strong> tags, e.g. <strong>$7.77</strong> */
-				'title'            => sprintf( __( '%1$s net sales in this period', 'mwc-cost-of-goods' ), '<strong>' . wc_price( $data->net_sales ) . '</strong>' ),
-				'placeholder'      => __( 'This is the sum of the order totals after any refunds and excluding fees, taxes, and shipping (unless you have toggled the settings to include them)', 'mwc-cost-of-goods' ),
+				'title'            => sprintf( __( '%1$s net sales in this period', 'woocommerce-cost-of-goods' ), '<strong>' . wc_price( $data->net_sales ) . '</strong>' ),
+				'placeholder'      => __( 'This is the sum of the order totals after any refunds and excluding fees, taxes, and shipping (unless you have toggled the settings to include them)', 'woocommerce-cost-of-goods' ),
 				'color'            => $this->chart_colors['net_sales'],
 				'highlight_series' => 1,
 			],
@@ -71,8 +71,8 @@ class WC_COG_Admin_Report_Profit_by_Date extends WC_COG_Admin_Report {
 			// total cost of goods
 			[
 				/* translators: Placeholders: %1$s is the formatted total cost of goods amount with surrounding <strong> tags, e.g. <strong>$2.00</strong> */
-				'title'            => sprintf( __( '%1$s total cost of goods in this period', 'mwc-cost-of-goods' ), '<strong>' . wc_price( $data->total_cogs ) . '</strong>' ),
-				'placeholder'      => __( 'This is the sum of the item cost of goods after any refunds', 'mwc-cost-of-goods' ),
+				'title'            => sprintf( __( '%1$s total cost of goods in this period', 'woocommerce-cost-of-goods' ), '<strong>' . wc_price( $data->total_cogs ) . '</strong>' ),
+				'placeholder'      => __( 'This is the sum of the item cost of goods after any refunds', 'woocommerce-cost-of-goods' ),
 				'color'            => $this->chart_colors['total_cogs'],
 				'highlight_series' => 2,
 			],
@@ -80,8 +80,8 @@ class WC_COG_Admin_Report_Profit_by_Date extends WC_COG_Admin_Report {
 			// total profit
 			[
 				/* translators: Placeholders: %1$s is the formatted total profit amount with surrounding <strong> tags, e.g. <strong>$5.77</strong> */
-				'title'            => sprintf( __( '%1$s total profit in this period', 'mwc-cost-of-goods' ), '<strong>' . wc_price( $data->total_profit ) . '</strong>' ),
-				'placeholder'      => __( 'This is the sum of the order profit after any refunds', 'mwc-cost-of-goods' ),
+				'title'            => sprintf( __( '%1$s total profit in this period', 'woocommerce-cost-of-goods' ), '<strong>' . wc_price( $data->total_profit ) . '</strong>' ),
+				'placeholder'      => __( 'This is the sum of the order profit after any refunds', 'woocommerce-cost-of-goods' ),
 				'color'            => $this->chart_colors['total_profit'],
 				'highlight_series' => 3,
 			],
@@ -89,7 +89,7 @@ class WC_COG_Admin_Report_Profit_by_Date extends WC_COG_Admin_Report {
 			// order count
 			[
 				/* translators: Placeholders: %1$s is the total orders count with surrounding <strong> tags, e.g. <strong>7</strong> */
-				'title'            => sprintf( __( '%1$s orders placed', 'mwc-cost-of-goods' ), '<strong>' . $data->total_orders . '</strong>' ),
+				'title'            => sprintf( __( '%1$s orders placed', 'woocommerce-cost-of-goods' ), '<strong>' . $data->total_orders . '</strong>' ),
 				'color'            => $this->chart_colors['total_orders'],
 				'highlight_series' => 0,
 			],
@@ -97,8 +97,8 @@ class WC_COG_Admin_Report_Profit_by_Date extends WC_COG_Admin_Report {
 			// average profit per order
 			[
 				/* translators: Placeholders: %1$s is the formatted average profit per order amount with surrounding <strong> tags, e.g. <strong>$1.77</strong> */
-				'title'       => sprintf( __( '%1$s average profit per order in this period', 'mwc-cost-of-goods' ), '<strong>' . wc_price( $data->avg_profit ) . '</strong>' ),
-				'placeholder' => __( 'This is the average profit per order after any refunds', 'mwc-cost-of-goods' ),
+				'title'       => sprintf( __( '%1$s average profit per order in this period', 'woocommerce-cost-of-goods' ), '<strong>' . wc_price( $data->avg_profit ) . '</strong>' ),
+				'placeholder' => __( 'This is the average profit per order after any refunds', 'woocommerce-cost-of-goods' ),
 				'color'       => $this->chart_colors['avg_profit'],
 			],
 
@@ -177,7 +177,7 @@ class WC_COG_Admin_Report_Profit_by_Date extends WC_COG_Admin_Report {
 				var drawGraph  = function ( highlight ) {
 					var series = [
 						{
-							label      : "<?php echo esc_js( __( 'Number of orders', 'mwc-cost-of-goods' ) ) ?>",
+							label      : "<?php echo esc_js( __( 'Number of orders', 'woocommerce-cost-of-goods' ) ) ?>",
 							data       : order_data.order_counts,
 							color      : '<?php echo $this->chart_colors['total_orders']; ?>',
 							bars       : {
@@ -193,7 +193,7 @@ class WC_COG_Admin_Report_Profit_by_Date extends WC_COG_Admin_Report {
 							hoverable  : false
 						},
 						{
-							label      : "<?php echo esc_js( __( 'Net Sales amount', 'mwc-cost-of-goods' ) ) ?>",
+							label      : "<?php echo esc_js( __( 'Net Sales amount', 'woocommerce-cost-of-goods' ) ) ?>",
 							data       : order_data.net_order_amounts,
 							yaxis      : 2,
 							color      : '<?php echo $this->chart_colors['net_sales']; ?>',
@@ -213,7 +213,7 @@ class WC_COG_Admin_Report_Profit_by_Date extends WC_COG_Admin_Report {
 							<?php echo $this->get_currency_tooltip(); ?>
 						},
 						{
-							label      : "<?php echo esc_js( __( 'Cost of Goods Sold', 'mwc-cost-of-goods' ) ) ?>",
+							label      : "<?php echo esc_js( __( 'Cost of Goods Sold', 'woocommerce-cost-of-goods' ) ) ?>",
 							data       : order_data.cogs_amounts,
 							yaxis      : 2,
 							color      : '<?php echo $this->chart_colors['total_cogs']; ?>',
@@ -233,7 +233,7 @@ class WC_COG_Admin_Report_Profit_by_Date extends WC_COG_Admin_Report {
 							<?php echo $this->get_currency_tooltip(); ?>
 						},
 						{
-							label      : "<?php echo esc_js( __( 'Profit amount', 'mwc-cost-of-goods' ) ) ?>",
+							label      : "<?php echo esc_js( __( 'Profit amount', 'woocommerce-cost-of-goods' ) ) ?>",
 							data       : order_data.profit_amounts,
 							yaxis      : 2,
 							color      : '<?php echo $this->chart_colors['total_profit']; ?>',

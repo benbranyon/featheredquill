@@ -32,6 +32,7 @@ jQuery( ( $ ) => {
 			this.appId            = args.appId;
 			this.businessId       = args.businessId;
 			this.customerAddress  = args.customerAddress;
+			this.shippingAddress  = args.shippingAddress;
 			this.isLoggingEnabled = args.isLoggingEnabled;
 			this.options          = args.options;
 			this.formInitialized  = false;
@@ -112,8 +113,52 @@ jQuery( ( $ ) => {
 				nonceData.line1 = this.customerAddress.line1;
 			}
 
+			if ( this.customerAddress.line2 ) {
+				nonceData.line2 = this.customerAddress.line2;
+			}
+
+			if ( this.customerAddress.city ) {
+				nonceData.city = this.customerAddress.city;
+			}
+
+			if ( this.customerAddress.state ) {
+				nonceData.territory = this.customerAddress.state;
+			}
+
+			if ( this.customerAddress.country ) {
+				nonceData.countryCode = this.customerAddress.country;
+			}
+
 			if ( this.customerAddress.postcode )  {
 				nonceData.zip = this.customerAddress.postcode;
+			}
+
+			if ( this.customerAddress.phone ) {
+				nonceData.phone = this.customerAddress.phone;
+			}
+
+			if ( this.customerAddress.email ) {
+				nonceData.emailAddress = this.customerAddress.email;
+			}
+
+			if ( this.shippingAddress.line1 ) {
+				nonceData.shippingLine1 = this.shippingAddress.line1;
+			}
+
+			if ( this.shippingAddress.line2 ) {
+				nonceData.shippingLine2 = this.shippingAddress.line2;
+			}
+
+			if ( this.shippingAddress.city ) {
+				nonceData.shippingCity = this.shippingAddress.city;
+			}
+
+			if ( this.shippingAddress.state ) {
+				nonceData.shippingTerritory = this.shippingAddress.state;
+			}
+
+			if ( this.shippingAddress.postcode ) {
+				nonceData.shippingZip = this.shippingAddress.postcode;
 			}
 
 			this.debugLog( nonceData );
@@ -162,47 +207,48 @@ jQuery( ( $ ) => {
 		 *
 		 * Logs errors to console and maybe renders them in a user-facing notice.
 		 *
-		 * @since 1.0.0
+		 * @link https://docs.poynt.com/app-integration/poynt-collect/getting-started/event-listeners.html#error
+		 *
+		 * We render their provided message if the error is:
+		 * - a result of the form submit (inline field errors are not handled by our JS)
+		 * - of type "invalid_details" or "missing_fields". These are the only two known types right now,
+		 *   but we check for them anyway in case more are added later that we might not want displayed
+		 *
+		 * Note: the event will have a different shape than what's documented above if it comes after form validation, directly from their
+		 * server-side API. They just pass the raw error in that case, so there is no event.data.error object. For that
+		 * we just render the generic error message.
 		 *
 		 * @param {Object} event after a form error
 		 */
 		handleError( event ) {
 
-			let errorMessage = '';
+			// always console log the event
+			this.debugLog( event );
 
-			// Poynt Collect API has some inconsistency about error message response data:
-			if ( 'error' === event.type && event.data ) {
-				if ( event.data.error && event.data.error.message && event.data.error.message.message ) {
-					errorMessage = event.data.error.message.message;
-				} else if ( event.data.message ) {
-					errorMessage = event.data.message;
-				} else if ( event.data.error && event.data.error.message && event.data.error.source && 'submit' === event.data.error.source ) {
+			// only handle error events
+			if ('error' !== event?.type) {
+				return;
+			}
+
+			// default to a generic error message
+			let errorMessage = poyntPaymentFormI18n.errorMessages.genericError;
+
+			// special handling for errors from the form vs. the API
+			if (event.data?.error) {
+
+				// if this is not a submit event (such as a field change), don't render anything
+				if ('submit' !== event.data.error?.source) {
+					return;
+				}
+
+				// use the provided error message if available and is fixable by C2
+				if (event.data.error.message && ['invalid_details', 'missing_fields'].includes(event.data.error.type)) {
 					errorMessage = event.data.error.message;
-				} else if ( event.data.error ) {
-					errorMessage = event.data.error;
-				} else {
-					errorMessage = poyntPaymentFormI18n.errorMessages.genericError;
 				}
 			}
 
-			if ( 'string' === typeof errorMessage && errorMessage.length > 0 ) {
-
-				this.debugLog( errorMessage );
-
-				if ( errorMessage.includes( 'Request failed' ) ) {
-					this.renderErrors( [ poyntPaymentFormI18n.errorMessages.genericError ] );
-				} else if ( errorMessage.includes( 'Missing details' ) || errorMessage.includes( 'Enter a' ) ) {
-					this.renderErrors( [ poyntPaymentFormI18n.errorMessages.missingCardDetails ] );
-				} else if ( errorMessage.includes( 'Missing field' ) ) {
-					this.renderErrors([ poyntPaymentFormI18n.errorMessages.missingBillingDetails ] );
-				} else {
-					this.renderErrors( [ errorMessage ] );
-				}
-
-			} else {
-
-				this.debugLog( event );
-			}
+			// render the error at the top of the page
+			this.renderErrors( [ errorMessage ] );
 		}
 
 		handlePayPage() {
@@ -378,12 +424,60 @@ jQuery( ( $ ) => {
 				this.customerAddress.lastName = $( '#billing_last_name' ).val();
 			}
 
+			if ( $( '#billing_phone' ).val() ) {
+				this.customerAddress.phone = $( '#billing_phone' ).val();
+			}
+
+			if ( $( '#billing_email' ).val() ) {
+				this.customerAddress.email = $( '#billing_email' ).val();
+			}
+
 			if ( $( '#billing_address_1' ).val() ) {
 				this.customerAddress.line1 = $( '#billing_address_1' ).val();
 			}
 
+			if ( $( '#billing_address_2' ).val() ) {
+				this.customerAddress.line2 = $( '#billing_address_2' ).val();
+			}
+
+			if ( $( '#billing_city' ).val() ) {
+				this.customerAddress.city = $( '#billing_city' ).val();
+			}
+
+			if ( $( '#billing_state' ).val() ) {
+				this.customerAddress.state = $( '#billing_state' ).val();
+			}
+
+			if ( $( '#billing_country' ).val() ) {
+				this.customerAddress.country = $( '#billing_country' ).val();
+			}
+
 			if ( $( '#billing_postcode' ).val() ) {
 				this.customerAddress.postcode = $( '#billing_postcode' ).val();
+			}
+
+			let shipToDifferentAddress = $( '#ship-to-different-address-checkbox' ).is( ':checked' );
+
+			let shippingLine1    = this.shippingAddress.needsShipping ? (shipToDifferentAddress ? $( '#shipping_address_1' ).val() : this.customerAddress.line1) : '';
+			let shippingLine2    = this.shippingAddress.needsShipping ? (shipToDifferentAddress ? $( '#shipping_address_2' ).val() : this.customerAddress.line2) : '';
+			let shippingCity     = this.shippingAddress.needsShipping ? (shipToDifferentAddress ? $( '#shipping_city' ).val() : this.customerAddress.city) : '';
+			let shippingState    = this.shippingAddress.needsShipping ? (shipToDifferentAddress ? $( '#shipping_state' ).val() : this.customerAddress.state) : '';
+			let shippingPostcode = this.shippingAddress.needsShipping ? (shipToDifferentAddress ? $( '#shipping_postcode' ).val() : this.customerAddress.postcode) : '';
+
+			if ( shippingLine1 && shippingLine1.length > 0 ) {
+				this.shippingAddress.line1 = shippingLine1;
+			}
+			if ( shippingLine2 && shippingLine2.length > 0 ) {
+				this.shippingAddress.line2 = shippingLine2;
+			}
+			if ( shippingCity && shippingCity.length > 0 ) {
+				this.shippingAddress.city = shippingCity;
+			}
+			if ( shippingState && shippingState.length > 0 ) {
+				this.shippingAddress.state = shippingState;
+			}
+			if ( shippingPostcode && shippingPostcode.length > 0 ) {
+				this.shippingAddress.postcode = shippingPostcode;
 			}
 
 			// block the UI

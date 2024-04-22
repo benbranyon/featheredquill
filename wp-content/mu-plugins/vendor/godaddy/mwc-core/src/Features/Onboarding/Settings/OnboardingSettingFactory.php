@@ -2,6 +2,7 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Features\Onboarding\Settings;
 
+use Exception;
 use GoDaddy\WordPress\MWC\Common\Settings\Models\Control;
 use GoDaddy\WordPress\MWC\Core\Features\Onboarding\Contracts\OnboardingSettingFactoryContract;
 use InvalidArgumentException;
@@ -85,7 +86,7 @@ class OnboardingSettingFactory implements OnboardingSettingFactoryContract
     public function buildCountryRegionSetting() : OnboardingSetting
     {
         return $this->buildSetting(OnboardingSetting::SETTING_ID_COUNTRY_REGION)
-            ->setLabel(__('Country Region', 'mwc-core'))
+            ->setLabel(_x('Country Region', "The country's region", 'mwc-core'))
             ->setType(OnboardingSetting::TYPE_STRING)
             ->setDefault('US:CA')
             ->setControl((new Control())->setType(Control::TYPE_TEXT));
@@ -403,6 +404,21 @@ class OnboardingSettingFactory implements OnboardingSettingFactoryContract
         return $this->buildSetting(OnboardingSetting::SETTING_ID_STORE_SELECTOR_DISMISSED)
             ->setType(OnboardingSetting::TYPE_BOOLEAN)
             ->setLabel(__('Store selector dismissed', 'mwc-core'))
+            ->setDefault(false)
+            ->setControl((new Control())->setType(Control::TYPE_CHECKBOX));
+    }
+
+    /**
+     * Builds the object that represents the onboarding dialog dismissed setting.
+     *
+     * @return OnboardingSetting
+     * @throws Exception
+     */
+    public function buildDismissedSetting() : OnboardingSetting
+    {
+        return $this->buildSetting(OnboardingSetting::SETTING_ID_DISMISSED)
+            ->setType(OnboardingSetting::TYPE_BOOLEAN)
+            ->setLabel(__('Dismissed', 'mwc-core'))
             ->setDefault(false)
             ->setControl((new Control())->setType(Control::TYPE_CHECKBOX));
     }

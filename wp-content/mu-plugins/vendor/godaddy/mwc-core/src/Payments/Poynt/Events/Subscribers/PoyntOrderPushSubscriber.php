@@ -65,7 +65,6 @@ class PoyntOrderPushSubscriber implements SubscriberContract
      * @param EventContract $event event object
      *
      * @return bool
-     * @throws Exception
      */
     protected function shouldSendEvent(EventContract $event) : bool
     {

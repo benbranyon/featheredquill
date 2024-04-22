@@ -17,7 +17,7 @@
  * needs please refer to http://docs.woocommerce.com/document/cost-of-goods/ for more information.
  *
  * @author      SkyVerge
- * @copyright   Copyright (c) 2013-2020, SkyVerge, Inc. (info@skyverge.com)
+ * @copyright   Copyright (c) 2013-2023, SkyVerge, Inc. (info@skyverge.com)
  * @license     http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -94,7 +94,7 @@ class WC_COG_Admin_Report_Profit_by_Product extends WC_COG_Admin_Report {
 			// total product sales
 			[
 				/* translators: Placeholders: %1$s is the formatted total product sales with surrounding <strong> tags, e.g. <strong>$7.77</strong> */
-				'title'            => sprintf( __( '%1$s sales for the selected items', 'mwc-cost-of-goods' ), '<strong>' . wc_price( $data->total_sales ) . '</strong>' ),
+				'title'            => sprintf( __( '%1$s sales for the selected items', 'woocommerce-cost-of-goods' ), '<strong>' . wc_price( $data->total_sales ) . '</strong>' ),
 				'color'            => $this->chart_colors['total_sales'],
 				'highlight_series' => 1,
 			],
@@ -102,7 +102,7 @@ class WC_COG_Admin_Report_Profit_by_Product extends WC_COG_Admin_Report {
 			// total product cost of goods
 			[
 				/* translators: Placeholders: %1$s is the formatted total product cost of goods with surrounding <strong> tags, e.g. <strong>$4.77</strong> */
-				'title'            => sprintf( __( '%1$s cost of goods for the selected items', 'mwc-cost-of-goods' ), '<strong>' . wc_price( $data->total_cogs ) . '</strong>' ),
+				'title'            => sprintf( __( '%1$s cost of goods for the selected items', 'woocommerce-cost-of-goods' ), '<strong>' . wc_price( $data->total_cogs ) . '</strong>' ),
 				'color'            => $this->chart_colors['total_cogs'],
 				'highlight_series' => 2,
 			],
@@ -110,7 +110,7 @@ class WC_COG_Admin_Report_Profit_by_Product extends WC_COG_Admin_Report {
 			// total product profit
 			[
 				/* translators: Placeholders: %1$s is the formatted total product profit with surrounding <strong> tags, e.g. <strong>$3.00</strong> */
-				'title'            => sprintf( __( '%1$s profit for the selected items', 'mwc-cost-of-goods' ), '<strong>' . wc_price( $data->total_profit ) . '</strong>' ),
+				'title'            => sprintf( __( '%1$s profit for the selected items', 'woocommerce-cost-of-goods' ), '<strong>' . wc_price( $data->total_profit ) . '</strong>' ),
 				'color'            => $this->chart_colors['total_profit'],
 				'highlight_series' => 3,
 			],
@@ -118,7 +118,7 @@ class WC_COG_Admin_Report_Profit_by_Product extends WC_COG_Admin_Report {
 			// total product items
 			[
 				/* translators: Placeholders: %1$s is the the total number of purchased items with surrounding <strong> tags, e.g. <strong>5</strong> */
-				'title'            => sprintf( __( '%1$s purchases for the selected items', 'mwc-cost-of-goods' ), '<strong>' . $data->total_items . '</strong>' ),
+				'title'            => sprintf( __( '%1$s purchases for the selected items', 'woocommerce-cost-of-goods' ), '<strong>' . $data->total_items . '</strong>' ),
 				'color'            => $this->chart_colors['total_items'],
 				'highlight_series' => 0,
 			],
@@ -145,7 +145,7 @@ class WC_COG_Admin_Report_Profit_by_Product extends WC_COG_Admin_Report {
 
 		$widgets = [
 			[
-				'title'    => __( 'Product Search', 'mwc-cost-of-goods' ),
+				'title'    => __( 'Product Search', 'woocommerce-cost-of-goods' ),
 				'callback' => [ $this, 'output_product_search_widget' ],
 			],
 			[
@@ -158,7 +158,7 @@ class WC_COG_Admin_Report_Profit_by_Product extends WC_COG_Admin_Report {
 		if ( ! empty( $this->product_ids ) ) {
 
 			array_unshift( $widgets, [
-				'title'    => __( 'Showing reports for:', 'mwc-cost-of-goods' ),
+				'title'    => __( 'Showing reports for:', 'woocommerce-cost-of-goods' ),
 				'callback' => [ $this, 'output_current_filters_widget' ],
 			] );
 		}
@@ -183,7 +183,7 @@ class WC_COG_Admin_Report_Profit_by_Product extends WC_COG_Admin_Report {
 			$product_titles[] = $product instanceof \WC_Product ? $product->get_formatted_name() : '#' . $product_id;
 		}
 
-		printf( '<p><strong>%1$s</strong></p><p><a class="button" href="%2$s">%3$s</a></p>', implode( ', ', $product_titles ), esc_url( remove_query_arg( 'product_ids' ) ), __( 'Reset', 'mwc-cost-of-goods' ) );
+		printf( '<p><strong>%1$s</strong></p><p><a class="button" href="%2$s">%3$s</a></p>', implode( ', ', $product_titles ), esc_url( remove_query_arg( 'product_ids' ) ), __( 'Reset', 'woocommerce-cost-of-goods' ) );
 	}
 
 
@@ -202,10 +202,10 @@ class WC_COG_Admin_Report_Profit_by_Product extends WC_COG_Admin_Report {
 						name="product_ids[]"
 						class="wc-product-search"
 						style="width:203px;"
-						data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'mwc-cost-of-goods' ); ?>"
+						data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce-cost-of-goods' ); ?>"
 						data-action="woocommerce_json_search_products_and_variations">
 					</select>
-					<input type="submit" class="submit button" value="<?php esc_attr_e( 'Show', 'mwc-cost-of-goods' ); ?>" />
+					<input type="submit" class="submit button" value="<?php esc_attr_e( 'Show', 'woocommerce-cost-of-goods' ); ?>" />
 					<input type="hidden" name="range" value="<?php if ( ! empty( $_GET['range'] ) ) {
 						echo esc_attr( $_GET['range'] );
 					} ?>" />
@@ -240,10 +240,10 @@ class WC_COG_Admin_Report_Profit_by_Product extends WC_COG_Admin_Report {
 
 		if ( isset( $_GET['show_least_profitable'] ) ) {
 			$order_by = 'ASC';
-			$title    = esc_html__( 'Least Profitable Sellers', 'mwc-cost-of-goods' );
+			$title    = esc_html__( 'Least Profitable Sellers', 'woocommerce-cost-of-goods' );
 		} else {
 			$order_by = 'DESC';
-			$title    = esc_html__( 'Most Profitable Sellers', 'mwc-cost-of-goods' );
+			$title    = esc_html__( 'Most Profitable Sellers', 'woocommerce-cost-of-goods' );
 		}
 
 		?>
@@ -292,24 +292,24 @@ class WC_COG_Admin_Report_Profit_by_Product extends WC_COG_Admin_Report {
 						?>
 						<tr class="<?php echo in_array( $product->product_id, $this->product_ids, false ) ? 'active' : ''; ?>">
 							<td class="tips" data-tip="<?php /* translators: Placeholders: %1$s - profit margin as a percentage, e.g. 85.4% */
-							printf( esc_attr__( '%1$s%% profit margin', 'mwc-cost-of-goods' ), $this->format_decimal( $profit_margin ) ); ?>">
-								<?php echo wc_price( $product->total_profit ) . ' <small>' . esc_html__( 'total profit', 'mwc-cost-of-goods' ) . '</small>'; ?></td>
+							printf( esc_attr__( '%1$s%% profit margin', 'woocommerce-cost-of-goods' ), $this->format_decimal( $profit_margin ) ); ?>">
+								<?php echo wc_price( $product->total_profit ) . ' <small>' . esc_html__( 'total profit', 'woocommerce-cost-of-goods' ) . '</small>'; ?></td>
 							<td class="name"><a href="<?php echo esc_url( add_query_arg( 'product_ids', $product->product_id ) ) . '">' . get_the_title( $product->product_id ); ?></a></td>
 							<td class=" sparkline"><?php echo $this->sales_sparkline( $product->product_id, 7, 'sales' ); ?></td>
 						</tr>
 						<?php
 					}
 				} else {
-					echo '<tr><td colspan="3">' . __( 'No products found in range', 'mwc-cost-of-goods' ) . '</td></tr>';
+					echo '<tr><td colspan="3">' . __( 'No products found in range', 'woocommerce-cost-of-goods' ) . '</td></tr>';
 				}
 				?>
 				<tr>
 					<td colspan="3" style="text-align: right">
 						<small><?php
 							if ( isset( $_GET['show_least_profitable'] ) ) {
-								echo '<a href="' . esc_url( remove_query_arg( 'show_least_profitable' ) ) . '">' . esc_html__( 'show most profitable', 'mwc-cost-of-goods' ) . '</a>';
+								echo '<a href="' . esc_url( remove_query_arg( 'show_least_profitable' ) ) . '">' . esc_html__( 'show most profitable', 'woocommerce-cost-of-goods' ) . '</a>';
 							} else {
-								echo '<a href="' . esc_url( add_query_arg( [ 'show_least_profitable' => 1 ] ) ) . '">' . esc_html__( 'show least profitable', 'mwc-cost-of-goods' ) . '</a>';
+								echo '<a href="' . esc_url( add_query_arg( [ 'show_least_profitable' => 1 ] ) ) . '">' . esc_html__( 'show least profitable', 'woocommerce-cost-of-goods' ) . '</a>';
 							}
 							?>
 						</small>
@@ -358,7 +358,7 @@ class WC_COG_Admin_Report_Profit_by_Product extends WC_COG_Admin_Report {
 		if ( empty( $this->product_ids ) ) {
 			?>
 			<div class="chart-container">
-				<p class="chart-prompt"><?php _e( '&larr; Choose a product to view stats', 'mwc-cost-of-goods' ); ?></p>
+				<p class="chart-prompt"><?php _e( '&larr; Choose a product to view stats', 'woocommerce-cost-of-goods' ); ?></p>
 			</div>
 			<?php
 			return;
@@ -394,7 +394,7 @@ class WC_COG_Admin_Report_Profit_by_Product extends WC_COG_Admin_Report {
 
 					var series = [
 						{
-							label      : "<?php echo esc_js( __( 'Number of items sold', 'mwc-cost-of-goods' ) ) ?>",
+							label      : "<?php echo esc_js( __( 'Number of items sold', 'woocommerce-cost-of-goods' ) ) ?>",
 							data       : order_data.item_counts,
 							color      : '<?php echo $this->chart_colors['total_items']; ?>',
 							bars       : {
@@ -410,7 +410,7 @@ class WC_COG_Admin_Report_Profit_by_Product extends WC_COG_Admin_Report {
 							hoverable  : false
 						},
 						{
-							label      : "<?php echo esc_js( __( 'Sales amount', 'mwc-cost-of-goods' ) ) ?>",
+							label      : "<?php echo esc_js( __( 'Sales amount', 'woocommerce-cost-of-goods' ) ) ?>",
 							data       : order_data.sales,
 							yaxis      : 2,
 							color      : '<?php echo $this->chart_colors['total_sales']; ?>',
@@ -430,7 +430,7 @@ class WC_COG_Admin_Report_Profit_by_Product extends WC_COG_Admin_Report {
 							<?php echo $this->get_currency_tooltip(); ?>
 						},
 						{
-							label      : "<?php echo esc_js( __( 'Cost of Goods Sold', 'mwc-cost-of-goods' ) ) ?>",
+							label      : "<?php echo esc_js( __( 'Cost of Goods Sold', 'woocommerce-cost-of-goods' ) ) ?>",
 							data       : order_data.cogs,
 							yaxis      : 2,
 							color      : '<?php echo $this->chart_colors['total_cogs']; ?>',
@@ -450,7 +450,7 @@ class WC_COG_Admin_Report_Profit_by_Product extends WC_COG_Admin_Report {
 							<?php echo $this->get_currency_tooltip(); ?>
 						},
 						{
-							label      : "<?php echo esc_js( __( 'Profit amount', 'mwc-cost-of-goods' ) ) ?>",
+							label      : "<?php echo esc_js( __( 'Profit amount', 'woocommerce-cost-of-goods' ) ) ?>",
 							data       : order_data.profits,
 							yaxis      : 2,
 							color      : '<?php echo $this->chart_colors['total_profit']; ?>',

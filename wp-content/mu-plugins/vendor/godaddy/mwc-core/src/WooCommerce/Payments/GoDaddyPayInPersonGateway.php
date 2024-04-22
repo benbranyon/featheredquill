@@ -8,6 +8,7 @@ use GoDaddy\WordPress\MWC\Common\Enqueue\Enqueue;
 use GoDaddy\WordPress\MWC\Common\Events\Events;
 use GoDaddy\WordPress\MWC\Common\Events\Exceptions\EventTransformFailedException;
 use GoDaddy\WordPress\MWC\Common\Exceptions\BaseException;
+use GoDaddy\WordPress\MWC\Common\Exceptions\SentryException;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\SanitizationHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
@@ -20,6 +21,7 @@ use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPressRepository;
 use GoDaddy\WordPress\MWC\Core\Exceptions\Payments\PaymentsProviderSettingsException;
 use GoDaddy\WordPress\MWC\Core\Features\GoDaddyPayments\GoDaddyPayments;
+use GoDaddy\WordPress\MWC\Core\Features\GoDaddyPayments\Traits\HasGoDaddyPaymentsUrlsTrait;
 use GoDaddy\WordPress\MWC\Core\Features\Worldpay\Worldpay;
 use GoDaddy\WordPress\MWC\Core\Payments\DataStores\WooCommerce\OrderTransactionDataStore;
 use GoDaddy\WordPress\MWC\Core\Payments\DataStores\WooCommerce\ProductDataStore;
@@ -48,6 +50,8 @@ use WC_Shipping_Zone;
  */
 class GoDaddyPayInPersonGateway extends AbstractPaymentGateway
 {
+    use HasGoDaddyPaymentsUrlsTrait;
+
     /** @var string method title. */
     public $method_title = 'GoDaddy Payments - Selling in Person';
 
@@ -295,12 +299,7 @@ class GoDaddyPayInPersonGateway extends AbstractPaymentGateway
         </h2>
         <?php
         if (Poynt::hasPoyntSmartTerminalActivated()) {
-            $poyntBusinessId = Poynt::getBusinessId();
-            $poyntHubUrl = StringHelper::trailingSlash(Poynt::getHubUrl());
-            $devicesUrl = 'https://payments.godaddy.com/payment-tools/devices';
-            $catalogsUrl = Worldpay::shouldLoad() ? $poyntHubUrl.'catalogs' : $poyntHubUrl.'payment-tools/catalog';
-            $customizeUrl = Worldpay::shouldLoad() ? $poyntHubUrl.'settings/store/terminals' : $poyntHubUrl.'payment-tools/customization'; ?>
-
+            ?>
             <p class="mwc-payments-godaddy-settings-description">
                 <?php echo wp_kses_post($this->method_description); ?>
             </p>
@@ -318,19 +317,19 @@ class GoDaddyPayInPersonGateway extends AbstractPaymentGateway
 
                 <?php printf(
                     esc_html__('%1$sDevices%2$s', 'mwc-core'),
-                    '<a href="'.esc_url(add_query_arg('businessId', $poyntBusinessId, $devicesUrl)).'" target="_blank">',
+                    '<a href="'.esc_url($this->getDevicesUrl()).'" target="_blank">',
                     ' <span class="dashicons dashicons-external"></span></a>'
                 ); ?>
                 &nbsp;|&nbsp;
                 <?php printf(
                     esc_html__('%1$sCatalogs%2$s', 'mwc-core'),
-                    '<a href="'.esc_url(add_query_arg('businessId', $poyntBusinessId, $catalogsUrl)).'" target="_blank">',
+                    '<a href="'.esc_url($this->getCatalogUrl()).'" target="_blank">',
                     ' <span class="dashicons dashicons-external"></span></a>'
                 ); ?>
                 &nbsp;|&nbsp;
                 <?php printf(
                     esc_html__('%1$sCustomize Terminal%2$s', 'mwc-core'),
-                    '<a href="'.esc_url(add_query_arg('businessId', $poyntBusinessId, $customizeUrl)).'" target="_blank">',
+                    '<a href="'.esc_url($this->getTerminalUrl()).'" target="_blank">',
                     ' <span class="dashicons dashicons-external"></span></a>'
                 ); ?>
             </p>
@@ -349,7 +348,7 @@ class GoDaddyPayInPersonGateway extends AbstractPaymentGateway
                     <div class="mwc-payments-godaddy-settings-no-order-upper">
                         <h4><?php echo __('Smart Terminal', 'mwc-core'); ?></h4>
                         <h2><?php echo __('Dual screens for smoother selling.', 'mwc-core'); ?></h2>
-                        <p><?php echo __('Our dual screens make check out a breeze. Plus, our all-in-one terminal includes a built-in payment processor, scanner, printer, security and more.', 'mwc-core'); ?></p>
+                        <p><?php echo __('Our dual screens make checkout a breeze. Plus, our all-in-one terminal includes a built-in payment processor, scanner, printer, security and more.', 'mwc-core'); ?></p>
                     </div>
                     <div class="mwc-payments-godaddy-settings-no-order-lower">
                         <div class="mwc-payments-godaddy-settings-no-order-lower-inner">
@@ -1023,7 +1022,7 @@ class GoDaddyPayInPersonGateway extends AbstractPaymentGateway
     {
         return 'local_pickup_plus' === $method->id
             ? __('Local Pickup Plus method', 'mwc-core')
-            /* translators: Placeholders: %1$s - Shipping Method name */
+            /* translators: Placeholders: %1$s - Shipping Method name (for example FedEx, UPS or Local Pickup, etc.) */
             : sprintf(__('Any "%1$s" method', 'mwc-core'), $method->get_method_title());
     }
 
@@ -1514,11 +1513,12 @@ class GoDaddyPayInPersonGateway extends AbstractPaymentGateway
             'default' => 'no',
         ];
 
-        /* translators: Placeholders: %1$s - <a> tag, %2$s - </a> tag */
         $formFields['bopit-sync-title'] = [
+            /* translators: We are prompting the user to sync their products with in-person product catalog(s) - refers to products sold in-person, e.g. via POS terminal */
             'title'       => __('In-Person Catalog Sync', 'mwc-core'),
             'type'        => 'title',
             'description' => sprintf(
+                /* translators: Placeholders: %1$s - <a> tag, %2$s - </a> tag */
                 __('Sync your WooCommerce products with In-Person catalog(s). %1$sLearn more%2$s', 'mwc-core'),
                 '<a href="https://www.godaddy.com/help/41073" target="_blank">', '</a>'
             ),
@@ -1527,21 +1527,24 @@ class GoDaddyPayInPersonGateway extends AbstractPaymentGateway
         $catalogOptions = $this->getSyncCatalogOptions();
 
         $formFields['sync_push_enabled'] = [
-            'title'    => esc_html__('Sync WooCommerce products to In-Person', 'mwc-core'),
-            'type'     => 'switch',
-            'class'    => '',
-            'label'    => '<span></span>',
-            'default'  => 'no',
+            /* translators: We are prompting the user to sync their products with in-person product catalog(s) - refers to products sold in-person, e.g. via POS terminal */
+            'title'   => esc_html__('Sync WooCommerce products to In-Person', 'mwc-core'),
+            'type'    => 'switch',
+            'class'   => '',
+            'label'   => '<span></span>',
+            'default' => 'no',
+            /* translators: We are prompting the user to sync their products with in-person product catalog(s) - refers to products sold in-person, e.g. via POS terminal */
             'desc_tip' => esc_html__('Basic WooCommerce product data is pushed to the selected In-Person catalog(s) for simple products.', 'mwc-core'),
         ];
 
         $formFields['sync_push_catalog_ids'] = [
-            'title'       => '',
-            'type'        => 'multiselect',
-            'class'       => 'pay-in-person-sync-select wc-enhanced-select',
-            'css'         => 'max-width: 400px; margin-top: -24px;',
-            'default'     => ArrayHelper::wrap(current(array_keys($catalogOptions))),
-            'options'     => $catalogOptions,
+            'title'   => '',
+            'type'    => 'multiselect',
+            'class'   => 'pay-in-person-sync-select wc-enhanced-select',
+            'css'     => 'max-width: 400px; margin-top: -24px;',
+            'default' => ArrayHelper::wrap(current(array_keys($catalogOptions))),
+            'options' => $catalogOptions,
+            /* translators: In-person catalog(s) refers to products sold in-person, e.g. via POS terminal */
             'description' => '<span class="pay-in-person-sync-select--error">'.__('To sync to In-Person you must have at least one catalog selected.', 'mwc-core').'</span>',
         ];
 
@@ -1550,11 +1553,12 @@ class GoDaddyPayInPersonGateway extends AbstractPaymentGateway
         ];
 
         $formFields['sync_pull_enabled'] = [
-            'title'    => esc_html__('Sync In-Person products to WooCommerce', 'mwc-core'),
-            'type'     => 'switch',
-            'class'    => '',
-            'label'    => '<span></span>',
-            'default'  => 'no',
+            'title'   => esc_html__('Sync In-Person products to WooCommerce', 'mwc-core'),
+            'type'    => 'switch',
+            'class'   => '',
+            'label'   => '<span></span>',
+            'default' => 'no',
+            /* translators: In-person catalog(s) refers to products sold in-person, e.g. via POS terminal */
             'desc_tip' => esc_html__('Product data is fetched from the selected In-Person catalog(s). Sync excludes products with custom prices or "any combination" modifiers.', 'mwc-core'),
         ];
 
@@ -1707,7 +1711,6 @@ class GoDaddyPayInPersonGateway extends AbstractPaymentGateway
      * Gets the catalog options for use in multi-selects.
      *
      * @return array
-     * @throws Exception
      */
     protected function getSyncCatalogOptions() : array
     {
@@ -1771,13 +1774,18 @@ class GoDaddyPayInPersonGateway extends AbstractPaymentGateway
      * pages, as getting the catalogs list is expensive.
      *
      * @return Catalog[]
-     * @throws Exception
      */
     protected function getAvailableSyncCatalogs() : array
     {
         // only get catalogs on the settings page
         if (empty($this->availableSyncCatalogs) && $this->isAccessingSettings()) {
-            $this->availableSyncCatalogs = CatalogsGateway::getNewInstance()->getList();
+            try {
+                $this->availableSyncCatalogs = CatalogsGateway::getNewInstance()->getList();
+            } catch (Exception $e) {
+                SentryException::getNewInstance($e->getMessage(), $e);
+
+                $this->availableSyncCatalogs = [];
+            }
         }
 
         return $this->availableSyncCatalogs;
@@ -1789,7 +1797,6 @@ class GoDaddyPayInPersonGateway extends AbstractPaymentGateway
      * @param string $catalogId
      *
      * @return string
-     * @throws Exception
      */
     protected function getCatalogName(string $catalogId) : string
     {

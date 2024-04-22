@@ -4,10 +4,10 @@ namespace GoDaddy\WordPress\MWC\Core\Auth\JWT;
 
 use DomainException;
 use Exception;
-use Firebase\JWT\JWK;
-use Firebase\JWT\JWT;
 use GoDaddy\WordPress\MWC\Common\Auth\JWT\Contracts\JwtDecoderContract;
 use GoDaddy\WordPress\MWC\Common\Exceptions\JwtDecoderException;
+use GoDaddy\WordPress\MWC\Core\Vendor\Firebase\JWT\JWK;
+use GoDaddy\WordPress\MWC\Core\Vendor\Firebase\JWT\JWT;
 use InvalidArgumentException;
 use stdClass;
 use UnexpectedValueException;

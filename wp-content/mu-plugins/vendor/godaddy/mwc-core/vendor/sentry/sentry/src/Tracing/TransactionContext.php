@@ -55,9 +55,11 @@ final class TransactionContext extends SpanContext
      *
      * @param string $name The name
      */
-    public function setName(string $name): void
+    public function setName(string $name): self
     {
         $this->name = $name;
+
+        return $this;
     }
 
     /**
@@ -73,9 +75,11 @@ final class TransactionContext extends SpanContext
      *
      * @param bool|null $parentSampled The decision
      */
-    public function setParentSampled(?bool $parentSampled): void
+    public function setParentSampled(?bool $parentSampled): self
     {
         $this->parentSampled = $parentSampled;
+
+        return $this;
     }
 
     /**
@@ -91,9 +95,11 @@ final class TransactionContext extends SpanContext
      *
      * @param TransactionMetadata $metadata The transaction metadata
      */
-    public function setMetadata(TransactionMetadata $metadata): void
+    public function setMetadata(TransactionMetadata $metadata): self
     {
         $this->metadata = $metadata;
+
+        return $this;
     }
 
     /**
@@ -101,39 +107,22 @@ final class TransactionContext extends SpanContext
      *
      * @param TransactionSource $transactionSource The transaction source
      */
-    public function setSource(TransactionSource $transactionSource): void
+    public function setSource(TransactionSource $transactionSource): self
     {
         $this->metadata->setSource($transactionSource);
+
+        return $this;
     }
 
     /**
-     * Returns a context populated with the data of the given header.
+     * Returns a context populated with the data of the given environment variables.
      *
-     * @param string $header The sentry-trace header from the request
-     *
-     * @deprecated since version 3.9, to be removed in 4.0
+     * @param string $sentryTrace The sentry-trace value from the environment
+     * @param string $baggage     The baggage header value from the environment
      */
-    public static function fromSentryTrace(string $header): self
+    public static function fromEnvironment(string $sentryTrace, string $baggage): self
     {
-        $context = new self();
-
-        if (!preg_match(self::TRACEPARENT_HEADER_REGEX, $header, $matches)) {
-            return $context;
-        }
-
-        if (!empty($matches['trace_id'])) {
-            $context->traceId = new TraceId($matches['trace_id']);
-        }
-
-        if (!empty($matches['span_id'])) {
-            $context->parentSpanId = new SpanId($matches['span_id']);
-        }
-
-        if (isset($matches['sampled'])) {
-            $context->parentSampled = '1' === $matches['sampled'];
-        }
-
-        return $context;
+        return self::parseTraceAndBaggage($sentryTrace, $baggage);
     }
 
     /**
@@ -144,10 +133,15 @@ final class TransactionContext extends SpanContext
      */
     public static function fromHeaders(string $sentryTraceHeader, string $baggageHeader): self
     {
+        return self::parseTraceAndBaggage($sentryTraceHeader, $baggageHeader);
+    }
+
+    private static function parseTraceAndBaggage(string $sentryTrace, string $baggage): self
+    {
         $context = new self();
         $hasSentryTrace = false;
 
-        if (preg_match(self::TRACEPARENT_HEADER_REGEX, $sentryTraceHeader, $matches)) {
+        if (preg_match(self::TRACEPARENT_HEADER_REGEX, $sentryTrace, $matches)) {
             if (!empty($matches['trace_id'])) {
                 $context->traceId = new TraceId($matches['trace_id']);
                 $hasSentryTrace = true;
@@ -159,12 +153,12 @@ final class TransactionContext extends SpanContext
             }
 
             if (isset($matches['sampled'])) {
-                $context->parentSampled = '1' === $matches['sampled'];
+                $context->parentSampled = $matches['sampled'] === '1';
                 $hasSentryTrace = true;
             }
         }
 
-        $samplingContext = DynamicSamplingContext::fromHeader($baggageHeader);
+        $samplingContext = DynamicSamplingContext::fromHeader($baggage);
 
         if ($hasSentryTrace && !$samplingContext->hasEntries()) {
             // The request comes from an old SDK which does not support Dynamic Sampling.

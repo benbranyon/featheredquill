@@ -12,9 +12,10 @@ abstract class AbstractFailHandlerSubscriber implements SubscriberContract
     /**
      * Gets the notice for the subscriber.
      *
+     * @param string|null $failReason
      * @return Notice
      */
-    abstract public function getNotice() : Notice;
+    abstract public function getNotice(string $failReason = null) : Notice;
 
     /**
      * Handles the event.

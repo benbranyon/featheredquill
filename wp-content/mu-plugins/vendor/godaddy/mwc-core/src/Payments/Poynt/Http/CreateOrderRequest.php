@@ -3,12 +3,15 @@
 namespace GoDaddy\WordPress\MWC\Core\Payments\Poynt\Http;
 
 use Exception;
+use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
 
 /**
  * Request to create a remote Poynt Order.
  */
 class CreateOrderRequest extends AbstractResourceRequest
 {
+    use CanGetNewInstanceTrait;
+
     /** @var string */
     const RESOURCE_PLURAL = 'orders';
 

@@ -8,6 +8,7 @@ use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Interceptors\AbstractInterceptor;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\Contracts\CommerceExceptionContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\MissingLocationInformationException;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services\Contracts\LocationMappingServiceContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services\Contracts\LocationsServiceContract;
 
@@ -91,6 +92,8 @@ class StoreLocationInterceptor extends AbstractInterceptor
 
             // no locations otherwise available, so create one
             $this->locationsService->createOrUpdateLocation();
+        } catch (MissingLocationInformationException $exception) {
+            // do not report to Sentry. A location will be auto-created for the site by the service when the first inventory is created
         } catch (CommerceExceptionContract|Exception $exception) {
             SentryException::getNewInstance(sprintf('An error occurred trying to associate the site with an inventory location: %s', $exception->getMessage()), $exception);
         }

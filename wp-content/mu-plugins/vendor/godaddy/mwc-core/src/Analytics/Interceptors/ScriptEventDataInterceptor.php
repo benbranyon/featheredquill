@@ -141,6 +141,11 @@ class ScriptEventDataInterceptor extends AbstractAnalyticsEventInterceptor
      */
     public function addProductAddedToCartToRedirectUrl($url, $productAddedToCart = null)
     {
+        // bail early if this is an AJAX request to avoid breaking add-to-cart functionality when using AJAX
+        if (WordPressRepository::isAjax()) {
+            return $url;
+        }
+
         if (empty($url) && 'yes' === get_option('woocommerce_cart_redirect_after_add')) {
             $url = WooCommerceRepository::getCartPageUrl();
         }
@@ -202,7 +207,7 @@ class ScriptEventDataInterceptor extends AbstractAnalyticsEventInterceptor
             return $removeFromCartLink;
         }
 
-        $removeFromCartUrl = htmlspecialchars_decode(wc_get_cart_remove_url($cartItemKey));
+        $removeFromCartUrl = htmlspecialchars_decode(wc_get_cart_remove_url($cartItemKey), ENT_COMPAT);
 
         try {
             /** this will be used in {@see ScriptEventDataInterceptor::addProductRemovedFromCartToRedirectUrl()} */

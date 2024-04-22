@@ -8,6 +8,7 @@ use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\StringHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
+use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerceRepository;
 use WP_Post;
 
 /**
@@ -37,10 +38,9 @@ class ShipmentTrackingMetabox extends AbstractPostMetabox
     /**
      * Registers the metabox hooks.
      *
-     * @since 2.10.0
      * @throws Exception
      */
-    protected function addHooks()
+    protected function addHooks() : void
     {
         parent::addHooks();
 
@@ -55,14 +55,23 @@ class ShipmentTrackingMetabox extends AbstractPostMetabox
     }
 
     /**
+     * Gets the post type for the metabox.
+     *
+     * @return string
+     */
+    public function getPostType() : string
+    {
+        return WooCommerceRepository::getEditOrderPageScreenId() ?: parent::getPostType();
+    }
+
+    /**
      * Possibly updates metabox order.
      *
      * Will not update the order if this metabox was moved to another position or context.
      *
      * @internal
      *
-     * @param WP_Post $post
-     *
+     * @param WP_Post|null $post
      * @return void
      */
     public function maybeUpdateMetaboxOrder($post = null)

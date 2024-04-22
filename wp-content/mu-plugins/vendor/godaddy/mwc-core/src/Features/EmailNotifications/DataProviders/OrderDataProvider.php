@@ -4,6 +4,7 @@ namespace GoDaddy\WordPress\MWC\Core\Features\EmailNotifications\DataProviders;
 
 use DateTime;
 use Exception;
+use GoDaddy\WordPress\MWC\Common\Exceptions\AdapterException;
 use GoDaddy\WordPress\MWC\Common\Models\Address;
 use GoDaddy\WordPress\MWC\Common\Models\CurrencyAmount;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\LineItem;
@@ -103,17 +104,24 @@ class OrderDataProvider implements DataProviderContract
     }
 
     /**
-     * Gets a dummy WooCommerce order for generating preview data.
+     * Gets a WooCommerce order for generating preview data.
      *
      * @return WC_Order
      * @throws WC_Data_Exception
      */
     protected function getPreviewWooCommerceOrder() : WC_Order
     {
-        $wcOrder = new WC_Order();
-        $wcOrder->set_id(101);
-        $wcOrder->set_status('processing');
+        $wcOrder = $this->makeWooCommerceOrder();
+        $wcOrder->set_id(1);
         $wcOrder->set_date_created(current_time('timestamp'));
+
+        // setting the date_paid prop before setting the status of the order prevents
+        // unnecessary executions of the woocommerce_payment_complete_order_status filter
+        // that can trigger bugs on plugins that don't handle false return values
+        // from wc_get_order()
+        $wcOrder->set_date_paid(current_time('timestamp'));
+
+        $wcOrder->set_status('processing');
         $wcOrder->set_customer_ip_address('192.168.0.1');
 
         $wcOrder->set_billing_address_1('Main Avenue 1');
@@ -134,33 +142,56 @@ class OrderDataProvider implements DataProviderContract
         $wcOrder->set_shipping_first_name('John');
         $wcOrder->set_shipping_last_name('Doe');
 
-        $wcLineItem1 = new WC_Order_Item_Product();
-        $wcLineItem1->set_id(0);
-        $wcLineItem1->set_name('Product A');
-        $wcLineItem1->set_quantity(1);
-        $wcLineItem1->set_total(0.1);
-        $wcLineItem1->set_total_tax(0.01);
-        $wcOrder->add_item($wcLineItem1);
-
-        $wcLineItem2 = new WC_Order_Item_Product();
-        $wcLineItem2->set_id(0);
-        $wcLineItem2->set_name('Product B');
-        $wcLineItem2->set_quantity(1);
-        $wcLineItem2->set_total(0.2);
-        $wcLineItem2->set_total_tax(0.02);
-        $wcOrder->add_item($wcLineItem2);
+        $this->addPreviewWooCommerceLineItems($wcOrder);
 
         $wcOrder->set_total(0.3);
 
         return $wcOrder;
     }
 
+    protected function makeWooCommerceOrder() : WC_Order
+    {
+        return new WC_Order();
+    }
+
     /**
-     * Gets a dummy order for generating preview data.
+     * Updates the given order with line items to generate preview data.
+     */
+    protected function addPreviewWooCommerceLineItems(WC_Order $wcOrder) : void
+    {
+        $wcLineItem1 = new WC_Order_Item_Product();
+        $wcLineItem1->set_id(0);
+        $wcLineItem1->set_name('Product A');
+        $wcLineItem1->set_quantity(1);
+        // the value for totals are passed as a string to make PHPStan happy
+        // because WooCommerce defined the parameter as string
+        $wcLineItem1->set_total((string) 0.1);
+        $wcLineItem1->set_total_tax((string) 0.01);
+        $wcOrder->add_item($wcLineItem1);
+
+        $wcLineItem2 = new WC_Order_Item_Product();
+        $wcLineItem2->set_id(0);
+        $wcLineItem2->set_name('Product B');
+        $wcLineItem2->set_quantity(1);
+        $wcLineItem2->set_total((string) 0.2);
+        $wcLineItem2->set_total_tax((string) 0.02);
+        $wcOrder->add_item($wcLineItem2);
+    }
+
+    /**
+     * Gets an order for generating preview data.
      *
      * @return Order
      */
     protected function getPreviewOrder() : Order
+    {
+        return $this->getMostRecentOrder() ?: $this->getDummyOrder();
+    }
+
+    /**
+     * Gets an in-memory order for generating preview data.
+     */
+    protected function getDummyOrder() : Order
     {
         $billingAddress = (new Address())
             ->setFirstname('John')
@@ -214,6 +245,24 @@ class OrderDataProvider implements DataProviderContract
             ->setBillingAddress($billingAddress)
             ->setShippingAddress($shippingAddress)
             ->setLineItems($lineItems);
+    }
+
+    /**
+     * Gets the most recent WooCommerce order represented as an {@see Order} instance.
+     */
+    protected function getMostRecentOrder() : ?Order
+    {
+        $orders = OrdersRepository::query(['limit' => 1]);
+
+        if (! $order = array_shift($orders)) {
+            return null;
+        }
+
+        try {
+            return OrderAdapter::getNewInstance($order)->convertFromSource();
+        } catch (AdapterException $exception) {
+            return null;
+        }
     }
 
     /**

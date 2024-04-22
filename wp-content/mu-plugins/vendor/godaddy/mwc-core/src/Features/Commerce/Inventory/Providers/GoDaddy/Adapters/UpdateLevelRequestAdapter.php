@@ -24,6 +24,16 @@ class UpdateLevelRequestAdapter extends AbstractUpsertLevelRequestAdapter
             ArrayHelper::set($data, 'cost', $level->cost->toArray());
         }
 
+        if (isset($level->summary)) {
+            ArrayHelper::set($data, 'summaryData', [
+                'isBackorderable' => $level->summary->isBackorderable,
+            ]);
+
+            if (isset($level->summary->lowInventoryThreshold)) {
+                ArrayHelper::set($data, 'summaryData.lowInventoryThreshold', $level->summary->lowInventoryThreshold);
+            }
+        }
+
         return $this->getBaseRequest()
             ->setPath('/inventory-levels/'.$level->inventoryLevelId)
             ->setMethod('PATCH')

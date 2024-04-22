@@ -7,4 +7,6 @@ namespace GoDaddy\WordPress\MWC\Common\Exceptions;
  */
 class ValidationException extends SentryException
 {
+    /** @var int exception code */
+    protected $code = 422;
 }

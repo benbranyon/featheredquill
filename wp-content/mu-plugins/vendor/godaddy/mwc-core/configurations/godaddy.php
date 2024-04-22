@@ -8,7 +8,7 @@ return [
      *--------------------------------------------------------------------------
      */
     'platform' => [
-        'repository' => \GoDaddy\WordPress\MWC\Core\Repositories\ManagedWordPressPlatformRepository::class,
+        'repository' => GoDaddy\WordPress\MWC\Core\Repositories\ManagedWordPressPlatformRepository::class,
     ],
     /*
      *--------------------------------------------------------------------------
@@ -17,6 +17,7 @@ return [
      */
     'store' => [
         'shouldDetermineDefaultSiteId' => false,
+        'channelId'                    => defined('GD_COMMERCE_CHANNEL_ID') ? GD_COMMERCE_CHANNEL_ID : '',
     ],
     /*
      *--------------------------------------------------------------------------

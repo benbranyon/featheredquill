@@ -27,7 +27,7 @@ class ValueAdapter implements DataSourceAdapterContract
         }
 
         return Value::getNewInstance([
-            'name'         => $attributeValue->getId(),
+            'name'         => $attributeValue->getName(),
             'presentation' => $attributeValue->getLabel(),
         ]);
     }

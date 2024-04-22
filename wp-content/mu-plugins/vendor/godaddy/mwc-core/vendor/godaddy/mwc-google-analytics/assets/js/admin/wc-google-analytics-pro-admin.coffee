@@ -1,5 +1,5 @@
 ###*
-# Google Analytics Admin scripts
+# WooCommerce Google Analytics Pro Admin scripts
 #
 # @since 1.0.0
 ###
@@ -103,4 +103,71 @@ jQuery ( $ ) ->
 			else
 				$( this ).find( '.status-enabled' ).css( 'display', 'block' ) # can't use show() as it will set display:inline
 				$( this ).find( '.status-disabled' ).hide()
+
+
+	# toggle UA-specific fields
+	toggle_ua_fields = ( has_property ) =>
+
+		$ua_sections = $( '
+			#woocommerce_google_analytics_pro_event_names_section,
+			#woocommerce_google_analytics_pro_funnel_steps_section,
+			#woocommerce_google_analytics_pro_ua_subscription_event_names_section
+		' )
+
+		if ( has_property )
+			$( '.universal-analytics-option' ).closest('tr').show()
+
+			$ua_sections.show()
+			$ua_sections.next( 'p' ).show()
+			$ua_sections.each( () -> $(this).nextAll( '.form-table:first' ).show() )
+		else
+			$( '.universal-analytics-option' ).closest('tr').hide()
+
+			$ua_sections.hide()
+			$ua_sections.next( 'p' ).hide()
+			$ua_sections.each( () -> $(this).nextAll( '.form-table:first' ).hide() )
+
+	$( '#woocommerce_google_analytics_pro_property' ).on( 'change', ->
+		toggle_ua_fields( $( this ).val() )
+	).change()
+
+	# hide UA-specific fields if there is no property selector (meaning, no UA properties are available for the selected GA account)
+	if (!$( '#woocommerce_google_analytics_pro_property' ).length)
+		toggle_ua_fields( false )
+
+
+	# toggle GA4-specific fields
+	$( '#woocommerce_google_analytics_pro_ga4_property' ).on( 'change', ->
+
+		$ga4_sections = $( '
+			#woocommerce_google_analytics_pro_recommended_event_names_section,
+			#woocommerce_google_analytics_pro_custom_event_names_section,
+			#woocommerce_google_analytics_pro_subscription_event_names_section
+		' )
+
+		if ( $( this ).val() )
+			$ga4_sections.show()
+			$ga4_sections.next( 'p' ).show()
+			$ga4_sections.each( () -> $(this).nextAll( '.form-table:first' ).show() )
+		else
+			$ga4_sections.hide()
+			$ga4_sections.next( 'p' ).hide()
+			$ga4_sections.each( () -> $(this).nextAll( '.form-table:first' ).hide() )
+
+	).change()
+
+	# show warning when customizing GA4 recommended events
+	$( 'input[recommended_event="yes"]' ).on( 'change, input', () ->
+
+		value = $( this ).val()
+		default_name = $( this ).attr( 'default_name' )
+
+		if value != default_name
+			if ! $( this ).nextAll( 'p.warning' ).length
+				warning = if value then wc_google_analytics_pro.i18n.recommended_event_warning else wc_google_analytics_pro.i18n.recommended_event_warning_empty
+				$( '<p class="warning" />' ).html( warning ).insertAfter( this )
+		else
+			$( this ).nextAll( 'p.warning' ).remove( )
+
+	).change()
 

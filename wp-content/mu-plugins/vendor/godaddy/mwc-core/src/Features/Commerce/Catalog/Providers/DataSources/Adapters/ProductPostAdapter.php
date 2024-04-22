@@ -3,6 +3,7 @@
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataSources\Adapters;
 
 use GoDaddy\WordPress\MWC\Common\DataSources\Contracts\DataSourceAdapterContract;
+use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
 use GoDaddy\WordPress\MWC\Common\Traits\HasStringRemoteIdentifierTrait;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataObjects\ProductBase;
@@ -17,11 +18,11 @@ use GoDaddy\WordPress\MWC\Core\Features\Commerce\Repositories\ProductMapReposito
  * Examples:
  *
  * // to overlay the product base data to an existing WP_Post:
- * ProductPostAdapter::getNewInstance($productsMappingService)->convertToSource($productBase)->toWordPressPostObject($wpPost);
+ * ProductPostAdapter::getNewInstance($productsMappingService)->setLocalPost((array) $wpPost)->convertToSource($productBase)->toWordPressPostObject($wpPost);
  * // to obtain an array of data that is compatible with WP_Post data (for example when interacting with WPDB):
- * ProductPostAdapter::getNewInstance($productsMappingService)->convertToSource($productBase)->toDatabaseArray();
+ * ProductPostAdapter::getNewInstance($productsMappingService)->setLocalPost((array) $wpPost)->convertToSource($productBase)->toDatabaseArray();
  * // the same as above but outputs a stdClass object to match WP_Post properties as from a wp_posts row:
- * ProductPostAdapter::getNewInstance($productsMappingService)->convertToSource($productBase)->toDatabaseObject();
+ * ProductPostAdapter::getNewInstance($productsMappingService)->setLocalPost((array) $wpPost)->convertToSource($productBase)->toDatabaseObject();
  */
 class ProductPostAdapter implements DataSourceAdapterContract
 {
@@ -31,6 +32,9 @@ class ProductPostAdapter implements DataSourceAdapterContract
     /** @var ProductMapRepository */
     protected ProductMapRepository $productMapRepository;
 
+    /** @var array<string, mixed> the corresponding local post object in array form - used to compare against the local database */
+    protected array $localPost = [];
+
     /**
      * Constructor.
      *
@@ -39,6 +43,29 @@ class ProductPostAdapter implements DataSourceAdapterContract
     public function __construct(ProductMapRepository $productMapRepository)
     {
         $this->productMapRepository = $productMapRepository;
+    }
+
+    /**
+     * Gets the local post data (in array form) to use in comparisons.
+     *
+     * @return array<string, mixed>
+     */
+    public function getLocalPost() : array
+    {
+        return $this->localPost;
+    }
+
+    /**
+     * Sets the local post data (in array form) to use in comparisons.
+     *
+     * @param array<string, mixed> $value
+     * @return $this
+     */
+    public function setLocalPost(array $value) : ProductPostAdapter
+    {
+        $this->localPost = $value;
+
+        return $this;
     }
 
     /**
@@ -64,9 +91,8 @@ class ProductPostAdapter implements DataSourceAdapterContract
             'postDateGmt'     => $productBase->createdAt,
             'postModified'    => $this->convertDateFromGmt($productBase->updatedAt),
             'postModifiedGmt' => $productBase->updatedAt,
-            'postName'        => $productBase->altId,
             'postParent'      => $this->convertRemoteParentUuidToLocalParentId($productBase->parentId),
-            'postStatus'      => $productBase->active ? 'publish' : 'private',
+            'postStatus'      => $this->convertStatusToSource($productBase),
         ]);
     }
 
@@ -86,6 +112,38 @@ class ProductPostAdapter implements DataSourceAdapterContract
         }
 
         return $this->productMapRepository->getLocalId($remoteParentId);
+    }
+
+    /**
+     * Converts the product's status.
+     *
+     * Since Woo supports more product statuses than the Commerce Platform we are selective about how to map the statuses:
+     * - Published: Are active in the platform.
+     * - Draft: inactive in the platform.
+     * - Trash: since the platform does not support soft deletes (in a way that's manageable by the merchant) a locally trashed post is _also_ inactive in the platform.
+     * - Other statuses are maintained as is and not mapped from the platform.
+     *
+     * @param ProductBase $productBase
+     * @return string
+     */
+    protected function convertStatusToSource(ProductBase $productBase) : string
+    {
+        $localPostStatus = TypeHelper::string($this->getLocalPost()['post_status'] ?? 'draft', 'draft');
+
+        // Since both draft and trashed are mapped to inactive, when products in either status is active in the
+        // platform they should become published locally.
+        if ($productBase->active && ('draft' === $localPostStatus || 'trash' === $localPostStatus)) {
+            return 'publish';
+        }
+
+        // When the product is inactive in the Platform and published locally the product has been
+        // deactivated for web and should be draft locally.
+        if (! $productBase->active && 'publish' === $localPostStatus) {
+            return 'draft';
+        }
+
+        // All other posts statuses (i.e. pending, private) are maintained regardless of the product's status in the platform.
+        return $localPostStatus;
     }
 
     /**

@@ -45,7 +45,6 @@ use GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Pages\EditOrder\Fields\Mark
 use GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Pages\EditProduct\Fields\MarketplacesFields as ProductMarketplacesFields;
 use GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Pages\EditProduct\Metaboxes\MarketplacesMetabox;
 use GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Pages\MarketplacesPage;
-use GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Pages\Orders\Columns\SalesChannelColumn;
 use GoDaddy\WordPress\MWC\Core\Features\Marketplaces\Repositories\OrderRepository;
 
 /**
@@ -77,7 +76,6 @@ class Marketplaces extends AbstractFeature implements DelayedInstantiationCompon
         ProductInterceptor::class,
         ProductMarketplacesFields::class,
         ProductsPageInterceptor::class,
-        SalesChannelColumn::class,
         SellbritePluginHandler::class,
     ];
 

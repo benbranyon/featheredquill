@@ -5,45 +5,35 @@ json = false
 regex = true
 entropy = true
 exclude-path-patterns = [
-    {path-pattern='resources/js/app.js', reason='exclude-patterns.txt'},
-    {path-pattern='resources/vendor', reason='exclude-patterns.txt'},
-    {path-pattern='(.*/)?autoload.php', reason='exclude-patterns.txt'},
-    {path-pattern='sample.env', reason='exclude-patterns.txt'},
+    # Vendor and documentation assets
+    {path-pattern='resources/js/app.js', reason='Built app.js from documentation'},
+    {path-pattern='resources/vendor', reason='Documentation vendor directory'},
+    {path-pattern='(.*/)?autoload.php', reason='Composer-generated autoload file'},
 
     # Lock Files are not always in the root
-    {path-pattern='.*composer.lock', reason='exclude-patterns.txt'},
-    {path-pattern='.*package-lock.json', reason='exclude-patterns.txt'},
-    {path-pattern='.pnp.js', reason='exclude-patterns.txt'},
-    {path-pattern='.*Pipfile.lock', reason='exclude-patterns.txt'},
-    {path-pattern='.*yarn.lock', reason='exclude-patterns.txt'},
+    {path-pattern='.*composer.lock', reason='Composer-generated lockfile'},
+    {path-pattern='.*package-lock.json', reason='NPM-generated lockfile'},
+    {path-pattern='.*Pipfile.lock', reason='PIP lockfile'},
+    {path-pattern='.*yarn.lock', reason='Yarn lockfile'},
 
-    # Ignore inline images
-    {path-pattern='.*\.css$', reason='exclude-patterns.txt'},
-    {path-pattern='.*\.scss$', reason='exclude-patterns.txt'},
-    {path-pattern='.*\.ico$', reason='exclude-patterns.txt'},
-    {path-pattern='.*\.jpg$', reason='exclude-patterns.txt'},
-    {path-pattern='.*\.png$', reason='exclude-patterns.txt'},
-    {path-pattern='.*\.svg$', reason='exclude-patterns.txt'},
-
-    # Ignore uploaded logs
-    {path-pattern='.*\.log$', reason='exclude-patterns.txt'},
+    {path-pattern='.*\.css$', reason='Inline images in CSS assets'},
+    {path-pattern='.*\.scss$', reason='Inline images in CSS assets'},
+    {path-pattern='.*\.ico$', reason='Image assets'},
+    {path-pattern='.*\.jpg$', reason='Image assets'},
+    {path-pattern='.*\.png$', reason='Image assets'},
+    {path-pattern='.*\.svg$', reason='Image assets'},
 
     # pre-commit configuration
-    {path-pattern='.pre-commit-config.yaml', reason='exclude-patterns.txt'},
+    {path-pattern='.pre-commit-config.yaml', reason='pre-commit config file'},
 
     # Tartufo configuration
-    {path-pattern='tartufo.toml', reason='exclude-patterns.txt'},
+    {path-pattern='tartufo.toml', reason='Tartufo config file'},
 
     # PHPStan baseline
-    {path-pattern='phpstan-baseline.neon', reason='exclude-patterns.txt'},
-
-    # Frontend Build Files
-    {path-pattern='build', reason='exclude-patterns.txt'},
-    {path-pattern='data', reason='exclude-patterns.txt'},
-    {path-pattern='public/js/app.js', reason='exclude-patterns.txt'},
+    {path-pattern='phpstan-baseline.neon', reason='PHPStan baseline'},
 
     # i18n
-    {path-pattern='languages/', reason='exclude-patterns.txt'},
+    {path-pattern='languages/', reason='L10n assets'},
 ]
 exclude-signatures = [
     {signature="543a697de5f4ef48b5714141999eca9c65b49de01b780879f7bb87ff3e9d09d6", reason="imported from v2 configuration"},

@@ -7,6 +7,7 @@ use GoDaddy\WordPress\MWC\Common\Interceptors\AbstractInterceptor;
 use GoDaddy\WordPress\MWC\Common\Models\Coupon as CommonCoupon;
 use GoDaddy\WordPress\MWC\Common\Register\Register;
 use GoDaddy\WordPress\MWC\Common\Repositories\WooCommerce\CouponsRepository;
+use GoDaddy\WordPress\MWC\Core\Traits\ShouldLoadOnlyIfWooCommerceIsEnabledTrait;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\Adapters\CouponAdapter;
 use GoDaddy\WordPress\MWC\Core\WooCommerce\NewWooCommerceObjectFlag;
 use WC_Coupon;
@@ -17,6 +18,8 @@ use WP_Post;
  */
 class CouponInterceptor extends AbstractInterceptor
 {
+    use ShouldLoadOnlyIfWooCommerceIsEnabledTrait;
+
     /**
      * {@inheritDoc}
      *
@@ -55,13 +58,13 @@ class CouponInterceptor extends AbstractInterceptor
      *
      * @throws Exception
      */
-    public function onWooCommerceUpdateCoupon($postId)
+    public function onWooCommerceUpdateCoupon($postId) : void
     {
         if (! ($wcCoupon = CouponsRepository::get((int) $postId))) {
             return;
         }
 
-        $newCouponFlag = $this->getNewCouponFlag($wcCoupon->get_id());
+        $newCouponFlag = NewWooCommerceObjectFlag::getNewInstance($wcCoupon);
 
         $coupon = $this->getConvertedCoupon($wcCoupon);
 
@@ -81,10 +84,10 @@ class CouponInterceptor extends AbstractInterceptor
      * @param WP_Post $post
      * @param bool $isUpdate
      */
-    protected function maybeFlagNewCoupon($postId, $post, $isUpdate)
+    protected function maybeFlagNewCoupon($postId, $post, $isUpdate) : void
     {
-        if (! $isUpdate && $post->post_type === 'shop_coupon') {
-            $this->getNewCouponFlag((int) $postId)->turnOn();
+        if (! $isUpdate && $post->post_type === 'shop_coupon' && $flag = $this->maybeGetNewCouponFlag((int) $postId)) {
+            $flag->turnOn();
         }
     }
 
@@ -92,11 +95,15 @@ class CouponInterceptor extends AbstractInterceptor
      * Gets the new coupon flag instance for the given coupon id.
      *
      * @param int $couponId
-     * @return NewWooCommerceObjectFlag
+     * @return NewWooCommerceObjectFlag|null
      */
-    protected function getNewCouponFlag(int $couponId) : NewWooCommerceObjectFlag
+    protected function maybeGetNewCouponFlag(int $couponId) : ?NewWooCommerceObjectFlag
     {
-        return new NewWooCommerceObjectFlag($couponId);
+        if ($coupon = CouponsRepository::get($couponId)) {
+            return NewWooCommerceObjectFlag::getNewInstance($coupon);
+        }
+
+        return null;
     }
 
     /**

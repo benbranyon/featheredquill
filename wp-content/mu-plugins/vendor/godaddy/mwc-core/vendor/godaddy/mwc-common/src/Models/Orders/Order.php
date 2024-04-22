@@ -6,6 +6,7 @@ use DateTime;
 use GoDaddy\WordPress\MWC\Common\Contracts\OrderStatusContract;
 use GoDaddy\WordPress\MWC\Common\Models\AbstractModel;
 use GoDaddy\WordPress\MWC\Common\Models\CurrencyAmount;
+use GoDaddy\WordPress\MWC\Common\Models\Orders\Contracts\NoteContract;
 use GoDaddy\WordPress\MWC\Common\Traits\BillableTrait;
 use GoDaddy\WordPress\MWC\Common\Traits\FulfillableTrait;
 use GoDaddy\WordPress\MWC\Common\Traits\HasNumericIdentifierTrait;
@@ -53,7 +54,7 @@ class Order extends AbstractModel
     /** @var CurrencyAmount|null */
     protected $lineAmount;
 
-    /** @var Note[] */
+    /** @var NoteContract[] */
     protected array $notes = [];
 
     /** @var ShippingItem[] */
@@ -180,7 +181,7 @@ class Order extends AbstractModel
     /**
      * Gets order notes.
      *
-     * @return Note[]
+     * @return NoteContract[]
      */
     public function getNotes() : array
     {
@@ -390,12 +391,25 @@ class Order extends AbstractModel
     /**
      * Sets order notes.
      *
-     * @param Note[] $notes
+     * @param NoteContract[] $notes
      * @return $this
      */
     public function setNotes(array $notes) : Order
     {
         $this->notes = $notes;
+
+        return $this;
+    }
+
+    /**
+     * Adds order notes.
+     *
+     * @param NoteContract ...$notes
+     * @return $this
+     */
+    public function addNotes(NoteContract ...$notes) : Order
+    {
+        $this->notes = array_merge($this->notes, $notes);
 
         return $this;
     }

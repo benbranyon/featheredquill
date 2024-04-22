@@ -11,4 +11,17 @@ abstract class AbstractInfo extends AbstractDataObject
 {
     public string $firstName = '';
     public string $lastName = '';
+
+    /**
+     * Constructor.
+     *
+     * @param array{
+     *     firstName: string,
+     *     lastName?: string
+     * } $data
+     */
+    public function __construct(array $data)
+    {
+        parent::__construct($data);
+    }
 }

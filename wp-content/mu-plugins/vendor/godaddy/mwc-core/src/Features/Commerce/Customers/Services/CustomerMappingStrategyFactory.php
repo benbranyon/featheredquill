@@ -3,6 +3,7 @@
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Customers\Services;
 
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Customers\Services\Contracts\CustomerMappingStrategyContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Models\Contracts\CommerceContextContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Models\GuestCustomer;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Repositories\CustomerMapRepository;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Repositories\GuestCustomerMapRepository;
@@ -12,6 +13,17 @@ use GoDaddy\WordPress\MWC\Payments\Models\Customer;
 
 class CustomerMappingStrategyFactory extends AbstractMappingStrategyFactory
 {
+    protected CustomerMapRepository $customerMapRepository;
+    protected GuestCustomerMapRepository $guestCustomerMapRepository;
+
+    public function __construct(CommerceContextContract $commerceContext, CustomerMapRepository $customerMapRepository, GuestCustomerMapRepository $guestCustomerMapRepository)
+    {
+        parent::__construct($commerceContext);
+
+        $this->customerMapRepository = $customerMapRepository;
+        $this->guestCustomerMapRepository = $guestCustomerMapRepository;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -35,7 +47,7 @@ class CustomerMappingStrategyFactory extends AbstractMappingStrategyFactory
      */
     protected function getRegisteredCustomerMappingStrategy() : CustomerMappingStrategyContract
     {
-        return new RegisteredCustomerMappingStrategy(new CustomerMapRepository($this->commerceContext));
+        return new RegisteredCustomerMappingStrategy($this->customerMapRepository);
     }
 
     /**
@@ -45,7 +57,7 @@ class CustomerMappingStrategyFactory extends AbstractMappingStrategyFactory
      */
     protected function getGuestCustomerMappingStrategy() : CustomerMappingStrategyContract
     {
-        return new GuestCustomerMappingStrategy(new GuestCustomerMapRepository($this->commerceContext));
+        return new GuestCustomerMappingStrategy($this->guestCustomerMapRepository);
     }
 
     /**

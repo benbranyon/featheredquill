@@ -5,7 +5,6 @@ namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Locations\Interceptors;
 use Exception;
 use GoDaddy\WordPress\MWC\Common\Configuration\Configuration;
 use GoDaddy\WordPress\MWC\Common\Enqueue\Enqueue;
-use GoDaddy\WordPress\MWC\Common\Exceptions\BaseException;
 use GoDaddy\WordPress\MWC\Common\Exceptions\SentryException;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
@@ -14,6 +13,7 @@ use GoDaddy\WordPress\MWC\Common\Register\Register;
 use GoDaddy\WordPress\MWC\Common\Repositories\WordPressRepository;
 use GoDaddy\WordPress\MWC\Core\Admin\Notices\Notices;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\Contracts\CommerceExceptionContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Locations\LocationsIntegration;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Locations\Notices\AppleGooglePayLocalPickupNotice;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Locations\Providers\DataObjects\Contact;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Locations\Providers\DataObjects\Location;
@@ -25,6 +25,8 @@ use WC_Meta_Data;
 
 /**
  * Interceptor to handle the Local Pickup Admin components.
+ *
+ * @NOTE: This is documented by documentation/development/features/commerce/locations/local-pickup-admin-interceptor.md
  */
 class LocalPickupAdminInterceptor extends AbstractInterceptor
 {
@@ -78,32 +80,51 @@ class LocalPickupAdminInterceptor extends AbstractInterceptor
      * @param mixed $instanceFields
      *
      * @return mixed
-     * @throws BaseException|CommerceExceptionContract|Exception
      */
     public function addLocalPickupLocationsField($instanceFields)
     {
-        if ($locations = $this->getLocalPickupOptions($this->locationsService->getLocations())) {
-            $instanceFields = ArrayHelper::wrap($instanceFields);
+        if (! $this->shouldAddLocalPickupLocationsField()) {
+            return $instanceFields;
+        }
 
-            $localPickupField = ['godaddy_commerce_locations' => [
-                'title'    => __('Available Pickup Locations', 'mwc-core'),
-                'type'     => 'multiselect',
-                'class'    => 'wc-enhanced-select',
-                'desc_tip' => esc_html__('Copy TBD', 'mwc-core'),
-                'default'  => count($locations) === 1 ? [array_key_first($locations)] : [''],
-                'options'  => $locations,
-            ]];
+        try {
+            if ($locations = $this->getLocalPickupOptions($this->locationsService->getLocations())) {
+                $instanceFields = ArrayHelper::wrap($instanceFields);
 
-            // Ensures field is loaded under title if it exists
-            if (ArrayHelper::exists($instanceFields, 'title')) {
-                return ArrayHelper::insertAfterKey($instanceFields, $localPickupField, 'title');
+                $localPickupField = ['godaddy_commerce_locations' => [
+                    'title'    => __('Available Pickup Locations', 'mwc-core'),
+                    'type'     => 'multiselect',
+                    'class'    => 'wc-enhanced-select',
+                    'desc_tip' => esc_html__('Select the location(s) that should be available for local pickup.', 'mwc-core'),
+                    'default'  => count($locations) === 1 ? [array_key_first($locations)] : [''],
+                    'options'  => $locations,
+                ]];
+
+                // Ensures field is loaded under title if it exists
+                if (ArrayHelper::exists($instanceFields, 'title')) {
+                    return ArrayHelper::insertAfterKey($instanceFields, $localPickupField, 'title');
+                }
+
+                // Adds to the end if there is no title
+                return ArrayHelper::combine($instanceFields, $localPickupField);
             }
-
-            // Adds to the end if there is no title
-            return ArrayHelper::combine($instanceFields, $localPickupField);
+        } catch (CommerceExceptionContract|Exception $exception) {
+            new SentryException($exception->getMessage(), $exception);
         }
 
         return $instanceFields;
+    }
+
+    /**
+     * Determines if the local pickup locations field should be added during current request.
+     *
+     * @return bool
+     */
+    protected function shouldAddLocalPickupLocationsField() : bool
+    {
+        $currentScreen = WordPressRepository::getCurrentScreen();
+
+        return WordPressRepository::isAjax() || ($currentScreen && 'woocommerce-wc-settings' === $currentScreen->getPageId());
     }
 
     /**
@@ -138,7 +159,7 @@ class LocalPickupAdminInterceptor extends AbstractInterceptor
         $fieldsLocations = [];
 
         foreach ($locations as $location) {
-            $fieldsLocations[$location->channelId] = $location->address->address1;
+            $fieldsLocations[$location->channelId] = $location->address ? $location->address->address1 : $location->alias;
         }
 
         return $fieldsLocations;
@@ -232,7 +253,9 @@ class LocalPickupAdminInterceptor extends AbstractInterceptor
             $markup .= '<p>'.esc_attr($alias).'</p>';
         }
 
-        $markup .= '<p>'.esc_attr($this->getFormattedAddress($location->address)).'</p>';
+        if ($address = $location->address) {
+            $markup .= '<p>'.esc_attr($this->getFormattedAddress($address)).'</p>';
+        }
 
         foreach ($this->getFormattedContacts($location->contacts) as $contact) {
             $markup .= '<p>'.esc_attr($contact).'</p>';
@@ -284,11 +307,13 @@ class LocalPickupAdminInterceptor extends AbstractInterceptor
     }
 
     /**
-     * Enqueues Notice if ApplePay or GooglePay are enabled.
+     * Enqueues Notice if Apple Pay or Google Pay are enabled and there's at least one pickup location added.
      */
     public function maybeEnqueueAppleGooglePayLocalPickupNotice() : void
     {
-        if (ApplePayGateway::isEnabled() || GooglePayGateway::isEnabled()) {
+        $hasAtLeastOneWalletGatewayEnabled = ApplePayGateway::isEnabled() || GooglePayGateway::isEnabled();
+
+        if ($hasAtLeastOneWalletGatewayEnabled && LocationsIntegration::hasPickupLocationAdded()) {
             Notices::enqueueAdminNotice(AppleGooglePayLocalPickupNotice::getNewInstance());
         }
     }

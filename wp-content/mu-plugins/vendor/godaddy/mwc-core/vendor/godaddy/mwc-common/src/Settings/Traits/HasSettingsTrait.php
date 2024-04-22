@@ -25,7 +25,7 @@ trait HasSettingsTrait
     /**
      * Gets the settings configuration.
      *
-     * @return array
+     * @return array<mixed>
      * @throws Exception
      */
     public function getConfiguration() : array
@@ -45,7 +45,7 @@ trait HasSettingsTrait
      * This is a recursive method that's keep being called as long as the current subgroup has children subgroups.
      *
      * @param ConfigurableContract[] $subgroups
-     * @return array
+     * @return array<mixed>
      * @throws Exception
      */
     protected function getSubgroupConfiguration(array $subgroups) : array
@@ -122,7 +122,7 @@ trait HasSettingsTrait
      * Gets a setting's value.
      *
      * @param string $name
-     * @return int|float|string|bool|array
+     * @return int|float|string|bool|array<mixed>
      * @throws InvalidArgumentException
      */
     public function getSettingValue(string $name)
@@ -135,8 +135,9 @@ trait HasSettingsTrait
      *
      * @return string|null
      */
-    public function getSettingsId()
+    public function getSettingsId() : ?string
     {
+        /* @phpstan-ignore-next-line getId() is a member of the trait's parent. */
         return is_callable([$this, 'getId']) ? $this->getId() : null;
     }
 
@@ -215,7 +216,7 @@ trait HasSettingsTrait
     /**
      * Sets the setting subgroups.
      *
-     * @param array $value
+     * @param ConfigurableContract[] $value
      * @return $this
      */
     public function setSettingsSubgroups(array $value)
@@ -244,9 +245,10 @@ trait HasSettingsTrait
      *
      * @param string $name
      * @param mixed $value
+     * @return void
      * @throws InvalidArgumentException
      */
-    public function updateSettingValue(string $name, $value)
+    public function updateSettingValue(string $name, $value) : void
     {
         $setting = $this->getSetting($name);
 

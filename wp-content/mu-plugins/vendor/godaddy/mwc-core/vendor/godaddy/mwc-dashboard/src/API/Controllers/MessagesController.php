@@ -239,7 +239,7 @@ class MessagesController extends AbstractController
         $messagesRequest = $this->getMessagesRequest();
 
         if (empty($messagesRequest->getAuthMethod())) {
-            /* translators: Placeholder: %s - object name */
+            /* translators: Placeholder: %s - internal name of a component that issued a request that should provide an authentication method */
             throw new MessagesNotAvailableException(sprintf(__('No auth method found for %s', 'mwc-dashboard'), get_class($messagesRequest)));
         }
 
@@ -258,7 +258,7 @@ class MessagesController extends AbstractController
 
             throw new MessagesFailedFetchException(
                 sprintf(
-                    /* translators: Placeholder: %s - error message */
+                    /* translators: Placeholders: %d - error code, %s - error message */
                     __('Could not retrieve remote messages data - API responded with status %d, error: %s', 'mwc-dashboard'),
                     $responseStatus,
                     $response->getErrorMessage()

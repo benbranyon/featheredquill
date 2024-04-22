@@ -6,6 +6,8 @@ use Exception;
 use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Http\Contracts\ResponseContract;
 use GoDaddy\WordPress\MWC\Common\Traits\CanGetNewInstanceTrait;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\Contracts\CommerceExceptionContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\NotUniqueException;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\DataObjects\Level;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\DataObjects\UpsertLevelInput;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\GoDaddy\Http\Requests\Request;
@@ -48,5 +50,19 @@ abstract class AbstractUpsertLevelRequestAdapter extends AbstractGatewayRequestA
     protected function getBaseRequest() : Request
     {
         return Request::withAuth()->setStoreId($this->input->storeId);
+    }
+
+    /**
+     * @param ResponseContract $response
+     *
+     * @throws NotUniqueException|CommerceExceptionContract
+     */
+    protected function throwIfIsErrorResponse(ResponseContract $response) : void
+    {
+        if ($response->getStatus() === 409 || ArrayHelper::get($response->getBody(), 'code') === 'NOT_UNIQUE_ERROR') {
+            throw NotUniqueException::getNewInstance($response->getErrorMessage() ?? 'Record is not unique');
+        }
+
+        parent::throwIfIsErrorResponse($response);
     }
 }

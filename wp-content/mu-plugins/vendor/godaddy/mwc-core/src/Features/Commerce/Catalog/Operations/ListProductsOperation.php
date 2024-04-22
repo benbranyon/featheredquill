@@ -6,6 +6,13 @@ use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
 use GoDaddy\WordPress\MWC\Common\Traits\CanConvertToArrayTrait;
 use GoDaddy\WordPress\MWC\Common\Traits\CanSeedTrait;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Operations\Contracts\ListProductsOperationContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Operations\Traits\HasAltIdFilterTrait;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Operations\Traits\HasPageSizeTrait;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Operations\Traits\HasPageTokenTrait;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Operations\Traits\HasParentIdTrait;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Operations\Traits\HasRemoteIdsTrait;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Operations\Traits\HasSortingTrait;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Traits\HasLocalIdsTrait;
 
 /**
  * Operation for listing/querying products.
@@ -16,15 +23,25 @@ class ListProductsOperation implements ListProductsOperationContract
         CanConvertToArrayTrait::toArray as traitToArray;
     }
     use CanSeedTrait;
+    use HasAltIdFilterTrait;
+    use HasLocalIdsTrait;
+    use HasPageSizeTrait;
+    use HasPageTokenTrait;
+    use HasParentIdTrait;
+    use HasRemoteIdsTrait;
+    use HasSortingTrait;
 
-    /** @var ?array<int> the products local IDs */
-    protected ?array $localIds = null;
+    /** @var array<int> the products local IDs */
+    protected array $localIds = [];
 
     /** @var string[]|null the remote (Commerce) product IDs to include */
     protected ?array $ids = null;
 
     /** @var ?bool include deleted */
     protected ?bool $includeDeleted = null;
+
+    /** @var ?bool include child products */
+    protected ?bool $includeChildProducts = null;
 
     /** @var ?string sort by */
     protected ?string $sortBy = null;
@@ -50,8 +67,14 @@ class ListProductsOperation implements ListProductsOperationContract
     /** @var ?string the type */
     protected ?string $type = null;
 
+    /** @var int|null maximum number of results per page */
+    protected ?int $pageSize = null;
+
     /** @var ?string the page token */
     protected ?string $pageToken = null;
+
+    /** @var ?string the parent product id */
+    protected ?string $parentId = null;
 
     /** @var ?string the token direction */
     protected ?string $tokenDirection = null;
@@ -59,43 +82,7 @@ class ListProductsOperation implements ListProductsOperationContract
     /**
      * {@inheritDoc}
      */
-    public function setLocalIds(?array $ids) : ListProductsOperationContract
-    {
-        $this->localIds = $ids;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getLocalIds() : ?array
-    {
-        return $this->localIds;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setIds(?array $value) : ListProductsOperationContract
-    {
-        $this->ids = $value;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getIds() : ?array
-    {
-        return $this->ids;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setIncludeDeleted(?bool $includeDeleted) : ListProductsOperationContract
+    public function setIncludeDeleted(?bool $includeDeleted)
     {
         $this->includeDeleted = $includeDeleted;
 
@@ -113,9 +100,9 @@ class ListProductsOperation implements ListProductsOperationContract
     /**
      * {@inheritDoc}
      */
-    public function setSortBy(?string $sortBy) : ListProductsOperationContract
+    public function setIncludeChildProducts(?bool $includeChildProducts) : ListProductsOperationContract
     {
-        $this->sortBy = $sortBy;
+        $this->includeChildProducts = $includeChildProducts;
 
         return $this;
     }
@@ -123,33 +110,15 @@ class ListProductsOperation implements ListProductsOperationContract
     /**
      * {@inheritDoc}
      */
-    public function getSortBy() : ?string
+    public function getIncludeChildProducts() : ?bool
     {
-        return $this->sortBy;
+        return $this->includeChildProducts;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function setSortOrder(?string $sortOrder) : ListProductsOperationContract
-    {
-        $this->sortOrder = $sortOrder;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getSortOrder() : ?string
-    {
-        return $this->sortOrder;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setLocalCategoryId(?int $localCategoryId) : ListProductsOperationContract
+    public function setLocalCategoryId(?int $localCategoryId)
     {
         $this->localCategoryId = $localCategoryId;
 
@@ -167,7 +136,7 @@ class ListProductsOperation implements ListProductsOperationContract
     /**
      * {@inheritDoc}
      */
-    public function setChannelId(?string $channelId) : ListProductsOperationContract
+    public function setChannelId(?string $channelId)
     {
         $this->channelId = $channelId;
 
@@ -185,7 +154,7 @@ class ListProductsOperation implements ListProductsOperationContract
     /**
      * {@inheritDoc}
      */
-    public function setSku(?string $sku) : ListProductsOperationContract
+    public function setSku(?string $sku)
     {
         $this->sku = $sku;
 
@@ -203,25 +172,7 @@ class ListProductsOperation implements ListProductsOperationContract
     /**
      * {@inheritDoc}
      */
-    public function setAltId(?string $altId) : ListProductsOperationContract
-    {
-        $this->altId = $altId;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getAltId() : ?string
-    {
-        return $this->altId;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setName(?string $name) : ListProductsOperationContract
+    public function setName(?string $name)
     {
         $this->name = $name;
 
@@ -252,42 +203,6 @@ class ListProductsOperation implements ListProductsOperationContract
     public function getType() : ?string
     {
         return $this->type;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setPageToken(?string $pageToken) : ListProductsOperationContract
-    {
-        $this->pageToken = $pageToken;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getPageToken() : ?string
-    {
-        return $this->pageToken;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setTokenDirection(?string $tokenDirection) : ListProductsOperationContract
-    {
-        $this->tokenDirection = $tokenDirection;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getTokenDirection() : ?string
-    {
-        return $this->tokenDirection;
     }
 
     /**

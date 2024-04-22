@@ -247,6 +247,7 @@ class DatabaseRepository
     {
         $wpdb = static::instance();
 
+        /** @phpstan-ignore-next-line Parameter #1 $query of method wpdb::prepare() expects literal-string */
         $results = $wpdb->get_row($wpdb->prepare($query, ...$args), ARRAY_A);
 
         return ArrayHelper::wrap($results);
@@ -265,6 +266,7 @@ class DatabaseRepository
     {
         $wpdb = static::instance();
 
+        /** @phpstan-ignore-next-line Parameter #1 $query of method wpdb::prepare() expects literal-string */
         $results = $wpdb->get_results($wpdb->prepare($query, ...$args), ARRAY_A);
 
         return ArrayHelper::wrap($results);

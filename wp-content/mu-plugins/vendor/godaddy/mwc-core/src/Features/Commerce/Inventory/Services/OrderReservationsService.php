@@ -3,10 +3,13 @@
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services;
 
 use Exception;
-use GoDaddy\WordPress\MWC\Common\Exceptions\BaseException;
-use GoDaddy\WordPress\MWC\Common\Helpers\ArrayHelper;
+use GoDaddy\WordPress\MWC\Common\Events\Events;
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\Note;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Exceptions\MissingProductRemoteIdException;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Events\LineItemReservedEvent;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Providers\DataObjects\Reservation;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services\Contracts\ProductInventoryCachingServiceContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services\Contracts\ReservationsServiceContract;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Inventory\Services\Operations\CreateOrUpdateReservationOperation;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Orders\Providers\DataSources\WooOrderCartIdProvider;
@@ -19,37 +22,53 @@ class OrderReservationsService implements OrderReservationsServiceContract
     const TRANSIENT_RESERVATIONS_FAILED = 'godaddy_mwc_commerce_reservations_failed';
 
     protected ReservationsServiceContract $reservationsService;
+    protected ProductInventoryCachingServiceContract $inventoryCachingService;
     protected WooOrderCartIdProvider $cartIdProvider;
 
     /**
      * @param ReservationsServiceContract $reservationsService
+     * @param ProductInventoryCachingServiceContract $inventoryCachingService
      * @param WooOrderCartIdProvider $cartIdProvider
      */
     public function __construct(
         ReservationsServiceContract $reservationsService,
+        ProductInventoryCachingServiceContract $inventoryCachingService,
         WooOrderCartIdProvider $cartIdProvider
     ) {
         $this->reservationsService = $reservationsService;
+        $this->inventoryCachingService = $inventoryCachingService;
         $this->cartIdProvider = $cartIdProvider;
     }
 
     /**
      * {@inheritDoc}
-     *
-     * @throws BaseException
      */
     public function createOrUpdateReservations(Order &$order) : void
     {
-        $existingNotes = $order->getNotes();
-        $newNotes = [];
+        $reservations = $notes = [];
 
         foreach ($order->getLineItems() as $lineItem) {
             try {
-                $this->reservationsService->createOrUpdateReservation(new CreateOrUpdateReservationOperation($lineItem, $order));
+                if (! $product = $lineItem->getProduct()) {
+                    continue;
+                }
+
+                if (! $product->managing_stock()) {
+                    continue;
+                }
+
+                $lineReservations = $this->reservationsService->createOrUpdateReservation(new CreateOrUpdateReservationOperation($lineItem, $order))->getReservations();
+
+                Events::broadcast(new LineItemReservedEvent($lineItem, $lineReservations, $order));
+
+                array_push($reservations, ...$lineReservations);
+            } catch (MissingProductRemoteIdException $exception) {
+                // No-op. This is expected for a site that has not pushed all its products up to commerce platform.
+                // The order should be allowed to proceed as if there was inventory available. See MWC-12739.
             } catch (Exception $exception) {
                 $this->markOrderReservationsFailed($order);
 
-                $newNotes[] = Note::seed([
+                $notes[] = Note::seed([
                     'authorName' => Note::SYSTEM_AUTHOR_NAME,
                     'content'    => sprintf(
                         /* translators: Placeholders: %1$s - a product name, %2$s - a product SKU, %3$s - an API error message */
@@ -62,10 +81,23 @@ class OrderReservationsService implements OrderReservationsServiceContract
             }
         }
 
-        /** @var Note[] $notes */
-        $notes = ArrayHelper::combine($existingNotes, $newNotes);
+        // refresh the inventory cache for all products that were reserved
+        $this->refreshCache($reservations);
 
-        $order->setNotes($notes);
+        // add any failure notes to the order
+        $order->addNotes(...$notes);
+    }
+
+    /**
+     * Refreshes the product inventory caches for the given reservations.
+     *
+     * @param Reservation[] $reservations
+     */
+    protected function refreshCache(array $reservations) : void
+    {
+        if ($productIds = array_unique(TypeHelper::arrayOfStrings(array_map(static fn (Reservation $reservation) => $reservation->productId, $reservations)))) {
+            $this->inventoryCachingService->refreshCache($productIds);
+        }
     }
 
     /**

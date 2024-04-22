@@ -6,6 +6,7 @@ use Exception;
 use GoDaddy\WordPress\MWC\Common\DataSources\Contracts\DataSourceAdapterContract;
 use GoDaddy\WordPress\MWC\Common\Exceptions\AdapterException;
 use GoDaddy\WordPress\MWC\Common\Models\Orders\ShippingItem;
+use WC_Order;
 use WC_Order_Item_Shipping;
 
 /**
@@ -14,6 +15,8 @@ use WC_Order_Item_Shipping;
  * Converts between a native order shipping item object and a WooCommerce order shipping item object.
  *
  * @property WC_Order_Item_Shipping $source
+ * @method static static getNewInstance(WC_Order_Item_Shipping $source)
+ * @method static static for(WC_Order_Item_Shipping $source, ?WC_Order $sourceOrder = null)
  */
 class ShippingItemAdapter extends AbstractOrderItemAdapter implements DataSourceAdapterContract
 {

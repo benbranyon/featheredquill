@@ -34,11 +34,20 @@ return [
      */
     'service' => [
         'core' => [
+            GoDaddy\WordPress\MWC\Core\Providers\Auth\Sso\WordPress\CareUserServiceServiceProvider::class,
+            GoDaddy\WordPress\MWC\Core\Providers\Commerce\CachingStrategyServiceProvider::class,
             GoDaddy\WordPress\MWC\Core\Providers\Commerce\CommerceContextServiceProvider::class,
             GoDaddy\WordPress\MWC\Core\Providers\Commerce\IdProviderServiceProvider::class,
+            GoDaddy\WordPress\MWC\Core\Providers\Commerce\Catalog\CatalogAssetMapRepositoryServiceProvider::class,
             GoDaddy\WordPress\MWC\Core\Providers\Commerce\Catalog\CatalogProviderServiceProvider::class,
-            GoDaddy\WordPress\MWC\Core\Providers\Commerce\Catalog\ListProductsCachingServiceServiceProvider::class,
+            GoDaddy\WordPress\MWC\Core\Providers\Commerce\Catalog\CategoriesCachingServiceServiceProvider::class,
+            GoDaddy\WordPress\MWC\Core\Providers\Commerce\Catalog\CategoriesMappingServiceServiceProvider::class,
+            GoDaddy\WordPress\MWC\Core\Providers\Commerce\Catalog\CategoriesServiceServiceProvider::class,
+            GoDaddy\WordPress\MWC\Core\Providers\Commerce\Catalog\RemoteImageResizeServiceServiceProvider::class,
+            GoDaddy\WordPress\MWC\Core\Providers\Commerce\Catalog\ListProductsCachingHelperServiceProvider::class,
             GoDaddy\WordPress\MWC\Core\Providers\Commerce\Catalog\ListProductsServiceServiceProvider::class,
+            GoDaddy\WordPress\MWC\Core\Providers\Commerce\Catalog\ListCategoriesServiceServiceProvider::class,
+            GoDaddy\WordPress\MWC\Core\Providers\Commerce\Catalog\ProductsCachingServiceServiceProvider::class,
             GoDaddy\WordPress\MWC\Core\Providers\Commerce\Catalog\ProductsMappingServiceProvider::class,
             GoDaddy\WordPress\MWC\Core\Providers\Commerce\Catalog\ProductsServiceServiceProvider::class,
             GoDaddy\WordPress\MWC\Core\Providers\Commerce\Customers\CustomersMappingServiceProvider::class,
@@ -54,9 +63,14 @@ return [
             GoDaddy\WordPress\MWC\Core\Providers\Commerce\Orders\OrdersServiceServiceProvider::class,
             GoDaddy\WordPress\MWC\Core\Providers\Commerce\Orders\LineItemMappingServiceProvider::class,
             GoDaddy\WordPress\MWC\Core\Providers\Commerce\Orders\NoteMappingServiceProvider::class,
+            GoDaddy\WordPress\MWC\Core\Providers\Commerce\Orders\OrdersCachingServiceProvider::class,
+            GoDaddy\WordPress\MWC\Core\Providers\HostingPlanServiceProvider::class,
+            GoDaddy\WordPress\MWC\Core\Providers\CartRecoveryEmailsFeatureRuntimeConfigurationProvider::class,
         ],
         // overridable providers: plugins that include mwc-core (woosaas-system-plugin) may override these by array key
-        'platformRepo' => GoDaddy\WordPress\MWC\Core\Providers\PlatformRepositoryServiceProvider::class,
-        'storeRepo'    => GoDaddy\WordPress\MWC\Core\Providers\StoreRepositoryServiceProvider::class,
+        'platformRepo'                          => GoDaddy\WordPress\MWC\Core\Providers\PlatformRepositoryServiceProvider::class,
+        'storeRepo'                             => GoDaddy\WordPress\MWC\Core\Providers\StoreRepositoryServiceProvider::class,
+        'commercePersistentCachingStrategy'     => GoDaddy\WordPress\MWC\Core\Providers\Commerce\PersistentCachingStrategyServiceProvider::class,
+        'managedExtensionsRuntimeConfiguration' => GoDaddy\WordPress\MWC\Core\Providers\Extensions\ManagedExtensionsRuntimeConfigurationServiceProvider::class,
     ],
 ];

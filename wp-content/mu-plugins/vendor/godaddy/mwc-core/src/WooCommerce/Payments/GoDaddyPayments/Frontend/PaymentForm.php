@@ -73,6 +73,7 @@ class PaymentForm extends \GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\Front
                 'appId'            => Poynt::getAppId(),
                 'businessId'       => Poynt::getBusinessId(),
                 'customerAddress'  => $this->getCustomerAddress(),
+                'shippingAddress'  => $this->getShippingAddress(),
                 'isLoggingEnabled' => Configuration::get('mwc.debug'),
                 'options'          => $this->getOptions(),
             ])
@@ -112,7 +113,7 @@ class PaymentForm extends \GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\Front
                 'border'       => '0px',
                 'borderRadius' => '0px',
                 'boxShadow'    => 'none',
-                'height'       => $showZip ? '320px' : '230px',
+                'height'       => $showZip ? '400px' : '320px',
                 'width'        => 'auto',
             ],
             'style' => [
@@ -133,6 +134,10 @@ class PaymentForm extends \GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\Front
                 'inputLabel' => [
                     'font-size' => '16px',
                 ],
+            ],
+            'enableReCaptcha'  => true,
+            'reCaptchaOptions' => [
+                'type' => 'TEXT',
             ],
         ]), []);
     }
@@ -160,20 +165,28 @@ class PaymentForm extends \GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\Front
         $address = [
             'firstName' => '',
             'lastName'  => '',
+            'phone'     => '',
+            'email'     => '',
             'line1'     => '',
+            'line2'     => '',
+            'city'      => '',
+            'state'     => '',
+            'country'   => '',
             'postcode'  => '',
         ];
 
         // if on the checkout pay page use the order's address details
-        if (WooCommerceRepository::isCheckoutPayPage()) {
-            $order = OrdersRepository::get($this->getOrderPayQueryVar());
-
-            if ($order instanceof WC_Order) {
-                $address['firstName'] = $order->get_billing_first_name();
-                $address['lastName'] = $order->get_billing_last_name();
-                $address['line1'] = $order->get_billing_address_1();
-                $address['postcode'] = $order->get_billing_postcode();
-            }
+        if ($order = $this->getPendingPayPageOrder()) {
+            $address['firstName'] = $order->get_billing_first_name();
+            $address['lastName'] = $order->get_billing_last_name();
+            $address['phone'] = $order->get_billing_phone();
+            $address['email'] = $order->get_billing_email();
+            $address['line1'] = $order->get_billing_address_1();
+            $address['line2'] = $order->get_billing_address_2();
+            $address['city'] = $order->get_billing_city();
+            $address['state'] = $order->get_billing_state();
+            $address['country'] = $order->get_billing_country();
+            $address['postcode'] = $order->get_billing_postcode();
 
             return $address;
         }
@@ -182,11 +195,66 @@ class PaymentForm extends \GoDaddy\WordPress\MWC\Core\WooCommerce\Payments\Front
         if (WC()->customer instanceof WC_Customer) {
             $address['firstName'] = WC()->customer->get_billing_first_name();
             $address['lastName'] = WC()->customer->get_billing_last_name();
+            $address['phone'] = WC()->customer->get_billing_phone();
+            $address['email'] = WC()->customer->get_billing_email();
             $address['line1'] = WC()->customer->get_billing_address_1();
+            $address['line2'] = WC()->customer->get_billing_address_2();
+            $address['city'] = WC()->customer->get_billing_city();
+            $address['state'] = WC()->customer->get_billing_state();
+            $address['country'] = WC()->customer->get_billing_country();
             $address['postcode'] = WC()->customer->get_billing_postcode();
         }
 
         return $address;
+    }
+
+    /**
+     * Gets the current shipping address.
+     *
+     * @return array<string, mixed>
+     */
+    protected function getShippingAddress() : array
+    {
+        $address = [
+            'line1'         => '',
+            'line2'         => '',
+            'city'          => '',
+            'state'         => '',
+            'country'       => '',
+            'postcode'      => '',
+            'needsShipping' => false,
+        ];
+
+        // if on the checkout pay page use the order's address details
+        if ($order = $this->getPendingPayPageOrder()) {
+            $address['line1'] = $order->get_shipping_address_1();
+            $address['line2'] = $order->get_shipping_address_2();
+            $address['city'] = $order->get_shipping_city();
+            $address['state'] = $order->get_shipping_state();
+            $address['country'] = $order->get_shipping_country();
+            $address['postcode'] = $order->get_shipping_postcode();
+            $address['needsShipping'] = $order->needs_shipping_address();
+
+            return $address;
+        } elseif (WC()->cart && WC()->cart->needs_shipping()) {
+            $address['needsShipping'] = true;
+        }
+
+        return $address;
+    }
+
+    /**
+     * Gets the checkout pay page order if available.
+     *
+     * @return WC_Order|null
+     */
+    protected function getPendingPayPageOrder() : ?WC_Order
+    {
+        return WooCommerceRepository::isCheckoutPayPage()
+        && ($order = OrdersRepository::get($this->getOrderPayQueryVar()))
+        && $order instanceof WC_Order
+            ? $order
+            : null;
     }
 
     /**

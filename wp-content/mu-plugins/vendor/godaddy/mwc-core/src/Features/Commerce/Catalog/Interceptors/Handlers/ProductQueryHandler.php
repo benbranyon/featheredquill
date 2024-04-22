@@ -3,10 +3,12 @@
 namespace GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Interceptors\Handlers;
 
 use GoDaddy\WordPress\MWC\Common\Helpers\TypeHelper;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\CatalogIntegration;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Interceptors\Traits\CanInjectCommerceProductsIntoPostsArrayTrait;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Providers\DataSources\Adapters\ProductPostAdapter;
-use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Services\Contracts\ProductsServiceContract;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Services\BatchListProductsByLocalIdService;
 use GoDaddy\WordPress\MWC\Core\Features\Commerce\Catalog\Traits\CanDetermineWpQueryProductPostTypeTrait;
+use GoDaddy\WordPress\MWC\Core\Features\Commerce\Commerce;
 use GoDaddy\WordPress\MWC\Core\Interceptors\Handlers\AbstractInterceptorHandler;
 use stdClass;
 use WP_Post;
@@ -23,13 +25,13 @@ class ProductQueryHandler extends AbstractInterceptorHandler
     /**
      * Constructor.
      *
-     * @param ProductsServiceContract $productsService
      * @param ProductPostAdapter $postAdapter
+     * @param BatchListProductsByLocalIdService $batchListProductsByLocalIdService
      */
-    public function __construct(ProductsServiceContract $productsService, ProductPostAdapter $postAdapter)
+    public function __construct(ProductPostAdapter $postAdapter, BatchListProductsByLocalIdService $batchListProductsByLocalIdService)
     {
-        $this->productsService = $productsService;
         $this->postAdapter = $postAdapter;
+        $this->batchListProductsByLocalIdService = $batchListProductsByLocalIdService;
     }
 
     /**
@@ -41,7 +43,8 @@ class ProductQueryHandler extends AbstractInterceptorHandler
      */
     protected function shouldInjectCommerceData(array $posts, $wpQuery) : bool
     {
-        return ! empty($posts)
+        return CatalogIntegration::hasCommerceCapability(Commerce::CAPABILITY_READ)
+            && ! empty($posts)
             && $wpQuery instanceof WP_Query
             && $this->isProductQuery($wpQuery);
     }

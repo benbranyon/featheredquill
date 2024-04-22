@@ -26,7 +26,7 @@ class GetHelpPage extends AbstractAdminPage
      */
     public function __construct()
     {
-        $this->title = __('Get Help', 'mwc-dashboard');
+        $this->title = _x('Get Help', 'Menu title for requesting GoDaddy support assistance via form', 'mwc-dashboard');
         $this->screenId = GetHelpMenu::MENU_SLUG;
         $this->parentMenuSlug = GetHelpMenu::MENU_SLUG;
         $this->capability = GetHelpMenu::CAPABILITY;

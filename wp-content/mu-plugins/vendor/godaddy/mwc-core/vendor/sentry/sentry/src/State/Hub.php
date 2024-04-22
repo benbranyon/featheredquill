@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace Sentry\State;
 
 use Sentry\Breadcrumb;
+use Sentry\CheckIn;
+use Sentry\CheckInStatus;
 use Sentry\ClientInterface;
 use Sentry\Event;
 use Sentry\EventHint;
 use Sentry\EventId;
 use Sentry\Integration\IntegrationInterface;
+use Sentry\MonitorConfig;
 use Sentry\Severity;
 use Sentry\Tracing\SamplingContext;
 use Sentry\Tracing\Span;
@@ -19,7 +22,7 @@ use Sentry\Tracing\TransactionContext;
 /**
  * This class is a basic implementation of the {@see HubInterface} interface.
  */
-final class Hub implements HubInterface
+class Hub implements HubInterface
 {
     /**
      * @var Layer[] The stack of client/scope pairs
@@ -75,11 +78,11 @@ final class Hub implements HubInterface
      */
     public function popScope(): bool
     {
-        if (1 === \count($this->stack)) {
+        if (\count($this->stack) === 1) {
             return false;
         }
 
-        return null !== array_pop($this->stack);
+        return array_pop($this->stack) !== null;
     }
 
     /**
@@ -120,7 +123,7 @@ final class Hub implements HubInterface
     {
         $client = $this->getClient();
 
-        if (null !== $client) {
+        if ($client !== null) {
             return $this->lastEventId = $client->captureMessage($message, $level, $this->getScope(), $hint);
         }
 
@@ -134,7 +137,7 @@ final class Hub implements HubInterface
     {
         $client = $this->getClient();
 
-        if (null !== $client) {
+        if ($client !== null) {
             return $this->lastEventId = $client->captureException($exception, $this->getScope(), $hint);
         }
 
@@ -148,7 +151,7 @@ final class Hub implements HubInterface
     {
         $client = $this->getClient();
 
-        if (null !== $client) {
+        if ($client !== null) {
             return $this->lastEventId = $client->captureEvent($event, $hint, $this->getScope());
         }
 
@@ -162,11 +165,41 @@ final class Hub implements HubInterface
     {
         $client = $this->getClient();
 
-        if (null !== $client) {
+        if ($client !== null) {
             return $this->lastEventId = $client->captureLastError($this->getScope(), $hint);
         }
 
         return null;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param int|float|null $duration
+     */
+    public function captureCheckIn(string $slug, CheckInStatus $status, $duration = null, ?MonitorConfig $monitorConfig = null, ?string $checkInId = null): ?string
+    {
+        $client = $this->getClient();
+
+        if ($client === null) {
+            return null;
+        }
+
+        $options = $client->getOptions();
+        $event = Event::createCheckIn();
+        $checkIn = new CheckIn(
+            $slug,
+            $status,
+            $checkInId,
+            $options->getRelease(),
+            $options->getEnvironment(),
+            $duration,
+            $monitorConfig
+        );
+        $event->setCheckIn($checkIn);
+        $this->captureEvent($event);
+
+        return $checkIn->getId();
     }
 
     /**
@@ -176,7 +209,7 @@ final class Hub implements HubInterface
     {
         $client = $this->getClient();
 
-        if (null === $client) {
+        if ($client === null) {
             return false;
         }
 
@@ -190,11 +223,11 @@ final class Hub implements HubInterface
 
         $breadcrumb = $beforeBreadcrumbCallback($breadcrumb);
 
-        if (null !== $breadcrumb) {
+        if ($breadcrumb !== null) {
             $this->getScope()->addBreadcrumb($breadcrumb, $maxBreadcrumbs);
         }
 
-        return null !== $breadcrumb;
+        return $breadcrumb !== null;
     }
 
     /**
@@ -204,7 +237,7 @@ final class Hub implements HubInterface
     {
         $client = $this->getClient();
 
-        if (null !== $client) {
+        if ($client !== null) {
             return $client->getIntegration($className);
         }
 
@@ -220,9 +253,9 @@ final class Hub implements HubInterface
     {
         $transaction = new Transaction($context, $this);
         $client = $this->getClient();
-        $options = null !== $client ? $client->getOptions() : null;
+        $options = $client !== null ? $client->getOptions() : null;
 
-        if (null === $options || !$options->isTracingEnabled()) {
+        if ($options === null || !$options->isTracingEnabled()) {
             $transaction->setSampled(false);
 
             return $transaction;
@@ -233,8 +266,8 @@ final class Hub implements HubInterface
 
         $tracesSampler = $options->getTracesSampler();
 
-        if (null === $transaction->getSampled()) {
-            if (null !== $tracesSampler) {
+        if ($transaction->getSampled() === null) {
+            if ($tracesSampler !== null) {
                 $sampleRate = $tracesSampler($samplingContext);
             } else {
                 $sampleRate = $this->getSampleRate(
@@ -251,13 +284,13 @@ final class Hub implements HubInterface
 
             $transaction->getMetadata()->setSamplingRate($sampleRate);
 
-            if (0.0 === $sampleRate) {
+            if ($sampleRate === 0.0) {
                 $transaction->setSampled(false);
 
                 return $transaction;
             }
 
-            $transaction->setSampled(mt_rand(0, mt_getrandmax() - 1) / mt_getrandmax() < $sampleRate);
+            $transaction->setSampled($this->sample($sampleRate));
         }
 
         if (!$transaction->getSampled()) {
@@ -265,6 +298,15 @@ final class Hub implements HubInterface
         }
 
         $transaction->initSpanRecorder();
+
+        $profilesSampleRate = $options->getProfilesSampleRate();
+        if ($this->sample($profilesSampleRate)) {
+            $transaction->initProfiler();
+            $profiler = $transaction->getProfiler();
+            if ($profiler !== null) {
+                $profiler->start();
+            }
+        }
 
         return $transaction;
     }
@@ -313,15 +355,31 @@ final class Hub implements HubInterface
 
     private function getSampleRate(?bool $hasParentBeenSampled, float $fallbackSampleRate): float
     {
-        if (true === $hasParentBeenSampled) {
+        if ($hasParentBeenSampled === true) {
             return 1;
         }
 
-        if (false === $hasParentBeenSampled) {
+        if ($hasParentBeenSampled === false) {
             return 0;
         }
 
         return $fallbackSampleRate;
+    }
+
+    /**
+     * @param mixed $sampleRate
+     */
+    private function sample($sampleRate): bool
+    {
+        if ($sampleRate === 0.0) {
+            return false;
+        }
+
+        if ($sampleRate === 1.0) {
+            return true;
+        }
+
+        return mt_rand(0, mt_getrandmax() - 1) / mt_getrandmax() < $sampleRate;
     }
 
     /**

@@ -16,7 +16,7 @@ final class HeldOrderStatus implements OrderStatusContract
 
     public function __construct()
     {
-        $this->setName('held')
+        $this->setName('on-hold')
             ->setLabel(__('Held', 'mwc-common'));
     }
 }

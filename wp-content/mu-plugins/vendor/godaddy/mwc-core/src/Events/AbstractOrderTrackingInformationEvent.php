@@ -2,8 +2,6 @@
 
 namespace GoDaddy\WordPress\MWC\Core\Events;
 
-use Exception;
-
 /**
  * Abstract order tracking information event class.
  */
@@ -39,7 +37,6 @@ abstract class AbstractOrderTrackingInformationEvent extends AbstractOrderEvent
      * Builds the initial data for the event.
      *
      * @return array
-     * @throws Exception
      */
     protected function buildInitialData() : array
     {
