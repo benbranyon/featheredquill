@@ -1,8 +1,7 @@
 <?php
-/* @var $this NewsletterEmails */
-require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
-
-$controls = new NewsletterControls();
+/* @var $this NewsletterEmailsAdmin */
+/* @var $controls NewsletterControls */
+/* @var $logger NewsletterLogger */
 
 $theme_id = $_GET['id'];
 
@@ -10,7 +9,7 @@ if ($theme_id === 'rawhtml' && check_admin_referer('newsletter-new')) {
     $email = array();
     $email['status'] = 'new';
     $email['subject'] = __('Here the email subject', 'newsletter');
-    $email['track'] = Newsletter::instance()->options['track'];
+    $email['track'] = Newsletter::instance()->get_option('track');
     $email['token'] = $this->get_token();
     $email['type'] = 'message';
     $email['send_on'] = time();
@@ -27,14 +26,15 @@ $theme = $this->themes->get_theme($theme_id);
 
 // Should never happen
 if (!$theme) {
-    die('Invalid theme');
+    echo 'Invalid theme';
+    return;
 }
 
 if (!file_exists($theme['dir'] . '/theme-options.php') && check_admin_referer('newsletter-new')) {
     $email = array();
     $email['status'] = 'new';
     $email['subject'] = __('Here the email subject', 'newsletter');
-    $email['track'] = Newsletter::instance()->options['track'];
+    $email['track'] = Newsletter::instance()->get_option('track');
     $email['token'] = $this->get_token();
     $email['type'] = 'message';
     $email['send_on'] = time();
@@ -59,7 +59,7 @@ if (!file_exists($theme['dir'] . '/theme-options.php') && check_admin_referer('n
     } else {
         $email['message_text'] = 'You need a modern email client to read this email. Read it online: {email_url}.';
     }
-    $email = Newsletter::instance()->save_email($email);
+    $email = $this->save_email($email);
 
     $controls->js_redirect($this->get_editor_url($email->id, $email->editor));
     return;
@@ -76,7 +76,7 @@ if ($controls->is_action('create')) {
     $email = array();
     $email['status'] = 'new';
     $email['subject'] = __('Here the email subject', 'newsletter');
-    $email['track'] = Newsletter::instance()->options['track'];
+    $email['track'] = Newsletter::instance()->get_option('track');
     $email['message_text'] = '';
     $email['type'] = 'message';
     $email['send_on'] = time();
@@ -127,19 +127,20 @@ if ($controls->is_action('create')) {
 
 <div class="wrap tnp-emails tnp-emails-new" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/tnp-header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER ?>
 
     <div id="tnp-heading">
 
         <h2><?php _e('Create a newsletter', 'newsletter') ?>
-            <a class="tnp-btn-h1" href="<?php echo NewsletterEmails::instance()->get_admin_page_url('theme'); ?>"><?php _e('Back to newsletter themes', 'newsletter') ?></a>
+            <a class="tnp-btn-h1" href="?page=newsletter_emails_theme"><?php _e('Back', 'newsletter') ?></a>
         </h2>
-        <br>
-        <p>Theme options are saved for next time you'll use this theme.</p>
+        
 
     </div>
 
     <div id="tnp-body" class="tnp-body-lite"> 
+        
+        <?php $controls->show(); ?>
 
         <form method="post" action="">
             <?php $controls->init(); ?>

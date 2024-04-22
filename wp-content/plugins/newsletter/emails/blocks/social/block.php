@@ -23,11 +23,11 @@ $type = (int) $options['type'];
 $width = (int) $options['width'];
 $social_icon_url = plugins_url('newsletter') . '/images/social-' . $type;
 
-$socials = ['facebook', 'twitter', 'pinterest', 'linkedin', 'tumblr', 'youtube', 'soundcloud', 'instagram', 'vimeo', 'telegram', 'vk', 'discord', 'tiktok', 'twitch'];
+$socials = ['facebook', 'twitter', 'pinterest', 'linkedin', 'tumblr', 'youtube', 'soundcloud', 'instagram', 'vimeo', 'telegram', 'vk', 'discord', 'tiktok', 'twitch', 'whatsapp'];
 
 $valid_socials = [];
 foreach ($socials as &$social) {
-    if (!empty($block_options[$social . '_url'])) {
+    if (!empty($info[$social . '_url'])) {
         $valid_socials[] = $social;
     }
 }
@@ -47,7 +47,7 @@ if (!$valid_socials) {
     <tr>
         <td align="center" valign="middle">
             <?php foreach ($valid_socials as &$social) { ?>
-                <a href="<?php echo esc_url($block_options[$social . '_url']) ?>" inline-class="link"><img src="<?php echo $social_icon_url ?>/<?php echo $social ?>.png" width="<?php echo $width?>" height="<?php echo $width?>" alt="<?php echo $social ?>"></a>&nbsp;
+                <a href="<?php echo esc_url($info[$social . '_url']) ?>" inline-class="link" target="_blank"><img src="<?php echo $social_icon_url ?>/<?php echo $social ?>.png" width="<?php echo $width?>" height="<?php echo $width?>" alt="<?php echo esc_attr($social) ?>"></a>&nbsp;
             <?php } ?>
         </td>
     </tr>

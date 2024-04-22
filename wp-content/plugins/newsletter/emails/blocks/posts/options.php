@@ -14,10 +14,10 @@ if (class_exists('NewsletterExtensions')) {
 
 <?php if ($context['type'] == 'automated') { ?>
 
-    <div class="tnp-field-box">
+    <div class="tnpf-field-box">
         <p>
             <strong>AUTOMATED</strong><br>
-            While composing all posts are shown while on sending posts are extrated following the rules below. 
+            While composing all posts are shown while on sending posts are extrated following the rules below.
             <a href="https://www.thenewsletterplugin.com/documentation/addons/extended-features/automated-extension/#regeneration" target="_blank">Read more</a>.
         </p>
         <?php $fields->select('automated_disabled', '', ['' => 'Use the last newsletter date and...', '1' => 'Do not consider the last newsletter']) ?>
@@ -59,32 +59,42 @@ $fields->select('layout', __('Layout', 'newsletter'),
             'two' => __('Two columns', 'newsletter'),
             'big-image' => __('One column, big image', 'newsletter'),
             'full-post' => __('Full post', 'newsletter')
-])
+        ])
 ?>
 
 
 <div class="tnp-field-row">
     <label class="tnp-row-label"><?php _e('Post info', 'newsletter') ?></label>
-    <div class="tnp-field-col-3">
+    <div class="tnp-field-col-4">
         <?php $fields->checkbox('show_date', __('Show date', 'newsletter')) ?>
     </div>
-    <div class="tnp-field-col-3">
+    <div class="tnp-field-col-4">
         <?php $fields->checkbox('show_author', __('Show author', 'newsletter')) ?>
     </div>
-    <div class="tnp-field-col-3">
+    <div class="tnp-field-col-4">
         <?php $fields->checkbox('show_image', __('Show image', 'newsletter')) ?>
+    </div>
+    <div class="tnp-field-col-4">
+        <?php $fields->checkbox('nocrop', __('No crop', 'newsletter')) ?>
     </div>
     <div style="clear: both"></div>
 </div>
 
 <div class="tnp-field-row">
-    <div class="tnp-field-col-2">
+    <div class="tnp-field-col-3">
         <?php $fields->select_number('max', __('Max posts', 'newsletter'), 1, 40); ?>
     </div>
-    <div class="tnp-field-col-2">
+    <div class="tnp-field-col-3">
         <?php $fields->select_number('post_offset', __('Posts offset', 'newsletter'), 0, 20); ?>
     </div>
+    <div class="tnp-field-col-4">
+        <div class="tnp-field-col-3">
+        <?php $fields->yesno('private', __('Private', 'newsletter')) ?>
+    </div>
+    </div>
+    <div style="clear: both"></div>
 </div>
+
 
 <div class="tnp-field-row">
     <div class="tnp-field-col-3">
@@ -116,6 +126,9 @@ $fields->button('button', __('Read more button', 'newsletter'), [
     'weight_default' => true
 ])
 ?>
+
+<?php $fields->padding('text_padding', 'Text padding', ['description' => 'Supported only by some layouts', 'show_top' => false, 'show_bottom' => false]) ?>
+
 
 <?php $fields->block_commons() ?>
 

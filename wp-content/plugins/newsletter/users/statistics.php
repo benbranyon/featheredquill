@@ -1,14 +1,14 @@
 <?php
-/* @var $this NewsletterUsers */
-defined('ABSPATH') || exit;
+/* @var $this NewsletterUsersAdmin */
+/* @var $controls NewsletterControls */
 
-include_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
-$controls = new NewsletterControls();
+defined('ABSPATH') || exit;
 
 wp_enqueue_script('tnp-chart');
 
 $all_count = $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE);
-$options_profile = get_option('newsletter_profile');
+
+$referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained from " . NEWSLETTER_USERS_TABLE . " group by referrer order by confirmed desc");
 ?>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -19,30 +19,32 @@ $options_profile = get_option('newsletter_profile');
 </script>
 
 <div class="wrap" id="tnp-wrap">
-    
-    <?php include NEWSLETTER_DIR . '/tnp-header.php'; ?>
+
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscribers-and-management/') ?>
-        <h2><?php _e('Subscriber statistics', 'newsletter') ?></h2>
-
+        <h2><?php esc_html_e('Subscribers', 'newsletter') ?></h2>
+        <?php include __DIR__ . '/nav.php' ?>
     </div>
 
     <div id="tnp-body" class="tnp-users-statistics">
+
+        <?php $controls->show(); ?>
 
         <?php $controls->init(); ?>
 
         <div id="tabs">
 
             <ul>
-                <li><a href="#tabs-overview">By Status</a></li>
-                <li><a href="#tabs-lists">By Lists</a></li>
-                <li><a href="#tabs-language">By Language</a></li>
-                <li><a href="#tabs-countries">World Map</a></li>
-                <li><a href="#tabs-referrers">By Referrer</a></li>
-                <li><a href="#tabs-sources">By URL</a></li>
-                <li><a href="#tabs-gender">By Gender</a></li>
-                <li><a href="#tabs-time">By Time</a></li>
+                <li><a href="#tabs-overview"><?php esc_html_e('By Status', 'newsletter'); ?></a></li>
+                <li><a href="#tabs-lists"><?php esc_html_e('By Lists', 'newsletter'); ?></a></li>
+                <li><a href="#tabs-language"><?php esc_html_e('By Language', 'newsletter'); ?></a></li>
+                <li><a href="#tabs-countries"><?php esc_html_e('By location', 'newsletter'); ?></a></li>
+                <li><a href="#tabs-referrers"><?php esc_html_e('By Referrer', 'newsletter'); ?></a></li>
+                <li><a href="#tabs-sources"><?php esc_html_e('By URL', 'newsletter'); ?></a></li>
+                <li><a href="#tabs-gender"><?php esc_html_e('By Gender', 'newsletter'); ?></a></li>
+                <li><a href="#tabs-time"><?php esc_html_e('By Time', 'newsletter'); ?></a></li>
             </ul>
 
             <div id="tabs-overview">
@@ -55,45 +57,45 @@ $options_profile = get_option('newsletter_profile');
                         <table class="widefat" style="width: 250px">
                             <thead>
                                 <tr>
-                                    <th><?php _e('Status', 'newsletter') ?></th>
-                                    <th><?php _e('Total', 'newsletter') ?></th>
+                                    <th><?php esc_html_e('Status', 'newsletter') ?></th>
+                                    <th><?php esc_html_e('Total', 'newsletter') ?></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><?php _e('Any', 'newsletter') ?></td>
+                                    <td><?php esc_html_e('Any', 'newsletter') ?></td>
                                     <td>
-                                        <?php echo $list->total; ?>
+                                        <?php echo (int)$list->total; ?>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><?php _e('Confirmed', 'newsletter') ?></td>
+                                    <td><?php esc_html_e('Confirmed', 'newsletter') ?></td>
                                     <td>
-                                        <?php echo $list->confirmed; ?>
+                                        <?php echo (int)$list->confirmed; ?>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><?php _e('Not confirmed', 'newsletter') ?></td>
+                                    <td><?php esc_html_e('Not confirmed', 'newsletter') ?></td>
                                     <td>
-                                        <?php echo $list->unconfirmed; ?>
+                                        <?php echo (int)$list->unconfirmed; ?>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><?php _e('Unsubscribed', 'newsletter') ?></td>
+                                    <td><?php esc_html_e('Unsubscribed', 'newsletter') ?></td>
                                     <td>
-                                        <?php echo $list->unsubscribed; ?>
+                                        <?php echo (int)$list->unsubscribed; ?>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><?php _e('Bounced', 'newsletter') ?></td>
+                                    <td><?php esc_html_e('Bounced', 'newsletter') ?></td>
                                     <td>
-                                        <?php echo $list->bounced; ?>
+                                        <?php echo (int)$list->bounced; ?>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><?php _e('Complained', 'newsletter') ?></td>
+                                    <td><?php esc_html_e('Complained', 'newsletter') ?></td>
                                     <td>
-                                        <?php echo $list->complained; ?>
+                                        <?php echo (int)$list->complained; ?>
                                     </td>
                                 </tr>
                             </tbody>
@@ -143,8 +145,8 @@ $options_profile = get_option('newsletter_profile');
                     <thead>
                         <tr>
                             <th>&nbsp;</th>
-                            <th><?php _e('List', 'newsletter') ?></th>
-                            <th style="text-align: right"><?php _e('Total', 'newsletter') ?></th>
+                            <th><?php esc_html_e('List', 'newsletter') ?></th>
+                            <th style="text-align: right"><?php esc_html_e('Total', 'newsletter') ?></th>
                             <th style="text-align: right"><?php echo $this->get_user_status_label('C', true) ?></th>
                             <th style="text-align: right"><?php echo $this->get_user_status_label('S', true) ?></th>
                             <th style="text-align: right"><?php echo $this->get_user_status_label('U', true) ?></th>
@@ -159,7 +161,7 @@ $options_profile = get_option('newsletter_profile');
                             $row = $wpdb->get_row("select count(*) as total, SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained from " . NEWSLETTER_USERS_TABLE . " where list_" . $list->id . "=1");
                             ?>
                             <tr>
-                                <td><?php echo $list->id ?></td>
+                                <td><?php echo esc_html($list->id) ?></td>
                                 <td><?php echo esc_html($list->name) ?></td>
 
                                 <td style="text-align: right"><?php echo (int) $row->total; ?></td>
@@ -183,13 +185,13 @@ $options_profile = get_option('newsletter_profile');
                         ?>
                         <tr>
                             <td>&nbsp;</td>
-                            <td>IN NO LIST</td>
-                            <td style="text-align: right"><?php echo $row->total; ?></td>
-                            <td style="text-align: right"><?php echo $row->confirmed; ?></td>
-                            <td style="text-align: right"><?php echo $row->unconfirmed; ?></td>
-                            <td style="text-align: right"><?php echo $row->unsubscribed; ?></td>
-                            <td style="text-align: right"><?php echo $row->bounced; ?></td>
-                            <td style="text-align: right"><?php echo $row->complained; ?></td>
+                            <td style="font-style: italic"><?php esc_html_e('None', 'newsletter') ?></td>
+                            <td style="text-align: right"><?php echo (int)$row->total; ?></td>
+                            <td style="text-align: right"><?php echo (int)$row->confirmed; ?></td>
+                            <td style="text-align: right"><?php echo (int)$row->unconfirmed; ?></td>
+                            <td style="text-align: right"><?php echo (int)$row->unsubscribed; ?></td>
+                            <td style="text-align: right"><?php echo (int)$row->bounced; ?></td>
+                            <td style="text-align: right"><?php echo (int)$row->complained; ?></td>
                         </tr>
                     </tbody>
                 </table>
@@ -198,28 +200,27 @@ $options_profile = get_option('newsletter_profile');
 
             <div id="tabs-language">
                 <?php if ($this->is_multilanguage()) { ?>
-                    <h3>By language</h3>
                     <?php $languages = $this->get_languages(); ?>
 
                     <table class="widefat" style="width: auto">
                         <thead>
                             <tr>
-                                <th><?php _e('Status', 'newsletter') ?></th>
-                                <th><?php _e('Total', 'newsletter') ?></th>
+                                <th><?php esc_html_e('Status', 'newsletter') ?></th>
+                                <th><?php esc_html_e('Total', 'newsletter') ?></th>
                             </tr>
                         <tbody>
                             <?php foreach ($languages as $code => $label) { ?>
                                 <tr>
                                     <td><?php echo esc_html($label) ?></td>
                                     <td>
-                                        <?php echo $wpdb->get_var($wpdb->prepare("select count(*) from " . NEWSLETTER_USERS_TABLE . " where language=%s", $code)); ?>
+                                        <?php echo (int)$wpdb->get_var($wpdb->prepare("select count(*) from " . NEWSLETTER_USERS_TABLE . " where language=%s", $code)); ?>
                                     </td>
                                 </tr>
                             <?php } ?>
                             <tr>
-                                <td><?php _e('Without language', 'newsletter') ?></td>
+                                <td><?php esc_html_e('Without language', 'newsletter') ?></td>
                                 <td>
-                                    <?php echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where language=''"); ?>
+                                    <?php echo (int)$wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where language=''"); ?>
                                 </td>
                             </tr>
                             </thead>
@@ -245,17 +246,11 @@ $options_profile = get_option('newsletter_profile');
 
 
             <div id="tabs-referrers">
-                <p>
-                    <?php $controls->panel_help('https://www.thenewsletterplugin.com/documentation/subscribers-statistics#referrer') ?>
-                </p>
-                <?php
-                $list = $wpdb->get_results("select referrer, count(*) as total, SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained from " . NEWSLETTER_USERS_TABLE . " group by referrer order by confirmed desc");
-                ?>
                 <table class="widefat" style="width: auto">
                     <thead>
                         <tr>
-                            <th><?php _e('Referrer', 'newsletter') ?></th>
-                            <th style="text-align: right"><?php _e('Total', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Referrer', 'newsletter') ?></th>
+                            <th style="text-align: right"><?php esc_html_e('Total', 'newsletter') ?></th>
                             <th style="text-align: right"><?php echo $this->get_user_status_label('C', true) ?></th>
                             <th style="text-align: right"><?php echo $this->get_user_status_label('S', true) ?></th>
                             <th style="text-align: right"><?php echo $this->get_user_status_label('U', true) ?></th>
@@ -264,15 +259,15 @@ $options_profile = get_option('newsletter_profile');
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($list as $row) { ?>
+                        <?php foreach ($referres as $row) { ?>
                             <tr>
                                 <td><?php echo empty($row->referrer) ? '[not set]' : esc_html($row->referrer) ?></td>
-                                <td style="text-align: right"><?php echo $row->total; ?></td>
-                                <td style="text-align: right"><?php echo $row->confirmed; ?></td>
-                                <td style="text-align: right"><?php echo $row->unconfirmed; ?></td>
-                                <td style="text-align: right"><?php echo $row->unsubscribed; ?></td>
-                                <td style="text-align: right"><?php echo $row->bounced; ?></td>
-                                <td style="text-align: right"><?php echo $row->complained; ?></td>
+                                <td style="text-align: right"><?php echo (int)$row->total; ?></td>
+                                <td style="text-align: right"><?php echo (int)$row->confirmed; ?></td>
+                                <td style="text-align: right"><?php echo (int)$row->unconfirmed; ?></td>
+                                <td style="text-align: right"><?php echo (int)$row->unsubscribed; ?></td>
+                                <td style="text-align: right"><?php echo (int)$row->bounced; ?></td>
+                                <td style="text-align: right"><?php echo (int)$row->complained; ?></td>
                             </tr>
                         <?php } ?>
                     </tbody>
@@ -282,9 +277,7 @@ $options_profile = get_option('newsletter_profile');
 
 
             <div id="tabs-sources">
-                <p>
-                    <?php $controls->panel_help('https://www.thenewsletterplugin.com/documentation/subscribers-statistics#source') ?>
-                </p>
+
                 <?php
                 $list = $wpdb->get_results("select http_referer, count(*) as total, SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained from " . NEWSLETTER_USERS_TABLE . " group by http_referer order by count(*) desc limit 100");
                 ?>
@@ -292,7 +285,7 @@ $options_profile = get_option('newsletter_profile');
                     <thead>
                         <tr>
                             <th>URL</th>
-                            <th style="text-align: right"><?php _e('Total', 'newsletter') ?></th>
+                            <th style="text-align: right"><?php esc_html_e('Total', 'newsletter') ?></th>
                             <th style="text-align: right"><?php echo $this->get_user_status_label('C', true) ?></th>
                             <th style="text-align: right"><?php echo $this->get_user_status_label('S', true) ?></th>
                             <th style="text-align: right"><?php echo $this->get_user_status_label('U', true) ?></th>
@@ -304,12 +297,12 @@ $options_profile = get_option('newsletter_profile');
                         <?php foreach ($list as $row) { ?>
                             <tr>
                                 <td><?php echo empty($row->http_referer) ? '[not set]' : $controls->print_truncated($row->http_referer, 120) ?></td>
-                                <td style="text-align: right"><?php echo $row->total; ?></td>
-                                <td style="text-align: right"><?php echo $row->confirmed; ?></td>
-                                <td style="text-align: right"><?php echo $row->unconfirmed; ?></td>
-                                <td style="text-align: right"><?php echo $row->unsubscribed; ?></td>
-                                <td style="text-align: right"><?php echo $row->bounced; ?></td>
-                                <td style="text-align: right"><?php echo $row->complained; ?></td>
+                                <td style="text-align: right"><?php echo (int)$row->total; ?></td>
+                                <td style="text-align: right"><?php echo (int)$row->confirmed; ?></td>
+                                <td style="text-align: right"><?php echo (int)$row->unconfirmed; ?></td>
+                                <td style="text-align: right"><?php echo (int)$row->unsubscribed; ?></td>
+                                <td style="text-align: right"><?php echo (int)$row->bounced; ?></td>
+                                <td style="text-align: right"><?php echo (int)$row->complained; ?></td>
                             </tr>
                         <?php } ?>
                     </tbody>
@@ -327,10 +320,10 @@ $options_profile = get_option('newsletter_profile');
                 $none_count = $wpdb->get_row("select SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained from " . NEWSLETTER_USERS_TABLE . " where sex='n'");
                 ?>
 
-                <table class="widefat">
+                <table class="widefat" style="width: auto">
                     <thead>
                         <tr>
-                            <th><?php _e('Gender', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Gender', 'newsletter') ?></th>
                             <th style="text-align: right"><?php echo $this->get_user_status_label('C', true) ?></th>
                             <th style="text-align: right"><?php echo $this->get_user_status_label('S', true) ?></th>
                             <th style="text-align: right"><?php echo $this->get_user_status_label('U', true) ?></th>
@@ -340,28 +333,28 @@ $options_profile = get_option('newsletter_profile');
                     </thead>
                     <tbody>
                         <tr>
-                            <td><?php _e('Female', 'newsletter') ?></td>
-                            <td style="text-align: right"><?php echo $female_count->confirmed; ?></td>
-                            <td style="text-align: right"><?php echo $female_count->unconfirmed; ?></td>
-                            <td style="text-align: right"><?php echo $female_count->unsubscribed; ?></td>
-                            <td style="text-align: right"><?php echo $female_count->bounced; ?></td>
-                            <td style="text-align: right"><?php echo $female_count->complained; ?></td>
+                            <td><?php esc_html_e('Female', 'newsletter') ?></td>
+                            <td style="text-align: right"><?php echo (int)$female_count->confirmed; ?></td>
+                            <td style="text-align: right"><?php echo (int)$female_count->unconfirmed; ?></td>
+                            <td style="text-align: right"><?php echo (int)$female_count->unsubscribed; ?></td>
+                            <td style="text-align: right"><?php echo (int)$female_count->bounced; ?></td>
+                            <td style="text-align: right"><?php echo (int)$female_count->complained; ?></td>
                         </tr>
                         <tr>
-                            <td><?php _e('Male', 'newsletter') ?></td>
-                            <td style="text-align: right"><?php echo $male_count->confirmed; ?></td>
-                            <td style="text-align: right"><?php echo $male_count->unconfirmed; ?></td>
-                            <td style="text-align: right"><?php echo $male_count->unsubscribed; ?></td>
-                            <td style="text-align: right"><?php echo $male_count->bounced; ?></td>
-                            <td style="text-align: right"><?php echo $male_count->complained; ?></td>
+                            <td><?php esc_html_e('Male', 'newsletter') ?></td>
+                            <td style="text-align: right"><?php echo (int)$male_count->confirmed; ?></td>
+                            <td style="text-align: right"><?php echo (int)$male_count->unconfirmed; ?></td>
+                            <td style="text-align: right"><?php echo (int)$male_count->unsubscribed; ?></td>
+                            <td style="text-align: right"><?php echo (int)$male_count->bounced; ?></td>
+                            <td style="text-align: right"><?php echo (int)$male_count->complained; ?></td>
                         </tr>
                         <tr>
-                            <td><?php _e('Not specified', 'newsletter') ?></td>
-                            <td style="text-align: right"><?php echo $none_count->confirmed; ?></td>
-                            <td style="text-align: right"><?php echo $none_count->unconfirmed; ?></td>
-                            <td style="text-align: right"><?php echo $none_count->unsubscribed; ?></td>
-                            <td style="text-align: right"><?php echo $none_count->bounced; ?></td>
-                            <td style="text-align: right"><?php echo $none_count->complained; ?></td>
+                            <td><?php esc_html_e('Not specified', 'newsletter') ?></td>
+                            <td style="text-align: right"><?php echo (int)$none_count->confirmed; ?></td>
+                            <td style="text-align: right"><?php echo (int)$none_count->unconfirmed; ?></td>
+                            <td style="text-align: right"><?php echo (int)$none_count->unsubscribed; ?></td>
+                            <td style="text-align: right"><?php echo (int)$none_count->bounced; ?></td>
+                            <td style="text-align: right"><?php echo (int)$none_count->complained; ?></td>
                         </tr>
                     </tbody>
                 </table>
@@ -393,7 +386,7 @@ $options_profile = get_option('newsletter_profile');
 
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>
 

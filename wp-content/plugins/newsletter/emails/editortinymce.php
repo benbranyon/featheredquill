@@ -1,10 +1,9 @@
 <?php
+/* @var $this NewsletterEmailsAdmin */
+/* @var $controls NewsletterControls */
+/* @var $logger NewsletterLogger */
+
 defined('ABSPATH') || exit;
-
-require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
-
-$controls = new NewsletterControls();
-$module = NewsletterEmails::instance();
 
 $email_id = (int) $_GET['id'];
 
@@ -13,18 +12,18 @@ if ($controls->is_action('save') || $controls->is_action('next') || $controls->i
     $email['id'] = $email_id;
     $email['message'] = $controls->data['message'];
     $email['subject'] = $controls->data['subject'];
-    $module->save_email($email);
+    $this->save_email($email);
     if ($controls->is_action('next')) {
-        $controls->js_redirect($module->get_admin_page_url('edit') . '&id=' . $email_id);
+        $controls->js_redirect($this->get_admin_page_url('edit') . '&id=' . $email_id);
         return;
     }
 }
 
 if ($controls->is_action('test')) {
-    $module->send_test_email($module->get_email($email_id), $controls);
+    $this->send_test_email($this->get_email($email_id), $controls);
 }
 
-$controls->data = Newsletter::instance()->get_email($email_id, ARRAY_A);
+$controls->data = $this->get_email($email_id, ARRAY_A);
 ?>
 
 <style>

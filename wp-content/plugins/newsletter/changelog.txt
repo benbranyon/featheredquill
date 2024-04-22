@@ -1,3 +1,639 @@
+= 7.9.9 =
+
+* Removed use of the utf8_decode() function deprecated with PHP 8.2
+* Fixed notice on some internal pages with PHP 8.2
+* Fixed mobile preview for multicolumns block
+* Fixed translation domain for the activation message
+
+= 7.9.8 =
+
+* Fixed PHP notice for "add_submenu_page()"
+* Fixed PHP waning on user meta
+
+= 7.9.7 =
+
+* Fixed a "foreach" error on 7.9.6
+
+= 7.9.6 =
+
+* Added custom welcome email support
+* More linking information on lists panel
+* Fixed is_private() error under some specific settings
+* Fixed warning with minimal form widget
+* Updated Char.min.js (thanks to H. Nguyen)
+* Added support for subscriber meta values
+* Fixed "nocrop" missing key
+
+= 7.9.5 =
+
+* Fixed missing width for Outlook on packaged templates
+* Foxed private list filtering on subscription form
+
+= 7.9.4 =
+
+* Fixed list max change and database upgrade
+* Added a couple of templates
+* Fixed debug notice on some composer blocks when WP_DEBUG is active
+
+= 7.9.3 =
+
+* Added check on custom fields when the configuration is missing
+* Added twitter new logo
+* New template management panel
+* Fix attempt for shortcode not working on some blogs
+* Added subscriber ID and connected WP User ID on export
+* Newsletter list panel aligned with the new layout
+* Added the template change on the composer
+
+= 7.9.2 =
+
+* Removed image format filters when we generate thumbnail to avoid the creation of webp images
+* Added image crop control on posts block (experimental)
+* Fixed test error on template configuration
+* Added new controls and options to NewsletterFields
+* Fixed antibot for keyed parameters
+
+= 7.9.1 =
+
+* Added the "required" attribute on profile fields
+* Fixed "deprecated" notice with PHP 8.2
+* Fixed debug notices on profile page with some PHP installations
+
+= 7.9.0 =
+
+* Fixed some line heights
+* Added registration of shortcodes under the AJAX context
+* Added shortcode management on newsletter online view
+* Fixed line-height for Outlook on some blocks
+* Fixed the template message test
+* Added webp images check since Outlook does not support that format
+* Fixed error text field on subscription panel not displaying when customized
+* Security fix on minimal form shortcode
+* Removed the "before" and "after" attributes of the main shortcode
+
+= 7.8.9 =
+
+* Added default subject when it is missing
+* Added check on regeneration for missing subject
+* Text block editor now uses the block background
+* Added sub-menu to the subscriber edit page
+
+= 7.8.8 =
+
+* Fixed dismiss button no reloading the page correctly
+* Restored error messages when adding as new an extiting email
+* Added constant to define a delay between emails
+
+= 7.8.7 =
+
+* Fixed the dashboard layout (side effect of links not clickable)
+
+= 7.8.6 =
+
+* Restored the welcome wizard on new installations
+* Revisited the main settings page
+* Fixed preset deletion
+* Added check on controls for fatal errors on some installations (apparently using the plugin in the wrong way)
+* Fixed errors with PHP 8 on profile page
+
+= 7.8.5 =
+
+* Added new options to the "hero" block (alignement, color schema)
+* Change the font scaling on blocks to scale only when the size is set to "default"
+* Restored public access to $instance in Newsletter class since someone is (wrongly) using it
+* Added post order patch by B. K.
+* Fixed debug notice
+* Fix on style.css
+* Fixed captcha
+* Fixed warning on newsletter online with with {title} tag
+* Fixed custom fields not showing on profile page
+
+= 7.8.4 =
+
+* Fixed sanitization method used by the API
+* Fixed missing cleanup functions used after massive deletions
+* Fixed sending of text messages for activation and welcome emails
+* Fixed warnings with wp-cli ()
+* Fixed error with the old "default" legacy theme
+* Fixed automatic subject from posts block
+
+= 7.8.3 =
+
+* Fixed debug notices
+* Fixed missing form on public page
+* Fixed notices on main settings (in debug mode)
+
+= 7.8.2 =
+
+* Fixed migration of custom HTML forms
+
+= 7.8.1 =
+
+* Fixed menu order
+* Fixed gender field sanitization
+* Fixed submit button style on subscription form created with shortcodes
+* Fixed privacy label not aligned with the checkbox
+* Fixed errors on legacy themes
+* Fixed the export respoding with "0"
+
+= 7.8.0 =
+
+* Removed the unsed feed by mail references
+* Fixed CSS for profile page form
+* Improved configuration of the standard subscription form
+* Added configuration for the profile page form
+* Relativized font size and spaces on forms
+* New admin organization with sub-menus
+* New translation management (both for single language and multilanguage blogs)
+* Removed the legacy SMTP
+* Removed the PHPMailer instantiator
+* Removed deprecated and unused code
+* Added option to use the pre-translated texts (default on new installations)
+
+= 7.7.0 =
+
+* Fixed block detection on full post block
+
+= 7.6.9 =
+
+* Security fix
+* Added new controls to uniform the user experience
+* Fixed PHP notice on the footer
+* Added filter on welcome email
+
+= 7.6.8 =
+
+* More strict checks on get_option function (object caching plugins...)
+* Added massive status change for subscribers
+* Added new controls on common code
+* Fixed some doc links
+* Fixed help badge on some panels
+* Changed the posts block for Outlook on Mac
+
+= 7.6.7 =
+
+* Fixed hook linked functions on status page when closures are used
+* Fixed green color on links in the composer
+* Changed the default style of the text block
+* Optimized CSS an JS
+* Removed old composer code
+* Added trimming for long fields
+* Code for logged in users moved to the WP User Addon
+* Added link on status page to see the advanced report
+* Removed obsolete status page data
+* Fixes for PHP 8.2
+* Removed obsolete "define" statements
+* Fixed permalink generation with WPML in multidomain configuration and block post without a specified language
+* Improved email validation
+* Minor style fixes
+* Fixed composer javascript loading
+
+= 7.6.6 =
+
+* Improved the full post layout of the Posts block
+* Improved the test message to check image loading from different servers
+* Changed the system error reports
+* Merge of CSS to avoid problems with optimizers
+
+= 7.6.5 =
+
+* Urgent. Removed the WPGlobus support from the core
+
+= 7.6.4 =
+
+* Fixed possible composer width not set
+* Added version number on CSS to avoid browser caching
+* Changed the full post alignment (should fix layout problems)
+* When a test newsletter is sent from the composer to a custom address, the matching subscriber is used, if present
+* Fixed lists missing on subscribers' panel
+
+= 7.6.3 =
+
+* Fixed composer sidebar not working on Firefox
+
+= 7.6.2 =
+
+* New administration look and feel
+* Added ID attribute to form shortcodes
+* Fix attempt to the posts block (layout one column) for Outlook on Mac
+
+= 7.6.1 =
+
+* Fixed newsletter global settings saving
+
+= 7.6.0 =
+
+* Added control on admin notification of cancellations
+* Fixed the wrong error logged as "missing block.php" (anyway not affecting the plugin functionality)
+* Added fix to avoid mod_security false positive and newsletter saving problems
+* Improved image block for gmail web
+* Added filters' check on Status panel
+* Fixed Google Plus social url not cleared upon company info saving
+= NEXT =
+
+* New interface to configure the subscription flow
+* Bright style on the admin side
+* New configuration for the opt-out (was unsubscription - wrong word)
+* Improved subscribers' general statistics
+* Improved list panel readability when there are lot of notes
+
+= 7.5.9 =
+
+* Fixed underlined excerpt on posts block
+
+= 7.5.8 =
+
+* Added filter on newsletter message before online view
+* Added excerpt lenght in character (useful for Chinese) on posts block
+* Improved the excerpt extraction
+* Add link on excerpt on posts block
+
+= 7.5.7 =
+
+* Check on ctype_space function (there are installation without it)
+* Improved the html-2-text conversion
+* Added language to the export
+* Status labels fixed on subscriber search and edit panel
+* Stripped HTML tags on block generated subjects
+
+= 7.5.6 =
+
+* Added new filter for multilanguage support for GTranslate (experimental)
+* Added link to the backup/recovery documentation
+
+= 7.5.5 =
+
+* Fixed access control on form manager base class
+
+= 7.5.4 =
+
+* Fixed composer icons path for Amazon AWS+Bitnami installations
+* Fixed profile form on multilanguage installation
+
+= 7.5.3 =
+
+* Fixed missing languages on profile page with WPML
+
+= 7.5.2 =
+
+* Fixed the global newsletter styles not applied when it is regenerated
+* Fixed "title" tag not showing the value for "not specified" gender
+
+= 7.5.1 =
+
+* Fixed PHPMailer loading for WP 5.4.10
+* Updated WP version compatibility
+
+= 7.5.0 =
+
+* Fixed image block width for small images or specific width
+
+= 7.4.9 =
+
+* Composer fix not updating new newsletters
+
+= 7.4.8 =
+
+* Changed the image block for Gmail
+* Removed the WP emojis staticizer on emails sent by Newsletter
+
+= 7.4.7 =
+
+* Changed removal order of the emojis admin script breaking newsletters' body
+* Disabled DOM warnings
+
+= 7.4.6 =
+
+* XSS security fix
+
+= 7.4.5 =
+
+* Fixed image block font-size to show the alt text (not for Outlook, it never shows the alt text)
+* XSS security fix
+
+= 7.4.4 =
+
+* Changed the dedicated page retrieval to intercept misconfigurations
+* Added option to accept repeated subscription in single opt-in (you should check if it is compatible with your privacy regulation)
+* Posts field selector keep now track of the previous post selected even if no more in list
+* Improved the error management when delivery fails using the WP native mailing function
+* Added title filter on posts block for compatibility with WPGlobus
+
+= 7.4.3 =
+
+* Removed obsolete note about the newsletter textual part
+* Introduced text part generator right now only for the Composer (with permission of Frank M.)
+* Added check on System>Status for images with relative URL
+* Addec check for Freesoul Deactivate Plugins
+* Minimal for layout now consider the button_label attribute
+
+= 7.4.2 =
+
+* Fixed the post date (regression)
+* Added link to the automatic plaintext generator plugin by franciscus
+* Possible fix for our Gutenberg block (sometimes) not working
+* Added uoloads dir and url on System>Status panel
+* Fixed Status panel error when a newsletter is in "error" status
+* Added default width to the logo on header block
+
+= 7.4.1 =
+
+* Added check on invalid media on two columns post type
+* WP 5.9.2 compatibility check
+
+= 7.4.0 =
+
+* Added privacy links
+* Added filter "newsletter_subscription" (documentation is under writing)
+
+= 7.3.9 =
+
+* Fixed grid layout not showing correctly on gmail
+* Fixed notice on widget page about the wrong editor enqueued
+* Removed wrong top bar warning
+* Fixed block options on posts block
+* Fixed padding on two column posts block
+
+= 7.3.8 =
+
+* Fixed graph scale on System/Scheduler panel
+* Fixed untraslated labels on subscriber management panels
+* Fixed the "toggle" private/public status on sent newsletter
+* Removed the "action call test" from the status panel since it does not work with some providers but does not affect the correct working of Newsletter
+* Added developer information on this readme
+
+= 7.3.7 =
+
+* Fixed unwanted redirects on subscription errors
+* Fixed composer page HTML
+* Minor fixes on PHP, CSS
+* Fixed notice on image block
+
+= 7.3.6 =
+
+* Improved composer reusability in other contexts
+* Removed obsolete composer code
+* Fixed default tracking for old theme-based neewsletters
+* Forced enconding on export (attempt)
+* WP 5.9 check
+
+= 7.3.5 =
+
+* WP 5.8.3 compatibility check
+* Fixed 2021 max year in date picker
+* Typos
+
+= 7.3.4 =
+
+* Fixed delivery fatal error management
+* Fixed link to the schduler dianostica panel
+
+= 7.3.3 =
+
+* Added "complained" status to subscriber filters
+* Fixed some links bringing to a "not allowed" page
+* Fixed a notice on delivery diagnostic page
+* Fixed logo width notice on header block
+
+= 7.3.2 =
+
+* Fixed the remote ip retrieval and clean up
+* Fixed header link to status page
+* Fixed database error with too long IPs
+* Fixed the subscription of cancelled addresses
+* Fixed sender and name customization
+
+= 7.3.1 =
+
+* Dropped old mailers support
+* Improved sending process and limits checking
+* Removed obsolete notifications
+* Fixed the wrong report on single email delivery speed
+* Added support for custom sending speed by addons
+* Improved excerpt generation (but it still depends on plugins and themes...)
+* Support for building button option on composer blocks
+
+= 7.3.0 =
+
+* Fixed header block layout with (logo only layout)
+* Check for conflicts on newsletter saving
+* Added the subscriber complained status (actually not managed automatically)
+
+= 7.2.9 =
+
+* Fixed generic action button confirmation popup not showing the message
+* [SECURITY] Pre parsing of IP addresses on security panel
+* [SECURITY] Comments allowed on IP address list on security panel
+* [COMPOSER] Fixed preset name/subject
+* Improved generated forms for accessibility
+
+= 7.2.8 =
+
+* Fixed the print_date() when no time is provided
+* Fixed date alignment on posts block
+* Folders reorganization
+* Social block with a new set of icons
+* Boosted performances of the lists management page (for big databases)
+* Added a new scheduler diagnostic panel
+* Seriously improved the cron statistics and diagnostic panel (check it out!)
+* Removed obsolete migration code from ancient versions
+
+= 7.2.7 =
+
+* Fixed JS error on composer sometimes preventing the correct initialization
+
+= 7.2.6 =
+
+* Fixed links on test emails sent to a free email address
+* Added attachment explanation
+* Added link to explain the use of the snippet
+
+= 7.2.5 =
+
+* Fixed subject not saved under specific circumstance
+
+= 7.2.4 =
+
+* Fixed the composer not starting for blog with SSL plugin but still HTTP configured on main WP settings
+* Changed labels on subscriber maintenance panel
+* Updated requirements for WP version
+
+= 7.2.3 =
+
+* [COMPOSER] Added approx. indicators of the subsject visibile part in Apple and Android clients (experimental)
+* [COMPOSER] New mobile version view directly while composing (experimental)
+* [COMPOSER] New test email to test subscribers or to specific email address
+* [COMPOSER] Fixed missing background when creating a new message from a preset
+* [COMPOSER] Added media selector to the CTA block
+* [COMPOSER] Added reference to the tags on HTML and Text blocks
+* [COMPOSER] Move the snippet (preheader) field near the subject
+* [COMPOSER] Footer block with three link options: unsubscribe, manage and view online
+* [COMPOSER] Improve font coherence between blocks (by default)
+* [ANTISPAM] Improved the antispam checks on subscription
+* [GENERAL] Removed obsolete folders and code
+* [NEWSLETTERS] Refactored subject ideas selector
+* [SUBSCRIPTION] Inverted extra profile fields and lists on standard subscription form
+* [GENERAL] IP address extracted checking proxy variables
+* [GENERAL] Improved sending stats collection and display for the delivery engine (not related to click/open stats)
+
+= 7.2.2 =
+
+* [COMPOSER] Posts block excerpt removed when set to 0-length
+* [GENERAL]Added special characters on test message
+* [GENERAL]Added more specific error for action calls on System/Status panel
+* [SUBSCRIPTION] Check for the _wp_amp_action_xhr_converted parameter by AMP plugin
+
+= 7.2.1 =
+
+* [GENERAL] Added more detailed admin logging
+* [NEWSLETTERS] Fixed scheduled date sometimes reset to 1/1/1970
+
+= 7.2.0 =
+
+* [PROFILE] Fixed activation email on profile change
+* [NEWSLETTERS] Extended year selection on newsletter scheduling
+* [DELIVERY] Breaking change: old enqueue() and flush() methods have been removed
+* [GENERAL] Fixed alert message on some buttons
+* [SUBSCRIPTION] Fixed error message on multiple subscriptions (when not allowed)
+* [GENERAL] Fixed erratic error log line on main log
+
+= 7.1.9 =
+
+* [GENERAL] Removed the encodign defatlt to Base 64 when not specified since it seems incompatible with some SMTP plugins
+* [GENERAL] Review some controls layout and behavior
+* [DEBUG] Improved logging on database errors
+* [GENERAL] Added TikTok, Discord and Twitch socials
+* [GENERAL] Fixed odd error reported related to the cron call statistics collection
+* [DEBUG] Added a delivery diagnostic panel
+
+= 7.1.8 =
+
+* [COMPOSER] Fixed alignment of single big image on Outlook Android
+
+= 7.1.7 =
+
+* [GENERAL] Fix of permalink onm email with multilanguage plugins
+
+= 7.1.6 =
+
+* [COMPOSER] Fixed one column big image Read more links
+
+= 7.1.5 =
+
+* [COMPOSER] Improve buttons on posts layout
+* [COMPOSER] Improved header layout and logo
+* [COMPOSER] Generally improved block spacing
+
+= 7.1.4 =
+
+* [COMPOSER] Fixed image block for Outlook
+* [GENERAL] Fix undefined values in Gutenberg block
+
+= 7.1.3 =
+
+* [COMPOSER] Improvements on blocks layout compatibility
+* [COMPOSER] Fixed preset global options saving
+* [COMPOSER] Content regeneration on preset selection
+* [GENERAL] Added to System menu the Site Health link, a not well known native page of WordPress with system information
+* [GENERAL] Added sending statistics reset button on status panel
+
+= 7.1.2 =
+
+* [ADDONS] Fixed the addons list
+
+= 7.1.1 =
+
+* [GENERAL] Improved profile related functions
+* [GENERAL] Fixed check on field names (thanks Peter P.)
+* [COMPOSER] Fix on preset selection
+* [GENERAL] Fix ajax subscription on error
+
+= 7.1.0 =
+
+* [COMPOSER] Added link to tags documentation to inject subscriber's data
+* [COMPOSER] Fixed layout of posts block for Outlook 365
+* [GENERAL] Improved caching of addons json (even on error)
+* [GENERAL] Status menu changed to System/Status and System/Logs
+* [API] Fixed the subscriber status management (the API Addon should be updated as well)
+* [GENERAL] Fixed management of fatal errors on sending
+* [GENERAL] Limited error string per message to 250 chars
+* [GENERAL] Fixed check on field names (thanks Peter P.)
+
+
+= 7.0.9 =
+
+* [CAPTCHA] Fixed button label translation
+* [DELIVERY] Mailing fatal error management with newsletter stop and reporting
+* [SMTP] Marked obsolete the internal SMTP and made available the free SMTP addon
+* [DELIVERY] Better management of delivery fatal errors with a new "error" status for newsletters
+* [GENERAL] New log files panel
+* [IMPORT] Old import panel replaced by the new (really better) import addon (file, copy and paste, bounced addresses import)
+* [NEWSLETTERS] It's now possible to specify the sender name and email per newsletter (thanks to Matthew S.)
+
+= 7.0.8 =
+
+* [SUBSCRIBERS] Changed action buttons
+* [GENERAL] Reorganization of CSS and removal of unused files
+* [DASHBOARD] New window open for links and fix of invalid URLs
+* [NEWSLETTERS] New action buttons
+* [GENERAL] Minor fixes and optimizations
+* [COMPOSER] Fixed rare size error on gif images
+
+= 7.0.7 =
+
+* [COMPOSER] Fixed a warning in some inline editable blocks
+* [NEWSLETTERS] Fixed style which made list labels badly readable
+* [NEWSLETTERS] Fixed style which made bullet lists white (not on delivered newsletters)
+* [GENERAL] Added some references to the not working scheduler warning
+
+= 7.0.6 =
+
+* [COMPOSER] CTA block not grabbing settings from the "old" blocks
+* [COMPOSER] CSS issue on button settings group
+* [COMPOSER] Posts block two columns layout (author and padding)
+* [IMPORT] Removed the old low-featured import (the free import addon has everything needed!)
+* [GENERAL] Compatibility check with WP 5.7
+
+= 7.0.5 =
+
+* [COMPOSER] Hero CTA button not working
+* Fixed to the hero block button
+* Added support for the SMTP addon
+
+= 7.0.4 =
+
+* [COMPOSER] Redesigned drag and drop composer
+* [COMPOSER] NEW! Save drag and drop composed newsletters as templates to reuse easily
+* Redesigned dashboard
+* Several bug and fixes
+
+= 7.0.3 =
+
+* Option to choose between unsubscription and profile link in the footer block
+* Direct image src URL for image block
+* New media selector for blocks
+* Minor fixes
+* Updated codemirror
+* Updated default theme
+* Fixed tag filter on posts block (when tags have parathesis or like)
+* Fixed composer visualization of bullet points
+
+= 7.0.2 =
+
+* Fixed media 2x resize
+
+= 7.0.1 =
+
+* Fixed enforced lists by language with Polylang
+
+= 7.0.0 =
+
+* Added multiple newsletter selection for deletion
+* Added text part on welcome and activation email
+* Added the attribute "show_form" to "newsletter" shortcode
+* Added filter on subscriber saving (from external systems) with wrong list field values
+* Added index.html on log folder
+
 = 6.9.9 =
 
 * Not specified gender fix
@@ -653,7 +1289,7 @@
 
 = 5.7.8 =
 
-* Support for the [Add on Manager](https://www.thenewsletterplugin.com/documentation/how-to-install-the-addons-manager) 
+* Support for the [Add on Manager](https://www.thenewsletterplugin.com/documentation/how-to-install-the-addons-manager)
 
 = 5.7.7 =
 
@@ -821,7 +1457,7 @@
 
 = 5.4.4 =
 
-* Fixed warning on default option init 
+* Fixed warning on default option init
 
 = 5.4.3 =
 
@@ -843,7 +1479,7 @@
 * Revised and simplified all texts for easy translation by the community
 * The messages alternative page (/extensions/newsletter/subscription/page.php) is now deprecated and will be removed
 * New [cancellation documentation page published](/extensions/newsletter/subscription/page.php)
-* Integrated SMTP is now deprecated (soon will be replaced with a **free extension**) 
+* Integrated SMTP is now deprecated (soon will be replaced with a **free extension**)
 * {home_url} tag is now deprecated, use {blog_url} instead
 * Introduced tags {company_name} and {company_address} replaced by info in the company info configuration
 * Default template for messages has been improved with company contacts
@@ -912,9 +1548,9 @@
 = 5.3.2 =
 
 * Security panel reorganized
-* Added Akismet spam check 
+* Added Akismet spam check
 
-= 5.3.1 = 
+= 5.3.1 =
 
 * Name and last name check for spam
 * 404 responses on error condition
@@ -989,7 +1625,7 @@
 
 = 5.1.5 =
 
-* Re-confirmation is now allows for unsubscribed and bounced 
+* Re-confirmation is now allows for unsubscribed and bounced
 * Fixed to minimal widget and minimal css
 * Fixed the approx. subscriber count on newsletter creation (was showing encoded data)
 
@@ -998,7 +1634,7 @@
 * Fixed notices on email edit panel
 * Added microdata to the call to action block
 * Added filter on name field while sending. [See this post](https://www.thenewsletterplugin.com/?p=54292)
-* Improved the online [viewability rules](https://www.thenewsletterplugin.com/documentation/newsletters-module#view-online) 
+* Improved the online [viewability rules](https://www.thenewsletterplugin.com/documentation/newsletters-module#view-online)
 * Fixed theme editor bad behavior
 * Fixed the min size of thumbnails on default theme
 * Removed references to font awesome where not used
@@ -1008,7 +1644,7 @@
 * Fixed newsletter duplication which was loosing the editor type
 * Fixed gender saving on targeting
 
-= 5.1.2 = 
+= 5.1.2 =
 
 * Improved the speed report on status panel
 * Removed the obsolete diagnostic panel
@@ -1145,7 +1781,7 @@
 
 = 4.8.9 =
 
-* Package problems on WP.org 
+* Package problems on WP.org
 
 = 4.8.8 =
 
@@ -1192,7 +1828,7 @@
 = 4.8.2 =
 
 * Changed few labels
-* CSS fix on admin panels  
+* CSS fix on admin panels
 
 = 4.8.1 =
 
@@ -1435,7 +2071,7 @@
 * Fixed CSS for extensions
 * Fixed few debug notices
 * Improved the content lock user recognition
-* Subscriber search by list 
+* Subscriber search by list
 
 = 4.0.4 =
 
@@ -1443,7 +2079,7 @@
 
 = 4.0.3 =
 
-* Fixed the welcome email enable/disable setting 
+* Fixed the welcome email enable/disable setting
 
 = 4.0.2 =
 
@@ -1564,7 +2200,7 @@
 = 3.7.9 =
 
 * Added subject empty check when sending tests
-* Added option to import subscribers as confirmed or not confirmed 
+* Added option to import subscribers as confirmed or not confirmed
 * Added import subscribers from CSV file
 * Updated the WP compatibility version number
 * Fixed the save button on sent emails

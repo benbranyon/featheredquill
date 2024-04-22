@@ -51,7 +51,7 @@
 
 #tnpc-subject-wrap {
     border-bottom: 5px solid #eee;
-    padding-bottom: 20px;
+    padding-bottom: 1rem;
     padding-top: 20px;
     padding-left: 20px;
     position:relative;
@@ -87,52 +87,29 @@
     margin-right: 0;
 }
 
-#tnpc-subject-wrap .composer-actions {
-    position: absolute;
-    right: 10px;
-    bottom: 5px;
-    display: flex;
-    align-items: center;
+#tnp-body #tnpc-subject-wrap .tnpb-actions {
+    text-align: right;
+    padding-right: 1rem;
 }
 
-#tnpc-subject-wrap .composer-view-mode {
-    display: flex;
-}
-
-#tnpc-subject-wrap .composer-view-mode .composer-view-mode__item {
-    display: block;
-    width: 30px;
-    height: 30px;
-    line-height: 30px;
-    box-sizing: content-box;
+#tnp-body #tnpc-subject-wrap .tnpb-actions a,
+#tnp-body #tnpc-subject-wrap .tnpb-actions span
+{
+    display: inline-block;
+    width: 40px;
     text-align: center;
-    margin-left: 3px;
-    border-radius: 3px;
-    border: solid 1px #3c434a;
-    background-color: #FFF;
-    color: #3c434a;
-    font-size: 12px;
-    cursor: pointer;
 }
 
-#tnpc-subject-wrap .composer-view-mode .composer-view-mode__item--active {
-    background-color: #2b2f3a;
-    border-color: #2b2f3a;
-    color: #FFF;
+#tnp-body #tnpc-subject a {
+    color: #000 !important;
 }
 
-#tnpc-subject-wrap .composer-view-mode .composer-view-mode__item:hover{
-    background-color: #3c434a;
-    border-color: #3c434a;
-    color: #FFF;
+.tnpb-actions .button-primary {
+    background-color: #777;
 }
 
-.composer-actions .button-primary {
-    background-color: #2b2f3a;
-}
-
-.composer-actions .button-primary:hover {
-    background-color: #3c434a;
+.tnpb-actions .button-primary:hover {
+    background-color: #333;
 }
 
 #tnpc-subject #options-subject-subject,
@@ -226,7 +203,7 @@
     display: none;
 }
 
-#tnpb-content p {
+#tnp-wrap #tnpb-content p {
     font-size: inherit;
     font-weight: inherit;
     font-family: inherit;
@@ -769,6 +746,12 @@
     width: 50px;
     height: 50px;
     margin-top: 50px;
+}
+
+.tnpc-preset.tnpc-preset2 img {
+    width: auto;
+    height: 110px;
+    margin-top: 15px;
 }
 
 .tnpc-preset-label {

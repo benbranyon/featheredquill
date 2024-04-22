@@ -2,11 +2,6 @@
 /* @var $this NewsletterEmails */
 defined('ABSPATH') || exit;
 
-/* @var $wpdb wpdb */
-require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
-$controls = new NewsletterControls();
-$module = NewsletterEmails::instance();
-
 function tnp_prepare_controls($email, $controls) {
     $controls->data = $email;
 
@@ -19,7 +14,7 @@ function tnp_prepare_controls($email, $controls) {
 $email = $this->get_email($_GET['id'], ARRAY_A);
 
 if (empty($email)) {
-    echo 'Wrong email identifier';
+    echo 'Newsletter not found';
     return;
 }
 
@@ -27,21 +22,21 @@ $email_id = $email['id'];
 
 /* Satus changes which require a reload */
 if ($controls->is_action('pause')) {
-    $this->admin_logger->info('Newsletter ' . $email_id . ' paused');
+    $this->logger->info('Newsletter ' . $email_id . ' paused');
     $wpdb->update(NEWSLETTER_EMAILS_TABLE, array('status' => 'paused'), array('id' => $email_id));
     $email = $this->get_email($_GET['id'], ARRAY_A);
     tnp_prepare_controls($email, $controls);
 }
 
 if ($controls->is_action('continue')) {
-    $this->admin_logger->info('Newsletter ' . $email_id . ' restarted');
+    $this->logger->info('Newsletter ' . $email_id . ' restarted');
     $wpdb->update(NEWSLETTER_EMAILS_TABLE, array('status' => 'sending'), array('id' => $email_id));
     $email = $this->get_email($_GET['id'], ARRAY_A);
     tnp_prepare_controls($email, $controls);
 }
 
 if ($controls->is_action('abort')) {
-    $this->admin_logger->info('Newsletter ' . $email_id . ' aborted');
+    $this->logger->info('Newsletter ' . $email_id . ' aborted');
     $wpdb->query("update " . NEWSLETTER_EMAILS_TABLE . " set last_id=0, sent=0, status='new' where id=" . $email_id);
     $email = $this->get_email($_GET['id'], ARRAY_A);
     tnp_prepare_controls($email, $controls);
@@ -53,7 +48,7 @@ if ($controls->is_action('change-private')) {
     $data['private'] = $controls->data['private'];
     $data['id'] = $email['id'];
     $email = $this->save_email($data, ARRAY_A);
-    $controls->add_message_saved();
+    $controls->add_toast_saved();
 
     tnp_prepare_controls($email, $controls);
 }
@@ -97,7 +92,7 @@ if (!$controls->is_action()) {
 
 if ($controls->is_action('html')) {
 
-    $this->admin_logger->info('Newsletter ' . $email_id . ' converted to HTML');
+    $this->logger->info('Newsletter ' . $email_id . ' converted to HTML');
 
     $data = [];
     $data['editor'] = NewsletterEmails::EDITOR_HTML;
@@ -107,6 +102,15 @@ if ($controls->is_action('html')) {
     $data['options'] = $email['options'];
     unset($data['options']['composer']);
     // End backward compatibility
+
+    $data['message'] = preg_replace('/data-json=".*?"/is', '', $email['message']);
+    $data['message'] = str_replace('</table>', "</table>\n", $data['message']);
+    $data['message'] = str_replace('</td></tr>', "</td>\n</tr>", $data['message']);
+    $data['message'] = str_replace('</td></tr>', "</td>\n</tr>", $data['message']);
+    $data['message'] = str_replace('</tr></tbody>', "</tr>\n</tbody>", $data['message']);
+    $data['message'] = str_replace('</tbody></table>', "</tbody>\n</table>", $data['message']);
+    $data['message'] = str_replace('<tbody><tr>', "<tbody>\n<tr>", $data['message']);
+    $data['message'] = str_replace('<tr><td ', "<tr>\n<td ", $data['message']);
 
     $email = $this->save_email($data, ARRAY_A);
     $controls->messages = 'You can now edit the newsletter as pure HTML';
@@ -125,19 +129,19 @@ if ($controls->is_action('test') || $controls->is_action('save') || $controls->i
     } else {
         $email['updated'] = time();
         if ($controls->is_action('save')) {
-            $this->admin_logger->info('Saving newsletter: ' . $email_id);
+            $this->logger->info('Saving newsletter: ' . $email_id);
         } else if ($controls->is_action('send')) {
-            $this->admin_logger->info('Sending newsletter: ' . $email_id);
+            $this->logger->info('Sending newsletter: ' . $email_id);
         } else if ($controls->is_action('schedule')) {
-            $this->admin_logger->info('Scheduling newsletter: ' . $email_id);
+            $this->logger->info('Scheduling newsletter: ' . $email_id);
         }
 
-        $email['subject'] = $controls->data['subject'];
+        //$email['subject'] = $controls->data['subject'];
         $email['track'] = $controls->data['track'];
         $email['editor'] = $editor_type;
         $email['private'] = $controls->data['private'];
         $email['message_text'] = $controls->data['message_text'];
-        if ($controls->is_action('send')) {
+        if ($controls->is_action('send') || $controls->is_action('save')) {
             $email['send_on'] = time();
         } else {
             // Patch, empty on continuation
@@ -154,7 +158,7 @@ if ($controls->is_action('test') || $controls->is_action('save') || $controls->i
         unset($email['options']['lists_operator']);
         unset($email['options']['lists_exclude']);
         unset($email['options']['sex']);
-        for ($i = 1; $i <= 20; $i++) {
+        for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
             unset($email['options']["profile_$i"]);
         }
 
@@ -257,23 +261,22 @@ if ($controls->is_action('test') || $controls->is_action('save') || $controls->i
 
         $email = Newsletter::instance()->save_email($email, ARRAY_A);
 
-        tnp_prepare_controls($email, $controls);
-
         if ($email === false) {
             $controls->errors = 'Unable to save. Try to deactivate and reactivate the plugin may be the database is out of sync.';
         }
 
-        $controls->add_message_saved();
+        tnp_prepare_controls($email, $controls);
+
+        $controls->add_toast_saved();
     }
 }
 
 if (empty($controls->errors) && ($controls->is_action('send') || $controls->is_action('schedule'))) {
 
-    NewsletterStatistics::instance()->reset_stats($email);
-
     if ($email['subject'] == '') {
         $controls->errors = __('A subject is required to send', 'newsletter');
     } else {
+        NewsletterStatistics::instance()->reset_stats($email);
         $wpdb->update(NEWSLETTER_EMAILS_TABLE, array('status' => TNP_Email::STATUS_SENDING), array('id' => $email_id));
         $email['status'] = TNP_Email::STATUS_SENDING;
         if ($controls->is_action('send')) {
@@ -281,6 +284,11 @@ if (empty($controls->errors) && ($controls->is_action('send') || $controls->is_a
         } else {
             $controls->messages = __('Scheduled.', 'newsletter');
         }
+        if ($controls->is_action('send') && $email['total'] < 20) {
+            Newsletter::instance()->hook_newsletter();
+        }
+
+        NewsletterMainAdmin::instance()->set_completed_step('first-newsletter');
     }
 }
 
@@ -309,73 +317,67 @@ if ($email['status'] != 'sent') {
 
 <div class="wrap tnp-emails tnp-emails-edit" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/tnp-header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
         <?php $controls->title_help('/newsletter-targeting') ?>
 
-        <h2><?php _e('Edit Newsletter', 'newsletter') ?></h2>
+        <h2><?php echo esc_html($email['subject']) ?></h2>
 
     </div>
 
     <div id="tnp-body">
+        <?php $controls->show() ?>
+
         <form method="post" action="" id="newsletter-form">
             <?php $controls->init(['cookie_name' => 'newsletter_emails_edit_tab']); ?>
             <?php $controls->hidden('updated') ?>
 
-            <div class="tnp-submit">
-
-                <?php if ($email['status'] == 'sending' || $email['status'] == 'sent') { ?>
-
-                    <?php $controls->button_back('?page=newsletter_emails_index') ?>
-
-                <?php } else { ?>
-
-                    <a class="button-primary" href="<?php echo $module->get_editor_url($email_id, $editor_type) ?>">
-                        <i class="fas fa-edit"></i> <?php _e('Edit', 'newsletter') ?>
-                    </a>
-
-                <?php } ?>
-
-                <?php if ($email['status'] != 'sending' && $email['status'] != 'sent') $controls->button_save(); ?>
-                <?php if ($email['status'] == 'new') $controls->button_confirm('send', __('Send now', 'newsletter'), __('Start real delivery?', 'newsletter')); ?>
-                <?php if ($email['status'] == 'sending') $controls->button_confirm('pause', __('Pause', 'newsletter'), __('Pause the delivery?', 'newsletter')); ?>
-                <?php if ($email['status'] == 'paused' || $email['status'] == 'error') $controls->button_confirm('continue', __('Continue', 'newsletter'), 'Continue the delivery?'); ?>
-                <?php if ($email['status'] == 'paused') $controls->button_confirm('abort', __('Stop', 'newsletter'), __('This totally stop the delivery, ok?', 'newsletter')); ?>
-                <?php if ($email['status'] == 'new' || ( $email['status'] == 'paused' && $email['send_on'] > time() )) { ?>
-                    <a id="tnp-schedule-button" class="button-secondary" href="javascript:tnp_toggle_schedule()"><i class="far fa-clock"></i> <?php _e("Schedule") ?></a>
-                    <span id="tnp-schedule" style="display: none;">
-                        <?php $controls->datetime('send_on') ?>
-                        <?php $controls->button_confirm('schedule', __('Schedule', 'newsletter'), __('Schedule delivery?', 'newsletter')); ?>
-                        <a class="button-secondary tnp-button-cancel" href="javascript:tnp_toggle_schedule()"><?php _e("Cancel") ?></a>
-                    </span>
-                <?php } ?>
-            </div>
-
             <div class="tnp-emails-header">
+                <div class="tnp-submit">
 
-                <div class="tnp-emails-subject">
+                    <?php if ($email['status'] == 'sending' || $email['status'] == 'sent') { ?>
 
+                        <?php $controls->button_back('?page=newsletter_emails_index') ?>
 
+                    <?php } else { ?>
 
-                    <?php $controls->text('subject', null, 'Subject'); ?>
-                    &nbsp;&nbsp;&nbsp;
-                    <i class="far fa-lightbulb" data-tnp-modal-target="#subject-ideas-modal" style="font-size: 24px"></i>
+                        <a class="button-secondary" href="<?php echo $this->get_editor_url($email_id, $editor_type) ?>">
+                            <i class="fas fa-edit"></i> <?php _e('Edit', 'newsletter') ?>
+                        </a>
+
+                    <?php } ?>
+
+                    <?php if ($email['status'] != 'sending' && $email['status'] != 'sent') $controls->button_save(); ?>
+                    <?php if ($email['status'] == 'new') $controls->button_confirm('send', __('Send now', 'newsletter'), __('Start real delivery?', 'newsletter')); ?>
+                    <?php if ($email['status'] == 'sending') $controls->button_confirm('pause', __('Pause', 'newsletter'), __('Pause the delivery?', 'newsletter')); ?>
+                    <?php if ($email['status'] == 'paused' || $email['status'] == 'error') $controls->button_confirm('continue', __('Continue', 'newsletter'), 'Continue the delivery?'); ?>
+                    <?php if ($email['status'] == 'paused') $controls->button_confirm('abort', __('Stop', 'newsletter'), __('This totally stop the delivery, ok?', 'newsletter')); ?>
+                    <?php if ($email['status'] == 'new' || ( $email['status'] == 'paused' && $email['send_on'] > time() )) { ?>
+                        <a id="tnp-schedule-button" class="button-secondary" href="javascript:tnp_toggle_schedule()"><i class="far fa-clock"></i> <?php _e("Schedule") ?></a>
+                        <span id="tnp-schedule" style="display: none;">
+                            <?php $controls->datetime('send_on') ?>
+                            <?php $controls->button_confirm('schedule', __('Schedule', 'newsletter'), __('Schedule delivery?', 'newsletter')); ?>
+                            <a class="button-secondary tnp-button-cancel" href="javascript:tnp_toggle_schedule()"><?php _e("Cancel") ?></a>
+                        </span>
+                    <?php } ?>
+
+                    <?php $controls->button_icon_view(home_url('/') . '?na=view&id=' . $email_id) ?>
                 </div>
 
                 <div class="tnp-emails-status">
 
                     <div style="display: flex; justify-content: space-between">
                         <div style="flex-grow: 1">
-                            <?php $module->show_email_status_label($email) ?>
+                            <?php $this->show_email_status_label($email) ?>
                         </div>
 
                         <div style="flex-grow: 1">
                             <?php
-                            if ($email['status'] == 'sending' && $email['send_on'] > time() || $email['status'] == 'sent') {
-                                echo $module->format_date($email['send_on']);
+                            if ($email['status'] == 'sending' && $email['send_on'] > time() || $email['status'] == 'sent' || $email['status'] == 'error') {
+                                echo $this->format_date($email['send_on']);
                             } else {
-                                $module->show_email_progress_bar($email);
+                                $this->show_email_progress_bar($email);
                             }
                             ?>
 
@@ -394,12 +396,13 @@ if ($email['status'] != 'sent') {
                 </div>
             </div>
 
+
             <div id="tabs">
 
                 <ul>
                     <li><a href="#tabs-options"><?php _e('Targeting', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-advanced"><?php _e('Advanced', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-preview"><?php _e('Preview', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-ga">Google Analytics</a></li>
+                    <li class="tnp-tabs-advanced"><a href="#tabs-advanced"><?php _e('Advanced', 'newsletter') ?></a></li>
                 </ul>
 
 
@@ -453,13 +456,14 @@ if ($email['status'] != 'sent') {
                             </td>
                         </tr>
                         <?php
-                        $fields = TNP_Profile_Service::get_profiles('', TNP_Profile::TYPE_SELECT);
+                        $fields = $this->get_customfields();
                         ?>
                         <?php if (!empty($fields)) { ?>
                             <tr>
                                 <th><?php _e('Profile fields', 'newsletter') ?></th>
                                 <td>
                                     <?php foreach ($fields as $profile) { ?>
+                                        <?php if ($profile->type !== TNP_Profile::TYPE_SELECT) continue; ?>
                                         <?php echo esc_html($profile->name), ' ', __('is one of:', 'newsletter') ?>
                                         <?php $controls->select2("options_profile_$profile->id", $profile->options, null, true, null, __('Do not filter by this field', 'newsletter')); ?>
                                         <br>
@@ -472,10 +476,74 @@ if ($email['status'] != 'sent') {
                         <?php } ?>
                     </table>
 
-                    <?php do_action('newsletter_emails_edit_target', $module->get_email($email_id), $controls) ?>
+                    <?php do_action('newsletter_emails_edit_target', $this->get_email($email_id), $controls) ?>
 
                 </div>
 
+                <div id="tabs-ga">
+                    <?php if (!class_exists('NewsletterAnalytics')) { ?>
+                        <p class="tnp-tab-notice">Google Analytics addon required.</p>
+                    <?php } ?>
+                    <?php if (empty($email['track'])) { ?>
+                        <p class="tnp-tab-warning">Tracking must be active to use Google Analytics.</p>
+                    <?php } ?>
+
+
+                    <table class="form-table">
+                        <tr valign="top">
+                            <th>UTM Source</th>
+                            <td>
+                                <?php $controls->text('options_utm_source', 50); ?>
+                                <p class="description">
+                                    Should set as "newsletter-{email_id}" and it's mandatory for Google. "{email_id}" is replaced with the
+                                    newsletter unique id. Automated newsletter, autoresponders and other non standard newsletter use a different
+                                    source like automated-{channel numer}-{email id}.
+                                </p>
+                            </td>
+                        </tr>
+
+                        <tr valign="top">
+                            <th>UTM Campaign</th>
+                            <td>
+                                <?php $controls->text('options_utm_campaign', 50); ?>
+                                <p class="description">
+                                    This is the campaign name
+                                </p>
+                            </td>
+                        </tr>
+
+                        <tr valign="top">
+                            <th>UTM Medium</th>
+                            <td>
+                                <?php $controls->text('options_utm_medium', 50); ?>
+                                <p class="description">
+                                    Should be set to "email" since this is the only medium used.
+                                </p>
+                            </td>
+                        </tr>
+
+                        <tr valign="top">
+                            <th>UTM Term</th>
+                            <td>
+                                <?php $controls->text('options_utm_term', 50); ?>
+                                <p class="description">
+                                    Usually empty can be used on specific newsletters but it is more related to keyword based advertising.
+                                </p>
+                            </td>
+                        </tr>
+
+                        <tr valign="top">
+                            <th>UTM Content</th>
+                            <td>
+                                <?php $controls->text('options_utm_content', 50); ?>
+                                <p class="description">
+                                    Usually empty can be used on specific newsletters.
+                                </p>
+                            </td>
+                        </tr>
+
+                    </table>
+                </div>
 
                 <div id="tabs-advanced">
 
@@ -503,8 +571,10 @@ if ($email['status'] != 'sent') {
                             <th><?php _e('Sender email address', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->text_email('options_sender_email', 40); ?>
+                                <span class="description">
+                                    <?php echo esc_html(Newsletter::instance()->get_sender_email()) ?>
+                                </span>
                                 <p class="description">
-                                    Original: <?php echo esc_html(Newsletter::instance()->get_sender_email()) ?>.<br>
                                     If you use a delivery service, be sure to use a validated email address.
                                 </p>
                             </td>
@@ -515,27 +585,19 @@ if ($email['status'] != 'sent') {
                             </th>
                             <td>
                                 <?php $controls->text('options_sender_name', 40); ?>
-                                <p class="description">
-                                    Original: <?php echo esc_html(Newsletter::instance()->get_sender_name()) ?>
-                                </p> 
+                                <span class="description">
+                                    <?php echo esc_html(Newsletter::instance()->get_sender_name()) ?>
+                                </span>
                             </td>
                         </tr>
                     </table>
 
-                    <?php do_action('newsletter_emails_edit_other', $module->get_email($email_id), $controls) ?>
 
                     <table class="form-table">
-                        <tr>
-                            <th>Query (tech)</th>
-                            <td><?php echo esc_html($email['query']); ?></td>
-                        </tr>
-                        <tr>
-                            <th>Token (tech)</th>
-                            <td><?php echo esc_html($email['token']); ?></td>
-                        </tr>
+
                         <tr>
                             <th style="vertical-align: top">
-                                This is the textual version of your newsletter. 
+                                This is the textual version of your newsletter.
                                 If you empty it, only an HTML version will be sent but is an anti-spam best practice to include a text only version.
                             </th>
                             <td>
@@ -552,45 +614,25 @@ if ($email['status'] != 'sent') {
                                 -->
                             </td>
                         </tr>
+                        <tr>
+                            <th>Query (tech)</th>
+                            <td><?php echo esc_html($email['query']); ?></td>
+                        </tr>
+                        <tr>
+                            <th>Token (tech)</th>
+                            <td><?php echo esc_html($email['token']); ?></td>
+                        </tr>
+
+                        <?php if ($editor_type != NewsletterEmails::EDITOR_HTML && $email['status'] != 'sending' && $email['status'] != 'sent') { ?>
+                            <tr>
+                                <th>Convert to HTML</th>
+                                <td>
+                                    <?php $controls->button_confirm('html', __('Convert', 'newsletter'), 'No way back!'); ?>
+                                </td>
+                            </tr>
+                        <?php } ?>
+
                     </table>
-                </div>
-
-
-                <div id="tabs-preview">
-
-                    <div class="tnpc-preview">
-                        <!-- Flat Laptop Browser -->
-                        <div class="fake-browser-ui">
-                            <div class="frame">
-                                <span class="bt-1"></span>
-                                <span class="bt-2"></span>
-                                <span class="bt-3"></span>
-                            </div>
-                            <iframe id="tnpc-preview-desktop" src="" width="700" height="520" alt="" frameborder="0"></iframe>
-                        </div>
-
-                        <!-- Flat Mobile Browser -->
-                        <div class="fake-mobile-browser-ui">
-                            <iframe id="tnpc-preview-mobile" src="" width="320" height="445" alt="" frameborder="0"></iframe>
-                            <div class="frame">
-                                <span class="bt-4"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <script type="text/javascript">
-                        preview_url = ajaxurl + "?action=tnpc_preview&id=<?php echo $email_id ?>";
-                        jQuery('#tnpc-preview-desktop, #tnpc-preview-mobile').attr("src", preview_url);
-                        setTimeout(function () {
-                            jQuery('#tnpc-preview-desktop, #tnpc-preview-mobile').contents().find("a").click(function (e) {
-                                e.preventDefault();
-                            })
-                        }, 500);
-                    </script>
-
-                    <p>
-                        <?php if ($editor_type != NewsletterEmails::EDITOR_HTML && $email['status'] != 'sending' && $email['status'] != 'sent') $controls->button_confirm('html', __('Convert to HTML newsletter', 'newsletter'), 'Attention: no way back!'); ?>
-                    </p>
                 </div>
 
             </div>
@@ -598,8 +640,6 @@ if ($email['status'] != 'sent') {
         </form>
     </div>
 
-    <?php include NEWSLETTER_DIR . '/emails/subjects.php'; ?>
-
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

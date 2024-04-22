@@ -1,27 +1,35 @@
 <?php
-$size = ['width' => $composer['width'], 'height' => 0];
+$size = [$composer['width'], 0];
 $content_width = $composer['width'] - $options['block_padding_left'] - $options['block_padding_right'];
 $title_style = TNP_Composer::get_title_style($options, 'title', $composer);
 $text_style = TNP_Composer::get_text_style($options, '', $composer);
 ?>
 
 <style>
+    .title-td {
+        padding-bottom: 20px;
+        padding-left: <?php echo (int) $options['text_padding_left'] ?>px;
+        padding-right: <?php echo (int) $options['text_padding_right'] ?>px;
+    }
     .title {
         <?php $title_style->echo_css() ?>
         line-height: normal;
         margin: 0;
-        padding-bottom: 20px;
+        text-decoration: none;
     }
-    
+
     .content {
         <?php $text_style->echo_css() ?>
+        padding-left: <?php echo (int) $options['text_padding_left'] ?>px;
+        padding-right: <?php echo (int) $options['text_padding_right'] ?>px;
+        line-height: 1.5;
     }
 
     .p {
         <?php $text_style->echo_css() ?>
-        line-height: 1.5em!important;
+        line-height: 1.5 !important;
     }
-    
+
     .li {
         <?php $text_style->echo_css() ?>
         line-height: normal!important;
@@ -44,14 +52,13 @@ $text_style = TNP_Composer::get_text_style($options, '', $composer);
 <?php foreach ($posts as $post) { ?>
 
     <?php
-    $url = tnp_post_permalink($post);
 
     $media = null;
     if ($show_image) {
         $media = tnp_composer_block_posts_get_media($post, $size);
         if ($media) {
             $media->set_width($content_width);
-            $media->link = $url;
+            $media->link = $post->url;
         }
     }
 
@@ -64,18 +71,18 @@ $text_style = TNP_Composer::get_text_style($options, '', $composer);
     if ($show_author) {
         $author_object = get_user_by('id', $post->post_author);
         if ($author_object) {
-            $meta[] = $author_object->display_name;
+            $meta[] = apply_filters('the_author', $author_object->display_name);
         }
     }
 
-    $button_options['button_url'] = $url;
+    $button_options['button_url'] = $post->url;
     ?>
 
 
     <table border="0" cellpadding="0" align="center" cellspacing="0" width="100%" class="responsive">
         <tr>
-            <td inline-class="title">
-                <?php echo $post->post_title ?>
+            <td inline-class="title-td">
+                <?php echo $post->title_linked ?>
             </td>
         </tr>
 
@@ -96,7 +103,7 @@ $text_style = TNP_Composer::get_text_style($options, '', $composer);
         <?php } ?>
 
         <tr>
-            <td align="<?php echo $align_left?>" dir="<?php echo $dir?>" inline-class="content">
+            <td align="<?php echo $align_left ?>" dir="<?php echo $dir ?>" inline-class="content">
                 <?php echo TNP_Composer::post_content($post) ?>
             </td>
         </tr>
@@ -104,7 +111,7 @@ $text_style = TNP_Composer::get_text_style($options, '', $composer);
         <?php if ($show_read_more_button) { ?>
             <tr>
                 <td align="center" inline-class="button">
-                    <?php echo TNP_Composer::button($button_options) ?>
+                    <?php echo TNP_Composer::button($button_options, 'button', $composer) ?>
                 </td>
             </tr>
         <?php } ?>

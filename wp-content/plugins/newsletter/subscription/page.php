@@ -15,7 +15,7 @@
 if (!defined('ABSPATH')) exit;
 
 $module = NewsletterSubscription::instance();
-$message_key = $module->get_message_key_from_request();
+$message_key = Newsletter::instance()->get_message_key_from_request();
 if ($message_key == 'confirmation') {
     $user = $module->get_user_from_request(true, 'preconfirm');
 } else {
@@ -49,42 +49,24 @@ if (is_file(WP_CONTENT_DIR . '/extensions/newsletter/subscription/page.php')) {
     <head>
         <style type="text/css">
             body {
-                font-family: verdana;
+                font-family: sans-serif;
                 background-color: #ddd;
-                font-size: 14px;
+                font-size: 1rem;
                 color: #333;
             }
             #container {
                 border: 1px solid #ccc;
                 border-radius: 0px;
                 background-color: #fff;
-                margin: 40px auto;
-                width: 650px;
-                padding: 30px
+                margin: 3rem auto;
+                width: 50%;
+                padding: 2rem;
             }
-            h1 {
-                font-size: 30px;
-                font-weight: normal;
-                border-bottom: 0px solid #aaa;
-                margin-top: 0;
-            }
-            h2 {
-                font-size: 20px;
-            }
-            th, td {
-                font-size: 12px;
-            }
-            th {
-                padding-right: 10px;
-                text-align: right;
-                vertical-align: middle;
-                font-weight: normal;
-            }
-            
+
             #message {
                 line-height: 1.6em;
             }
-            
+
             #missing {
                 padding: 20px;
                 font-weight: bold;
@@ -103,11 +85,10 @@ if (is_file(WP_CONTENT_DIR . '/extensions/newsletter/subscription/page.php')) {
         <div id="container">
             <?php if (current_user_can('administrator')) { ?>
             <div id="missing">
-                This message is shown only to administrators. Newsletter is using this page to show its messages because 
-                the dedicated page (on main settings) is not set or the configured page has been deleted or unpublished.
+                This message is shown only to administrators. Newsletter is using this page to show its messages because
+                the public page (on main settings) is not set or the configured page has been deleted or unpublished.
             </div>
             <?php } ?>
-            <h1><?php echo get_option('blogname'); ?></h1>
             <div id="message">
             <?php echo $message; ?>
             </div>

@@ -27,10 +27,10 @@
             <div class="tnp-separator"><?php _e( "or", 'newsletter' ) ?></div>
 
             <div class="test-subscribers">
-				<?php if ( ! empty( NewsletterUsers::instance()->get_test_users() ) ): ?>
+				<?php if ( ! empty( NewsletterUsersAdmin::instance()->get_test_users() ) ): ?>
                     <h4><?php _e( "Send a test to test subscribers", 'newsletter' ) ?></h4>
                     <ul>
-						<?php foreach ( NewsletterUsers::instance()->get_test_users() as $user ) { ?>
+						<?php foreach ( NewsletterUsersAdmin::instance()->get_test_users() as $user ) { ?>
                             <li><?php echo $user->email ?></li>
 						<?php } ?>
                     </ul>

@@ -1,7 +1,5 @@
 <?php
 
-use TNP\Mailer\PHPMailerLoader;
-
 /**
  * @property string $to
  * @property string $to_name
@@ -12,9 +10,10 @@ use TNP\Mailer\PHPMailerLoader;
  * @property string $from_name
  */
 class TNP_Mailer_Message {
-
+    var $ch; // Transient variable for mailers with turbo send option
+    var $to = '';
     var $to_name = '';
-    var $headers = array();
+    var $headers = [];
     var $user_id = 0;
     var $email_id = 0;
     var $error = '';
@@ -23,11 +22,10 @@ class TNP_Mailer_Message {
     var $body_text = '';
     var $from = '';
     var $from_name = '';
-
 }
 
 /**
- * A basic class able to send one or more TNP_Mailer_Message objects using a 
+ * A basic class able to send one or more TNP_Mailer_Message objects using a
  * delivery method (wp-mail(), SMTP, API, ...).
  */
 class NewsletterMailer {
@@ -48,12 +46,11 @@ class NewsletterMailer {
         $this->name = $name;
         $this->options = $options;
         if (!empty($this->options['speed'])) {
-            $this->speed = max(0, (int)$this->options['speed']);
+            $this->speed = max(0, (int) $this->options['speed']);
         }
         if (!empty($this->options['turbo'])) {
-            $this->batch_size = max(1, (int)$this->options['turbo']);
+            $this->batch_size = max(1, (int) $this->options['turbo']);
         }
-        //$this->get_logger()->debug($options);
     }
 
     public function get_name() {
@@ -67,7 +64,7 @@ class NewsletterMailer {
     public function get_batch_size() {
         return $this->batch_size;
     }
-    
+
     public function get_speed() {
         return $this->speed;
     }
@@ -139,7 +136,7 @@ class NewsletterMailer {
 
     /**
      * This one should be implemented by specilized classes.
-     * 
+     *
      * @param TNP_Mailer_Message[] $messages
      * @return bool|WP_Error
      */
@@ -190,7 +187,7 @@ class NewsletterMailer {
 
     /**
      * Used by bounce detection.
-     * 
+     *
      * @param int $time
      */
     function save_last_run($time) {
@@ -199,9 +196,9 @@ class NewsletterMailer {
 
     /**
      * Used by bounce detection.
-     * 
+     *
      * @param int $time
-     */    
+     */
     function get_last_run() {
         return (int) get_option($this->prefix . '_last_run', 0);
     }
@@ -214,7 +211,7 @@ class NewsletterMailer {
 class NewsletterDefaultMailer extends NewsletterMailer {
 
     var $filter_active = false;
-    
+
     /** @var WP_Error */
     var $last_error = null;
 
@@ -225,11 +222,11 @@ class NewsletterDefaultMailer extends NewsletterMailer {
     var $current_message = null;
 
     function __construct() {
-        parent::__construct('default', Newsletter::instance()->get_options('smtp'));
+        parent::__construct('default');
         add_action('wp_mail_failed', [$this, 'hook_wp_mail_failed']);
         remove_filter('wp_mail', 'wp_staticize_emoji_for_email');
     }
-    
+
     function hook_wp_mail_failed($error) {
         $this->last_error = $error;
     }
@@ -238,11 +235,16 @@ class NewsletterDefaultMailer extends NewsletterMailer {
         // TODO: check if overloaded
         return 'wp_mail() WordPress function (could be extended by a SMTP plugin)';
     }
-    
+
     function get_speed() {
-        return (int)Newsletter::instance()->options['scheduler_max'];
+        return (int) Newsletter::instance()->options['scheduler_max'];
     }
 
+    /**
+     *
+     * @param PHPMailer $mailer
+     * @return
+     */
     function fix_mailer($mailer) {
         // If there is not a current message, wp_mail() was not called by us
         if (is_null($this->current_message)) {
@@ -268,10 +270,12 @@ class NewsletterDefaultMailer extends NewsletterMailer {
         if (!empty($this->current_message->body) && !empty($this->current_message->body_text)) {
             $mailer->AltBody = $this->current_message->body_text;
         }
+
+        $mailer->XMailer = false;
     }
 
     /**
-     * 
+     *
      * @param TNP_Mailer_Message $message
      * @return \WP_Error|boolean
      */
@@ -285,13 +289,13 @@ class NewsletterDefaultMailer extends NewsletterMailer {
         $newsletter = Newsletter::instance();
         $wp_mail_headers = [];
         if (empty($message->from)) {
-            $message->from = $newsletter->options['sender_email'];
-        } 
-        
-        if (empty($message->from_name)) {
-            $message->from_name = $newsletter->options['sender_name'];
+            $message->from = $newsletter->get_sender_email();
         }
-        
+
+        if (empty($message->from_name)) {
+            $message->from_name = $newsletter->get_sender_name();
+        }
+
         $wp_mail_headers[] = 'From: "' . $message->from_name . '" <' . $message->from . '>';
 
         if (!empty($newsletter->options['reply_to'])) {
@@ -318,7 +322,7 @@ class NewsletterDefaultMailer extends NewsletterMailer {
         }
 
         $this->last_error = null;
-        
+
         $this->current_message = $message;
         $r = wp_mail($message->to, $message->subject, $body, $wp_mail_headers);
         $this->current_message = null;
@@ -326,21 +330,21 @@ class NewsletterDefaultMailer extends NewsletterMailer {
         if (!$r) {
             if ($this->last_error && is_wp_error($this->last_error)) {
                 $error_message = $this->last_error->get_error_message();
-                
+
                 // Still not used
                 $error_data = $this->last_error->get_error_data();
                 $error_code = '';
                 if (isset($mail_data['phpmailer_exception_code'])) {
                     $error_code = $mail_data['phpmailer_exception_code'];
                 }
-                
+
                 if (stripos($error_message, 'Could not instantiate mail function') || stripos($error_message, 'Failed to connect to mailserver')) {
                     return new WP_Error(self::ERROR_FATAL, $error_message);
                 } else {
                     return new WP_Error(self::ERROR_GENERIC, $error_message);
                 }
             }
-            
+
             // This code should be removed when sure...
             $last_error = error_get_last();
             if (is_array($last_error)) {
@@ -356,143 +360,6 @@ class NewsletterDefaultMailer extends NewsletterMailer {
             }
         }
         return true;
-    }
-
-}
-
-/**
- * @deprecated since version 6.2.0
- * Internal SMTP mailer implementation (move to an SMTP plugin or use the
- * SMTP Addon).
- */
-class NewsletterDefaultSMTPMailer extends NewsletterMailer {
-
-    var $mailer = null;
-
-    function __construct($options) {
-        parent::__construct('internal-smtp', $options);
-    }
-
-    function get_description() {
-        return 'Internal SMTP (deprecated)';
-    }
-
-    /**
-     *
-     * @param TNP_Mailer_Message $message
-     * @return \WP_Error|boolean
-     */
-    public function send($message) {
-        $logger = $this->get_logger();
-        $logger->debug('Start sending to ' . $message->to);
-        $mailer = $this->get_mailer();
-
-        if (!empty($message->body)) {
-            $mailer->IsHTML(true);
-            $mailer->Body = $message->body;
-            $mailer->AltBody = $message->body_text;
-        } else {
-            $mailer->IsHTML(false);
-            $mailer->Body = $message->body_text;
-            $mailer->AltBody = '';
-        }
-
-        $mailer->Subject = $message->subject;
-
-        $mailer->ClearCustomHeaders();
-        if (!empty($message->headers)) {
-            foreach ($message->headers as $key => $value) {
-                $mailer->AddCustomHeader($key . ': ' . $value);
-            }
-        }
-
-        if ($message->from) {
-            $logger->debug('Alternative from available');
-            $mailer->setFrom($message->from, $message->from_name);
-        } else {
-            $newsletter = Newsletter::instance();
-            $mailer->setFrom($newsletter->options['sender_email'], $newsletter->options['sender_name']);
-        }
-
-        $mailer->ClearAddresses();
-        $mailer->AddAddress($message->to);
-        $mailer->Send();
-
-        if ($mailer->IsError()) {
-
-            $logger->error($mailer->ErrorInfo);
-            // If the error is due to SMTP connection, the mailer cannot be reused since it does not clean up the connection
-            // on error.
-            //$this->mailer = null;
-            $message->error = $mailer->ErrorInfo;
-            return new WP_Error(self::ERROR_GENERIC, $mailer->ErrorInfo);
-        }
-
-        $logger->debug('Sent ' . $message->to);
-        //$logger->error('Time: ' . (microtime(true) - $start) . ' seconds');
-        return true;
-    }
-
-    /**
-     *
-     * @return PHPMailer
-     */
-    function get_mailer() {
-        global $wp_version;
-
-        if ($this->mailer) {
-            return $this->mailer;
-        }
-
-        $logger = $this->get_logger();
-        $logger->debug('Setting up PHP mailer');
-
-        require_once 'PHPMailerLoader.php';
-        $this->mailer = PHPMailerLoader::make_instance();
-
-        $this->mailer->XMailer = ' '; // A space!
-
-        $this->mailer->IsSMTP();
-        $this->mailer->Host = $this->options['host'];
-        if (!empty($this->options['port'])) {
-            $this->mailer->Port = (int) $this->options['port'];
-        }
-
-        if (!empty($this->options['user'])) {
-            $this->mailer->SMTPAuth = true;
-            $this->mailer->Username = $this->options['user'];
-            $this->mailer->Password = $this->options['pass'];
-        }
-
-        $this->mailer->SMTPSecure = $this->options['secure'];
-        $this->mailer->SMTPAutoTLS = false;
-
-        if ($this->options['ssl_insecure'] == 1) {
-            $this->mailer->SMTPOptions = array(
-                'ssl' => array(
-                    'verify_peer' => false,
-                    'verify_peer_name' => false,
-                    'allow_self_signed' => true
-                )
-            );
-        }
-
-        $newsletter = Newsletter::instance();
-
-        $this->mailer->CharSet = 'UTF-8';
-        $this->mailer->From = $newsletter->options['sender_email'];
-
-        if (!empty($newsletter->options['return_path'])) {
-            $this->mailer->Sender = $newsletter->options['return_path'];
-        }
-        if (!empty($newsletter->options['reply_to'])) {
-            $this->mailer->AddReplyTo($newsletter->options['reply_to']);
-        }
-
-        $this->mailer->FromName = $newsletter->options['sender_name'];
-
-
-        return $this->mailer;
     }
 
 }

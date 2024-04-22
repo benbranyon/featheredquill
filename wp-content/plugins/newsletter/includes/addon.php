@@ -11,8 +11,9 @@ class NewsletterAddon {
     var $options;
     var $version;
     var $labels;
+    var $menu_priority = 100;
 
-    public function __construct($name, $version = '0.0.0') {
+    public function __construct($name, $version = '0.0.0', $dir = '') {
         $this->name = $name;
         $this->version = $version;
         if (is_admin()) {
@@ -25,6 +26,16 @@ class NewsletterAddon {
         add_action('newsletter_init', array($this, 'init'));
         //Load translations from specific addon /languages/ directory
         load_plugin_textdomain('newsletter-' . $this->name, false, 'newsletter-' . $this->name . '/languages/');
+
+        if (is_admin() && !wp_next_scheduled('newsletter_addon_' . $this->name)) {
+            wp_schedule_event(time() + HOUR_IN_SECONDS, 'weekly', 'newsletter_addon_' . $this->name);
+        }
+
+        add_action('newsletter_addon_' . $this->name, [$this, 'weekly_check']);
+
+        if ($dir) {
+            register_deactivation_hook($dir . '/' . $this->name . '.php', [$this, 'deactivate']);
+        }
     }
 
     /**
@@ -33,7 +44,7 @@ class NewsletterAddon {
      * @param bool $first_install
      */
     function upgrade($first_install = false) {
-        
+
     }
 
     /**
@@ -41,15 +52,47 @@ class NewsletterAddon {
      * fires the <code>newsletter_init</code> event.
      */
     function init() {
-        
+        if (is_admin()) {
+            if ($this->is_allowed()) {
+                add_action('admin_menu', [$this, 'admin_menu'], $this->menu_priority);
+                if (method_exists($this, 'settings_menu')) {
+                    add_filter('newsletter_menu_settings', [$this, 'settings_menu']);
+                }
+                if (method_exists($this, 'subscribers_menu')) {
+                    add_filter('newsletter_menu_subscribers', [$this, 'subscribers_menu']);
+                }
+            }
+        }
     }
+
+    function weekly_check() {
+        $logger = $this->get_logger();
+        $logger->info('Weekly check for ' . $this->name);
+    }
+
+    function deactivate() {
+        $logger = $this->get_logger();
+        $logger->info($this->name . ' deactivated');
+
+        // The periodic check
+        wp_clear_scheduled_hook('newsletter_addon_' . $this->name);
+    }
+
+    function admin_menu() {
+
+    }
+
+//    function settings_menu($entries) {
+//    }
+//    function subscribers_menu($entries) {
+//    }
 
     function get_current_language() {
         return Newsletter::instance()->get_current_language();
     }
 
     function is_all_languages() {
-        return Newsletter::instance()->is_all_languages();
+        return empty(NewsletterAdmin::instance()->language());
     }
 
     function is_allowed() {
@@ -96,20 +139,31 @@ class NewsletterAddon {
         if ($this->options) {
             return;
         }
-        $this->options = get_option('newsletter_' . $this->name, []);
+        $this->options = $this->get_option_array('newsletter_' . $this->name, []);
+        if (!is_array($this->options)) {
+            $this->options = [];
+        }
+    }
+
+    function get_option_array($name) {
+        $opt = get_option($name, []);
+        if (!is_array($opt)) {
+            return [];
+        }
+        return $opt;
     }
 
     /**
      * Retrieve the stored options, merged with the specified language set.
-     * 
+     *
      * @param string $language
      * @return array
      */
     function get_options($language = '') {
         if ($language) {
-            return array_merge(get_option('newsletter_' . $this->name, []), get_option('newsletter_' . $this->name . '_' . $language, []));
+            return array_merge($this->get_option_array('newsletter_' . $this->name), $this->get_option_array('newsletter_' . $this->name . '_' . $language));
         } else {
-            return get_option('newsletter_' . $this->name, []);
+            return $this->get_option_array('newsletter_' . $this->name);
         }
     }
 
@@ -134,7 +188,7 @@ class NewsletterAddon {
     }
 
     /**
-     * 
+     *
      */
     function setup_labels() {
         if (!$this->labels) {
@@ -175,6 +229,13 @@ class NewsletterAddon {
         return $r;
     }
 
+    function show_email_status_label($email) {
+        return NewsletterAdmin::instance()->show_email_status_label($email);
+    }
+
+    function send_test_email($email, $controls) {
+        NewsletterEmailsAdmin::instance()->send_test_email($email, $controls);
+    }
 }
 
 /**
@@ -192,13 +253,17 @@ class NewsletterMailerAddon extends NewsletterAddon {
     var $enabled = false;
     var $menu_title = null;
     var $menu_description = null;
+    var $menu_slug = null;
     var $dir = '';
+    var $index_page = null;
+    var $logs_page = null;
 
     function __construct($name, $version = '0.0.0', $dir = '') {
-        parent::__construct($name, $version);
+        parent::__construct($name, $version, $dir);
         $this->dir = $dir;
         $this->setup_options();
         $this->enabled = !empty($this->options['enabled']);
+        $this->menu_slug = $this->name;
     }
 
     /**
@@ -213,22 +278,92 @@ class NewsletterMailerAddon extends NewsletterAddon {
         });
 
         if (is_admin() && !empty($this->menu_title) && !empty($this->dir) && current_user_can('administrator')) {
+            $this->index_page = 'newsletter_' . $this->menu_slug . '_index';
+            $this->logs_page = 'newsletter_' . $this->menu_slug . '_logs';
             add_action('admin_menu', [$this, 'hook_admin_menu'], 101);
             add_filter('newsletter_menu_settings', [$this, 'hook_newsletter_menu_settings']);
         }
     }
 
+    function deactivate() {
+        parent::deactivate();
+
+        // For delivery services without webkooks
+        wp_clear_scheduled_hook('newsletter_' . $this->name . '_bounce');
+    }
+
     function hook_newsletter_menu_settings($entries) {
-        $entries[] = array('label' => '<i class="fas fa-envelope"></i> ' . $this->menu_title, 'url' => '?page=newsletter_' . $this->name . '_index', 'description' => $this->menu_description);
+        $entries[] = ['label' => $this->menu_title, 'url' => '?page=' . $this->index_page];
         return $entries;
     }
 
     function hook_admin_menu() {
-        add_submenu_page('newsletter_main_index', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'manage_options', 'newsletter_' . $this->name . '_index',
+
+        add_submenu_page('newsletter_main_index', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'manage_options', $this->index_page,
                 function () {
-                    require $this->dir . '/index.php';
+                    if (file_exists($this->dir . '/admin/index.php')) {
+                        require $this->dir . '/admin/index.php';
+                    } else {
+                        require $this->dir . '/index.php';
+                    }
                 }
         );
+
+        if (file_exists($this->dir . '/admin/logs.php')) {
+            add_submenu_page('admin.php', 'Logs', 'Logs', 'manage_options', $this->logs_page,
+                    function () {
+                        require $this->dir . '/admin/logs.php';
+                    }
+            );
+        }
+    }
+
+    function set_warnings($controls) {
+//        if (!$this->enabled) {
+//            $controls->warnings[] = 'Enable to send with this service.';
+//        }
+
+        $current_mailer = Newsletter::instance()->get_mailer();
+        if ($current_mailer && $this->enabled && get_class($current_mailer) != get_class($this->get_mailer())) {
+            $controls->warnings[] = 'Another delivery addon is active: ' . esc_html($current_mailer->get_description());
+        }
+
+        if ($this->enabled && class_exists('NewsletterBounce')) {
+            $controls->warnings[] = 'The Bounce addon is active and should be disabled (bounces are managed by this addon)';
+        }
+    }
+
+    function get_status_badge() {
+        if ($this->enabled) {
+            return '<span class="tnp-badge-green">' . esc_html('Enabled', 'newsletter') . '</span>';
+        } else {
+            return '<span class="tnp-badge-orange">' . esc_html('Disabled', 'newsletter') . '</span>';
+        }
+    }
+
+    function get_title() {
+        return esc_html($this->menu_title) . $this->get_status_badge();
+    }
+
+    function set_bounced($email) {
+        global $wpdb;
+        $logger = $this->get_logger();
+        $logger->info($email . ' bounced');
+        $wpdb->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set status=%s where email=%s limit 1", TNP_User::STATUS_BOUNCED, $email));
+    }
+
+    function set_complained($email) {
+        global $wpdb;
+        $logger = $this->get_logger();
+        $logger->info($email . ' complained');
+        $wpdb->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set status=%s where email=%s limit 1", TNP_User::STATUS_COMPLAINED, $email));
+    }
+
+    function set_unsubscribed($email) {
+        global $wpdb;
+        $logger = $this->get_logger();
+        $logger->info($email . ' unsubscribed');
+        $wpdb->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set status=%s where email=%s limit 1", TNP_User::STATUS_UNSUBSCRIBED, $email));
     }
 
     /**
@@ -266,14 +401,14 @@ class NewsletterMailerAddon extends NewsletterAddon {
         $message->to_name = '';
         if (empty($type) || $type == 'html') {
             $message->body = file_get_contents(NEWSLETTER_DIR . '/includes/test-message.html');
-            $message->body = str_replace('{plugin_url}', Newsletter::instance()->plugin_url, $message->body);
+            $message->body = str_replace('{plugin_url}', Newsletter::plugin_url(), $message->body);
         }
 
         if (empty($type) || $type == 'text') {
             $message->body_text = 'This is the TEXT version of a test message. You should see this message only if you email client does not support the rich text (HTML) version.';
         }
 
-        $message->headers['X-Newsletter-Email-Id'] = '0';
+        //$message->headers['X-Newsletter-Email-Id'] = '0';
 
         if (empty($subject)) {
             $message->subject = '[' . get_option('blogname') . '] Test message from Newsletter (' . date(DATE_ISO8601) . ')';
@@ -285,8 +420,9 @@ class NewsletterMailerAddon extends NewsletterAddon {
             $message->subject .= ' - ' . $type . ' only';
         }
 
-        $message->from = Newsletter::instance()->options['sender_email'];
-        $message->from_name = Newsletter::instance()->options['sender_name'];
+        $message->from = Newsletter::instance()->get_sender_email();
+        $message->from_name = Newsletter::instance()->get_sender_name();
+        $message->headers['X-Newsletter'] = 'test';
         return $message;
     }
 
@@ -305,48 +441,147 @@ class NewsletterMailerAddon extends NewsletterAddon {
         }
         return $messages;
     }
-
 }
 
 class NewsletterFormManagerAddon extends NewsletterAddon {
 
     var $menu_title = null;
     var $menu_description = null;
+    var $menu_slug = null;
+    var $index_page = null;
+    var $edit_page = null;
+    var $welcome_page = null;
+    var $logs_page = null;
     var $dir = '';
+    var $forms = null; // For caching
 
-    function __construct($name, $version, $dir) {
-        parent::__construct($name, $version);
+    function __construct($name, $version, $dir, $menu_slug = null) {
+        parent::__construct($name, $version, $dir);
         $this->dir = $dir;
+        $this->menu_slug = $menu_slug;
+        if (empty($this->menu_slug)) {
+            $this->menu_slug = $this->name;
+        }
         $this->setup_options();
     }
 
     function init() {
         parent::init();
 
-        if (is_admin() && !empty($this->menu_title) && !empty($this->dir) && Newsletter::instance()->is_allowed()) {
-            add_action('admin_menu', [$this, 'hook_admin_menu'], 101);
-            add_filter('newsletter_menu_subscription', [$this, 'hook_newsletter_menu_subscription']);
+        if (is_admin() && $this->is_allowed()) {
+
+            $this->index_page = 'newsletter_' . $this->menu_slug . '_index';
+            $this->edit_page = 'newsletter_' . $this->menu_slug . '_edit';
+            $this->welcome_page = 'newsletter_' . $this->menu_slug . '_welcome';
+            $this->logs_page = 'newsletter_' . $this->menu_slug . '_logs';
+
+            // Auto add a menu entry
+            if (!empty($this->menu_title) && !empty($this->dir)) {
+                add_action('admin_menu', [$this, 'hook_admin_menu'], 101);
+                add_filter('newsletter_menu_subscription', [$this, 'hook_newsletter_menu_subscription']);
+            }
+            add_filter('newsletter_lists_notes', array($this, 'hook_newsletter_lists_notes'), 10, 2);
         }
     }
 
+    function hook_newsletter_lists_notes($notes, $list_id) {
+        if (!$this->forms) {
+            $this->forms = $this->get_forms();
+        }
+        foreach ($this->forms as $form) {
+            $ok = false;
+            $form_options = $this->get_form_options($form->id);
+            // Too many years of development
+            if (!empty($form_options['lists']) && is_array($form_options['lists']) && in_array($list_id, $form_options['lists'])) {
+                $ok = true;
+            } else if (!empty($form_options['preferences_' . $list_id])) {
+                $ok = true;
+            } else if (!empty($form_options['preferences']) && is_array($form_options['preferences']) && in_array($list_id, $form_options['preferences'])) {
+                $ok = true;
+            }
+            if ($ok) {
+                $notes[] = 'Linked to form "' . $form->title . '"';
+            }
+        }
+
+        return $notes;
+    }
+
+    function get_default_subscription($form_options) {
+        $subscription = NewsletterSubscription::instance()->get_default_subscription();
+        if (!empty($form_options['welcome_email'])) {
+            if ($form_options['welcome_email'] == '1') {
+                $subscription->welcome_email_id = (int) $form_options['welcome_email_id'];
+            } else {
+                $subscription->welcome_email_id = -1;
+            }
+        }
+        if (!empty($form_options['status'])) {
+            $subscription->optin = $form_options['status'];
+        }
+
+        if (!empty($form_options['lists'])) {
+            $subscription->data->add_lists($form_options['lists']);
+        }
+
+        return $subscription;
+    }
+
     function hook_newsletter_menu_subscription($entries) {
-        $entries[] = ['label' => $this->menu_title, 'url' => '?page=newsletter_' . $this->name . '_index'];
+        $entries[] = ['label' => $this->menu_title, 'url' => '?page=' . $this->index_page];
         return $entries;
     }
 
     function hook_admin_menu() {
-        add_submenu_page('newsletter_main_index', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'exist', 'newsletter_' . $this->name . '_index',
+        add_submenu_page('newsletter_main_index', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'exist', $this->index_page,
                 function () {
+
                     require $this->dir . '/admin/index.php';
                 }
         );
+        add_submenu_page('admin.php', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'exist', $this->edit_page,
+                function () {
+                    require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
+                    $controls = new NewsletterControls();
+
+                    $form = $this->get_form($_GET['id']);
+                    if (!$form) {
+                        echo 'Form not found';
+                        return;
+                    }
+                    require $this->dir . '/admin/edit.php';
+                }
+        );
+        if (file_exists($this->dir . '/admin/welcome.php')) {
+            add_submenu_page('admin.php', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'exist', $this->welcome_page,
+                    function () {
+                        require $this->dir . '/admin/welcome.php';
+                    }
+            );
+        }
+
+        if (file_exists($this->dir . '/admin/logs.php')) {
+            add_submenu_page('admin.php', $this->menu_title, $this->menu_title, 'exist', $this->logs_page,
+                    function () {
+                        require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
+                        $controls = new NewsletterControls();
+
+                        $form = $this->get_form($_GET['id']);
+                        if (!$form) {
+                            echo 'Form not found';
+                            return;
+                        }
+                        require $this->dir . '/admin/logs.php';
+                    }
+            );
+        }
     }
 
     /**
-     * Returns a lists of representations of forms available in the plugin subject of integration. 
+     * Returns a lists of representations of forms available in the plugin subject of integration.
      * Usually the $fields is not set up on returned objects.
      * Must be implemented.
-     *  
+     *
      * @return TNP_FormManager_Form[] List of forms by 3rd party plugin
      */
     function get_forms() {
@@ -358,7 +593,7 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
      * only the data required to integrate. The form id is domain of the form manager plugin, so it can be
      * anything.
      * Must be implemented.
-     * 
+     *
      * @param mixed $form_id
      * @return TNP_FormManager_Form
      */
@@ -383,7 +618,6 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
     public function get_form_options($form_id) {
         return get_option('newsletter_' . $this->name . '_' . $form_id, []);
     }
-
 }
 
 class TNP_FormManager_Form {
@@ -392,5 +626,4 @@ class TNP_FormManager_Form {
     var $title = '';
     var $fields = [];
     var $connected = false;
-
 }

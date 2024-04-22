@@ -6,143 +6,111 @@ CUSTOM CSS RULES.
 
 */
 
-.tnp-subscription {
-    /*font-size: 13px;*/
+div.tnp-subscription,
+form.tnp-subscription, form.tnp-profile {
     display: block;
-    margin: 15px auto;
+    margin: 1em auto;
     max-width: 500px;
     width: 100%;
 }
 
+div.tnp-profile {
+    display: block;
+    margin: 1em 0;
+    max-width: 500px;
+    /*width: 100%;*/
+}
+
 /* Generic field wrapper */
-.tnp-subscription div.tnp-field {
-    margin-bottom: 10px;
+.tnp-subscription div.tnp-field,
+.tnp-profile div.tnp-field
+{
+    margin-bottom: .7em;
     border: 0;
     padding: 0;
 }
 
-.tnp-subscription label {
+.tnp-subscription label,
+.tnp-profile label
+{
     display: block;
     color: inherit;
-    /*font-size: 14px;*/
-    font-weight: 700;
+    font-weight: normal;
     line-height: normal;
-    padding: 5px;
-    margin: 0;
-}
-
-.tnp-subscription input[type=text], 
-.tnp-subscription input[type=email], 
-.tnp-subscription input[type=submit], 
-.tnp-subscription select {
-    width: 100%;
-    height: 50px;
-    padding: 10px;
-    display: block;
-    border: 1px;
-    border-color: #ddd;
-    background-color: #f4f4f4;
-    background-image: none;
-    text-shadow: none;
-    color: #444;
-    font-size: 14px;
-    line-height: 20px;
-    margin: 0;
-    line-height: normal;
-    box-sizing: border-box;
-}
-
-.tnp-subscription input[type=checkbox], 
-.tnp-widget input[type=radio] {
-    max-width: 20px;
-    display: inline-block;
-}
-
-/* Antireset - http://www.satollo.net/css-and-select-space-between-the-options-and-the-arrow */
-.tnp-subscription select option {
-    margin-right: 10px;
-}
-
-.tnp-subscription input.tnp-submit {
-    background-color: #444;
-    color: #fff;
-    width: auto;
-    height: auto;
-    margin: 0;
-}
-
-@media all and (max-width: 480px) {
-    .tnp-subscription input[type=submit] {
-        width: 100%;
-    }
-}
-
-
-/* Profile form */
-
-.tnp-profile form .tnp-field {
-    margin-bottom: 10px;
-    border: 0;
     padding: 0;
+    margin: 0;
+    margin-bottom: .25em;
+    font-size: .9em;
 }
 
-.tnp-profile form .tnp-field label {
-    display: block;
-    color: #333;
+.tnp-subscription .tnp-field-checkbox label,
+.tnp-profile .tnp-field-checkbox label
+{
+    display: inline-block;
 }
 
-.tnp-profile form .tnp-field input[type=text], 
-.tnp-profile form .tnp-field input[type=email], 
-.tnp-profile form .tnp-field input[type=submit], 
-.tnp-profile form .tnp-field textarea, 
-.tnp-profile form .tnp-field select {
-    padding: 10px;
+.tnp-subscription input[type=text],
+.tnp-subscription input[type=email],
+.tnp-subscription input[type=submit],
+.tnp-subscription select,
+.tnp-subscription textarea,
+.tnp-profile input[type=text],
+.tnp-profile input[type=email],
+.tnp-profile input[type=submit],
+.tnp-profile select,
+.tnp-profile textarea
+{
+    width: 100%;
+    padding: .7em;
     display: block;
     border: 1px;
+    color: #444;
     border-color: #ddd;
     background-color: #f4f4f4;
     background-image: none;
     text-shadow: none;
-    color: #444;
-    font-size: 14px;
+    font-size: 1em;
     margin: 0;
     line-height: normal;
     box-sizing: border-box;
-    border-radius: 0;
-    height: auto;
-    float: none;
 }
 
-.tnp-profile form input[type=checkbox], .tnp-profile input[type=radio] {
-    max-width: 20px;
+.tnp-subscription input[type=checkbox],
+.tnp-widget input[type=radio],
+.tnp-profile input[type=checkbox]
+{
+    /* Fixes some bad themes CSS */
+    max-width: 1em;
     display: inline-block;
-}
-
-.tnp-profile form .tnp-list-label {
-    margin-left: 15px;
+    margin-right: .5em;
 }
 
 /* Antireset - http://www.satollo.net/css-and-select-space-between-the-options-and-the-arrow */
-.tnp-profile form select option {
-    margin-right: 10px;
+.tnp-subscription select option,
+.tnp-profile select option
+{
+    margin-right: .75em;
 }
 
-.tnp-profile form .tnp-field input[type=submit] {
+.tnp-subscription input.tnp-submit,
+.tnp-profile input.tnp-submit,
+.tnp-unsubscribe button.tnp-submit,
+.tnp-reactivate button.tnp-submit
+{
     background-color: #444;
     color: #fff;
     width: auto;
     height: auto;
     margin: 0;
+    display: inline-block;
 }
 
 @media all and (max-width: 480px) {
+    .tnp-subscription input[type=submit],
     .tnp-profile input[type=submit] {
         width: 100%;
-        margin: 0;
     }
 }
-
-
 
 .tnp-widget {
     width: 100%;
@@ -201,7 +169,7 @@ CUSTOM CSS RULES.
 }
 
 .tnp-field label {
-    
+
 }
 
 /* Newsletter Widget Minimal */
@@ -250,15 +218,20 @@ CUSTOM CSS RULES.
 .tnp-subscription-minimal {
     width: 100%;
     box-sizing: border-box;
+    margin: 10px 0;
 }
 
 .tnp-subscription-minimal form {
+    width: auto;
     margin: 0;
     padding: 0;
     border: 0;
+    white-space: nowrap;
 }
 
-.tnp-subscription-minimal input.tnp-email {
+.tnp-subscription-minimal input.tnp-email,
+.tnp-subscription-minimal input.tnp-name
+{
     width: 70%;
     max-width: 300px;
     box-sizing: border-box;
@@ -270,12 +243,20 @@ CUSTOM CSS RULES.
     font-size: 14px;
     line-height: 20px;
     border-radius: 0px;
+    margin-right: 10px;
+}
+
+.tnp-subscription-minimal.with-name input.tnp-email,
+.tnp-subscription-minimal.with-name input.tnp-name
+{
+    width: 31%;
 }
 
 .tnp-subscription-minimal .tnp-privacy-field {
     margin-top: 10px;
 }
 
+/* Some of these styles are overridden by theme styles... */
 .tnp-subscription-minimal input.tnp-submit {
     width: 29%;
     box-sizing: border-box;
@@ -291,6 +272,30 @@ CUSTOM CSS RULES.
     line-height: 20px;
     border-radius: 0px;
     margin: 0;
+}
+
+.tnp-subscription-posts {
+    margin-top: 2em;
+    margin-bottom: 2em;
+    padding: 2rem;
+}
+
+.tnp-subscription-posts .tnp-subscription {
+    max-width: auto;
+    margin: 0;
+}
+
+@media all and (max-width: 525px) {
+    .tnp-subscription-minimal.with-name input.tnp-email,
+    .tnp-subscription-minimal.with-name input.tnp-name,
+    .tnp-subscription-minimal input.tnp-submit
+    {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        display: block;
+        margin-bottom: .5rem;
+    }
 }
 
 /* Comments Extension */

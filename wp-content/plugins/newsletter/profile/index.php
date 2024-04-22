@@ -1,57 +1,65 @@
 <?php
+/* @var $this NewsletterProfileAdmin */
+/* @var $controls NewsletterControls */
+
 defined('ABSPATH') || exit;
 
-/* @var $this NewsletterProfile */
-
-require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
-
-$controls = new NewsletterControls();
-
-$current_language = $this->get_current_language();
-
-$is_all_languages = $this->is_all_languages();
-
-if (!$is_all_languages) {
-    $controls->warnings[] = 'You are configuring the language "<strong>' . $current_language . '</strong>". Switch to "all languages" to see every options.';
-}
-
-// Profile options are still inside the main options
 if ($controls->is_action()) {
     if ($controls->is_action('save')) {
-        $this->save_options($controls->data, '', null, $current_language);
-        $controls->add_message_saved();
-    }
-    if ($controls->is_action('reset')) {
-        $this->reset_options();
-        $controls->data = $this->get_options('', $current_language);
-        $controls->add_message_reset();
+        foreach ($controls->data as $k => $v) {
+            if (strpos($k, '_custom') > 0) {
+                if (empty($v)) {
+                    $controls->data[str_replace('_custom', '', $k)] = '';
+                }
+                unset($controls->data[$k]);
+            }
+        }
+        $controls->data = wp_kses_post_deep($controls->data);
+        $this->save_options($controls->data, '', $language);
+        $controls->add_toast_saved();
     }
 } else {
-    $controls->data = $this->get_options('', $current_language);
+    $controls->data = $this->get_options('', $language);
+}
+
+foreach (['text'] as $key) {
+    if (!empty($controls->data[$key])) {
+        $controls->data[$key . '_custom'] = '1';
+    }
 }
 ?>
 
 <div class="wrap tnp-profile tnp-profile-index" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/tnp-header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER ?>
 
     <div id="tnp-heading">
         <?php $controls->title_help('/profile-page') ?>
-        <h2><?php _e('The subscriber profile page', 'newsletter') ?></h2>
-        <p>Where your subscribers can change their data.</p>
+        <h2><?php esc_html_e('Subscribers', 'newsletter') ?></h2>
+        <?php include __DIR__ . '/../users/nav.php' ?>
+
     </div>
 
     <div id="tnp-body">
 
+        <?php $controls->show() ?>
+        <p>
+            Where your subscribers can change their data.
+            <?php if (current_user_can('administrator')) { ?>
+                <a href="<?php echo esc_attr($this->build_action_url('p')); ?>&nk=0-0" target="_blank">Preview online</a>
+            <?php } ?>
+        </p>
 
         <form id="channel" method="post" action="">
             <?php $controls->init(); ?>
             <div id="tabs">
                 <ul>
-                    <li><a href="#tabs-general"><?php _e('General', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-labels"><?php _e('Messages and labels', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-export"><?php _e('Subscriber data export', 'newsletter') ?></a></li>
-
+                    <li><a href="#tabs-general"><?php esc_html_e('General', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-fields"><?php esc_html_e('Form', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-labels"><?php esc_html_e('Messages and labels', 'newsletter') ?></a></li>
+                    <?php if (NEWSLETTER_DEBUG) { ?>
+                        <li><a href="#tabs-debug">Debug</a></li>
+                    <?php } ?>
                 </ul>
 
                 <div id="tabs-general">
@@ -59,23 +67,31 @@ if ($controls->is_action()) {
                     <table class="form-table">
 
                         <tr>
-                            <th><?php _e('Profile page', 'newsletter') ?>
+                            <th><?php esc_html_e('Page content', 'newsletter') ?>
                             </th>
                             <td>
-                                <p>
-                                    Shown inside the Newsletter dedicated page. Use <code>{profile_form}</code> where you want the data form
-                                    be inserted. Create a link with URL <code>{unsubscribe_url}</code> to give access to the cancellation page.
+
+                                <?php $controls->checkbox2('text_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
+                                <div data-bind="options-text_custom">
+                                    <?php $controls->wp_editor('text', ['editor_height' => 150], ['default' => $this->get_default_text('text')]); ?>
+                                </div>
+                                <div data-bind="!options-text_custom" class="tnpc-default-text">
+                                    <?php echo wp_kses_post($this->get_default_text('text')) ?>
+                                </div>
+                                <p class="description">
+                                    Shown inside the Newsletter public page. Use <code>[newsletter_profile]</code> where you want the edit form
+                                    to be inserted. Create a link with URL <code>{unsubscription_url}</code> to give access to the cancellation page.
                                 </p>
-                                <?php $controls->wp_editor('text'); ?>
                             </td>
                         </tr>
 
                         <tr>
-                            <th><?php _e('Alternative URL', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Custom profile page', 'newsletter') ?></th>
                             <td>
-                                <?php $controls->text('url', 70); ?>
+                                <?php $controls->page_or_url('page'); ?>
                                 <p class="description">
-                                    The specified page should containt the <code>[newsletter_profile]</code> shortcode to insert the data form.
+                                    The specified page must contain the <code>[newsletter]</code> shortcode which will be replaced with the
+                                    custom content above.
                                 </p>
                             </td>
                         </tr>
@@ -83,85 +99,165 @@ if ($controls->is_action()) {
                     </table>
                 </div>
 
-                <div id="tabs-labels">
+                <div id="tabs-fields">
+                    <?php $this->language_notice() ?>
 
-                    <table class="form-table">
-                        <tr>
-                            <th><?php _e('Profile saved', 'newsletter') ?></th>
-                            <td>
-                                <?php $controls->text('saved', 80); ?>
-                            </td>
-                        </tr>
+                    <?php if (!$language) { ?>
 
-                        <tr>
-                        <tr>
-                            <th><?php _e('Email changed alert', 'newsletter') ?></th>
-                            <td>
-                                <?php $controls->text('email_changed', 80); ?>
-                            </td>
-                        </tr>
+                        <table class="widefat" style="width: auto">
+                            <thead>
+                                <tr>
+                                    <th><?php esc_html_e('Field', 'newsletter') ?></th>
+                                    <th>
+                                        <?php esc_html_e('Show', 'newsletter') ?>
+                                    </th>
+                                    <th>
+                                        <?php esc_html_e('Required', 'newsletter') ?></th>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th><?php esc_html_e('Email', 'newsletter') ?></th>
+                                    <td>
+                                        <?php $controls->checkbox2('email') ?>
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" checked disabled>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th><?php esc_html_e('First name', 'newsletter') ?></th>
+                                    <td>
+                                        <?php $controls->checkbox2('name') ?>
+                                    </td>
+                                    <td>
+                                        <?php $controls->checkbox2('name_required') ?>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th><?php esc_html_e('Last name', 'newsletter') ?></th>
+                                    <td>
+                                        <?php $controls->checkbox2('surname') ?>
+                                    </td>
+                                    <td>
+                                        <?php $controls->checkbox2('surname_required') ?>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th><?php esc_html_e('Gender', 'newsletter') ?></th>
 
-                        <tr>
+                                    <td>
+                                        <?php $controls->checkbox2('sex') ?>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th><?php esc_html_e('Language', 'newsletter') ?></th>
 
-                        <tr>
-                        <tr>
-                            <th><?php _e('General error', 'newsletter') ?></th>
-                            <td>
-                                <?php $controls->text('error', 80); ?>
-                            </td>
-                        </tr>
+                                    <td>
+                                        <?php $controls->checkbox2('language') ?>
+                                    </td>
+                                    <td></td>
+                                </tr>
 
-                        <tr>
-                            <th><?php _e('"Save" label', 'newsletter') ?></th>
-                            <td>
-                                <?php $controls->text('save_label'); ?>
-                            </td>
-                        </tr>
+                                <tr>
+                                    <th style="vertical-align: top">
+                                        <?php esc_html_e('Lists', 'newsletter') ?><br>
+                                        <a href="?page=newsletter_subscription_lists" target="_blank"><small><?php esc_html_e('Configure', 'newsletter') ?></small></a>
+                                    </th>
 
-                        <tr>
-                            <th><?php _e('Privacy link text', 'newsletter') ?></th>
-                            <td>
-                                <?php $controls->text('privacy_label', 80); ?>
-                                <p class="description">
+                                    <td>
+                                        <?php $controls->lists_public() ?>
+                                    </td>
+                                    <td>
+                                    </td>
+                                </tr>
 
-                                </p>
-                            </td>
-                        </tr>
+                                <tr>
+                                    <th style="vertical-align: top">
+                                        <?php esc_html_e('Custom fields', 'newsletter') ?><br>
+                                        <a href="?page=newsletter_subscription_customfields" target="_blank"><small><?php esc_html_e('Configure', 'newsletter') ?></small></a>
+                                    </th>
 
-                    </table>
-                </div>
-
-                <div id="tabs-export">
-                    <?php if ($is_all_languages) { ?>
-
-                        <table class="form-table">
-
-                            <tr>
-                                <th>
-                                    <?php _e('Log of sent newsletters', 'newsletter') ?>
-                                </th>
-                                <td>
-                                    <?php $controls->yesno('export_newsletters'); ?>
-                                </td>
-                            </tr>
+                                    <td>
+                                        <?php $controls->profiles_public('profiles'); ?>
+                                    </td>
+                                    <td>
+                                    </td>
+                                </tr>
+                            </tbody>
                         </table>
-                    <?php } else { ?>
-
-                        <?php $controls->switch_to_all_languages_notice(); ?>
 
                     <?php } ?>
                 </div>
 
+
+
+
+
+                <div id="tabs-labels">
+                    <?php $this->language_notice() ?>
+                    <table class="form-table">
+                        <tr>
+                            <th><?php esc_html_e('Profile saved', 'newsletter') ?></th>
+                            <td>
+                                <?php $controls->text('saved', 80, $this->get_default_text('saved')); ?>
+                            </td>
+                        </tr>
+
+                        <tr>
+                        <tr>
+                            <th><?php esc_html_e('Email changed alert', 'newsletter') ?></th>
+                            <td>
+                                <?php $controls->text('email_changed', 80, $this->get_default_text('email_changed')); ?>
+                            </td>
+                        </tr>
+
+                        <tr>
+
+                        <tr>
+                        <tr>
+                            <th><?php esc_html_e('General error', 'newsletter') ?></th>
+                            <td>
+                                <?php $controls->text('error', 80, $this->get_default_text('error')); ?>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th><?php esc_html_e('"Save" label', 'newsletter') ?></th>
+                            <td>
+                                <?php $controls->text('save_label', 30, $this->get_default_text('save_label')); ?>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th><?php esc_html_e('Privacy link text', 'newsletter') ?></th>
+                            <td>
+                                <?php $controls->text('privacy_label', 80, $this->get_default_text('privacy_label')); ?>
+                                <p class="description">
+
+                                </p>
+                            </td>
+                        </tr>
+
+                    </table>
+                </div>
+
+                <?php if (NEWSLETTER_DEBUG) { ?>
+                    <div id="tabs-debug">
+                        <pre><?php echo esc_html(wp_json_encode($this->get_db_options('', $language), JSON_PRETTY_PRINT)) ?></pre>
+                    </div>
+                <?php } ?>
             </div>
 
             <p>
                 <?php $controls->button_save() ?>
-                <?php $controls->button_reset() ?>
             </p>
 
         </form>
+
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER ?>
 
 </div>

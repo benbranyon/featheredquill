@@ -1,120 +1,220 @@
 <?php
-/* @var $this NewsletterUnsubscription */
+/* @var $this NewsletterUnsubscriptionAdmin */
+/* @var $controls NewsletterControls */
+/* @var $logger NewsletterLogger */
+
+
 defined('ABSPATH') || exit;
 
-include_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
-$controls = new NewsletterControls();
-
-$current_language = $this->get_current_language();
-
-$is_all_languages = $this->is_all_languages();
-
-$controls->add_language_warning();
-
 if (!$controls->is_action()) {
-    $controls->data = $this->get_options('', $current_language);
+    $controls->data = $this->get_options('', $language);
 } else {
-    if ($controls->is_action('save')) {
-        $this->save_options($controls->data, '', null, $current_language);
-        $controls->data = $this->get_options('', $current_language);
-        $controls->add_message_saved();
+    foreach ($controls->data as $k => $v) {
+        if (strpos($k, '_custom') > 0) {
+            if (empty($v)) {
+                $controls->data[str_replace('_custom', '', $k)] = '';
+            }
+            // Remove the _custom field
+            unset($controls->data[$k]);
+        }
     }
 
-    if ($controls->is_action('reset')) {
-        // On reset we ignore the current language
-        $controls->data = $this->reset_options();
+    if ($controls->is_action('save')) {
+        $controls->data = wp_kses_post_deep($controls->data);
+        $this->save_options($controls->data, '', $language);
+        $controls->data = $this->get_options('', $language);
+        $controls->add_toast_saved();
+    }
+
+    if ($controls->is_action('change')) {
+        $controls->data = wp_kses_post_deep($controls->data);
+        $this->save_options($controls->data, '', $language);
+        $controls->data = $this->get_options('', $language);
+        $controls->add_toast_saved();
     }
 }
+
+foreach (['unsubscribe_text', 'error_text', 'unsubscribed_text', 'unsubscribed_message', 'reactivated_text'] as $key) {
+    if (!empty($controls->data[$key])) {
+        $controls->data[$key . '_custom'] = '1';
+    }
+}
+
+$one_step = $controls->data['mode'] == '1';
+$advanced = !empty($controls->data['advanced']);
 ?>
+
+<?php if ($controls->data['mode'] == '1') { ?>
+    <style>
+        .tnp-extended {
+            display: none;
+        }
+    </style>
+<?php } ?>
+
 <div class="wrap" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/tnp-header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
         <?php $controls->title_help('/cancellation') ?>
-        <h2><?php _e('Unsubscribe', 'newsletter') ?></h2>
+        <h2><?php esc_html_e('Subscribers', 'newsletter') ?></h2>
+        <?php include __DIR__ . '/../users/nav.php' ?>
     </div>
 
     <div id="tnp-body">
 
+        <?php $controls->show() ?>
+
         <form method="post" action="">
             <?php $controls->init(); ?>
+
+            <p>
+                <?php $controls->select('mode', ['1' => 'One-step', '2' => 'Two-step (recommended)'], null, ['onchange' => 'this.form.act.value="change";this.form.submit()']); ?>
+                <?php if (current_user_can('administrator')) { ?>
+                <a href="<?php echo esc_attr($this->build_action_url('u')); ?>&nk=0-0" target="_blank">Preview online</a>
+                <?php } ?>
+                <?php if ($one_step) { ?>
+                <div class="tnpc-hint">
+                    Single step lowers the protection against mail scanner and unwanted unsubscriptions. You're always conformant
+                    to the One-Click-Un subscribe standard since the Newsletter plugin implements the
+                    <a href="https://www.rfc-editor.org/rfc/rfc8058.txt" target="_blank">RFC 8058</a> and the
+                    <a href="https://support.google.com/a/answer/14229414" target="_blank">Google Guidelines</a>.
+                </div>
+            <?php } ?>
+            </p>
+
 
             <div class="tnp-tabs">
 
                 <ul>
-                    <li><a href="#tabs-cancellation"><?php _e('Unsubscribe', 'newsletter') ?></a></li>
+                    <?php if (!$one_step) { ?>
+                        <li><a href="#tabs-cancellation"><?php _e('Confirm', 'newsletter') ?></a></li>
+                    <?php } ?>
                     <li><a href="#tabs-goodbye"><?php _e('Goodbye', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-reactivation"><?php _e('Reactivation', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-advanced"><?php _e('Advanced', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-reactivation"><?php _e('Resubscribe', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-advanced" style="font-style: italic"><?php _e('Advanced', 'newsletter') ?></a></li>
+                        <?php if (NEWSLETTER_DEBUG) { ?>
+                        <li><a href="#tabs-debug">Debug</a></li>
+                    <?php } ?>
                 </ul>
 
-                <div id="tabs-cancellation">
-                    <table class="form-table">
-                        <tr>
-                            <th><?php _e('Opt-out message', 'newsletter') ?></th>
-                            <td>
-                                <?php $controls->wp_editor('unsubscribe_text', array('editor_height' => 250)); ?>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th><?php _e('On error', 'newsletter') ?></th>
-                            <td>
-                                <?php $controls->wp_editor('error_text', array('editor_height' => 150)); ?>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
+                <?php if (!$one_step) { ?>
+                    <div id="tabs-cancellation">
+                        <?php $this->language_notice(); ?>
+                        <table class="form-table">
+                            <tr>
+                                <th><?php esc_html_e('Opt-out message', 'newsletter') ?></th>
+                                <td>
+                                    <?php $controls->checkbox2('unsubscribe_text_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
+                                    <div data-bind="options-unsubscribe_text_custom">
+                                        <?php $controls->wp_editor('unsubscribe_text', ['editor_height' => 250], ['default' => wp_kses_post($this->get_default_text('unsubscribe_text'))]); ?>
+                                    </div>
+                                    <div data-bind="!options-unsubscribe_text_custom" class="tnpc-default-text">
+                                        <?php echo wp_kses_post($this->get_default_text('unsubscribe_text')) ?>
+                                    </div>
+                                </td>
+                            </tr>
+
+                        </table>
+                    </div>
+                <?php } else { ?>
+                    <?php $controls->hidden('unsubscribe_text_custom') ?>
+                    <?php $controls->hidden('unsubscribe_text') ?>
+                <?php } ?>
 
                 <div id="tabs-goodbye">
+
+                    <?php $this->language_notice(); ?>
+
                     <table class="form-table">
 
 
                         <tr>
-                            <th><?php _e('Goodbye message', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Goodbye message', 'newsletter') ?></th>
                             <td>
-                                <?php $controls->wp_editor('unsubscribed_text', array('editor_height' => 250)); ?>
+                                <?php $controls->checkbox2('unsubscribed_text_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
+                                <div data-bind="options-unsubscribed_text_custom">
+                                    <?php $controls->wp_editor('unsubscribed_text', ['editor_height' => 150], ['default' => wp_kses_post($this->get_default_text('unsubscribed_text'))]); ?>
+                                </div>
+                                <div data-bind="!options-unsubscribed_text_custom" class="tnpc-default-text">
+                                    <?php echo wp_kses_post($this->get_default_text('unsubscribed_text')) ?>
+                                </div>
+
                             </td>
                         </tr>
 
                         <tr>
-                            <th><?php _e('Goodbye email', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Goodbye email', 'newsletter') ?></th>
                             <td>
-                                <?php $controls->email('unsubscribed', 'wordpress', $is_all_languages, array('editor_height' => 250)); ?>
+                                <?php if (!$language) { ?>
+                                    <?php $controls->disabled('unsubscribed_disabled') ?>
+                                <?php } ?>
+
+                                <?php $controls->text('unsubscribed_subject', 70, wp_kses_post($this->get_default_text('unsubscribed_subject'))); ?>
+                                <br><br>
+                                <?php $controls->checkbox2('unsubscribed_message_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
+                                <div data-bind="options-unsubscribed_message_custom">
+                                    <?php $controls->wp_editor('unsubscribed_message', ['editor_height' => 150], ['default' => wp_kses_post($this->get_default_text('unsubscribed_message'))]); ?>
+                                </div>
+                                <div data-bind="!options-unsubscribed_message_custom" class="tnpc-default-text">
+                                    <?php echo wp_kses_post($this->get_default_text('unsubscribed_message')) ?>
+                                </div>
+
                             </td>
                         </tr>
                     </table>
                 </div>
 
                 <div id="tabs-reactivation">
+                    <?php $this->language_notice(); ?>
                     <table class="form-table">
                         <tr>
-                            <th><?php _e('Reactivated message', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Reactivated message', 'newsletter') ?></th>
                             <td>
-                                <?php $controls->wp_editor('reactivated_text', array('editor_height' => 250)); ?>
-                                <p class="description">
-                                </p>
+                                <?php $controls->checkbox2('reactivated_text_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
+                                <div data-bind="options-reactivated_text_custom">
+                                    <?php $controls->wp_editor('reactivated_text', ['editor_height' => 150], ['default' => wp_kses_post($this->get_default_text('reactivated_text'))]); ?>
+                                </div>
+                                <div data-bind="!options-reactivated_text_custom" class="tnpc-default-text">
+                                    <?php echo wp_kses_post($this->get_default_text('reactivated_text')) ?>
+                                </div>
+
+
                             </td>
                         </tr>
                     </table>
                 </div>
 
                 <div id="tabs-advanced">
-                    <?php if ($is_all_languages) { ?>
+                    <?php $this->language_notice(); ?>
+                    <?php if (!$language) { ?>
                         <table class="form-table">
                             <tr>
-                                <th><?php _e('Notifications', 'newsletter') ?></th>
+                                <th><?php esc_html_e('Notifications', 'newsletter') ?></th>
                                 <td>
                                     <?php $controls->yesno('notify'); ?>
                                     <?php $controls->text_email('notify_email'); ?>
                                 </td>
                             </tr>
+                            <tr>
+                                <th><?php _e('On error', 'newsletter') ?></th>
+                                <td>
+                                    <?php $controls->checkbox2('error_text_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
+                                    <div data-bind="options-error_text_custom">
+                                        <?php $controls->wp_editor('error_text', ['editor_height' => 150], ['default' => wp_kses_post($this->get_default_text('error_text'))]); ?>
+                                    </div>
+                                    <div data-bind="!options-error_text_custom" class="tnpc-default-text">
+                                        <?php echo wp_kses_post($this->get_default_text('error_text')) ?>
+                                    </div>
+                                </td>
+                            </tr>
                         </table>
-                        <h3>List-Unsubscribe header</h3>
+                        <h3>List-Unsubscribe headers</h3>
                         <table class="form-table">
                             <tr>
                                 <th>
-                                    <?php _e('Disable unsubscribe headers', 'newsletter') ?>
+                                    <?php esc_html_e('Disable unsubscribe headers', 'newsletter') ?>
                                     <?php $controls->field_help('/subscribers-and-management/cancellation/#list-unsubscribe') ?>
                                 </th>
                                 <td>
@@ -124,7 +224,7 @@ if (!$controls->is_action()) {
                             </tr>
                             <tr>
                                 <th>
-                                    <?php _e('Cancellation requests via email', 'newsletter') ?>
+                                    <?php esc_html_e('Cancellation requests via email', 'newsletter') ?>
                                     <?php $controls->field_help('/subscribers-and-management/cancellation/#list-unsubscribe') ?>
                                 </th>
                                 <td>
@@ -134,24 +234,30 @@ if (!$controls->is_action()) {
                                     </span>
                                 </td>
                             </tr>
-                            
+
                         </table>
-                    <?php } else { ?>
-
-                        <?php $controls->switch_to_all_languages_notice(); ?>
-
                     <?php } ?>
+
                 </div>
+
+
+                <?php if (NEWSLETTER_DEBUG) { ?>
+                    <div id="tabs-debug">
+                        <pre><?php echo esc_html(wp_json_encode($this->get_db_options('', $language), JSON_PRETTY_PRINT)) ?></pre>
+                    </div>
+                <?php } ?>
 
             </div>
 
+
             <p>
                 <?php $controls->button_save() ?>
-                <?php $controls->button_reset() ?>
             </p>
         </form>
+
+
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

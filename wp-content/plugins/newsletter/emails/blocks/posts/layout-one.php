@@ -1,5 +1,5 @@
 <?php
-$size = ['width' => $composer['width'], 'height' => 0];
+$size = [600, 0];
 $total_width = $composer['width'] - $options['block_padding_left'] - $options['block_padding_right'];
 $column_width = $total_width / 2 - 10;
 
@@ -7,17 +7,20 @@ $title_style = TNP_Composer::get_style($options, 'title', $composer, 'title', ['
 $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
 ?>
 <style>
+    .title-td {
+        padding: 0 0 5px 0;
+    }
     .title {
         <?php $title_style->echo_css() ?>
         line-height: normal !important;
-        padding: 0 0 5px 0;
+        text-decoration: none;
     }
     .excerpt-td {
         padding: 10px 0 15px 0;
     }
     .excerpt {
         <?php $text_style->echo_css() ?>
-        line-height: 1.5em !important;
+        line-height: 1.5 !important;
         text-decoration: none;
     }
 
@@ -35,13 +38,11 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
 
 <?php foreach ($posts as $post) { ?>
     <?php
-    $url = tnp_post_permalink($post);
-
     $media = null;
     if ($show_image) {
         $media = tnp_composer_block_posts_get_media($post, $size);
         if ($media) {
-            $media->link = $url;
+            $media->link = $post->url;
             $media->set_width($column_width);
         }
     }
@@ -55,11 +56,11 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
     if ($show_author) {
         $author_object = get_user_by('id', $post->post_author);
         if ($author_object) {
-            $meta[] = $author_object->display_name;
+            $meta[] = apply_filters('the_author', $author_object->display_name);
         }
     }
 
-    $button_options['button_url'] = $url;
+    $button_options['button_url'] = $post->url;
     $button_options['button_align'] = 'left';
     $items = [];
     ?>
@@ -89,29 +90,15 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
         <?php } ?>
 
         <tr>
-            <td align="<?php echo $align_left ?>" inline-class="title" class="title tnpc-row-edit tnpc-inline-editable"
-                data-type="title" data-id="<?php echo $post->ID ?>" dir="<?php echo $dir ?>">
-                <span>
-                    <?php
-                    echo TNP_Composer::is_post_field_edited_inline($options['inline_edits'], 'title', $post->ID) ?
-                            TNP_Composer::get_edited_inline_post_field($options['inline_edits'], 'title', $post->ID) :
-                            tnp_post_title($post)
-                    ?>
-                </span>
+            <td align="<?php echo $align_left ?>" inline-class="title-td">
+                <?php echo $post->title_linked ?>
             </td>
         </tr>
 
         <?php if ($excerpt_length) { ?>
             <tr>
                 <td align="<?php echo $align_left ?>" inline-class="excerpt-td">
-                    <a href="<?php echo $url ?>" inline-class="excerpt" class="tnpc-row-edit tnpc-inline-editable"
-                       data-type="text" data-id="<?php echo $post->ID ?>" dir="<?php echo $dir ?>">
-                           <?php
-                           echo TNP_Composer::is_post_field_edited_inline($options['inline_edits'], 'text', $post->ID) ?
-                                   TNP_Composer::get_edited_inline_post_field($options['inline_edits'], 'text', $post->ID) :
-                                   tnp_post_excerpt($post, $excerpt_length, $excerpt_length_in_chars)
-                           ?>
-                    </a>
+                    <?php echo $post->excerpt_linked ?>
                 </td>
             </tr>
         <?php } ?>
@@ -119,16 +106,18 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
         <?php if ($show_read_more_button) { ?>
             <tr>
                 <td align="<?php echo $align_left ?>" inline-class="button">
-                    <?php echo TNP_Composer::button($button_options) ?>
+                    <?php echo TNP_Composer::button($button_options, 'button', $composer) ?>
                 </td>
             </tr>
         <?php } ?>
     </table>
     <?php $items[] = ob_get_clean(); ?>
 
-
     <?php echo TNP_Composer::grid($items, ['columns' => count($items), 'width' => $composer['width'] - $options['block_padding_left'] - $options['block_padding_right']]); ?>
 
-
 <?php } ?>
+
+
+
+
 

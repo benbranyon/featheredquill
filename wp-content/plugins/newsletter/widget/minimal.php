@@ -25,14 +25,14 @@ class NewsletterWidgetMinimal extends WP_Widget {
         }
         // Filters are used for WPML
         if (!empty($instance['title'])) {
-            $title = apply_filters('widget_title', $instance['title'], $instance);
+            $title = apply_filters('widget_title', $instance['title'], $instance, $this->id_base);
             echo $before_title . $title . $after_title;
         }
 
-        $options_profile = NewsletterSubscription::instance()->get_options('profile', $current_language);
+        $options_profile = Newsletter::instance()->get_options('form');
 
         if (empty($instance['button'])) {
-            $instance['button'] = $options_profile['subscribe'];
+            $instance['button'] = NewsletterSubscription::instance()->get_form_option('subscribe');
         }
 
         $form = '<div class="tnp tnp-widget-minimal">';
@@ -45,7 +45,7 @@ class NewsletterWidgetMinimal extends WP_Widget {
         // Referrer
         $form .= '<input type="hidden" name="nr" value="widget-minimal"/>';
 
-        $form .= '<input class="tnp-email" type="email" required name="ne" value="" placeholder="' . esc_attr($options_profile['email']) . '">';
+        $form .= '<input class="tnp-email" type="email" required name="ne" value="" placeholder="' . esc_attr(NewsletterSubscription::instance()->get_form_option('email')) . '">';
 
         $form .= '<input class="tnp-submit" type="submit" value="' . esc_attr($instance['button']) . '">';
 

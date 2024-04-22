@@ -1,5 +1,4 @@
 <?php
-
 defined('ABSPATH') || exit;
 
 class NewsletterSubscription extends NewsletterModule {
@@ -9,83 +8,104 @@ class NewsletterSubscription extends NewsletterModule {
     const OPTIN_SINGLE = 1;
 
     static $instance;
-
-    /**
-     * @var array
-     */
-    var $options_profile;
-
-    /**
-     * Contains the options for the current language to build a subscription form. Must be initialized with
-     * setup_form_options() before use.
-     *
-     * @var array
-     */
-    var $form_options = null;
-
-    /**
-     * Contains the antibot/antispam options. Must be initialized with
-     * setup_antibot_options() before use.
-     *
-     * @var array
-     */
-    var $antibot_options = null;
-
-    /**
-     * @var array
-     */
-    var $options_lists;
+    var $popup_test = false;
 
     /**
      * @return NewsletterSubscription
      */
     static function instance() {
         if (self::$instance == null) {
-            self::$instance = new NewsletterSubscription();
+            self::$instance = new self();
         }
         return self::$instance;
     }
 
-    static $sources = [];
-
-    static function register_source($source) {
-        self::$sources[] = $source;
-    }
-
     function __construct() {
 
-        parent::__construct('subscription', '2.2.7', null, array('lists', 'template', 'profile', 'antibot'));
-        $this->options_profile = $this->get_options('profile');
-        $this->options_lists = $this->get_options('lists');
+        parent::__construct('subscription');
 
         // Must be called after the Newsletter::hook_init, since some constants are defined
         // there.
-        add_action('init', array($this, 'hook_init'), 90);
+        add_action('init', [$this, 'hook_init'], 90);
     }
 
     function hook_init() {
         add_action('newsletter_action', array($this, 'hook_newsletter_action'), 10, 3);
-        if (is_admin()) {
-            add_action('admin_init', array($this, 'hook_admin_init'));
-        } else {
-            // Shortcode for the Newsletter page
-            add_shortcode('newsletter', array($this, 'shortcode_newsletter'));
+        add_filter('newsletter_page_text', [$this, 'hook_newsletter_page_text'], 10, 3);
+        if (!is_admin() || defined('DOING_AJAX') && DOING_AJAX) {
             add_shortcode('newsletter_form', array($this, 'shortcode_newsletter_form'));
             add_shortcode('newsletter_field', array($this, 'shortcode_newsletter_field'));
         }
+
+        if (!empty($this->get_option('bottom_enabled', 'inject'))) {
+            add_filter('the_content', [$this, 'hook_the_content'], 99);
+        }
+        $this->popup_test = isset($_GET['tnp-popup-test']) && Newsletter::instance()->is_allowed();
+        if (!empty($this->get_option('enabled', 'popup')) || $this->popup_test) {
+            add_action('wp_footer', [$this, 'hook_wp_footer'], 99);
+            add_action('wp_enqueue_scripts', [$this, 'hook_wp_enqueue_scripts']);
+        }
+        add_action('newsletter_action', [$this, 'hook_newsletter_action_popup']);
     }
 
-    function hook_admin_init() {
-        // So the user can add JS and other code
-        if (isset($_GET['page']) && $_GET['page'] === 'newsletter_subscription_forms') {
-            header('X-XSS-Protection: 0');
+    function hook_wp_footer() {
+        if (!$this->popup_test) {
+            $user = Newsletter::instance()->check_user();
+            if ($user && $user->status === 'C') {
+                return;
+            }
+        }
+        ?>
+        <div id="tnp-modal">
+            <div id="tnp-modal-content">
+                <div id="tnp-modal-close">&times;</div>
+                <div id="tnp-modal-body">
+                </div>
+            </div>
+        </div>
+
+        <script>
+            var tnp_popup_test = <?php echo $this->popup_test ? 'true' : 'false' ?>;
+            var tnp_popup_url = '<?php echo esc_js(Newsletter::add_qs(home_url('/'), 'na=popup&language=' . urlencode($this->language()))); ?>';
+            var tnp_popup_action = '<?php echo esc_js($this->build_action_url('sa')); ?>';
+        </script>
+        <script src="<?php echo esc_attr(plugins_url('assets/popup.js', __FILE__)) ?>" async></script>
+        <?php
+    }
+
+    function hook_wp_enqueue_scripts() {
+
+        wp_enqueue_style('newsletter-popup', plugins_url('assets/popup.css', __FILE__), [], NEWSLETTER_VERSION);
+        if (is_rtl()) {
+            //wp_enqueue_style('newsletter-leads-rtl', plugins_url('newsletter-leads') . '/css/leads-rtl.css', [], $this->version);
+        }
+    }
+
+    function hook_newsletter_action_popup($action) {
+        switch ($action) {
+            case 'popup':
+                header('Content-Type: text/html;charset=UTF-8');
+                echo $this->get_option('text', 'popup');
+                echo NewsletterSubscription::instance()->get_subscription_form('popup', null,
+                        ['class' => 'tnp-subscription-popup', 'id' => 'tnp-subscription-popup']);
+                die();
+        }
+    }
+
+    function hook_the_content($content) {
+        if (!is_single()) {
+            return $content;
         }
 
-        if (function_exists('register_block_type')) {
-            // Add custom blocks to Gutenberg
-            wp_register_script('tnp-blocks', plugins_url('newsletter') . '/includes/tnp-blocks.js', array('wp-block-editor', 'wp-blocks', 'wp-element', 'wp-components'), NEWSLETTER_VERSION);
-            register_block_type('tnp/minimal', array('editor_script' => 'tnp-blocks'));
-        }
+        $style = '';
+
+        return $content
+                . '<div class="tnp-subscription-posts" id="tnp-subscription-posts"'
+                . ' style="' . esc_attr($style) . '"'
+                . '>'
+                . $this->get_option('bottom_text', 'inject')
+                . $this->get_subscription_form('posts_bottom')
+                . '</div>';
     }
 
     /**
@@ -94,8 +114,6 @@ class NewsletterSubscription extends NewsletterModule {
      * @return mixed
      */
     function hook_newsletter_action($action, $user, $email) {
-        global $wpdb;
-
         switch ($action) {
             case 'profile-change':
                 if ($this->antibot_form_check()) {
@@ -138,7 +156,7 @@ class NewsletterSubscription extends NewsletterModule {
 
             case 'm':
             case 'message':
-                include dirname(__FILE__) . '/page.php';
+                include __DIR__ . '/page.php';
                 die();
 
             // normal subscription
@@ -149,7 +167,7 @@ class NewsletterSubscription extends NewsletterModule {
                     $this->dienow('Invalid request', 'The subscription request was not made with a HTTP POST', 400);
                 }
 
-                $options_antibot = $this->get_options('antibot');
+                $options_antibot = $this->get_options('antispam');
 
                 $captcha = !empty($options_antibot['captcha']);
 
@@ -161,11 +179,9 @@ class NewsletterSubscription extends NewsletterModule {
 
                     if (is_wp_error($user)) {
                         if ($user->get_error_code() === 'exists') {
-                            $language = isset($_REQUEST['nlang']) ? $_REQUEST['nlang'] : '';
-                            $options = $this->get_options('', $language);
-                            $this->dienow($options['error_text'], $user->get_error_message(), 200);
+                            $this->show_message('error');
                         }
-                        $this->dienow('Registration failed.', $user->get_error_message(), 400);
+                        $this->dienow(__('Registration failed.', 'newsletter'), $user->get_error_message(), 400);
                     }
 
                     if ($user->status == TNP_User::STATUS_CONFIRMED) {
@@ -176,12 +192,13 @@ class NewsletterSubscription extends NewsletterModule {
                     }
                 } else {
                     $language = isset($_REQUEST['nlang']) ? $_REQUEST['nlang'] : '';
-                    $options = $this->get_form_options($language);
-                    $this->request_to_antibot_form($options['subscribe'], $captcha);
+                    Newsletter::instance()->switch_language($language);
+                    $this->antibot_subscription($this->get_form_text('subscribe'), $captcha);
                 }
                 die();
 
             // AJAX subscription
+            case 'sa':
             case 'ajaxsub':
 
                 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -194,10 +211,10 @@ class NewsletterSubscription extends NewsletterModule {
 
                 if (is_wp_error($user)) {
                     if ($user->get_error_code() === 'exists') {
-                        echo $this->options['error_text'];
+                        echo $this->get_text('error_text');
                         die();
                     } else {
-                        $this->dienow('Registration failed.', $user->get_error_message(), 400);
+                        $this->dienow(__('Registration failed.', 'newsletter'), $user->get_error_message(), 400);
                     }
                 } else {
                     if ($user->status == TNP_User::STATUS_CONFIRMED) {
@@ -209,10 +226,9 @@ class NewsletterSubscription extends NewsletterModule {
                     }
                 }
 
-                $message = $this->replace($this->options[$key . '_text'], $user);
-                if (isset($this->options[$key . '_tracking'])) {
-                    $message .= $this->options[$key . '_tracking'];
-                }
+                $this->switch_language($user->language);
+                $message = $this->replace($this->get_text($key . '_text'), $user);
+                $message .= $this->get_option($key . '_tracking');
                 echo $message;
                 die();
 
@@ -227,7 +243,7 @@ class NewsletterSubscription extends NewsletterModule {
                     $this->set_user_cookie($user);
                     $this->show_message('confirmed', $user);
                 } else {
-                    $this->request_to_antibot_form('Confirm');
+                    $this->antibot_subscription('Confirm');
                 }
                 die();
                 break;
@@ -237,213 +253,27 @@ class NewsletterSubscription extends NewsletterModule {
         }
     }
 
-    function upgrade() {
-        global $wpdb, $charset_collate;
-
-        parent::upgrade();
-
-        $newsletter = Newsletter::instance();
-        $lists_options = $this->get_options('lists');
-        $profile_options = $this->get_options('profile');
-
-        if (empty($lists_options)) {
-            foreach ($profile_options as $key => $value) {
-                if (strpos($key, 'list_') === 0) {
-                    $lists_options[$key] = $value;
-                }
-            }
+    function get_options($set = '', $language = null) {
+        // This is a patch for addon using the "profile" set which originally contained the
+        // form options. This patch can create a problem if someone calls this method to get the actual
+        // "profile" set which is the configuration of the profile page.
+        // The correct call would be NewsletterProfile::instance()->get_options().
+        if ($set === 'profile') {
+            $set = 'form';
         }
-
-        for ($i = 1; $i <= NEWSLETTER_LIST_MAX; $i++) {
-            // Options migration to the new set
-            if (!empty($profile_options['list_' . $i]) && empty($lists_options['list_' . $i])) {
-                $lists_options['list_' . $i] = $profile_options['list_' . $i];
-                $lists_options['list_' . $i . '_checked'] = $profile_options['list_' . $i . '_checked'];
-                $lists_options['list_' . $i . '_forced'] = $profile_options['list_' . $i . '_forced'];
-            }
-
-            if (!isset($profile_options['list_' . $i . '_forced'])) {
-                $profile_options['list_' . $i . '_forced'] = empty($this->options['preferences_' . $i]) ? 0 : 1;
-                $lists_options['list_' . $i . '_forced'] = empty($this->options['preferences_' . $i]) ? 0 : 1;
-            }
-        }
-
-        $this->save_options($profile_options, 'profile');
-        $this->save_options($lists_options, 'lists');
-
-        $default_options = $this->get_default_options();
-
-        if (empty($this->options['error_text'])) {
-            $this->options['error_text'] = $default_options['error_text'];
-            $this->save_options($this->options);
-        }
-
-        $this->init_options('template', false);
-
-        global $wpdb, $charset_collate;
-
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-
-        $sql = "CREATE TABLE `" . $wpdb->prefix . "newsletter_user_logs` (
-            `id` int(11) NOT NULL AUTO_INCREMENT,
-            `user_id` int(11) NOT NULL DEFAULT 0,
-            `ip` varchar(50) NOT NULL DEFAULT '',
-            `source` varchar(50) NOT NULL DEFAULT '',
-            `data` longtext,
-            `created` int(11) NOT NULL DEFAULT 0,
-            PRIMARY KEY (`id`)
-          ) $charset_collate;";
-
-        dbDelta($sql);
-
-        return true;
+        return parent::get_options($set, $language);
     }
 
-    function first_install() {
-        
+    function get_form_options() {
+        return $this->get_options('form');
     }
 
-    function admin_menu() {
-        $this->add_menu_page('lists', __('Lists', 'newsletter'), 1);
-        $this->add_menu_page('profile', __('Subscription Form', 'newsletter'), 1);
-        if ($this->is_multilanguage()) {
-            $this->add_menu_page('options', __('Subscription', 'newsletter'), 1);
-        } else {
-            $this->add_admin_page('options', __('Subscription', 'newsletter'), 1);
-            //$this->add_menu_page('optionsnew', __('Subscription Flow', 'newsletter'), 1);
-        }
-        $this->add_admin_page('antibot', __('Security', 'newsletter'));
-        $this->add_admin_page('forms', __('Forms', 'newsletter'));
-        $this->add_admin_page('template', __('Template', 'newsletter'));
+    function get_form_option($key) {
+        return $this->get_option($key, 'form');
     }
 
-    /**
-     * This method has been redefined for compatibility with the old options naming. It would
-     * be better to change them instead. The subscription options should be named
-     * "newsletter_subscription" while the form field options, actually named
-     * "newsletter_profile", should be renamed "newsletter_subscription_profile" (since
-     * they are retrived with get_options('profile')) or "newsletter_subscription_fields" or
-     * "newsletter_subscription_form".
-     *
-     * @param array $options
-     * @param string $sub
-     */
-    function save_options($options, $sub = '', $autoload = null, $language = '') {
-        if (empty($sub) && empty($language)) {
-            // For compatibility the options are wrongly named
-            return update_option('newsletter', $options, $autoload);
-        }
-
-        if (empty($sub) && !empty($language)) {
-            return update_option('newsletter_' . $language, $options, $autoload);
-        }
-
-        if ($sub == 'profile') {
-            if (empty($language)) {
-                $this->options_profile = $options;
-                return update_option('newsletter_profile', $options, $autoload);
-            } else {
-                return update_option('newsletter_profile_' . $language, $options, $autoload);
-            }
-            // For compatibility the options are wrongly named
-        }
-
-        if ($sub == 'forms') {
-            // For compatibility the options are wrongly named
-            return update_option('newsletter_forms', $options, $autoload);
-        }
-
-        if ($sub == 'lists') {
-            $this->options_lists = $options;
-        }
-        return parent::save_options($options, $sub, $autoload, $language);
-    }
-
-    function get_raw_options($sub = '', $language = '') {
-        if ($sub == '') {
-            $key = 'newsletter';
-            // For compatibility the options are wrongly named
-            if ($language) {
-                $key = '_' . $language;
-            }
-
-            $options = get_option($key, []);
-
-            if (!is_array($options)) {
-                $options = [];
-            }
-
-            return $options;
-        }
-
-        if ($sub == 'profile') {
-            $key = 'newsletter_profile';
-            if ($language) {
-                $key = '_' . $language;
-            }
-
-            $options = get_option($key, []);
-
-            if (!is_array($options)) {
-                $options = [];
-            }
-
-            return array_filter($options);
-        }
-
-        if ($sub == 'forms') {
-            // For compatibility the options are wrongly named
-            return get_option('newsletter_forms', []);
-        }
-        return parent::get_options($sub, $language);
-    }
-
-    function get_options($sub = '', $language = '') {
-        if ($sub == '') {
-            // For compatibility the options are wrongly named. The is_array() check prevents problem
-            // with object caching plugins.
-            if ($language) {
-                $options = $this->get_option_array('newsletter_' . $language);
-                $opt2 = $this->get_option_array('newsletter');
-                $options = array_merge($opt2, $options);
-            } else {
-                $options = $this->get_option_array('newsletter');
-            }
-
-            return $options;
-        }
-        if ($sub == 'profile') {
-            if ($language) {
-                // All that because for unknown reasome, sometime the options are returned as string, maybe a WPML
-                // interference...
-                $i18n_options = $this->get_option_array('newsletter_profile_' . $language);
-                $options = $this->get_option_array('newsletter_profile');
-                $options = array_merge($options, array_filter($i18n_options));
-            } else {
-                $options = $this->get_option_array('newsletter_profile');
-            }
-            // For compatibility the options are wrongly named
-            return $options;
-        }
-        if ($sub == 'forms') {
-            // For compatibility the options are wrongly named
-            return $this->get_option_array('newsletter_forms');
-        }
-        return parent::get_options($sub, $language);
-    }
-
-    /**
-     * Prepares the options used to build a subscription form for the current language
-     * in internal variable $form_options (for optimization). Can be called many times.
-     */
-    function setup_form_options() {
-        if (empty($this->form_options)) {
-            $this->form_options = $this->get_options('profile', $this->get_current_language());
-        }
-    }
-
-    function get_form_options($language = '') {
-        return $this->get_options('profile', $language);
+    function get_form_text($key) {
+        return $this->get_text($key, 'form');
     }
 
     function set_updated($user, $time = 0, $ip = '') {
@@ -493,11 +323,11 @@ class NewsletterSubscription extends NewsletterModule {
         }
 
         if (isset($data->sex)) {
-            $data->sex = $this->normalize_sex($data->sex);
+            $data->sex = $this->sanitize_gender($data->sex);
         }
 
         if (!isset($data->language)) {
-            $data->language = $this->get_current_language();
+            $data->language = $this->language();
         } else {
             $data->language = strtolower(strip_tags($data->language));
         }
@@ -518,17 +348,19 @@ class NewsletterSubscription extends NewsletterModule {
     function get_default_subscription($language = null) {
         $subscription = new TNP_Subscription();
 
-        $language = is_null($language) ? $this->get_current_language() : $language;
+        $language = is_null($language) ? $this->language() : $language;
 
         $subscription->data->language = $language;
         $subscription->optin = $this->is_double_optin() ? 'double' : 'single';
 
-        if (empty($this->options['multiple'])) {
-            $subscription->if_exists = TNP_Subscription::EXISTING_ERROR;
-        } else if ($this->options['multiple'] == 1) {
-            $subscription->if_exists = TNP_Subscription::EXISTING_MERGE;
-        } else {
-            $subscription->if_exists = TNP_Subscription::EXISTING_SINGLE_OPTIN;
+        $multiple = (int) $this->get_main_option('multiple');
+
+        switch ($multiple) {
+            case 0: $subscription->if_exists = TNP_Subscription::EXISTING_ERROR;
+                break;
+            case 1: $subscription->if_exists = TNP_Subscription::EXISTING_MERGE;
+                break;
+            case 2: $subscription->if_exists = TNP_Subscription::EXISTING_SINGLE_OPTIN;
         }
 
         $lists = $this->get_lists();
@@ -543,6 +375,12 @@ class NewsletterSubscription extends NewsletterModule {
             }
         }
 
+        $welcome_email = (int) $this->get_option('welcome_email');
+        switch ($welcome_email) {
+            case 1: $subscription->welcome_email_id = (int) $this->get_option('welcome_email_id');
+                break;
+            case 2: $subscription->welcome_email_id = -1;
+        }
         return $subscription;
     }
 
@@ -573,8 +411,10 @@ class NewsletterSubscription extends NewsletterModule {
             // TODO: Use autoload
             require_once NEWSLETTER_INCLUDES_DIR . '/antispam.php';
             $antispam = NewsletterAntispam::instance();
-            if ($antispam->is_spam($subscription)) {
-                return new WP_Error('spam', 'This looks like a spam subscription');
+            $res = $antispam->is_spam($subscription, true);
+            if (is_wp_error($res)) {
+                Newsletter\Logs::add('antispam', $res->get_error_code() . ' - ' . $res->get_error_message());
+                return new WP_Error('spam', $res->get_error_message());
             }
         }
 
@@ -585,7 +425,6 @@ class NewsletterSubscription extends NewsletterModule {
 
         // Do we accept repeated subscriptions?
         if ($user != null && $subscription->if_exists === TNP_Subscription::EXISTING_ERROR) {
-            //$this->show_message('error', $user);
             return new WP_Error('exists', 'Email address already registered and Newsletter sets to block repeated registrations. You can change this behavior or the user message above on subscription configuration panel.');
         }
 
@@ -604,15 +443,16 @@ class NewsletterSubscription extends NewsletterModule {
                 // Special behavior?
             }
 
-            if ($subscription->optin == 'single') {
+            if ($subscription->optin === 'single' || $subscription->if_exists === TNP_Subscription::EXISTING_SINGLE_OPTIN) {
                 $user->status = TNP_User::STATUS_CONFIRMED;
             } else {
                 if ($user->status == TNP_User::STATUS_CONFIRMED) {
 
-                    set_transient('newsletter_subscription_' . $user->id, $subscription->data, 3600 * 48);
+                    set_transient('newsletter_subscription_' . $user->id, $subscription, 3600 * 48);
 
                     // This status is *not* stored it indicate a temporary status to show the correct messages
                     $user->status = TNP_User::STATUS_NOT_CONFIRMED;
+                    $user->language = $subscription->data->language;
 
                     $this->send_message('confirmation', $user);
 
@@ -642,6 +482,18 @@ class NewsletterSubscription extends NewsletterModule {
 
         $user = $this->save_user($user);
 
+        if ($subscription->welcome_email_id) {
+            $this->save_user_meta($user->id, 'welcome_email_id', $subscription->welcome_email_id);
+        } else {
+            $this->delete_user_meta($user->id, 'welcome_email_id');
+        }
+
+        if ($subscription->welcome_page_id) {
+            $this->save_user_meta($user->id, 'welcome_page_id', $subscription->welcome_page_id);
+        } else {
+            $this->delete_user_meta($user->id, 'welcome_page_id');
+        }
+
         $this->add_user_log($user, 'subscribe');
 
         // Notification to admin (only for new confirmed subscriptions)
@@ -668,6 +520,8 @@ class NewsletterSubscription extends NewsletterModule {
      * @param string $status The status to use for this subscription (confirmed, not confirmed, ...)
      * @param bool $emails If the confirmation/welcome email should be sent or the subscription should be silent
      * @return TNP_User
+     *
+     * @deprecated
      */
     function subscribe($status = null, $emails = true) {
 
@@ -686,8 +540,8 @@ class NewsletterSubscription extends NewsletterModule {
             $last_name = $this->normalize_name(stripslashes($_REQUEST['ns']));
         }
 
-        $opt_in = (int) $this->options['noconfirmation']; // 0 - double, 1 - single
-        if (!empty($this->options['optin_override']) && isset($_REQUEST['optin'])) {
+        $opt_in = (int) $this->get_option('noconfirmation'); // 0 - double, 1 - single
+        if (!empty($this->get_option('optin_override')) && isset($_REQUEST['optin'])) {
             switch ($_REQUEST['optin']) {
                 case 'single': $opt_in = self::OPTIN_SINGLE;
                     break;
@@ -790,6 +644,10 @@ class NewsletterSubscription extends NewsletterModule {
         return $message . '<span itemscope itemtype="http://schema.org/EmailMessage"><span itemprop="description" content="Email address confirmation"></span><span itemprop="action" itemscope itemtype="http://schema.org/ConfirmAction"><meta itemprop="name" content="Confirm Subscription"><span itemprop="handler" itemscope itemtype="http://schema.org/HttpActionHandler"><meta itemprop="url" content="{subscription_confirm_url}"><link itemprop="method" href="http://schema.org/HttpRequestMethod/POST"></span></span></span>';
     }
 
+    function get_language_from_request() {
+        return isset($_REQUEST['nlang']) ? trim(strip_tags($_REQUEST['nlang'])) : $this->language();
+    }
+
     /**
      * Builds a subscription object starting from values in the $_REQUEST
      * global variable. It DOES NOT sanitizie or formally check the values.
@@ -803,8 +661,9 @@ class NewsletterSubscription extends NewsletterModule {
         $language = '';
         if (!empty($_REQUEST['nlang'])) {
             $language = $_REQUEST['nlang'];
+            $this->switch_language($language);
         } else {
-            $language = $this->get_current_language();
+            $language = $this->language();
         }
 
         $subscription = $this->get_default_subscription($language);
@@ -821,7 +680,7 @@ class NewsletterSubscription extends NewsletterModule {
         }
 
         if (!empty($_REQUEST['nx'])) {
-            $data->sex = $_REQUEST['nx'][0];
+            $data->sex = $this->sanitize_gender($_REQUEST['nx']);
         }
 
         if (isset($_REQUEST['nr'])) {
@@ -836,9 +695,10 @@ class NewsletterSubscription extends NewsletterModule {
         }
 
         // New profiles
+        $customfields = $this->get_options('customfields');
         for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
-            // If the profile cannot be set by  subscriber, skip it.
-            if ($this->options_profile['profile_' . $i . '_status'] == 0) {
+            // Private custom field?
+            if (empty($customfields['profile_' . $i . '_status'])) {
                 continue;
             }
             if (isset($_REQUEST['np' . $i])) {
@@ -861,12 +721,14 @@ class NewsletterSubscription extends NewsletterModule {
                 }
                 $data->lists['' . $list_id] = 1;
             }
-        } else {
-            $this->logger->debug('No lists received');
+        }
+
+        if (isset($_REQUEST['welcome_page_id'])) {
+            $subscription->welcome_page_id = (int) $_REQUEST['welcome_page_id'];
         }
 
         // Opt-in mode
-        if (!empty($this->options['optin_override']) && isset($_REQUEST['optin'])) {
+        if (!empty($this->get_main_option('optin_override')) && isset($_REQUEST['optin'])) {
             switch ($_REQUEST['optin']) {
                 case 'single': $subscription->optin = 'single';
                     break;
@@ -899,7 +761,7 @@ class NewsletterSubscription extends NewsletterModule {
         // TODO: required checking
 
         if (!empty($_REQUEST['nx'])) {
-            $user['sex'] = $this->normalize_sex($_REQUEST['nx'][0]);
+            $user['sex'] = $this->sanitize_gender($_REQUEST['nx']);
         }
         // TODO: valid values check
 
@@ -996,9 +858,9 @@ class NewsletterSubscription extends NewsletterModule {
      * @return type
      */
     function mail($user, $subject, $message) {
-        $language = $this->get_user_language($user);
+        $this->switch_language($user->language);
 
-        $options_template = $this->get_options('template', $language);
+        $options_template = $this->get_options('template');
 
         $template = trim($options_template['template']);
         if (empty($template) || strpos($template, '{message}') === false) {
@@ -1044,13 +906,19 @@ class NewsletterSubscription extends NewsletterModule {
         }
         // End compatibility
         // Should be merged?
-        $data = get_transient('newsletter_subscription_' . $user->id);
-        if ($data !== false) {
-            $data->merge_in($user);
+        $subscription = get_transient('newsletter_subscription_' . $user->id);
+        if (!empty($subscription->data)) {
+            delete_transient('newsletter_subscription_' . $user->id);
+            $subscription->data->merge_in($user);
             //$this->merge($user, $data);
             $user = $this->save_user($user);
             $user->status = TNP_User::STATUS_NOT_CONFIRMED;
-            delete_transient('newsletter_subscription_' . $user->id);
+
+            if (!empty($subscription->welcome_email_id)) {
+                $this->save_user_meta($user->id, 'welcome_email_id', $subscription->welcome_email_id);
+            } else {
+                $this->delete_user_meta($user->id, 'welcome_email_id');
+            }
         } else {
             $new_email = get_transient('newsletter_user_' . $user->id . '_email');
             if ($new_email) {
@@ -1095,24 +963,54 @@ class NewsletterSubscription extends NewsletterModule {
      * @param TNP_User $user
      */
     function send_message($type, $user, $force = false) {
-        if (!$force && !empty($this->options[$type . '_disabled'])) {
-            return true;
+
+        $this->logger->debug('Send message: ' . $type);
+
+        if ($type === 'confirmed') {
+
+            $email_id = $this->get_user_meta($user->id, 'welcome_email_id');
+            $this->logger->debug('Email ID: ' . $email_id);
+            if ($email_id) {
+                if ($email_id == '-1') {
+                    return;
+                }
+                $email = $this->get_email($email_id);
+                if ($email) {
+                    $r = Newsletter::instance()->send($email, [$user]);
+                    return;
+                } else {
+                    $this->logger->debug('Email not found');
+                }
+            }
+            if (!$force && $this->options['welcome_email'] == '2') {
+                return true;
+            }
         }
 
-        $language = $this->get_user_language($user);
+        if ($type === 'confirmation') {
+            if (!$force && !empty($this->options[$type . '_disabled'])) {
+                return true;
+            }
+        }
 
-        $options = $this->get_options('', $language);
+
+
+        $this->switch_language($user->language);
+
         $message = [];
-        $message['html'] = do_shortcode($options[$type . '_message']);
+        $message['html'] = do_shortcode($this->get_text($type . '_message'));
         $message['text'] = $this->get_text_message($type);
-        if ($user->status == TNP_User::STATUS_NOT_CONFIRMED) {
-            $message['html'] = $this->add_microdata($message['html']);
-        }
-        $subject = $options[$type . '_subject'];
+//        if ($user->status == TNP_User::STATUS_NOT_CONFIRMED) {
+//            $message['html'] = $this->add_microdata($message['html']);
+//        }
+        $subject = $this->get_text($type . '_subject');
 
         return $this->mail($user, $subject, $message);
     }
 
+    /**
+     * @todo Move texts in the _get_default_text() method
+     */
     function get_text_message($type) {
         switch ($type) {
             case 'confirmation':
@@ -1124,7 +1022,7 @@ class NewsletterSubscription extends NewsletterModule {
     }
 
     function is_double_optin() {
-        return $this->options['noconfirmation'] == 0;
+        return $this->get_main_option('noconfirmation') == 0;
     }
 
     /**
@@ -1134,6 +1032,18 @@ class NewsletterSubscription extends NewsletterModule {
      * @return bool
      */
     function send_activation_email($user) {
+        // TODO: Add filter
+        if ($res = apply_filters('newsletter_activation_email', false, $user)) {
+            if ($res === true)
+                return;
+            if (is_int($res)) {
+                $email = $this->get_email($res);
+                if ($email) {
+                    Newsletter::instance()->send($email, [$user]);
+                }
+            }
+        }
+
         return $this->send_message('confirmation', $user, true);
     }
 
@@ -1141,17 +1051,44 @@ class NewsletterSubscription extends NewsletterModule {
      * Finds the right way to show the message identified by $key (welcome, unsubscription, ...) redirecting the user to the
      * WordPress page or loading the configured url or activating the standard page.
      */
-    function show_message($key, $user, $alert = '', $email = null) {
+    function show_message($key, $user = null, $alert = '', $email = null) {
         $url = '';
 
-        if (isset($_REQUEST['ncu'])) {
-            // Custom URL from the form
-            $url = $_REQUEST['ncu'];
+        if ($user) {
+            $this->switch_language($user->language);
+        }
+
+        if ($key === 'confirmed') {
+            $welcome_page_id = $this->get_user_meta($user->id, 'welcome_page_id');
+            if ($welcome_page_id) {
+                // @todo Check for problems with WPML look at our tnp_get_permalink()
+                $url = get_permalink($welcome_page_id);
+            } else {
+                if (isset($_REQUEST['ncu'])) {
+                    // Custom URL from the form
+                    $url = sanitize_url($_REQUEST['ncu']);
+                } else {
+                    // Per message custom URL from configuration (language variants could not be supported)
+                    $page_id = $this->get_option($key . '_id');
+                    if (!empty($page_id)) {
+                        if ($page_id === 'url') {
+                            $url = trim($this->get_option($key . '_url'));
+                        } else {
+                            $url = get_permalink((int)$page_id);
+                        }
+                    }
+                }
+            }
+            $url = apply_filters('newsletter_welcome_url', $url, $user);
+            // Here $url can be empty, it will be resolved later using the Newsletter dedicated page
         } else {
-            // Per message custom URL from configuration (language variants could not be supported)
-            $options = $this->get_options('', $this->get_user_language($user));
-            if (!empty($options[$key . '_url'])) {
-                $url = $options[$key . '_url'];
+
+            if (isset($_REQUEST['ncu'])) {
+                // Custom URL from the form
+                $url = $_REQUEST['ncu'];
+            } else {
+                // Per message custom URL from configuration (language variants could not be supported)
+                $url = $this->get_option($key . '_url');
             }
         }
 
@@ -1159,23 +1096,6 @@ class NewsletterSubscription extends NewsletterModule {
         wp_redirect($url);
 
         die();
-    }
-
-    function get_message_key_from_request() {
-        if (empty($_GET['nm'])) {
-            return 'subscription';
-        }
-        $key = $_GET['nm'];
-        switch ($key) {
-            case 's': return 'confirmation';
-            case 'c': return 'confirmed';
-            case 'u': return 'unsubscription';
-            case 'uc': return 'unsubscribed';
-            case 'p':
-            case 'pe':
-                return 'profile';
-            default: return $key;
-        }
     }
 
     var $privacy_url = false;
@@ -1187,18 +1107,17 @@ class NewsletterSubscription extends NewsletterModule {
      */
     function get_privacy_url() {
         if ($this->privacy_url === false) {
-            $this->setup_form_options();
-            if (!empty($this->form_options['privacy_use_wp_url']) && function_exists('get_privacy_policy_url')) {
+            if (!empty($this->get_main_option('privacy_use_wp_url', 'form')) && function_exists('get_privacy_policy_url')) {
                 $this->privacy_url = get_privacy_policy_url();
             } else {
-                $this->privacy_url = $this->form_options['privacy_url'];
+                $this->privacy_url = $this->get_option('privacy_url', 'form');
             }
         }
         return $this->privacy_url;
     }
 
     function get_form_javascript() {
-        
+
     }
 
     /**
@@ -1213,8 +1132,6 @@ class NewsletterSubscription extends NewsletterModule {
             $attrs = [];
         }
 
-        $this->setup_form_options();
-
         $attrs = array_merge(['class' => 'tnp-subscription', 'style' => '', 'id' => ''], $attrs);
 
         $action = esc_attr($this->build_action_url('s'));
@@ -1227,8 +1144,6 @@ class NewsletterSubscription extends NewsletterModule {
         }
         $buffer .= '>' . "\n";
 
-        $language = $this->get_current_language();
-
         $buffer .= $this->get_form_hidden_fields($attrs);
 
         $buffer .= do_shortcode($content);
@@ -1236,17 +1151,11 @@ class NewsletterSubscription extends NewsletterModule {
         if (isset($attrs['button_label'])) {
             $label = $attrs['button_label'];
         } else {
-            $label = $this->form_options['subscribe'];
+            $label = $this->get_form_text('subscribe');
         }
 
         if (!empty($label)) {
-            $buffer .= '<div class="tnp-field tnp-field-button">';
-            if (strpos($label, 'http') === 0) {
-                $buffer .= '<input class="tnp-button-image" type="image" src="' . $label . '">';
-            } else {
-                $buffer .= '<input class="tnp-button" type="submit" value="' . $label . '">';
-            }
-            $buffer .= '</div>';
+            $buffer .= $this->get_button($attrs);
         }
 
         $buffer .= '</form>';
@@ -1271,8 +1180,9 @@ class NewsletterSubscription extends NewsletterModule {
 
         foreach ($arr as $a) {
             $a = trim($a);
-            if (empty($a))
+            if (empty($a)) {
                 continue;
+            }
 
             $list = $this->get_list($a);
             if (!$list) {
@@ -1314,7 +1224,7 @@ class NewsletterSubscription extends NewsletterModule {
         }
 
         if (isset($attrs['referrer'])) {
-            $b .= '<input type="hidden" name="nr" value="' . esc_attr($attrs['referrer']) . '">';
+            $b .= '<input type="hidden" name="nr" value="' . esc_attr($attrs['referrer']) . '">' . "\n";
         }
 
         if (isset($attrs['confirmation_url'])) {
@@ -1322,7 +1232,7 @@ class NewsletterSubscription extends NewsletterModule {
                 $attrs['confirmation_url'] = esc_url_raw($_SERVER['REQUEST_URI']);
             }
 
-            $b .= '<input type="hidden" name="ncu" value="' . esc_attr($attrs['confirmation_url']) . '">';
+            $b .= '<input type="hidden" name="ncu" value="' . esc_attr($attrs['confirmation_url']) . '">' . "\n";
         }
 
         if (isset($attrs['optin'])) {
@@ -1330,16 +1240,34 @@ class NewsletterSubscription extends NewsletterModule {
             if ($optin !== 'double' && $optin !== 'single') {
                 $b .= $this->build_field_admin_notice('The optin is set to an invalid value.');
             } else {
-                if ($optin !== 'double' && $this->is_double_optin() && empty($this->options['optin_override'])) {
+                if ($optin !== 'double' && $this->is_double_optin() && empty($this->get_main_option('optin_override'))) {
                     $b .= $this->build_field_admin_notice('The optin is specified but cannot be overridden (see the subscription configiraton page).');
                 } else {
-                    $b .= '<input type="hidden" name="optin" value="' . esc_attr($optin) . '">';
+                    $b .= '<input type="hidden" name="optin" value="' . esc_attr($optin) . '">' . "\n";
                 }
             }
         }
 
-        $language = $this->get_current_language();
-        $b .= '<input type="hidden" name="nlang" value="' . esc_attr($language) . '">';
+        $b .= '<input type="hidden" name="nlang" value="' . esc_attr($this->language()) . '">' . "\n";
+
+        // Beta
+//        if (isset($attrs['welcome_email_id'])) {
+//            $e = $this->get_email($attrs['welcome_email_id']);
+//            if ($e->type === 'welcome') {
+//                $b .= '<input type="hidden" name="welcome_email_id" value="' . esc_attr($e->id . '-' . $e->token) . '">';
+//            } else {
+//                $b .= $this->build_field_admin_notice('The welcome email ID is not correct.');
+//            }
+//        }
+        // Beta
+        if (isset($attrs['welcome_page_id'])) {
+            $page = get_post($attrs['welcome_page_id']);
+            if ($page && $page->post_status === 'publish') {
+                $b .= '<input type="hidden" name="welcome_page_id" value="' . esc_attr($page->ID) . '">' . "\n";
+            } else {
+                $b .= $this->build_field_admin_notice('The welcome page ID is not correct.');
+            }
+        }
 
         return $b;
     }
@@ -1349,28 +1277,38 @@ class NewsletterSubscription extends NewsletterModule {
      *
      * @param type $name
      * @param type $attrs
-     * @param type $suffix
      * @return string
      */
-    private function _shortcode_label($name, $attrs, $suffix = null) {
+    private function _shortcode_label($name, $attrs) {
 
-        if (!$suffix) {
-            $suffix = $name;
+        // When set but empty: no label
+        if (isset($attrs['label']) && empty($attrs['label'])) {
+            return;
         }
+
         $buffer = '<label for="' . esc_attr($attrs['id']) . '">';
         if (isset($attrs['label'])) {
-            if (empty($attrs['label'])) {
-                return;
-            } else {
-                $buffer .= esc_html($attrs['label']);
-            }
+            $buffer .= esc_html($attrs['label']);
         } else {
-            if (isset($this->form_options[$name])) {
-                $buffer .= esc_html($this->form_options[$name]);
+            if ($name !== 'lists') {
+                $buffer .= esc_html($this->get_form_text($name));
             }
         }
         $buffer .= "</label>\n";
         return $buffer;
+    }
+
+    private function _shortcode_placeholder($name, $attrs) {
+
+        if (isset($attrs['placeholder'])) {
+            return $attrs['placeholder'];
+        }
+
+        if (!empty($attrs['label_as_placeholder'])) {
+            return $this->get_form_text($name);
+        }
+
+        return $this->get_form_text($name . '_placeholder');
     }
 
     /**
@@ -1394,44 +1332,35 @@ class NewsletterSubscription extends NewsletterModule {
         $idx++;
         $attrs['id'] = 'tnp-' . $idx;
 
-        $this->setup_form_options();
-        $language = $this->get_current_language();
-
         $name = $attrs['name'];
 
         $buffer = '';
 
         if ($name == 'email') {
+            $placeholder = $attrs['placeholder'] ?? $this->get_form_text('email_placeholder');
             $buffer .= '<div class="tnp-field tnp-field-email">';
 
             $buffer .= $this->_shortcode_label('email', $attrs);
 
             $buffer .= '<input class="tnp-email" type="email" name="ne" id="' . esc_attr($attrs['id']) . '" value=""';
-            if (isset($attrs['placeholder'])) {
-                $buffer .= ' placeholder="' . esc_attr($attrs['placeholder']) . '"';
-            }
+            $buffer .= ' placeholder="' . esc_attr($placeholder) . '"';
             $buffer .= ' required>';
             if (isset($attrs['button_label'])) {
                 $label = $attrs['button_label'];
-                if (strpos($label, 'http') === 0) {
-                    $buffer .= ' <input class="tnp-submit-image" type="image" src="' . esc_attr(esc_url_raw($label)) . '">';
-                } else {
-                    $buffer .= ' <input class="tnp-submit" type="submit" value="' . esc_attr($label) . '" style="width: 29%">';
-                }
+                $buffer .= ' <input class="tnp-submit" type="submit" value="' . esc_attr($label) . '" style="width: 29%">';
             }
             $buffer .= "</div>\n";
             return $buffer;
         }
 
         if ($name == 'first_name' || $name == 'name') {
+            $placeholder = $attrs['placeholder'] ?? $this->get_form_text('name_placeholder');
             $buffer .= '<div class="tnp-field tnp-field-firstname">';
             $buffer .= $this->_shortcode_label('name', $attrs);
 
             $buffer .= '<input class="tnp-name" type="text" name="nn" id="' . esc_attr($attrs['id']) . '" value=""';
-            if (isset($attrs['placeholder'])) {
-                $buffer .= ' placeholder="' . esc_attr($attrs['placeholder']) . '"';
-            }
-            if ($this->form_options['name_rules'] == 1) {
+            $buffer .= ' placeholder="' . esc_attr($placeholder) . '"';
+            if ($this->get_form_option('name_rules') == 1) {
                 $buffer .= ' required';
             }
             $buffer .= '>';
@@ -1440,14 +1369,13 @@ class NewsletterSubscription extends NewsletterModule {
         }
 
         if ($name == 'last_name' || $name == 'surname') {
+            $placeholder = $attrs['placeholder'] ?? $this->get_form_text('surname_placeholder');
             $buffer .= '<div class="tnp-field tnp-field-surname">';
             $buffer .= $this->_shortcode_label('surname', $attrs);
 
             $buffer .= '<input class="tnp-surname" type="text" name="ns" id="' . esc_attr($attrs['id']) . '" value=""';
-            if (isset($attrs['placeholder'])) {
-                $buffer .= ' placeholder="' . esc_attr($attrs['placeholder']) . '"';
-            }
-            if ($this->form_options['surname_rules'] == 1) {
+            $buffer .= ' placeholder="' . esc_attr($placeholder) . '"';
+            if ($this->get_form_option('surname_rules') == 1) {
                 $buffer .= ' required';
             }
             $buffer .= '>';
@@ -1461,7 +1389,7 @@ class NewsletterSubscription extends NewsletterModule {
                 return $this->build_field_admin_notice('List number not specified.');
             }
             $number = (int) $attrs['number'];
-            $list = $this->get_list($number, $language);
+            $list = $this->get_list($number);
             if (!$list) {
                 return $this->build_field_admin_notice('List ' . $number . ' is not configured, cannot be shown.');
             }
@@ -1474,102 +1402,110 @@ class NewsletterSubscription extends NewsletterModule {
                 return '<input type="hidden" name="nl[]" value="' . esc_attr($list->id) . '">';
             }
 
-            $idx++;
             $buffer .= '<div class="tnp-field tnp-field-checkbox tnp-field-list"><label for="tnp-' . $idx . '">';
             $buffer .= '<input type="checkbox" id="tnp-' . $idx . '" name="nl[]" value="' . esc_attr($list->id) . '"';
             if (isset($attrs['checked'])) {
                 $buffer .= ' checked';
             }
-            $buffer .= '>';
-            if (isset($attrs['label'])) {
-                if ($attrs['label'] != '') {
-                    $buffer .= '&nbsp;' . esc_html($attrs['label']) . '</label>';
-                }
-            } else {
-                $buffer .= '&nbsp;' . esc_html($list->name) . '</label>';
-            }
-            $buffer .= "</div>\n";
+            $buffer .= '> ';
+            $buffer .= esc_html(isset($attrs['label']) ? $attrs['label'] : $list->name);
+            $buffer .= "</label></div>\n";
 
             return $buffer;
         }
 
         // All lists
         if ($name == 'lists' || $name == 'preferences') {
-            $lists = $this->get_lists_for_subscription($language);
-            if (!empty($lists) && isset($attrs['layout']) && $attrs['layout'] === 'dropdown') {
+            $list_ids = $this->get_form_option('lists');
+            if (!empty($list_ids)) {
 
-                $buffer .= '<div class="tnp-field tnp-lists">';
-                // There is not a default "label" for the block of lists, so it can only be specified in the shortcode attrs as "label"
-                $buffer .= $this->_shortcode_label('lists', $attrs);
-                $buffer .= '<select class="tnp-lists" name="nl[]" required>';
+                $checked_ids = $this->get_form_option('lists_checked');
 
-                if (!empty($attrs['first_option_label'])) {
-                    $buffer .= '<option value="" selected="true" disabled="disabled">' . esc_html($attrs['first_option_label']) . '</option>';
-                }
+                if (isset($attrs['layout']) && $attrs['layout'] === 'dropdown') {
 
-                foreach ($lists as $list) {
-                    $buffer .= '<option value="' . $list->id . '">' . esc_html($list->name) . '</option>';
-                }
-                $buffer .= '</select>';
-                $buffer .= '</div>';
-            } else {
+                    $buffer .= '<div class="tnp-field tnp-lists">';
+                    // There is not a default "label" for the block of lists, so it can only be specified in the shortcode attrs as "label"
+                    $buffer .= $this->_shortcode_label('lists', $attrs);
+                    $buffer .= '<select class="tnp-lists" name="nl[]" required>';
 
-                foreach ($lists as $list) {
-                    $idx++;
-                    $buffer .= '<div class="tnp-field tnp-field-checkbox tnp-field-list"><label for="nl' . $idx . '">';
-                    $buffer .= '<input type="checkbox" id="nl' . $idx . '" name="nl[]" value="' . $list->id . '"';
-                    if ($list->checked) {
-                        $buffer .= ' checked';
+                    if (!empty($attrs['first_option_label'])) {
+                        $buffer .= '<option value="" selected disabled>' . esc_html($attrs['first_option_label']) . '</option>';
                     }
-                    $buffer .= '>&nbsp;' . esc_html($list->name) . '</label>';
-                    $buffer .= "</div>\n";
+
+                    foreach ($list_ids as $list_id) {
+                        $list = $this->get_list($list_id);
+                        if ($list && $list->is_private()) {
+                            continue;
+                        }
+                        $buffer .= '<option value="' . esc_attr($list->id) . '">' . esc_html($list->name) . '</option>';
+                    }
+                    $buffer .= '</select>';
+                    $buffer .= '</div>';
+                } else {
+
+                    $buffer .= '<div class="tnp-field tnp-lists">';
+//                    if (!empty($attrs['label'])) {
+//                        $buffer .= '<p>' . $attrs['label'] . '</p>';
+//                    }
+                    foreach ($list_ids as $list_id) {
+                        $list = $this->get_list($list_id);
+                        if (!$list || $list->is_private()) {
+                            continue;
+                        }
+                        $idx++;
+                        $buffer .= '<div class="tnp-field tnp-field-checkbox tnp-field-list"><label for="nl' . $idx . '">';
+                        $buffer .= '<input type="checkbox" id="nl' . $idx . '" name="nl[]" value="' . esc_attr($list->id) . '"';
+                        if (in_array($list_id, $checked_ids)) {
+                            $buffer .= ' checked';
+                        }
+                        $buffer .= '> ' . esc_html($list->name) . '</label>';
+                        $buffer .= "</div>\n";
+                    }
+                    $buffer .= '</div>';
                 }
             }
             return $buffer;
         }
 
-        if ($name == 'sex' || $name == 'gender') {
+        if ($name === 'sex' || $name === 'gender') {
             $buffer .= '<div class="tnp-field tnp-field-gender">';
             $buffer .= $this->_shortcode_label('sex', $attrs);
 
             $buffer .= '<select name="nx" class="tnp-gender" id="tnp-gender"';
-            if ($this->form_options['sex_rules']) {
+            if ($this->get_form_option('sex_rules')) {
                 $buffer .= ' required ';
             }
             $buffer .= '>';
-            if ($this->form_options['sex_rules']) {
+            if ($this->get_form_option('sex_rules')) {
                 $buffer .= '<option value=""></option>';
             }
-            $buffer .= '<option value="n">' . esc_html($this->form_options['sex_none']) . '</option>';
-            $buffer .= '<option value="f">' . esc_html($this->form_options['sex_female']) . '</option>';
-            $buffer .= '<option value="m">' . esc_html($this->form_options['sex_male']) . '</option>';
+            $buffer .= '<option value="n">' . esc_html($this->get_form_text('sex_none')) . '</option>';
+            $buffer .= '<option value="f">' . esc_html($this->get_form_text('sex_female')) . '</option>';
+            $buffer .= '<option value="m">' . esc_html($this->get_form_text('sex_male')) . '</option>';
             $buffer .= '</select>';
             $buffer .= "</div>\n";
             return $buffer;
         }
 
-        if ($name == 'profile') {
-            if (!isset($attrs['number'])) {
-                return $this->build_field_admin_notice('Extra profile number not specified.');
-            }
+        if ($name === 'profile' || $name === 'customfield') {
+            $number = (int) $attrs['number'] ?? 0;
 
-            $number = (int) $attrs['number'];
-
-            $profile = TNP_Profile_Service::get_profile_by_id($number, $language);
+            $profile = $this->get_customfield($number);
 
             if (!$profile) {
-                return $this->build_field_admin_notice('Extra profile ' . $number . ' is not configured, cannot be shown.');
+                return $this->build_field_admin_notice('Custom field ' . $number . ' is not configured ot the number is wrong or not specified');
             }
 
-            if ($profile->status == 0) {
-                return $this->build_field_admin_notice('Extra profile ' . $number . ' is private, cannot be shown.');
+            if ($profile->is_private()) {
+                return $this->build_field_admin_notice('Custom field ' . $number . ' is private and cannot be shown.');
             }
 
-            $size = isset($attrs['size']) ? $attrs['size'] : '';
+            $size = $attrs['size'] ?? '';
+            $attrs['label'] = $attrs['label'] ?? $profile->name;
+            $placeholder = $attrs['placeholder'] ?? $profile->placeholder;
+
             $buffer .= '<div class="tnp-field tnp-field-profile">';
             $buffer .= $this->_shortcode_label('profile_' . $profile->id, $attrs);
-
-            $placeholder = isset($attrs['placeholder']) ? $attrs['placeholder'] : $profile->placeholder;
 
             // Text field
             if ($profile->type == TNP_Profile::TYPE_TEXT) {
@@ -1602,30 +1538,28 @@ class NewsletterSubscription extends NewsletterModule {
         }
 
         if (strpos($name, 'privacy') === 0) {
-            if (!isset($attrs['url'])) {
-                $attrs['url'] = $this->get_privacy_url();
-            }
-
-            if (!isset($attrs['label'])) {
-                $attrs['label'] = $this->form_options['privacy'];
-            }
+            $url = $attrs['url'] ?? $this->get_privacy_url();
+            $label = $attrs['label'] ?? $this->get_form_text('privacy');
 
             $buffer .= '<div class="tnp-field tnp-field-checkbox tnp-field-privacy">';
 
-            $idx++;
             $buffer .= '<input type="checkbox" name="ny" required class="tnp-privacy" id="tnp-' . $idx . '"> ';
             $buffer .= '<label for="tnp-' . $idx . '">';
-            if (!empty($attrs['url'])) {
-                $buffer .= '<a target="_blank" href="' . esc_attr($attrs['url']) . '">';
+            if (!empty($url)) {
+                $buffer .= '<a target="_blank" href="' . esc_attr($url) . '">';
             }
-            $buffer .= $attrs['label'];
-            if (!empty($attrs['url'])) {
+            $buffer .= esc_html($label);
+            if (!empty($url)) {
                 $buffer .= '</a>';
             }
             $buffer .= '</label>';
             $buffer .= '</div>';
 
             return $buffer;
+        }
+
+        if ($name === 'button') {
+
         }
     }
 
@@ -1635,27 +1569,65 @@ class NewsletterSubscription extends NewsletterModule {
      * @return string Empty id the privacy filed is not configured
      */
     function get_privacy_field($pre_html = '', $post_html = '') {
-        $this->setup_form_options();
-        $privacy_status = (int) $this->form_options['privacy_status'];
+
+        $privacy_status = (int) $this->get_option('privacy_status', 'form');
         if (empty($privacy_status)) {
             return '';
         }
 
         $buffer = '<label>';
         if ($privacy_status === 1) {
-            $buffer .= '<input type="checkbox" name="ny" required class="tnp-privacy">&nbsp;';
+            $buffer .= '<input type="checkbox" name="ny" required class="tnp-privacy"> ';
         }
         $url = $this->get_privacy_url();
         if (!empty($url)) {
             $buffer .= '<a target="_blank" href="' . esc_attr($url) . '">';
-            $buffer .= esc_attr($this->form_options['privacy']) . '</a>';
+            $buffer .= esc_html($this->get_form_text('privacy')) . '</a>';
         } else {
-            $buffer .= esc_html($this->form_options['privacy']);
+            $buffer .= esc_html($this->get_form_text('privacy'));
         }
 
         $buffer .= "</label>";
 
         return $pre_html . $buffer . $post_html;
+    }
+
+    function get_button($attrs, $wrapper = true) {
+        // Prepare the button attrbutes
+        $button_style = '';
+        if (!empty($attrs['button_color'])) {
+            $button_style = 'background-color:' . $attrs['button_color'] . ';';
+        }
+        if (!empty($attrs['button_radius'])) {
+            $button_style = 'border-radius:' . $attrs['button_radius'] . ';';
+        }
+        $button_label = $this->get_text('subscribe', 'form');
+        if (!empty($attrs['button_label'])) {
+            $button_label = $attrs['button_label'];
+        } else if (!empty($attrs['button'])) { // Old attribute
+            $button_label = $attrs['button'];
+        }
+        // For the button container
+        $button_div_style = '';
+        if (!empty($attrs['button_align'])) {
+            $button_div_style = 'text-align: ' . $attrs['button_align'];
+        } else {
+            if (is_rtl()) {
+                $button_div_style = 'text-align: right';
+            } else {
+                $button_div_style = 'text-align: left';
+            }
+        }
+
+        $b = '';
+        if ($wrapper) {
+            $b .= '<div class="tnp-field tnp-field-button" style="' . esc_attr($button_div_style) . '">';
+        }
+        $b .= '<input class="tnp-submit" type="submit" value="' . esc_attr($button_label) . '" style="' . esc_attr($button_style) . '">' . "\n";
+        if ($wrapper) {
+            $b .= "</div>\n";
+        }
+        return $b;
     }
 
     /**
@@ -1667,38 +1639,23 @@ class NewsletterSubscription extends NewsletterModule {
      * @return string The full HTML form
      */
     function get_subscription_form($referrer = '', $action = null, $attrs = []) {
-        $language = $this->get_current_language();
-        $options_profile = $this->get_options('profile', $language);
 
         if (!is_array($attrs)) {
             $attrs = [];
         }
+        $attrs = array_merge(['class' => '', 'show_labels' => 'true', 'show_placeholders' => 'true'], $attrs);
 
-        // Possible alternative form actions (used by...?)
-        if (isset($attrs['action'])) {
-            $action = $attrs['action'];
-        }
+        $buffer = '';
 
         // The referrer parameter is deprecated
         if (!empty($referrer)) {
             $attrs['referrer'] = $referrer;
         }
 
-        $buffer = '';
+        $action = $this->build_action_url($attrs['action'] ?? $action ?? 's');
+        $class = $attrs['class'] ?? '';
 
-        if (empty($action)) {
-            $action = $this->build_action_url('s');
-        }
-
-        if (isset($attrs['before'])) {
-            $buffer .= $attrs['before'];
-        } else {
-            if (isset($attrs['class'])) {
-                $buffer .= '<div class="tnp tnp-subscription ' . $attrs['class'] . '">' . "\n";
-            } else {
-                $buffer .= '<div class="tnp tnp-subscription">' . "\n";
-            }
-        }
+        $buffer .= '<div class="tnp tnp-subscription ' . esc_attr($class) . '">' . "\n";
 
         $buffer .= '<form method="post" action="' . esc_attr($action) . '"';
 
@@ -1706,93 +1663,109 @@ class NewsletterSubscription extends NewsletterModule {
             $buffer .= ' id="' . esc_attr($attrs['id']) . '"';
         }
 
-        $buffer .= '>' . "\n\n";
+        $buffer .= '>' . "\n";
 
         $buffer .= $this->get_form_hidden_fields($attrs);
 
-        if ($options_profile['name_status'] == 2) {
-            $buffer .= $this->shortcode_newsletter_field(['name' => 'first_name']);
+        $field_attrs = [];
+        if ($attrs['show_labels'] === 'false') {
+            $field_attrs['label'] = '';
         }
 
-        if ($options_profile['surname_status'] == 2) {
-            $buffer .= $this->shortcode_newsletter_field(['name' => 'last_name']);
+        if ($attrs['show_placeholders'] === 'false') {
+            $field_attrs['placeholder'] = '';
         }
 
-        $buffer .= $this->shortcode_newsletter_field(['name' => 'email']);
+        $fields = wp_parse_list($attrs['fields'] ?? '');
 
-        if (isset($options_profile['sex_status']) && $options_profile['sex_status'] == 2) {
-            $buffer .= $this->shortcode_newsletter_field(['name' => 'gender']);
-        }
-
-        // Extra profile fields
-        for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
-            // Not for subscription form
-            if ($options_profile['profile_' . $i . '_status'] != 2) {
-                continue;
+        if (empty($fields)) {
+            if (!empty($this->get_form_option('name_status'))) {
+                $fields[] = 'first_name';
             }
-
-            $buffer .= $this->shortcode_newsletter_field(['name' => 'profile', 'number' => $i]);
-        }
-
-        $tmp = '';
-        $lists = $this->get_lists_for_subscription($language);
-        if (!empty($attrs['lists_field_layout']) && $attrs['lists_field_layout'] == 'dropdown') {
-            if (empty($attrs['lists_field_empty_label'])) {
-                $attrs['lists_field_empty_label'] = '';
+            if (!empty($this->get_form_option('surname_status'))) {
+                $fields[] = 'last_name';
             }
-            if (empty($attrs['lists_field_label'])) {
-                $attrs['lists_field_label'] = '';
+            $fields[] = 'email';
+            if ($this->get_form_option('sex_status')) {
+                $fields[] = 'gender';
             }
-            $buffer .= $this->shortcode_newsletter_field(['name' => 'lists', 'layout' => 'dropdown', 'first_option_label' => $attrs['lists_field_empty_label'], 'label' => $attrs['lists_field_label']]);
-        } else {
-            $buffer .= $this->shortcode_newsletter_field(['name' => 'lists']);
-        }
-
-
-
-        // Deprecated
-        $extra = apply_filters('newsletter_subscription_extra', array());
-        foreach ($extra as $x) {
-            $label = $x['label'];
-            if (empty($label)) {
-                $label = '&nbsp;';
+            $fields[] = 'customfields';
+            $fields[] = 'lists';
+            if ($this->get_option('privacy_status', 'form')) {
+                $fields[] = 'privacy';
             }
-            $name = '';
-            if (!empty($x['name'])) {
-                $name = $x['name'];
+        }
+
+
+        if (!in_array('email', $fields)) {
+            $field_attrs['name'] = 'email';
+            $buffer .= $this->shortcode_newsletter_field($field_attrs);
+        }
+
+        foreach ($fields as $field) {
+            switch ($field) {
+                case 'email':
+                    $field_attrs['name'] = 'email';
+                    $buffer .= $this->shortcode_newsletter_field($field_attrs);
+                    break;
+
+                case 'first_name':
+                    $field_attrs['name'] = 'first_name';
+                    $buffer .= $this->shortcode_newsletter_field($field_attrs);
+                    break;
+
+                case 'last_name':
+                    $field_attrs['name'] = 'last_name';
+                    $buffer .= $this->shortcode_newsletter_field($field_attrs);
+                    break;
+
+                case 'gender':
+                    $field_attrs['name'] = 'gender';
+                    $buffer .= $this->shortcode_newsletter_field($field_attrs);
+                    break;
+
+                case 'customfields':
+                    $ids = $this->get_form_option('customfields');
+                    if (is_array($ids)) {
+                        $field_attrs['name'] = 'customfield';
+                        foreach ($ids as $id) {
+                            $field_attrs['number'] = $id;
+                            $buffer .= $this->shortcode_newsletter_field($field_attrs);
+                        }
+                    }
+                    break;
+
+                case 'lists':
+                    if (empty($attrs['lists_field_label'])) {
+                        $attrs['lists_field_label'] = '';
+                    }
+                    if (!empty($attrs['lists_field_layout']) && $attrs['lists_field_layout'] === 'dropdown') {
+                        if (empty($attrs['lists_field_empty_label'])) {
+                            $attrs['lists_field_empty_label'] = '';
+                        }
+                        $buffer .= $this->shortcode_newsletter_field(['name' => 'lists', 'layout' => 'dropdown', 'first_option_label' => $attrs['lists_field_empty_label'], 'label' => $attrs['lists_field_label']]);
+                    } else {
+                        $buffer .= $this->shortcode_newsletter_field(['name' => 'lists', 'label' => $attrs['lists_field_label']]);
+                    }
+
+                    break;
+
+                case 'privacy':
+                    $buffer .= $this->get_privacy_field('<div class="tnp-field tnp-privacy-field">', '</div>');
+                    break;
             }
-            $buffer .= '<div class="tnp-field tnp-field-' . $name . '"><label>' . $label . "</label>";
-            $buffer .= $x['field'] . "</div>\n";
         }
 
-        $buffer .= $this->get_privacy_field('<div class="tnp-field tnp-privacy-field">', '</div>');
+        $buffer .= $this->get_button($attrs);
 
-        $buffer .= '<div class="tnp-field tnp-field-button">';
-
-        $button_style = '';
-        if (!empty($attrs['button_color'])) {
-            $button_style = 'style="background-color:' . esc_attr($attrs['button_color']) . '"';
-        }
-
-        if (strpos($options_profile['subscribe'], 'http') === 0) {
-            $buffer .= '<input class="tnp-submit-image" type="image" src="' . esc_attr($options_profile['subscribe']) . '">' . "\n";
-        } else {
-            $buffer .= '<input class="tnp-submit" type="submit" value="' . esc_attr($options_profile['subscribe']) . '" ' . $button_style . '>' . "\n";
-        }
-
-        $buffer .= "</div>\n</form>\n";
-
-        if (isset($attrs['after'])) {
-            $buffer .= $attrs['after'];
-        } else {
-            $buffer .= "</div>\n";
-        }
+        $buffer .= "</form>\n";
+        $buffer .= "</div>\n";
 
         return $buffer;
     }
 
     function get_form($number) {
-        $options = get_option('newsletter_forms');
+        $options = $this->get_options('htmlforms');
 
         $form = $options['form_' . $number];
 
@@ -1801,7 +1774,7 @@ class NewsletterSubscription extends NewsletterModule {
         $action = $this->build_action_url('s');
 
         if (stripos($form, '<form') === false) {
-            $form = '<form method="post" action="' . $action . '">' . $form . '</form>';
+            $form = '<form method="post" action="' . esc_attr($action) . '">' . $form . '</form>';
         }
 
         // For compatibility
@@ -1820,26 +1793,26 @@ class NewsletterSubscription extends NewsletterModule {
      */
     function replace_lists($buffer) {
         $checkboxes = '';
-        $lists = $this->get_lists_for_subscription($this->get_current_language());
+        $lists = $this->get_lists_for_subscription();
         foreach ($lists as $list) {
-            $checkboxes .= '<input type="checkbox" name="nl[]" value="' . $list->id . '"/>&nbsp;' . $list->name . '<br />';
+            $checkboxes .= '<input type="checkbox" name="nl[]" value="' . esc_attr($list->id) . '"> ' . esc_attr($list->name) . '<br />';
         }
         $buffer = str_replace('{lists}', $checkboxes, $buffer);
-        $buffer = str_replace('{preferences}', $checkboxes, $buffer);
+        $buffer = str_replace('{preferences}', $checkboxes, $buffer); // For compatibility
         return $buffer;
     }
 
     function notify_admin_on_subscription($user) {
 
-        if (empty($this->options['notify'])) {
+        if (empty($this->get_main_option('notify'))) {
             return;
         }
 
         $message = $this->generate_admin_notification_message($user);
-        $email = trim($this->options['notify_email']);
+        $email = trim($this->get_main_option('notify_email'));
         $subject = $this->generate_admin_notification_subject('New subscription');
 
-        Newsletter::instance()->mail($email, $subject, array('html' => $message));
+        Newsletter::instance()->mail($email, $subject, ['html' => $message]);
     }
 
     /**
@@ -1850,40 +1823,49 @@ class NewsletterSubscription extends NewsletterModule {
      * @return string
      */
     function get_subscription_form_minimal($attrs) {
-
-        $this->setup_form_options();
-
         if (!is_array($attrs)) {
             $attrs = [];
         }
 
-        $attrs = array_merge(array('class' => '', 'referrer' => 'minimal',
-            'button' => $this->form_options['subscribe'], 'button_color' => '',
-            'button_radius' => '', 'placeholder' => $this->form_options['email']), $attrs);
+        // Compatibility
+        if (isset($attrs['button_label'])) {
+            $attrs['button'] = $attrs['button_label'];
+        }
 
-        $form = '';
+        $attrs = array_merge(['class' => '', 'referrer' => 'minimal',
+            'button' => $this->get_form_text('subscribe'), 'button_color' => '',
+            'button_radius' => '', 'placeholder' => $this->get_form_text('email'),
+            'name_placeholder' => $this->get_form_text('name'),
+            'show_name' => 0, 'align' => 'center'], $attrs);
 
-        $form .= '<div class="tnp tnp-subscription-minimal ' . $attrs['class'] . '">';
+        $show_name = !empty($attrs['show_name']);
+
+        $form = '<div class="tnp tnp-subscription-minimal '
+                . ($show_name ? 'with-name ' : ' ')
+                . esc_attr($attrs['class']) . '">';
+
         $form .= '<form action="' . esc_attr($this->build_action_url('s')) . '" method="post"';
         if (!empty($attrs['id'])) {
             $form .= ' id="' . esc_attr($attrs['id']) . '"';
         }
+        $style = 'text-align: ' . esc_attr($attrs['align']);
+
+        $form .= ' style="' . $style . '"';
+
         $form .= '>';
 
         $form .= $this->get_form_hidden_fields($attrs);
 
         $form .= '<input class="tnp-email" type="email" required name="ne" value="" placeholder="' . esc_attr($attrs['placeholder']) . '">';
 
-        if (isset($attrs['button_label'])) {
-            $label = $attrs['button_label'];
-        } else if (isset($attrs['button'])) { // Backward compatibility
-            $label = $attrs['button'];
-        } else {
-            $label = $this->form_options['subscribe'];
+        if ($show_name) {
+            $form .= '<input class="tnp-name" type="text" required name="nn" value="" placeholder="' . esc_attr($attrs['name_placeholder']) . '">';
         }
 
-        $form .= '<input class="tnp-submit" type="submit" value="' . esc_attr($attrs['button']) . '"'
-                . ' style="background-color:' . esc_attr($attrs['button_color']) . '">';
+//        $form .= '<input class="tnp-submit" type="submit" value="' . esc_attr($attrs['button']) . '"'
+//                . ' style="background-color:' . esc_attr($attrs['button_color']) . '">';
+
+        $form .= $this->get_button($attrs, false);
 
         $form .= $this->get_privacy_field('<div class="tnp-field tnp-privacy-field">', '</div>');
 
@@ -1892,7 +1874,14 @@ class NewsletterSubscription extends NewsletterModule {
         return $form;
     }
 
-    function shortcode_newsletter_form($attrs, $content) {
+    /**
+     * Implementation of the [newsletter_form] shortcode.
+     *
+     * @param array $attrs
+     * @param string $content
+     * @return string
+     */
+    function shortcode_newsletter_form($attrs, $content = '') {
 
         if (isset($attrs['type']) && $attrs['type'] === 'minimal') {
             return $this->get_subscription_form_minimal($attrs);
@@ -1916,74 +1905,40 @@ class NewsletterSubscription extends NewsletterModule {
         return $this->get_subscription_form(null, null, $attrs);
     }
 
-    /**
-     *
-     * @global wpdb $wpdb
-     * @param array $attrs
-     * @param string $content
-     * @return string
-     */
-    function shortcode_newsletter($attrs, $content) {
-        global $wpdb;
+    function hook_newsletter_page_text($text, $key, $user) {
 
-        $message_key = $this->get_message_key_from_request();
-        if ($message_key == 'confirmation') {
-            $user = $this->get_user_from_request(false, 'preconfirm');
-        } else {
-            $user = $this->get_user_from_request();
+        if (!in_array($key, ['subscription', 'confirmed', 'confirmation', 'error'])) {
+            return $text;
         }
 
-        $message = apply_filters('newsletter_page_text', '', $message_key, $user);
+        $text = $this->get_text($key . '_text');
 
-        $options = $this->get_options('', $this->get_current_language($user));
-
-        if (empty($message)) {
-            $message = $options[$message_key . '_text'];
-
-            // TODO: the if can be removed
-            if ($message_key == 'confirmed') {
-                $message .= $options[$message_key . '_tracking'];
+        // Fixing of the old tags
+        $text = str_replace('{profile_form}', '[newsletter_profile]', $text); // can be used on welcome text
+        $text = str_replace('{subscription_form}', '[newsletter_form]', $text);
+        for ($i = 1; $i <= 10; $i++) {
+            if (strpos($text, "{subscription_form_$i}") !== false) {
+                $text = str_replace("{subscription_form_$i}", '[newsletter_form form="' . $i . '"]', $text);
             }
         }
 
-        // Now check what form must be added
-        if ($message_key == 'subscription') {
-            if (isset($attrs['show_form']) && $attrs['show_form'] === 'false') {
-                //return $this->build_field_admin_notice('The [newsletter] shortcode is configured to not show the subscription form.');
-                return;
-            }
-
-            // Compatibility check
-            if (stripos($message, '<form') !== false) {
-                $message = str_ireplace('<form', '<form method="post" action="' . esc_attr($this->get_subscribe_url()) . '"', $message);
-            } else {
-
-                if (strpos($message, '{subscription_form') === false) {
-                    $message .= '{subscription_form}';
-                }
-
-                if (isset($attrs['form'])) {
-                    $message = str_replace('{subscription_form}', $this->get_form($attrs['form']), $message);
-                } else {
-                    $message = str_replace('{subscription_form}', $this->get_subscription_form('page', null, $attrs), $message);
-                }
-            }
+        if ($key === 'confirmed') {
+            $text .= $this->get_option($key . '_tracking');
         }
 
-        $email = $this->get_email_from_request();
-
-        $message = $this->replace($message, $user, $email, 'page');
-
-        $message = do_shortcode($message);
-
-        if (isset($_REQUEST['alert'])) {
-            // slashes are already added by wordpress!
-            $message .= '<script>alert("' . esc_js(strip_tags($_REQUEST['alert'])) . '");</script>';
+        if ($key === 'error' && current_user_can('administrator')) {
+            $text .= '<div style="padding: 1rem; background-color: #eee"><strong>Message only visibile to administrators</strong><br>';
+            $text .= 'Email address probably already registered and Newsletter sets to block repeated registrations. You can change this behavior or the user message above on subscription configuration panel.';
+            $text .= '</div>';
         }
 
-        return $message;
+        $admin_notice = '';
+        if (current_user_can('administrator')) {
+            $admin_notice = '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrators</strong>. <a href="' . admin_url('admin.php?page=newsletter_subscription_options') . '" target="_blank">Edit this content</a>.</p>';
+        }
+
+        return $admin_notice . $text;
     }
-
 }
 
 NewsletterSubscription::instance();

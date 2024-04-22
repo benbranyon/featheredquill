@@ -11,75 +11,176 @@ class NewsletterUnsubscription extends NewsletterModule {
      */
     static function instance() {
         if (self::$instance == null) {
-            self::$instance = new NewsletterUnsubscription();
+            self::$instance = new self();
         }
         return self::$instance;
     }
 
     function __construct() {
-        parent::__construct('unsubscription', '1.0.4');
+        parent::__construct('unsubscription');
 
-        add_filter('newsletter_replace', array($this, 'hook_newsletter_replace'), 10, 4);
-        add_filter('newsletter_page_text', array($this, 'hook_newsletter_page_text'), 10, 3);
-        add_filter('newsletter_message_headers', array($this, 'hook_add_unsubscribe_headers_to_email'), 10, 3);
+        add_filter('newsletter_replace', [$this, 'hook_newsletter_replace'], 10, 4);
+        add_filter('newsletter_page_text', [$this, 'hook_newsletter_page_text'], 10, 3);
+        add_filter('newsletter_message', [$this, 'hook_newsletter_message'], 9, 3);
 
-        add_action('newsletter_action', array($this, 'hook_newsletter_action'), 11, 3);
+        add_action('newsletter_action', [$this, 'hook_newsletter_action'], 11, 3);
+        add_action('newsletter_action_dummy', [$this, 'hook_newsletter_action_dummy'], 11, 3);
+
+        if (!is_admin() || defined('DOING_AJAX') && DOING_AJAX) {
+            add_shortcode('newsletter_unsubscribe_button', [$this, 'shortcode_newsletter_unsubscribe_button']);
+            add_shortcode('newsletter_resubscribe_button', [$this, 'shortcode_newsletter_resubscribe_button']);
+        }
     }
 
-    function upgrade() {
-        parent::upgrade();
+    function shortcode_newsletter_unsubscribe_button($attrs, $content = '') {
+        if ($this->is_current_user_dummy()) {
+            $user = $this->get_dummy_user();
+        } else {
+            $user = $this->check_user();
 
-        if (!empty($this->options['notify_admin_on_unsubscription'])) {
-            unset($this->options['notify_admin_on_unsubscription']);
-            $this->options['notify'] = '1';
-            $this->options['notify_email'] = get_option('admin_email');
-            $this->save_options($this->options);
+            if (empty($user)) {
+                if (empty($content)) {
+                    return __('Subscriber not found.', 'newsletter');
+                } else {
+                    return $content;
+                }
+            }
+        }
+        $label = empty($attrs['label']) ? __('Unsubscribe', 'newsletter') : $attrs['label'];
+
+        $b = '<form action="' . esc_attr($this->build_action_url('uc')) . '" method="post" class="tnp-unsubscribe">';
+        $b .= '<input type="hidden" name="nk" value="' . esc_attr($this->get_user_key($user)) . '">';
+        $b .= '<button class="tnp-submit">' . esc_html($label) . '</button>';
+        $b .= '</form>';
+        return $b;
+    }
+
+    function shortcode_newsletter_resubscribe_button($attrs, $content = '') {
+        if ($this->is_current_user_dummy()) {
+            $user = $this->get_dummy_user();
+        } else {
+            $user = $this->check_user();
+
+            if (empty($user)) {
+                if (empty($content)) {
+                    return __('Subscriber not found.', 'newsletter');
+                } else {
+                    return $content;
+                }
+            }
+        }
+
+        $label = empty($attrs['label']) ? __('Resubscribe', 'newsletter') : $attrs['label'];
+        $b = '<form action="' . esc_attr($this->build_action_url('reactivate')) . '" method="post" class="tnp-reactivate">';
+        $b .= '<input type="hidden" name="nk" value="' . esc_attr($this->get_user_key($user)) . '">';
+        $b .= '<button class="tnp-submit">' . esc_html($label) . '</button>';
+        $b .= '</form>';
+        return $b;
+    }
+
+    function hook_newsletter_action_dummy($action, $user, $email) {
+        if (!in_array($action, ['u', 'uc', 'ocu', 'reactivate'])) {
+            return;
+        }
+
+        switch ($action) {
+            case 'u':
+                $url = $this->build_message_url(null, 'unsubscribe', $user, $email);
+                $this->redirect($url);
+                break;
+
+            case 'uc':
+                $url = $this->build_message_url(null, 'unsubscribed', $user, $email);
+                $this->redirect($url);
+                break;
+
+            case 'reactivate':
+                $url = $this->build_message_url(null, 'reactivated', $user);
+                $this->redirect($url);
+                break;
         }
     }
 
     function hook_newsletter_action($action, $user, $email) {
 
-        if (in_array($action, ['u', 'uc', 'lu', 'reactivate'])) {
-            if (!$user) {
-                $this->dienow(__('Subscriber not found', 'newsletter'), 'Already deleted or using the wrong subscriber key in the URL', 404);
+        if (!in_array($action, ['u', 'uc', 'ocu', 'reactivate'])) {
+            return;
+        }
+
+        if (!$user) {
+            $this->dienow(__('Subscriber not found', 'newsletter'), 'From a test newsletter or already deleted or using the wrong subscriber key in the URL', 404);
+        }
+
+        if (isset($_SERVER['HTTP_USER_AGENT'])) {
+            $agent = strtolower($_SERVER['HTTP_USER_AGENT']);
+//            if (strpos($agent, 'yahoomailproxy') !== false) {
+//                return;
+//            }
+            if (strpos($agent, 'googlebot') !== false) {
+                die();
+            }
+            if (strpos($agent, 'yandexbot') !== false) {
+                die();
+            }
+            if (strpos($agent, 'bingbot') !== false) {
+                die();
+            }
+            if (strpos($agent, 'bingpreview') !== false) {
+                die();
+            }
+            if (strpos($agent, 'microsoftpreview') !== false) {
+                die();
+            }
+            if (strpos($agent, 'bytespider') !== false) {
+                die();
+            }
+            if (strpos($agent, 'headlesschrome') !== false) {
+                die();
             }
         }
 
-//        if ($action === 'u' && empty($this->options['optout'])) {
-//            $action = 'uc';
-//        }
+        if ($this->get_main_option('mode') == '1' && $action === 'u') {
+            $action = 'uc';
+        }
+
+        // Action conversion from old links from the email headers
+        if (isset($_POST['List-Unsubscribe']) && 'One-Click' === $_POST['List-Unsubscribe']) {
+            $action = 'ocu';
+        }
+
+        // Show the antibot and stop
+        if (in_array($action, ['u', 'uc', 'reactivate'])) {
+            if (!$this->antibot_form_check(false)) {
+                $this->antibot_unsubscription('');
+            }
+        }
 
         switch ($action) {
             case 'u':
                 $url = $this->build_message_url(null, 'unsubscribe', $user, $email);
-                wp_redirect($url);
-                die();
+                $this->redirect($url);
                 break;
 
-            case 'lu': //Left for backwards compatibility, could be removed after some time
             case 'uc':
+                $this->unsubscribe($user, $email);
+                $url = $this->build_message_url(null, 'unsubscribed', $user, $email);
+                setcookie('newsletter', '', 0, '/');
+                $this->redirect($url);
+                break;
+
+            case 'ocu': // One Click Unsubscribe rfc8058
                 if (isset($_POST['List-Unsubscribe']) && 'One-Click' === $_POST['List-Unsubscribe']) {
-                    $this->unsubscribe($user, $email);
-                } else if ($this->antibot_form_check()) {
-                    $this->unsubscribe($user, $email);
-                    $url = $this->build_message_url(null, 'unsubscribed', $user, $email);
-                    wp_redirect($url);
-                } else {
-                    $this->request_to_antibot_form('Unsubscribe');
+                    $this->unsubscribe($user, $email, 'unsubscribe-rfc8058');
+                    die('ok');
                 }
-                die();
+                die('ko');
                 break;
 
             case 'reactivate':
-                if ($this->antibot_form_check()) {
-                    $this->reactivate($user);
-                    $url = $this->build_message_url(null, 'reactivated', $user);
-                    setcookie('newsletter', $user->id . '-' . $user->token, time() + 60 * 60 * 24 * 365, '/');
-                    wp_redirect($url);
-                } else {
-                    $this->request_to_antibot_form('Reactivate');
-                }
-                die();
+                $this->reactivate($user);
+                setcookie('newsletter', $user->id . '-' . $user->token, time() + 60 * 60 * 24 * 365, '/');
+                $url = $this->build_message_url(null, 'reactivated', $user);
+                $this->redirect($url);
                 break;
         }
     }
@@ -89,17 +190,16 @@ class NewsletterUnsubscription extends NewsletterModule {
      *
      * @return TNP_User
      */
-    function unsubscribe($user, $email = null) {
+    function unsubscribe($user, $email = null, $type = 'unsubscribe') {
         global $wpdb;
 
-        if ($user->status == TNP_User::STATUS_UNSUBSCRIBED) {
+        if ($user->status === TNP_User::STATUS_UNSUBSCRIBED) {
             return $user;
         }
 
-        $this->refresh_user_token($user);
         $this->set_user_status($user, TNP_User::STATUS_UNSUBSCRIBED);
 
-        $this->add_user_log($user, 'unsubscribe');
+        $this->add_user_log($user, $type);
 
         do_action('newsletter_user_unsubscribed', $user);
 
@@ -115,25 +215,28 @@ class NewsletterUnsubscription extends NewsletterModule {
     }
 
     function send_unsubscribed_email($user, $force = false) {
-        $options = $this->get_options('', $this->get_user_language($user));
-        if (!$force && !empty($options['unsubscribed_disabled'])) {
+        if (!$force && !empty($this->get_main_option('unsubscribed_disabled'))) {
             return true;
         }
 
-        $message = do_shortcode($options['unsubscribed_message']);
-        $subject = $options['unsubscribed_subject'];
+        $this->switch_language($user->language);
 
-        return NewsletterSubscription::instance()->mail($user, $subject, $message);
+        $message = do_shortcode($this->get_text('unsubscribed_message'));
+        $subject = $this->get_text('unsubscribed_subject');
+
+        $res = NewsletterSubscription::instance()->mail($user, $subject, $message);
+        $this->restore_language();
+        return $res;
     }
 
     function notify_admin($user) {
 
-        if (empty($this->options['notify'])) {
+        if (empty($this->get_main_option('notify'))) {
             return;
         }
 
         $message = $this->generate_admin_notification_message($user);
-        $email = trim($this->options['notify_email']);
+        $email = trim($this->get_main_option('notify_email'));
         $subject = $this->generate_admin_notification_subject('New cancellation');
 
         Newsletter::instance()->mail($email, $subject, ['html' => $message]);
@@ -146,10 +249,6 @@ class NewsletterUnsubscription extends NewsletterModule {
      * @return TNP_User
      */
     function reactivate($user = null) {
-        // For compatibility, to be removed
-        if (!$user) {
-            $user = $this->get_user_from_request(true);
-        }
         $this->set_user_status($user, TNP_User::STATUS_CONFIRMED);
         $this->add_user_log($user, 'reactivate');
         do_action('newsletter_user_reactivated', $user);
@@ -160,47 +259,55 @@ class NewsletterUnsubscription extends NewsletterModule {
         if ($user) {
             $text = $this->replace_url($text, 'unsubscription_confirm_url', $this->build_action_url('uc', $user, $email));
             $text = $this->replace_url($text, 'unsubscription_url', $this->build_action_url('u', $user, $email));
+            $text = $this->replace_url($text, 'unsubscribe_url', $this->build_action_url('u', $user, $email));
             $text = $this->replace_url($text, 'reactivate_url', $this->build_action_url('reactivate', $user, $email));
         } else {
             $text = $this->replace_url($text, 'unsubscription_confirm_url', $this->build_action_url('nul'));
             $text = $this->replace_url($text, 'unsubscription_url', $this->build_action_url('nul'));
+            $text = $this->replace_url($text, 'unsubscribe_url', $this->build_action_url('nul'));
         }
 
         return $text;
     }
 
+    /**
+     * Language and locale are already defined in this hook.
+     *
+     * @param type $text
+     * @param type $key
+     * @param type $user
+     * @return type
+     */
     function hook_newsletter_page_text($text, $key, $user = null) {
+        $message = '';
+        if ($key === 'unsubscribe') {
+            if (!$user) {
+                $message = $this->get_text('error_text');
+            }
+            $message = $this->get_text('unsubscribe_text');
+        }
+        if ($key === 'unsubscribed') {
+            if (!$user) {
+                $message = $this->get_text('error_text');
+            }
+            $message = $this->get_text('unsubscribed_text');
+        }
+        if ($key === 'reactivated') {
+            if (!$user) {
+                $message = $this->get_text('error_text');
+            }
+            $message = $this->get_text('reactivated_text');
+        }
 
-        $options = $this->get_options('', $this->get_current_language($user));
-        if ($key == 'unsubscribe') {
-            if (!$user) {
-                return 'Subscriber not found.';
+        if ($message) {
+            if ($user && $user->id === 0 && current_user_can('administrator')) {
+                return '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrator</strong>. Preview of the content with a dummy subscriber. <a href="' . admin_url('admin.php?page=newsletter_unsubscription_index') . '" target="_blank">Edit this content</a>.</p>'
+                        . $message;
             }
-            return $options['unsubscribe_text'];
+            return $message;
         }
-        if ($key == 'unsubscribed') {
-            if (!$user) {
-                return $options['error_text'];
-            }
-            return $options['unsubscribed_text'];
-        }
-        if ($key == 'reactivated') {
-            if (!$user) {
-                return $options['error_text'];
-            }
-            return $options['reactivated_text'];
-        }
-        if ($key == 'unsubscription_error') {
-            return $options['error_text'];
-        }
+
         return $text;
-    }
-
-    function admin_menu() {
-        $this->add_admin_page('index', 'Unsubscribe');
-        if (!$this->is_multilanguage()) {
-            $this->add_admin_page('indexnew', 'Unsubscribe');
-        }
     }
 
     /**
@@ -210,27 +317,26 @@ class NewsletterUnsubscription extends NewsletterModule {
      *
      * @return array
      */
-    function hook_add_unsubscribe_headers_to_email($headers, $email, $user) {
+    function hook_newsletter_message($message, $email, $user) {
 
-        if (!empty($this->options['disable_unsubscribe_headers'])) {
-            return $headers;
+        if (!empty($this->get_main_option('disable_unsubscribe_headers'))) {
+            return $message;
         }
 
         $list_unsubscribe_values = [];
-        if (!empty($this->options['list_unsubscribe_mailto_header'])) {
-            $unsubscribe_address = $this->options['list_unsubscribe_mailto_header'];
+        if (!empty($this->get_main_option('list_unsubscribe_mailto_header'))) {
+            $unsubscribe_address = $this->get_main_option('list_unsubscribe_mailto_header');
             $list_unsubscribe_values[] = "<mailto:$unsubscribe_address?subject=unsubscribe>";
         }
 
-        $unsubscribe_action_url = $this->build_action_url('uc', $user, $email);
+        $unsubscribe_action_url = $this->build_action_url('ocu', $user, $email);
         $list_unsubscribe_values[] = "<$unsubscribe_action_url>";
 
-        $headers['List-Unsubscribe'] = implode(', ', $list_unsubscribe_values);
-        $headers['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click';
+        $message->headers['List-Unsubscribe'] = implode(', ', $list_unsubscribe_values);
+        $message->headers['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click';
 
-        return $headers;
+        return $message;
     }
-
 }
 
 NewsletterUnsubscription::instance();

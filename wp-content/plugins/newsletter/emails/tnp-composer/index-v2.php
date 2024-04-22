@@ -28,6 +28,9 @@ $fields = new NewsletterFields($controls);
 
 $dir = is_rtl() ? 'rtl' : 'ltr';
 $rev_dir = is_rtl() ? 'ltr' : 'rlt';
+
+//wp_enqueue_script('jquery-ui-dialog');
+//wp_enqueue_style('wp-jquery-ui-dialog');
 ?>
 <script type="text/javascript">
     if (window.innerWidth < 1550) {
@@ -41,8 +44,8 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
             jQuery('#tnpb-content').removeClass('tnp-view-mobile');
         }
     }
-</script>
 
+</script>
 
 <style>
 <?php echo NewsletterEmails::instance()->get_composer_backend_css(); ?>
@@ -71,6 +74,7 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
                         <td dir="<?php echo $dir ?>">
                             <div id="tnpc-subject">
                                 <?php $this->subject('subject'); ?>
+
                             </div>
                         </td>
                     </tr>
@@ -82,29 +86,25 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
                     </tr>
                 </table>
 
-                <div style="text-align: left; margin-left: 1em;">
-                    <a href="https://www.thenewsletterplugin.com/documentation/newsletters/newsletter-tags/"
-                       target="_blank">You can use tags to inject subscriber fields</a>. Even on subject.
-                </div>
+                <div class="tnpb-actions">
 
-                <div class="composer-actions">
+                    <span class="button-primary" onclick="tnpc_show_presets_modal()" title="<?php esc_attr_e('Template', 'newsletter') ?>">
+                        <i class="far fa-file"></i>
+                    </span>
 
-                    <div class="button-primary" data-tnp-modal-target="#attachment-modal">
-                        <i class="fas fa-paperclip"></i>
-                    </div>
+                    <a class="button-primary" href="#tnpc-placeholders" rel="modal:open" title="<?php esc_attr_e('Placeholders', 'newsletter') ?>"><i class="fas fa-user"></i></a>
+
+                    <a class="button-primary" href="#tnpc-attachment-modal" rel="modal:open" title="<?php esc_attr_e('Attachments', 'newsletter') ?>"><i class="fas fa-paperclip"></i></a>
 
                     <?php if ($show_test) { ?>
-                        <div class="button-primary" data-tnp-modal-target="#test-newsletter-modal">
-                            <i class="fas fa-paper-plane"></i> <?php _e('Test', 'newsletter') ?>
-                        </div>
+                        <span class="button-primary" data-tnp-modal-target="#test-newsletter-modal" title="<?php esc_attr_e('Test', 'newsletter') ?>">
+                            <i class="fas fa-paper-plane"></i> <?php //_e('Test', 'newsletter')       ?>
+                        </span>
                     <?php } ?>
 
-                    <div class="composer-view-mode">
-
-                        <span class="composer-view-mode__item" data-view-mode="desktop"><i class="fas fa-desktop"></i></span>
-
-                        <span class="composer-view-mode__item" data-view-mode="mobile"><i class="fas fa-mobile"></i></span>
-                    </div>
+                    <span class="button-primary" id="tnpc-view-mode" title="<?php esc_attr_e('Switch preview mode', 'newsletter') ?>">
+                        <i id="tnpc-view-mode-icon" class="fas fa-desktop"></i>
+                    </span>
 
                 </div>
 
@@ -191,16 +191,34 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
 </div>
 
 <script type="text/javascript">
-    TNP_PLUGIN_URL = "<?php echo esc_js(Newsletter::instance()->plugin_url) ?>";
+    TNP_PLUGIN_URL = "<?php echo esc_js(Newsletter::plugin_url()) ?>";
     TNP_HOME_URL = "<?php echo esc_js(home_url('/', is_ssl() ? 'https' : 'http')) ?>";
     tnp_context_type = "<?php echo esc_js($context_type) ?>";
     tnp_nonce = '<?php echo esc_js(wp_create_nonce('save')) ?>';
     tnp_preset_nonce = '<?php echo esc_js(wp_create_nonce('preset')) ?>';
+    if (typeof tnp_preset_show === 'undefined')
+        tnp_preset_show = true;
 </script>
 <?php
 wp_enqueue_script('tnp-composer', plugins_url('newsletter') . '/emails/tnp-composer/_scripts/newsletter-builder-v2.js', [], NEWSLETTER_VERSION);
 ?>
 
 <?php include NEWSLETTER_DIR . '/emails/subjects.php'; ?>
+<div id="tnpc-placeholders" style="display: none">
+    <h3><?php esc_html_e('Placeholders', 'newsletter')?></h3>
+    <ul>
+        <li>{name} - <?php esc_html_e('First name', 'newsletter')?></li>
+        <li>{surname} - <?php esc_html_e('Last name', 'newsletter')?></li>
+        <li>{email} - <?php esc_html_e('Email', 'newsletter')?></li>
+        <li>{profile_N} - <?php esc_html_e('Profile numner N with N=1, 2, 3, ...', 'newsletter')?></li>
+        <li>{email_url} - <?php esc_html_e('Email online view', 'newsletter')?></li>
+    </ul>
+    <p>
+        <a href="https://www.thenewsletterplugin.com/documentation/newsletters/newsletter-tags/" target="_blank">See the documentation</a>
+    </p>
+</div>
 
 <?php if (function_exists('wp_enqueue_editor')) wp_enqueue_editor(); ?>
+
+<?php do_action('newsletter_composer_footer') ?>
+

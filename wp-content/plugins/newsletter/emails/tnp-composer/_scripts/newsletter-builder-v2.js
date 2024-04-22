@@ -10,7 +10,6 @@ jQuery.fn.perform_delete = function () {
         tnpc_hide_block_options();
         // remove block
         jQuery(this).parent().remove();
-        tnpc_mobile_preview();
     });
 }
 
@@ -34,13 +33,13 @@ jQuery.fn.perform_block_edit = function () {
         target = jQuery(this).parent().find('.edit-block');
 
         // The row container which is a global variable and used later after the options save
-        container = jQuery(this).closest("table");
+        tnp_container = jQuery(this).closest("table");
 
-        if (container.hasClass('tnpc-row-block')) {
+        if (tnp_container.hasClass('tnpc-row-block')) {
 
             tnpc_show_block_options();
 
-            var options = container.find(".tnpc-block-content").attr("data-json");
+            var options = tnp_container.find(".tnpc-block-content").attr("data-json");
 
             // Compatibility
             if (!options) {
@@ -49,7 +48,7 @@ jQuery.fn.perform_block_edit = function () {
 
             var data = {
                 action: "tnpc_options",
-                id: container.data("id"),
+                id: tnp_container.data("id"),
                 context_type: tnp_context_type,
                 options: options
             };
@@ -58,7 +57,6 @@ jQuery.fn.perform_block_edit = function () {
 
             builderAreaHelper.lock();
             jQuery("#tnpc-block-options-form").load(ajaxurl, data, function () {
-                //console.log('Block form options loaded');
                 start_options = jQuery("#tnpc-block-options-form").serializeArray();
                 tnpc_add_global_options(start_options);
                 builderAreaHelper.unlock();
@@ -108,12 +106,11 @@ jQuery.fn.perform_clone = function () {
         //     new_row.find(".tnpc-row-edit-block i").click();
         // }
         new_row.insertAfter(row);
-        tnpc_mobile_preview();
     });
 };
 
 let start_options = null;
-let container = null;
+let tnp_container = null;
 
 jQuery(function () {
 
@@ -126,7 +123,7 @@ jQuery(function () {
         preloadedContent = jQuery('input[name="options[message]"]').val();
     }
 
-    if (!preloadedContent) {
+    if (!preloadedContent && tnp_preset_show) {
         tnpc_show_presets_modal();
     } else {
         jQuery('#tnpb-content').html(preloadedContent);
@@ -168,12 +165,10 @@ function BuilderAreaHelper() {
     _overlayEl.style.height = '100%';
 
     this.lock = function () {
-        console.log('Lock builder area');
         _builderAreaEl.appendChild(_overlayEl);
     }
 
     this.unlock = function () {
-        console.log('Unlock builder area');
         _builderAreaEl.removeChild(_overlayEl);
     }
 
@@ -223,13 +218,10 @@ function init_builder_area() {
                     if (new_row.hasClass('tnpc-row-block')) {
                         new_row.find(".tnpc-row-edit-block").click();
                     }
-                    tnpc_mobile_preview();
                 }).fail(function () {
                     alert("Block rendering failed.");
                     loading_row.remove();
                 });
-            } else {
-                tnpc_mobile_preview();
             }
         }
     });
@@ -302,7 +294,7 @@ function start_composer() {
 
         jQuery.post(ajaxurl, data, function (response) {
             _target.html(response);
-            tnpc_mobile_preview();
+
             jQuery("#tnpc-block-options-form").html("");
         });
     });
@@ -310,7 +302,7 @@ function start_composer() {
     jQuery('#tnpc-block-options-form').change(function (event) {
         var data = jQuery("#tnpc-block-options-form").serializeArray();
 
-        var _container = container;
+        var _container = tnp_container;
         var _target = target;
 
         tnpc_add_global_options(data);
@@ -326,7 +318,7 @@ function start_composer() {
 
     });
 
-    tnpc_mobile_preview();
+
 
 }
 
@@ -357,13 +349,10 @@ function tnpc_hide_block_options() {
 
 }
 
-function tnpc_mobile_preview() {
-
-    return;
-
-}
-
 function tnpc_save(form) {
+
+    if (window.tinymce)
+        window.tinymce.triggerSave();
 
     form.elements["options[message]"].value = tnpc_get_email_content_from_builder_area();
 
@@ -475,10 +464,6 @@ function tnpc_add_global_options(data) {
 // =================    PRESET    ===================== //
 // ==================================================== //
 
-//TODO non va bene tenere nel global space variabili che altri potrebbero accidentalmente modificare/usare
-// ma questo è un test
-const toastBottom = new TnpToast({duration: 5000, position: 'bottom right', wrapperPadding: '70px 20px'});
-
 //TODO - spostare gestione dei preset in contesto privato ma aggiungendo comunque a window le funzioni triggerate da html (load_preset, delete_preset,...) per mantenere compatibilità?
 const presetListModal = new TNPModal({
     closeWhenClickOutside: true,
@@ -557,80 +542,6 @@ function tnpc_load_preset(id, subject, isEditMode) {
 
 }
 
-function tnpc_save_preset(form) {
-    const presetName = document.getElementById('options-subject-subject').value.replace('"', '');
-
-    const presetNameModal = new TNPModal({
-        title: 'Choose a preset name',
-        content: '<input type="text" id="preset_name" style="width: 100%" placeholder="Preset name" value="' + presetName + '"/>',
-        showConfirm: true,
-        clickConfirmOnPressEnter: true,
-        onConfirm: function () {
-            const inputEl = document.querySelector('#preset_name');
-            document.querySelector('#options-subject-subject').value = inputEl.value;
-            tnpc_save(form);
-            form.submit();
-        }
-    });
-
-    presetNameModal.open();
-
-}
-
-function tnpc_delete_preset(presetId, name, event) {
-    event.stopPropagation();
-
-    const presetDeleteModal = new TNPModal({
-        title: `Are you sure to delete "${name}" preset?`,
-        confirmText: 'DELETE PRESET',
-        confirmClassName: 'button-secondary button-danger',
-        showConfirm: true,
-        onConfirm: function () {
-
-            const wrapperPresetEl = event.target.closest(".tnpc-preset");
-
-            jQuery.ajax({
-                type: 'POST',
-                dataType: 'json',
-                url: ajaxurl,
-                data: {
-                    action: 'tnpc_delete_preset',
-                    _wpnonce: tnp_preset_nonce,
-                    presetId: presetId
-                },
-                success: function (response) {
-                    if (response.success) {
-                        wrapperPresetEl.parentNode.removeChild(wrapperPresetEl);
-                        toastBottom.success('Preset successfully deleted!');
-                    }
-                }
-            });
-
-        }
-    });
-
-    presetDeleteModal.open();
-
-}
-
-function tnpc_edit_preset(presetId, name, event) {
-    event.stopPropagation();
-    tnpc_load_preset(presetId, name, true);
-
-    const composerForm = document.querySelector('#tnpc-form');
-
-    jQuery('#save-preset-button').hide();
-    jQuery('#update-preset-button').show();
-
-    //Add preset id hidden field
-    const presetIdfield = document.createElement("input");
-    presetIdfield.type = "hidden";
-    presetIdfield.name = "preset_id";
-    presetIdfield.value = presetId;
-    composerForm.appendChild(presetIdfield);
-
-}
-
 function tnpc_remove_double_quotes_escape_from(str) {
     return str.replace(/\\"/g, '"');
 }
@@ -639,10 +550,6 @@ function tnpc_remove_double_quotes_from(str) {
     return str.replace(/['"]+/g, '');
 }
 
-function tnpc_update_preset(form) {
-    tnpc_save(form);
-    form.submit();
-}
 
 // ========================================================= //
 // =================    PRESET FINE    ===================== //
@@ -795,8 +702,6 @@ jQuery(document).ready(function () {
                         new_row.find(".tnpc-row-edit-block").click();
                     }
 
-                    tnpc_mobile_preview();
-
                 }).fail(function () {
                     alert("Block rendering failed.");
                 });
@@ -839,12 +744,8 @@ jQuery(function () {
                     //Change background color of builder area
                     _setBuilderAreaBackgroundColor(document.getElementById('options-options_composer_background').value);
                     init_builder_area();
-                    tnpc_mobile_preview();
-
-                    toastBottom.success(response.data.message);
-                } else {
-                    toastBottom.error(response.data.message);
                 }
+                TNP.toast(response.data.message);
             });
 
         });
@@ -928,23 +829,19 @@ jQuery(function () {
 // ======================================================================= //
 
     (function composerModeViewIIFE($) {
-        const activeClass = 'composer-view-mode__item--active';
+
         var status = 'desktop';
 
-        $('.composer-view-mode__item[data-view-mode="' + status + '"]').addClass(activeClass);
 
-        $('.composer-view-mode__item').on('click', function () {
-            var $el = $(this);
-
-            if ($el.data('viewMode') === 'desktop') {
-                status = 'desktop';
-                $('.composer-view-mode__item[data-view-mode="desktop"]').addClass(activeClass);
-                $('.composer-view-mode__item[data-view-mode="mobile"]').removeClass(activeClass);
-            } else if ($el.data('viewMode') === 'mobile') {
+        $('#tnpc-view-mode').on('click', function () {
+            if (status === 'desktop') {
                 status = 'mobile';
-                $('.composer-view-mode__item[data-view-mode="desktop"]').removeClass(activeClass);
-                $('.composer-view-mode__item[data-view-mode="mobile"]').addClass(activeClass);
+                document.getElementById('tnpc-view-mode-icon').className = 'fas fa-mobile';
+            } else {
+                status = 'desktop';
+                document.getElementById('tnpc-view-mode-icon').className = 'fas fa-desktop';
             }
+
 
             tnp_view(status);
         });

@@ -1,19 +1,18 @@
 <?php
+/* @var $this NewsletterEmailsAdmin */
+/* @var $controls NewsletterControls */
+/* @var $logger NewsletterLogger */
+
 defined('ABSPATH') || exit;
-
-require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
-$controls = new NewsletterControls();
-$module = NewsletterEmails::instance();
-
 
 if ($controls->is_action('theme')) {
     $controls->merge($module->themes->get_options($controls->data['theme']));
-    $module->save_options($controls->data);
+    $this->save_options($controls->data);
 }
 
 
 if ($controls->data == null) {
-    $controls->data = $module->get_options();
+    $controls->data = $this->get_options();
 }
 
 function newsletter_emails_update_options($options)
@@ -34,7 +33,7 @@ function newsletter_emails_update_theme_options($theme, $options)
 
 function newsletter_emails_get_options()
 {
-    $options = get_option('newsletter_emails', array());
+    $options = get_option('newsletter_emails', []);
     return $options;
 }
 
@@ -44,11 +43,11 @@ function newsletter_emails_get_theme_options($theme)
     if ($x !== false) {
         $theme = substr($theme, $x + 1);
     }
-    $options = get_option('newsletter_emails_' . $theme, array());
+    $options = get_option('newsletter_emails_' . $theme, []);
     return $options;
 }
 
-$themes = $module->themes->get_all_with_data();
+$themes = $this->themes->get_all_with_data();
 ?>
 <script>
     function tnp_select_theme(id) {
@@ -60,18 +59,17 @@ $themes = $module->themes->get_all_with_data();
 </script>
 <div class="wrap tnp-emails tnp-emails-theme" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/tnp-header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER ?>
 
     <div id="tnp-heading">
+        
+        <?php echo $controls->title_help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-themes') ?>
 
         <h2><?php _e('Legacy themes', 'newsletter') ?></h2>
-
-        <?php echo $controls->page_help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-themes') ?>
-
     </div>
     <div id="tnp-body">
-
-        <form method="post" id="newsletter-form" action="<?php echo $module->get_admin_page_url('new'); ?>">
+        <?php $controls->show() ?>
+        <form method="post" id="newsletter-form" action="?page=newsletter_emails_new">
             <?php $controls->init(); ?>
             <?php $controls->hidden('theme'); ?>
 

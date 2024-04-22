@@ -1,11 +1,8 @@
 <?php
-/* @var $this Newsletter */
-/* @var $wpdb wpdb */
+/* @var $this NewsletterSystemAdmin */
+/* @var $controls NewsletterControls */
 
 defined('ABSPATH') || exit;
-
-include_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
-$controls = new NewsletterControls();
 
 if ($controls->is_action('delete_logs')) {
     $files = glob(WP_CONTENT_DIR . '/logs/newsletter/*.txt');
@@ -25,15 +22,17 @@ if ($controls->is_action('delete_logs')) {
 
 <div class="wrap tnp-system tnp-system-logs" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/tnp-header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
 
-        <h2><?php _e('Logs', 'newsletter') ?></h2>
+        <h2><?php _e('System', 'newsletter') ?></h2>
+        <?php include __DIR__ . '/nav.php' ?>
 
     </div>
 
     <div id="tnp-body">
+        <?php $controls->show(); ?>
 
         <form method="post" action="">
             <?php $controls->init(); ?>
@@ -64,6 +63,6 @@ if ($controls->is_action('delete_logs')) {
         </form>
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

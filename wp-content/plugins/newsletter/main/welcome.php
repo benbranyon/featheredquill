@@ -1,71 +1,69 @@
 <?php
+/* @var $this NewsletterMainAdmin */
+/* @var $controls NewsletterControls */
+
 defined('ABSPATH') || exit;
 
 // Very very naif
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_GET['action']) && $_GET['action'] == 'save') {
 
-    // Sender name
-    $module = Newsletter::instance();
-    $options = $module->get_options();
+    if (!check_admin_referer('save')) {
+        die('Invalid request');
+    }
+    // Sender
+    $options = $this->get_options();
     $options['sender_name'] = trim(stripslashes($_POST['sender_name']));
     $options['sender_email'] = trim(strtolower(stripslashes($_POST['sender_email'])));
-    $module->save_options($options);
+    $this->save_options($options);
 
-    // Profile setting
-    $module = NewsletterSubscription::instance();
-    $options = $module->get_options('profile');
+    // Form
+    $options = NewsletterSubscriptionAdmin::instance()->get_form_options();
     $options['privacy_status'] = isset($_POST['field_privacy']) ? 1 : 0;
     $options['name_status'] = isset($_POST['field_name']) ? 2 : 0;
-    $options['subscribe'] = trim(stripslashes($_POST['field_subscribe']));
-    if (empty($options['subscribe']))
-        $options['subscribe'] = 'Subscribe';
-    $module->save_options($options, 'profile');
+    NewsletterSubscriptionAdmin::instance()->save_options($options, 'form');
     die();
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_GET['action']) && $_GET['action'] == 'test') {
-    $module = Newsletter::instance();
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] == 'test') {
+    if (!check_admin_referer('save')) {
+        die('Invalid request');
+    }
     $email = $_POST['test_email'];
-    $status_options = $module->get_options('status');
+    $status_options = $this->get_options('status');
 
-    if (!NewsletterModule::is_email($email)) {
+    if (!$this->is_email($email)) {
         echo _e('Please check the email address, it seems wrong.', 'newsletter');
         die();
     }
-    // Newsletter mail 
+    // Newsletter mail
     $text = array();
     $text['html'] = '<p>This is an <b>HTML</b> test email sent using the sender data set on Newsletter main setting. <a href="https://www.thenewsletterplugin.com">This is a link to an external site</a>.</p>';
     $text['text'] = 'This is a textual test email part sent using the sender data set on Newsletter main setting.';
-    $r = $module->mail($email, 'Newsletter test email at ' . date(DATE_ISO8601), $text);
+    $r = Newsletter::instance()->mail($email, 'Newsletter test email at ' . date(DATE_ISO8601), $text);
 
     if ($r) {
-        $status_options['mail'] = 1;
-        $module->save_options($status_options, 'status');
+        //$status_options['mail'] = 1;
+        //$module->save_options($status_options, 'status');
         echo _e('Check your mailbox for a test message. Check the spam folder as well.', 'newsletter');
         die();
     } else {
-        $status_options['mail'] = 0;
-        $status_options['mail_error'] = $module->mail_last_error;
-        $module->save_options($status_options, 'status');
-        echo _e('There was an error. Complete the setup and then use the status panel to check it out.', 'newsletter');
+        //$status_options['mail'] = 0;
+        //$status_options['mail_error'] = $module->mail_last_error;
+        //$module->save_options($status_options, 'status');
+        echo _e('There was an error. Complete the setup and then use the System panels to test again.', 'newsletter');
         die();
     }
     die();
 }
 
-$profile_options = NewsletterSubscription::instance()->get_options('profile');
-$main_options = Newsletter::instance()->get_options();
-$subscription_options = NewsletterSubscription::instance()->get_options();
+$profile_options = NewsletterSubscriptionAdmin::instance()->get_form_options();
+$subscription_options = NewsletterSubscriptionAdmin::instance()->get_options();
 
-$logger = Newsletter::instance()->logger;
+if (empty($this->get_option('page'))) {
 
-$page_exists = get_option('newsletter_page');
-
-if (empty($page_exists)) {
-    $module = Newsletter::instance();
-    $logger->info('Dedicated page creation');
+    $this->logger->info('Adding a dedicated page');
     // Page creation
-    $page = array();
+    $page = [];
     $page['post_title'] = 'Newsletter';
     $page['post_content'] = '[newsletter]';
     $page['post_status'] = 'publish';
@@ -77,30 +75,29 @@ if (empty($page_exists)) {
     // Insert the post into the database
     $page_id = wp_insert_post($page);
 
-    $main_options['page'] = $page_id;
-    Newsletter::instance()->save_options($main_options);
-    $main_options = Newsletter::instance()->get_options();
-    $page_exists = true;
-    update_option('newsletter_page', $page_id, false);
+    $options = $this->get_main_options();
+    $options['page'] = $page_id;
+    $this->save_main_options($options);
 
     // Test subscriber creation
-    $users = $module->get_test_users();
+    $users = $this->get_test_users();
     if (!$users) {
+        $this->logger->info('Adding a test subscriber');
         global $current_user;
-        $user = array();
+        $user = [];
         $user['email'] = $current_user->user_email;
         $user['name'] = $current_user->first_name;
         $user['surname'] = $current_user->last_name;
         $user['test'] = 1;
         $user['status'] = TNP_User::STATUS_CONFIRMED;
-        $module->save_user($user);
+        $this->save_user($user);
     }
 } else {
-    $logger->info('Dedicated page already exists');
+    $this->logger->info('Dedicated page already exists');
 }
 ?>
 <style>
-    <?php include __DIR__ . '/css/welcome.css' ?>
+<?php include __DIR__ . '/css/welcome.css' ?>
 </style>
 <script src="<?php echo plugins_url('newsletter') ?>/main/js/welcome.js"></script>
 <script>
@@ -122,12 +119,13 @@ if (empty($page_exists)) {
 </script>
 <div class="wrap" id="tnp-wrap">
     <form id="tnp-welcome">
+        <?php wp_nonce_field('save') ?>
         <section class="cd-slider-wrapper">
             <ul class="cd-slider">
                 <li class="tnp-first-slide visible">
                     <div>
                         <img class="tnp-logo-big" src="<?php echo plugins_url('newsletter') ?>/admin/images/logo-white.png">
-                        <p><?php _e('Welcome to The Newsletter Plugin and thank your for choosing the best mail management system for Wordpress!', 'newsletter'); ?><br><br> 
+                        <p><?php _e('Welcome to The Newsletter Plugin and thank you for choosing the best mail management system for Wordpress!', 'newsletter'); ?><br><br>
                             <?php _e('In this short tutorial we will guide you through some of the basic settings to get the most out of our plugin. ', 'newsletter'); ?></p>
                     </div>
                 </li>
@@ -136,8 +134,8 @@ if (empty($page_exists)) {
                     <div>
                         <h2><?php _e('Sender', 'newsletter'); ?></h2>
                         <p><?php _e('Choose which name and email address you\'d like to appear as the sender of your newsletters.', 'newsletter'); ?></p>
-                        <input type="text" placeholder="<?php esc_attr_e('Sender name', 'newsletter') ?>" value="<?php echo esc_attr($main_options['sender_name']) ?>" name="sender_name">&nbsp;
-                        <input type="text" placeholder="<?php esc_attr_e('Sender email', 'newsletter') ?>" value="<?php echo esc_attr($main_options['sender_email']) ?>" name="sender_email">
+                        <input type="text" placeholder="<?php esc_attr_e('Sender name', 'newsletter') ?>" value="<?php echo esc_attr(Newsletter::instance()->get_sender_name()) ?>" name="sender_name">&nbsp;
+                        <input type="email" placeholder="<?php esc_attr_e('Sender email', 'newsletter') ?>" value="<?php echo esc_attr(Newsletter::instance()->get_sender_email()) ?>" name="sender_email">
                     </div>
                 </li>
 
@@ -160,10 +158,6 @@ if (empty($page_exists)) {
                                     <span class="slider round"></span>
                                 </label>
                             </div>
-                            <div class="tnp-col-3-boxed">
-                                <p><?php _e('Subscribe button label', 'newsletter'); ?></p>
-                                <input type="text" value="<?php echo esc_attr($profile_options['subscribe']) ?>" name="field_subscribe">
-                            </div>
                         </div>
 
                 </li>
@@ -171,7 +165,7 @@ if (empty($page_exists)) {
                 <li>
                     <div>
                         <h2><?php _e('Subscription and Edit<br>page creation', 'newsletter'); ?></h2>
-                        <p><?php _e('We\'ve just created the page where your visitors will subscribe and where they will edit their preferences.', 'newsletter'); ?></p> 
+                        <p><?php _e('We\'ve just created the page where your visitors will subscribe and where they will edit their preferences.', 'newsletter'); ?></p>
                     </div>
                 </li>
                 <li>
@@ -219,7 +213,7 @@ if (empty($page_exists)) {
 
                             </div>
                             <div class="tnp-col-3-boxed">
-                                <p><?php _e('If you are unsure on how to use some features of Newsletter, reach for our official documentation.', 'newsletter'); ?></p> 
+                                <p><?php _e('If you are unsure on how to use some features of Newsletter, reach for our official documentation.', 'newsletter'); ?></p>
                                 <a href="https://www.thenewsletterplugin.com/documentation" class="tnp-welcome-link-button" target="_blank"><?php _e('Documentation', 'newsletter'); ?></a>
                             </div>
                         </div>
@@ -230,9 +224,9 @@ if (empty($page_exists)) {
             </ul> <!-- .cd-slider -->
 
             <div class="cd-slider-navigation">
-                <a class="tnp-welcome-prev" style="display: none" href="#" onclick="prevSlide(); return false;"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" xml:space="preserve" width="16" height="16>"<g class="nc-icon-wrapper" fill="#ffffff"><path fill="#ffffff" d="M17,23.414L6.293,12.707c-0.391-0.391-0.391-1.023,0-1.414L17,0.586L18.414,2l-10,10l10,10L17,23.414z"></path></g></svg><?php _e('Previous', 'newsletter'); ?></a>                                   
+                <a class="tnp-welcome-prev" style="display: none" href="#" onclick="prevSlide(); return false;"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" xml:space="preserve" width="16" height="16>"<g class="nc-icon-wrapper" fill="#ffffff"><path fill="#ffffff" d="M17,23.414L6.293,12.707c-0.391-0.391-0.391-1.023,0-1.414L17,0.586L18.414,2l-10,10l10,10L17,23.414z"></path></g></svg><?php _e('Previous', 'newsletter'); ?></a>
                 <a class="tnp-welcome-next" href="#" onclick="nextSlide(); return false;"><?php _e('Next', 'newsletter'); ?><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" xml:space="preserve" width="16" height="16"><g class="nc-icon-wrapper" fill="#ffffff"><path fill="#ffffff" d="M7,23.414L5.586,22l10-10l-10-10L7,0.586l10.707,10.707c0.391,0.391,0.391,1.023,0,1.414L7,23.414z"></path></g></svg></a>
-            </div> 
+            </div>
 
             <div class="cd-svg-cover" data-step1="M1402,800h-2V0.6c0-0.3,0-0.3,0-0.6h2v294V800z" data-step2="M1400,800H383L770.7,0.6c0.2-0.3,0.5-0.6,0.9-0.6H1400v294V800z" data-step3="M1400,800H0V0.6C0,0.4,0,0.3,0,0h1400v294V800z" data-step4="M615,800H0V0.6C0,0.4,0,0.3,0,0h615L393,312L615,800z" data-step5="M0,800h-2V0.6C-2,0.4-2,0.3-2,0h2v312V800z" data-step6="M-2,800h2L0,0.6C0,0.3,0,0.3,0,0l-2,0v294V800z" data-step7="M0,800h1017L629.3,0.6c-0.2-0.3-0.5-0.6-0.9-0.6L0,0l0,294L0,800z" data-step8="M0,800h1400V0.6c0-0.2,0-0.3,0-0.6L0,0l0,294L0,800z" data-step9="M785,800h615V0.6c0-0.2,0-0.3,0-0.6L785,0l222,312L785,800z" data-step10="M1400,800h2V0.6c0-0.2,0-0.3,0-0.6l-2,0v312V800z">
                 <svg height='100%' width="100%" preserveAspectRatio="none" viewBox="0 0 1400 800">
@@ -240,7 +234,7 @@ if (empty($page_exists)) {
                 <desc>an animated layer to switch from one slide to the next one</desc>
                 <path id="cd-changing-path" d="M1402,800h-2V0.6c0-0.3,0-0.3,0-0.6h2v294V800z"/>
                 </svg>
-            </div>  .cd-svg-cover 
+            </div>  .cd-svg-cover
         </section> <!-- .cd-slider-wrapper -->
     </form>
 

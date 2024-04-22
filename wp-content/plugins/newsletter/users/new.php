@@ -1,5 +1,7 @@
 <?php
-/* @var $this NewsletterUsers */
+/* @var $this NewsletterUsersAdmin */
+/* @var $controls NewsletterControls */
+
 defined('ABSPATH') || exit;
 
 require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
@@ -30,22 +32,24 @@ if ($controls->is_action('save')) {
 
 <div class="wrap" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/tnp-header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
 
-        <h2><?php _e('New Subscriber', 'newsletter') ?></h2>
+        <h2><?php esc_html_e('New Subscriber', 'newsletter') ?></h2>
 
     </div>
 
     <div id="tnp-body" class="tnp-users tnp-users-new">
+
+        <?php $controls->show(); ?>
 
         <form method="post" action="">
             <?php $controls->init(); ?>
 
             <table class="form-table">
                 <tr>
-                    <th><?php _e('Email', 'newsletter')?></th>
+                    <th><?php esc_html_e('Email', 'newsletter')?></th>
                     <td>
                         <?php $controls->text_email('email', 60); ?>
                         <?php $controls->button('save', '&raquo;'); ?>
@@ -57,6 +61,6 @@ if ($controls->is_action('save')) {
         </form>
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

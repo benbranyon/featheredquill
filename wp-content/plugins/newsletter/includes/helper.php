@@ -10,11 +10,13 @@ function tnp_post_thumbnail_src($post, $size = 'thumbnail', $alternative = '') {
     // Find a media id to be used as featured image
     $media_id = get_post_thumbnail_id($post);
     if (empty($media_id)) {
-        $attachments = get_children(array('numberpost' => 1, 'post_parent' => $post, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => 'ASC', 'orderby' => 'menu_order'));
-        if (!empty($attachments)) {
-            foreach ($attachments as $id => &$attachment) {
-                $media_id = $id;
-                break;
+        if (NEWSLETTER_USE_POST_GALLERY) {
+            $attachments = get_children(array('numberpost' => 1, 'post_parent' => $post, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => 'ASC', 'orderby' => 'menu_order'));
+            if (!empty($attachments)) {
+                foreach ($attachments as $id => &$attachment) {
+                    $media_id = $id;
+                    break;
+                }
             }
         }
     }
@@ -99,13 +101,19 @@ function tnp_delete_all_shordcodes_tags($post_content = '') {
 }
 
 function tnp_post_permalink($post) {
+    // WPML does not return the correct permalink for a post: on WP frontend it returns the permalink of the
+    // translated post for the current language... ok it's complicated!
     if (class_exists('SitePress')) {
-        $data = apply_filters( 'wpml_post_language_details', [], $post->ID);
+        $data = apply_filters('wpml_post_language_details', [], $post->ID);
         if (isset($data['language_code'])) {
-            return apply_filters('wpml_permalink', get_permalink($post->ID), $data['language_code'], true);
+            do_action('wpml_switch_language', $data['language_code']);
+            // This filter does not work (always) on WP frontend (???)
+            //return apply_filters('wpml_permalink', get_permalink($post->ID), $data['language_code'], true);
         }
     }
     return get_permalink($post->ID);
+    // Interesting but WPML redirect to the current language version of the post...
+    //return wp_get_shortlink($post->ID);
 }
 
 function tnp_post_content($post) {
@@ -253,6 +261,10 @@ function tnp_resize($media_id, $size) {
         return null;
     }
 
+    Newsletter::instance()->logger->error($size);
+
+    // Try to use wp_get_attachment_metadata()
+    // https://developer.wordpress.org/reference/functions/wp_get_attachment_metadata/
     $relative_file = get_post_meta($media_id, '_wp_attached_file', true);
 
     if (empty($relative_file)) {
@@ -261,12 +273,14 @@ function tnp_resize($media_id, $size) {
 
     $uploads = wp_upload_dir();
 
-    // Based on _wp_relative_upload_path() function for blog which store the
+    // Based on _wp_relative_upload_path() function for blogs which store the
     // full path of media files
     if (0 === strpos($relative_file, $uploads['basedir'])) {
         $relative_file = str_replace($uploads['basedir'], '', $relative_file);
         $relative_file = ltrim($relative_file, '/');
     }
+
+    $absolute_file = $uploads['basedir'] . '/' . $relative_file;
 
     $width = $size[0];
     $height = $size[1];
@@ -275,9 +289,10 @@ function tnp_resize($media_id, $size) {
         $crop = (boolean) $size[2];
     }
 
-    $absolute_file = $uploads['basedir'] . '/' . $relative_file;
-
+    // Do nothing with GIF (otherwise the animation is lost)
     if (substr($relative_file, -4) === '.gif') {
+
+        // Just to have the real width and height, no transformations
         $editor = wp_get_image_editor($absolute_file);
         if (is_wp_error($editor)) {
             return _tnp_get_default_media($media_id, $size);
@@ -302,7 +317,15 @@ function tnp_resize($media_id, $size) {
         return _tnp_get_default_media($media_id, $size);
     }
 
-    $relative_thumb = $pathinfo['dirname'] . '/' . $pathinfo['filename'] . '-' . $width . 'x' . $height . ($crop ? '-c' : '') . '.' . $pathinfo['extension'];
+    $file_ext = strtolower($pathinfo['extension']);
+    $out_mimetype = null;
+
+    if ($file_ext === 'webp' || $file_ext === 'avif') {
+        $file_ext = 'jpg';
+        $out_mimetype = 'image/jpeg';
+    }
+
+    $relative_thumb = $pathinfo['dirname'] . '/' . $pathinfo['filename'] . '-' . $width . 'x' . $height . ($crop ? '-c' : '') . '.' . $file_ext;
     $absolute_thumb = $uploads['basedir'] . '/newsletter/thumbnails/' . $relative_thumb;
 
     // Thumbnail generation if needed.
@@ -341,11 +364,15 @@ function tnp_resize($media_id, $size) {
             return _tnp_get_default_media($media_id, $size);
         }
 
-        $saved = $editor->save($absolute_thumb);
+        // Attempt to deal with plugins that force the webp format
+        remove_all_filters('image_editor_output_format');
+
+        $saved = $editor->save($absolute_thumb, $out_mimetype);
         if (is_wp_error($saved)) {
             Newsletter::instance()->logger->error($saved);
             return _tnp_get_default_media($media_id, $size);
         }
+
         $new_size = $editor->get_size();
 
         $media = new TNP_Media();
@@ -429,9 +456,9 @@ function tnp_composer_block_posts_get_media($post, $size, $default_image_url = n
 }
 
 function tnp_outlook_wrapper_open($width = 600) {
-    return NewsletterEmails::get_outlook_wrapper_open($width);
+    return NewsletterComposer::get_outlook_wrapper_open($width);
 }
 
 function tnp_outlook_wrapper_close() {
-    return NewsletterEmails::get_outlook_wrapper_close();
+    return NewsletterComposer::get_outlook_wrapper_close();
 }

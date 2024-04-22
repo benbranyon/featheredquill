@@ -1,16 +1,14 @@
 <?php
-/* @var $this NewsletterUsers */
-include_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
-
-$options_profile = get_option('newsletter_profile');
-$controls = new NewsletterControls();
+/* @var $this NewsletterUsersAdmin */
+/* @var $controls NewsletterControls */
 
 $controls->warnings[] = 'The export cannot be used for backup and restore. <a href="https://www.thenewsletterplugin.com/documentation/developers/backup-recovery/" target="_blank">Read more</a>.';
+
 ?>
 
 <div class="wrap" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/tnp-header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER ?>
 
     <div id="tnp-heading">
 
@@ -19,6 +17,8 @@ $controls->warnings[] = 'The export cannot be used for backup and restore. <a hr
     </div>
     
     <div id="tnp-body" class="tnp-users tnp-users-export">
+        
+        <?php $controls->show() ?>
 
         <form method="post" action="<?php echo admin_url('admin-ajax.php') ?>?action=newsletter_users_export">
             <?php $controls->init(); ?>

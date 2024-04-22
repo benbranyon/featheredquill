@@ -2,8 +2,10 @@
 /*
  * @var $options array contains all the options the current block we're ediging contains
  * @var $controls NewsletterControls
+ * @var $fields NewsletterFields 
  */
-/* @var $fields NewsletterFields */
+
+$background = empty($options['block_background'])?$composer['block_background']:$options['block_background'];
 ?>
 <p>
     <a href="https://www.thenewsletterplugin.com/documentation/newsletters/newsletter-tags/"
@@ -15,5 +17,6 @@
 	'text_font_size'    => $composer['text_font_size'],
 	'text_font_weight'  => $composer['text_font_weight'],
 	'text_font_color'   => $composer['text_font_color'],
+        'background' => $background
 ] ) ?>
 <?php $fields->block_commons() ?>

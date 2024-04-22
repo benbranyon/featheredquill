@@ -9,7 +9,7 @@
 /* @var $options array */
 
 $default_options = array(
-    'html'=>'<p style="text-align: left; margin: 0; font-family: ' . $composer['text_font_family'] . '; font-size: ' . $composer['text_font_size'] . '">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam vitae sodales nulla, nec blandit velit. Morbi feugiat imperdiet augue, vel mattis augue sagittis rutrum. Sed.</p>',
+    'html'=>'<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam vitae sodales nulla, nec blandit velit.</p>',
     'font_family'=>'',
     'font_size'=>'',
     'font_color'=>'',
@@ -27,6 +27,7 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
 ?>
 <style>
     .text {
+        mso-line-height-rule: exactly;
         <?php echo $text_style->echo_css() ?>
         line-height: 1.5;
     }

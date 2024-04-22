@@ -20,7 +20,9 @@ $defaults = array(
     'title_font_size' => '',
     'title_font_color' => '',
     'title_font_weight' => '',
+    'nocrop' => 0,
     'max' => 4,
+    'private' => '',
     'categories' => '',
     'tags' => '',
     'layout' => 'one',
@@ -31,6 +33,10 @@ $defaults = array(
     'button_font_family' => '',
     'button_font_size' => '',
     'button_font_weight' => '',
+    'text_padding_left' => 0,
+    'text_padding_right' => 0,
+    'text_padding_top' => 15,
+    'text_padding_bottom' => 15,
     'block_padding_left' => 15,
     'block_padding_right' => 15,
     'block_padding_top' => 15,
@@ -71,6 +77,10 @@ if (!empty($options['tags'])) {
     $tags = explode(',', $options['tags']);
     // It's ok even as array
     $filters['tag'] = array_unique(array_map('sanitize_title', $tags));
+}
+
+if (!empty($options['private'])) {
+    $filters['post_status'] = ['publish', 'private'];
 }
 
 if ($context['type'] != 'automated') {
@@ -122,7 +132,6 @@ $image_placeholder_url = plugins_url('newsletter') . '/emails/blocks/posts/image
 $excerpt_length = $options['excerpt_length'];
 $excerpt_length_in_chars = $options['excerpt_length_type'] == 'chars';
 
-
 $show_image = !empty($options['show_image']);
 $show_date = !empty($options['show_date']);
 $show_author = !empty($options['show_author']);
@@ -149,6 +158,27 @@ $button_options['button_background'] = empty($options['button_background']) ? $g
 $show_read_more_button = (bool) $options['show_read_more_button'];
 
 Newsletter::instance()->switch_language($options['language']);
+
+// Preprocessing
+foreach ($posts as $post) {
+    $post->url = tnp_post_permalink($post);
+
+    $post->title = TNP_Composer::is_post_field_edited_inline($options['inline_edits'], 'title', $post->ID) ?
+            TNP_Composer::get_edited_inline_post_field($options['inline_edits'], 'title', $post->ID) :
+            tnp_post_title($post);
+
+    $post->title_linked = '<a href="' . esc_attr($post->url) . '" inline-class="title" class="tnpc-inline-editable"'
+            . ' data-type="title" data-id="' . esc_attr($post->ID) . '" dir="' . esc_attr($dir) . '">'
+            . $post->title . '</a>';
+
+    $post->excerpt = TNP_Composer::is_post_field_edited_inline($options['inline_edits'], 'text', $post->ID) ?
+            TNP_Composer::get_edited_inline_post_field($options['inline_edits'], 'text', $post->ID) :
+            tnp_post_excerpt($post, $excerpt_length, $excerpt_length_in_chars);
+
+    $post->excerpt_linked = '<a href="' . esc_attr($post->url) . '" inline-class="excerpt" class="tnpc-inline-editable" '
+            . 'data-type="text" data-id="' . esc_attr($post->ID) . '" dir="' . esc_attr($dir) . '">'
+            . $post->excerpt . '</a>';
+}
 
 if ($options['layout'] == 'one') {
     include __DIR__ . '/layout-one.php';

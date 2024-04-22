@@ -6,6 +6,10 @@ body { margin: 0; padding: 0; height: 100%!important; width: 100%!important; -we
 table,td { border-collapse: collapse !important; mso-table-lspace: 0pt; mso-table-rspace: 0pt;}
 img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; max-width: 100%!important; -ms-interpolation-mode: bicubic;}
 img.aligncenter { display: block; margin: 0 auto;}
+/* TinyMCE of WP */
+.alignleft { float: left; margin: 7px 15px 7px 0px; }
+.alignright { float: right; margin: 7px 0px 7px 15px; }
+.aligncenter { display: block; margin-left: auto; margin-right: auto; }
 @media screen and (max-width: 525px) {
     .pt-1, .padding-top-15 { padding-top: 15px!important; }
     .pb-1, .padding-bottom-15 { padding-bottom: 15px!important; }

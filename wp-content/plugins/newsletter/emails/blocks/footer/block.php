@@ -12,6 +12,7 @@ $default_options = array(
     'profile_enabled' => 1,
     'unsubscribe' => __('Unsubscribe', 'newsletter'),
     'unsubscribe_enabled' => 1,
+    'unsubscribe_mode' => 'single',
     'font_family' => '',
     'font_size' => '',
     'font_color' => '',
@@ -37,7 +38,7 @@ if (!isset($options['profile_enabled']) && isset($options['url'])) {
 
 $options = array_merge($default_options, $options);
 
-$text_style = TNP_Composer::get_text_style($options, '', $composer, ['scale'=>0.8]);
+$text_style = TNP_Composer::get_text_style($options, '', $composer, ['scale' => 0.8]);
 
 $links = [];
 if ($options['unsubscribe_enabled']) {
@@ -49,15 +50,15 @@ if ($options['profile_enabled']) {
 if ($options['view_enabled']) {
     $links[] = '<a inline-class="text" href="{email_url}" target="_blank">' . esc_html($options['view']) . '</a>';
 }
-
 ?>
 <style>
     .text {
-        <?php $text_style->echo_css()?>
+        <?php $text_style->echo_css() ?>
         text-decoration: none;
         line-height: normal;
     }
 </style>
 
-<?php echo implode('<span inline-class="text">&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;</span>', $links) ?>
-
+<div dir="<?php echo $dir ?>">
+    <?php echo implode('<span inline-class="text">&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;</span>', $links) ?>
+</div>

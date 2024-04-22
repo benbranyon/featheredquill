@@ -1,10 +1,8 @@
 <?php
-/* @var $this Newsletter */
+/* @var $this NewsletterMainAdmin */
+/* @var $controls NewsletterControls */
 
 defined('ABSPATH') || exit;
-
-include_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
-$controls = new NewsletterControls();
 
 wp_enqueue_script('tnp-chart');
 
@@ -18,14 +16,27 @@ if ($controls->is_action('feed_disable')) {
     $controls->messages = 'Feed by Mail demo panel disabled. On next page reload it will disappear.';
 }
 
-$emails_module = NewsletterEmails::instance();
-$statistics_module = NewsletterStatistics::instance();
-$emails = $wpdb->get_results("select * from " . NEWSLETTER_EMAILS_TABLE . " where type='message' order by id desc limit 5");
+$emails_module = NewsletterEmailsAdmin::instance();
+$statistics_module = NewsletterStatisticsAdmin::instance();
+$emails = $wpdb->get_results("select * from " . NEWSLETTER_EMAILS_TABLE . " where type='message' or type like 'automated_%' and type<> 'automated_template' order by id desc limit 5");
 
-$users_module = NewsletterUsers::instance();
-$query = "select * from " . NEWSLETTER_USERS_TABLE . " order by id desc limit 5";
+$list = $wpdb->get_results("select * from " . NEWSLETTER_EMAILS_TABLE . " where status='sending' and send_on<" . time() . " order by id asc");
+$total = 0;
+$queued = 0;
+foreach ($list as $email) {
+    $total += $email->total;
+    $queued += $email->total - $email->sent;
+}
+$speed = $newsletter->get_send_speed();
+
+$total_sent = (int) $wpdb->get_var("select sum(total) from " . NEWSLETTER_EMAILS_TABLE . " where status='sent'");
+
+$users_module = NewsletterUsersAdmin::instance();
+$query = "select * from " . NEWSLETTER_USERS_TABLE . " order by id desc limit 7";
 $subscribers = $wpdb->get_results($query);
 
+$subscribers_count = (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='C'");
+$subscribers_count_last_30_days = (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='C' and created>date_sub(now(), interval 30 day)");
 // Retrieves the last standard newsletter
 $last_email = $wpdb->get_row(
         $wpdb->prepare("select * from " . NEWSLETTER_EMAILS_TABLE . " where type='message' and status in ('sent', 'sending') and send_on<%d order by id desc limit 1", time()));
@@ -66,253 +77,514 @@ foreach ($months as $month) {
 $values = array_reverse($values);
 $labels = array_reverse($labels);
 
+// Unconfirmed
+$unconfirmed = ['y' => [], 'x' => []];
+$months = $wpdb->get_results("select count(*) as c, concat(year(created), '-', month(created)) as d "
+        . "from " . NEWSLETTER_USERS_TABLE . " where status='S' "
+        . "group by year(created), month(created) order by year(created) desc, month(created) desc limit 12");
+$months = array_reverse($months);
+foreach ($months as $month) {
+    $unconfirmed['y'][] = (int) $month->c;
+    $unconfirmed['x'][] = date("M y", date_create_from_format("Y-m", $month->d)->getTimestamp());
+}
+
 $lists = $this->get_lists();
+
+// Setup
+
+$steps = $this->get_option_array('newsletter_main_steps');
+$steps['sender'] = 1;
+
+if (class_exists('NewsletterExtensions')) {
+    $steps['addons-manager'] = 1;
+}
+
+global $wpdb;
+$c = $wpdb->get_results("select id from " . NEWSLETTER_EMAILS_TABLE . " where status in ('sending', 'sent') limit 1");
+if ($c) {
+    $steps['first-newsletter'] = 1;
+}
+
+$max_steps = 8;
+$completed_steps = count($steps);
+$completed = $completed_steps == $max_steps;
 ?>
 
 <style>
-    <?php include __DIR__ . '/css/dashboard.css' ?>
+<?php include __DIR__ . '/css/dashboard.css' ?>
+<?php include __DIR__ . '/css/setup.css' ?>
 </style>
 
 <div class="wrap" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/tnp-header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
-    <div id="tnp-body" class="tnp-main-index">
-        <div class="tnp-dashboard">
-            <div class="tnp-cards-container">
-                <div class="tnp-card tnp-mimosa">
-                    <div class="tnp-card-title"><?php esc_html_e('Forms', 'newsletter')?></div>
-                    <div class="tnp-card-description"><?php esc_html_e('Setup the form fields and labels.', 'newsletter')?></div>
-                    <div class="tnp-card-button-container">
-                        <a href="?page=newsletter_subscription_profile"><?php esc_html_e('Edit forms', 'newsletter')?></a>
-                    </div>
-                </div>
-                <div class="tnp-card">
-                    <div class="tnp-card-title"><?php esc_html_e('Lists', 'newsletter')?></div>
-                    <div class="tnp-card-description">You have <?php echo count($lists) ?> lists.</div>
-                    <div class="tnp-card-button-container">
-                        <a href="?page=newsletter_subscription_lists"><?php esc_html_e('Manage', 'newsletter')?></a>
-                    </div>
-                </div>
-                <div class="tnp-card">
-                    <div class="tnp-card-title"><?php esc_html_e('Delivery', 'newsletter')?></div>
-                    <div class="tnp-card-description"><?php esc_html_e('Change the delivery speed, sender name and return path.', 'newsletter')?></div>
-                    <div class="tnp-card-button-container">
-                        <a href="?page=newsletter_main_main"><?php esc_html_e('Change the delivery settings', 'newsletter')?></a>
-                    </div>
-                </div>
-                <div class="tnp-card">
-                    <div class="tnp-card-title"><?php esc_html_e('Company Info', 'newsletter')?></div>
-                    <div class="tnp-card-description"><?php esc_html_e('Set your company name, address, socials.', 'newsletter')?></div>
-                    <div class="tnp-card-button-container">
-                        <a href="?page=newsletter_main_info"><?php esc_html_e('Edit your info', 'newsletter')?></a>
-                    </div>
-                </div>
-            </div>
-            <div class="tnp-cards-container">
-                <div class="tnp-card">
-                    <div class="tnp-card-title"><?php esc_html_e('Newsletters', 'newsletter')?></div>
-                    <div class="tnp-card-upper-buttons"><a href="?page=newsletter_emails_composer"><?php _e('New', 'newsletter') ?></a></div>
-                    <div class="tnp-card-upper-buttons"><a href="?page=newsletter_emails_index"><?php _e('List', 'newsletter') ?></a></div>
-                    <div class="tnp-card-content">
-                        <?php foreach ($emails as $email) { ?>
-                            <div class="tnp-card-newsletter-list">
-                                <?php
-                                $subject = $email->subject ? $email->subject : "Newsletter #" . $email->id;
-                                ?>
-                                <div class="tnp-card-newsletters-subject">
-                                    <?php echo esc_html($subject) ?>
-                                </div>
-                                <div class="tnp-card-newsletters-status">
-                                    <?php $emails_module->show_email_status_label($email) ?>
-                                </div>
-                                <div class="tnp-card-newsletters-progress">
-                                    <?php $emails_module->show_email_progress_bar($email, array('scheduled' => true)) ?>
-                                </div>
-                                <div class="tnp-card-newsletters-action">
-                                    <?php
-                                    if ($email->status === TNP_Email::STATUS_SENT || $email->status === TNP_Email::STATUS_SENDING) {
-                                        echo '<a class="button-primary" href="' . $statistics_module->get_statistics_url($email->id) . '"><i class="fas fa-chart-bar"></i></a>';
-                                    } else {
-                                        echo $emails_module->get_edit_button($email, true);
-                                    }
-                                    ?>
-                                </div>
-                            </div>
-                        <?php } ?>
-                    </div>
-                </div>
+    <div id="tnp-heading">
+        <?php $controls->title_help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-configuration') ?>
 
-                <div class="tnp-card">
-                    <div class="tnp-card-title">Last Subscribers</div>
-                    <div class="tnp-card-upper-buttons"><a href="<?php echo $users_module->get_admin_page_url('new'); ?>"><?php _e('New', 'newsletter') ?></a></div>
-                    <div class="tnp-card-upper-buttons"><a href="<?php echo $users_module->get_admin_page_url('index'); ?>"><?php _e('List', 'newsletter') ?></a></div>
-                    <div class="tnp-card-content">
-
-                        <?php foreach ($subscribers as $s) { ?>
-                            <div class="tnp-card-newsletter-list">
-                                <div class="tnp-card-newsletters-subscriber-email">
-                                    <?php echo esc_html($s->email) ?>
-                                </div>
-
-                                <div class="tnp-card-newsletters-subscriber-name">
-                                    <?php echo esc_html($s->name) ?> <?php echo esc_html($s->surname) ?>
-                                </div>
-                                <div class="tnp-card-newsletters-subscriber-status">
-                                    <?php echo $emails_module->get_user_status_label($s, true) ?>
-                                </div>
-                                <div class="tnp-card-newsletters-action">
-                                        <a class="button-primary"
-                                           title="<?php _e('Edit', 'newsletter') ?>"
-                                           href="<?php echo $users_module->get_admin_page_url('edit'); ?>&amp;id=<?php echo $s->id; ?>"><i
-                                                    class="fas fa-edit"></i></a>
-                                        <!--
-                                            <a title="<?php _e('Profile', 'newsletter') ?>"
-                                               href="<?php echo home_url('/') ?>?na=p&nk=<?php echo $s->id . '-' . $s->token; ?>"
-                                               class="button-primary" target="_blank"><i
-                                                    class="fas fa-user"></i></a>-->
-                                </div>
-                            </div>
-                        <?php } ?>
-
-
-
-                </div>
-            </div>
-        </div>
-        <div class="tnp-cards-container">
-            <div class="tnp-card">
-                <div class="tnp-card-title"><?php _e('Subscriptions', 'newsletter') ?></div>
-                <div class="tnp-canvas">
-                    <canvas id="tnp-events-chart-canvas" height="300"></canvas>
-                </div>
-
-                <script type="text/javascript">
-                    var events_data = {
-                        labels: <?php echo json_encode($labels) ?>,
-                        datasets: [
-                            {
-                                label: "<?php _e('Subscriptions', 'newsletter') ?>",
-                                fill: true,
-                                strokeColor: "#27AE60",
-                                backgroundColor: "#eee",
-                                borderColor: "#27AE60",
-                                pointBorderColor: "#27AE60",
-                                pointBackgroundColor: "#ECF0F1",
-                                data: <?php echo json_encode($values) ?>
-                            }
-                        ]
-                    };
-
-                    jQuery(document).ready(function ($) {
-                        ctxe = $('#tnp-events-chart-canvas').get(0).getContext("2d");
-                        eventsLineChart = new Chart(ctxe, {
-                            type: 'line', data: events_data,
-                            options: {
-                                maintainAspectRatio: false,
-                                xresponsive: true,
-                                scales: {
-                                    xAxes: [{
-                                        type: "category",
-                                        "id": "x-axis-1",
-                                        gridLines: {display: false},
-                                        ticks: {fontFamily: "soleil"}
-                                    }],
-                                    yAxes: [
-                                        {
-                                            type: "linear",
-                                            "id": "y-axis-1",
-                                            gridLines: {display: false},
-                                            ticks: {fontFamily: "soleil"}
-                                        },
-                                    ]
-                                },
-                            }
-                        });
-                    });
-                </script>
-            </div>
-            <div class="tnp-card">
-                <div class="tnp-card-title"><?php _e('Documentation', 'newsletter') ?></div>
-                <div class="break"></div>
-                <a href="https://www.thenewsletterplugin.com/documentation/installation/" target="_blank">
-                    <div class="tnp-card-documentation-index">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><title>saved items</title><g class="nc-icon-wrapper" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  ><path d="M37,4h3a4,4,0,0,1,4,4V40a4,4,0,0,1-4,4H8a4,4,0,0,1-4-4V8A4,4,0,0,1,8,4h3" fill="none"  stroke-miterlimit="10"/> <polygon points="32 24 24 18 16 24 16 4 32 4 32 24" fill="none" stroke-miterlimit="10" data-color="color-2"/></g></svg>
-                        Installation
-                    </div>
-                </a>
-                <a href="https://www.thenewsletterplugin.com/documentation/subscription/" target="_blank">
-                    <div class="tnp-card-documentation-index">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><title>saved items</title><g class="nc-icon-wrapper" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  ><path d="M37,4h3a4,4,0,0,1,4,4V40a4,4,0,0,1-4,4H8a4,4,0,0,1-4-4V8A4,4,0,0,1,8,4h3" fill="none"  stroke-miterlimit="10"/> <polygon points="32 24 24 18 16 24 16 4 32 4 32 24" fill="none" stroke-miterlimit="10" data-color="color-2"/></g></svg>
-                        Subscription
-                    </div>
-                </a>
-                <a href="https://www.thenewsletterplugin.com/category/tips" target="_blank">
-                    <div class="tnp-card-documentation-index">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><title>saved items</title><g class="nc-icon-wrapper" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  ><path d="M37,4h3a4,4,0,0,1,4,4V40a4,4,0,0,1-4,4H8a4,4,0,0,1-4-4V8A4,4,0,0,1,8,4h3" fill="none"  stroke-miterlimit="10"/> <polygon points="32 24 24 18 16 24 16 4 32 4 32 24" fill="none" stroke-miterlimit="10" data-color="color-2"/></g></svg>
-                        Tips & Tricks
-                    </div>
-                </a>
-                <a href="https://www.thenewsletterplugin.com/documentation/subscribers-and-management/" target="_blank">
-                    <div class="tnp-card-documentation-index">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><title>saved items</title><g class="nc-icon-wrapper" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  ><path d="M37,4h3a4,4,0,0,1,4,4V40a4,4,0,0,1-4,4H8a4,4,0,0,1-4-4V8A4,4,0,0,1,8,4h3" fill="none"  stroke-miterlimit="10"/> <polygon points="32 24 24 18 16 24 16 4 32 4 32 24" fill="none" stroke-miterlimit="10" data-color="color-2"/></g></svg>
-                        Subscribers and management
-                    </div>
-                </a>
-                <a href="https://www.thenewsletterplugin.com/documentation/newsletters/newsletters-module/" target="_blank">
-                    <div class="tnp-card-documentation-index">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><title>saved items</title><g class="nc-icon-wrapper" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  ><path d="M37,4h3a4,4,0,0,1,4,4V40a4,4,0,0,1-4,4H8a4,4,0,0,1-4-4V8A4,4,0,0,1,8,4h3" fill="none"  stroke-miterlimit="10"/> <polygon points="32 24 24 18 16 24 16 4 32 4 32 24" fill="none" stroke-miterlimit="10" data-color="color-2"/></g></svg>
-                        Creating Newsletters
-                    </div>
-                </a>
-                <a href="https://www.thenewsletterplugin.com/documentation/addons/" target="_blank">
-                    <div class="tnp-card-documentation-index">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><title>saved items</title><g class="nc-icon-wrapper" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  ><path d="M37,4h3a4,4,0,0,1,4,4V40a4,4,0,0,1-4,4H8a4,4,0,0,1-4-4V8A4,4,0,0,1,8,4h3" fill="none"  stroke-miterlimit="10"/> <polygon points="32 24 24 18 16 24 16 4 32 4 32 24" fill="none" stroke-miterlimit="10" data-color="color-2"/></g></svg>
-                        Premium Addons
-                    </div>
-                </a>
-                <a href="https://www.thenewsletterplugin.com/documentation/customization/" target="_blank">
-                    <div class="tnp-card-documentation-index">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><title>saved items</title><g class="nc-icon-wrapper" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  ><path d="M37,4h3a4,4,0,0,1,4,4V40a4,4,0,0,1-4,4H8a4,4,0,0,1-4-4V8A4,4,0,0,1,8,4h3" fill="none"  stroke-miterlimit="10"/> <polygon points="32 24 24 18 16 24 16 4 32 4 32 24" fill="none" stroke-miterlimit="10" data-color="color-2"/></g></svg>
-                        Customization
-                    </div>
-                </a>
-                <a href="https://www.thenewsletterplugin.com/documentation/delivery-and-spam/" target="_blank">
-                    <div class="tnp-card-documentation-index">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><title>saved items</title><g class="nc-icon-wrapper" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  ><path d="M37,4h3a4,4,0,0,1,4,4V40a4,4,0,0,1-4,4H8a4,4,0,0,1-4-4V8A4,4,0,0,1,8,4h3" fill="none"  stroke-miterlimit="10"/> <polygon points="32 24 24 18 16 24 16 4 32 4 32 24" fill="none" stroke-miterlimit="10" data-color="color-2"/></g></svg>
-                        Delivery and spam
-                    </div>
-                </a>
-                <a href="https://www.thenewsletterplugin.com/documentation/developers/" target="_blank">
-                    <div class="tnp-card-documentation-index">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><title>saved items</title><g class="nc-icon-wrapper" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  ><path d="M37,4h3a4,4,0,0,1,4,4V40a4,4,0,0,1-4,4H8a4,4,0,0,1-4-4V8A4,4,0,0,1,8,4h3" fill="none"  stroke-miterlimit="10"/> <polygon points="32 24 24 18 16 24 16 4 32 4 32 24" fill="none" stroke-miterlimit="10" data-color="color-2"/></g></svg>
-                        Developers & Advanced Topics
-                    </div>
-                </a>
-            </div>
-        </div>
-        <div class="tnp-cards-container">
-            <div class="tnp-card" style="align-self: flex-start">
-                <div class="tnp-card-title"><?php _e('Developers', 'newsletter') ?></div>
-                <div class="tnp-card-description">Extending Newsletter by yourself? There is something for you as well!</div>
-                <div class="tnp-card-button-container">
-                    <a href="https://www.thenewsletterplugin.com/documentation/developers/" target="_blank">Developer's love 💛</a>
-                </div>
-            </div>
-            <div class="tnp-card">
-                <div class="tnp-card-title"><?php _e('Video Tutorials', 'newsletter') ?></div>
-                <div class="tnp-card-description">We have some videos to help gest the most from Newsletter.</div>
-                <div class="tnp-card-video">
-                    <iframe width="560" height="315" src="https://www.youtube.com/embed/zmVmW84Bw9A" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
-                <div class="tnp-card-button-container">
-                    <a href="https://www.thenewsletterplugin.com/video-tutorials" target="_blank">See the videos</a>
-                </div>
-            </div>
-        </div>
+        <h2><?php esc_html_e('Dashboard', 'newsletter'); ?></h2>
+        <?php include __DIR__ . '/dashboard-nav.php' ?>
 
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <div id="tnp-body" class="tnp-main-index">
 
+        <div class="tnp-dashboard">
+
+            <?php if (current_user_can('administrator')) { ?>
+
+                <div class="tnp-cards-container">
+
+
+                    <div class="tnp-card">
+
+                        <div class="tnp-step sender <?php echo!empty($steps['sender']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Your sender name and address</h3>
+                                <p>
+                                    From who your subscribers will see the emails coming from?
+
+                                    <a href="?page=newsletter_main_main">Review</a>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="tnp-step forms <?php echo!empty($steps['forms']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Subscription: popup and inline forms</h3>
+                                <p>
+                                    Activate the subscription forms to grow your subscriber list.
+
+                                    <a href="?page=newsletter_subscription_sources">Configure</a>.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="tnp-step <?php echo!empty($steps['notification']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Be notified when someone subscribes</h3>
+                                <p>
+                                    Activate the notification when you get a new subscriber.
+
+                                    <a href="?page=newsletter_subscription_options#advanced">Configure</a>.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="tnp-step welcome-email <?php echo!empty($steps['welcome-email']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Welcome email: give it your style</h3>
+                                <p>
+                                    Customize the welcome email to reflect your style.
+                                    <a href="?page=newsletter_subscription_welcome">Review</a>.
+                                </p>
+                            </div>
+                        </div>
+
+
+
+                        <div class="tnp-step addons-manager <?php echo!empty($steps['addons-manager']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Get a free license</h3>
+                                <p>
+                                    And install free addons to get more power.
+
+                                    <a href="?page=newsletter_main_extensions">Get it</a>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="tnp-card">
+
+
+                        <div class="tnp-step test-email <?php echo !empty($steps['test-email']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Test the email delivery</h3>
+                                <p>
+                                    Check if your blog can deliver emails.
+
+                                    <a href="?page=newsletter_system_delivery">Run a test</a>.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="tnp-step company <?php echo!empty($steps['company']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Your company info and socials</h3>
+                                <p>
+                                    Review your company info and socials
+
+                                    <a href="?page=newsletter_main_info">Review</a>.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="tnp-step first-newsletter <?php echo!empty($steps['first-newsletter']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Create your first newsletter</h3>
+                                <p>
+                                    Explore the composer and send it.
+
+                                    <a href="?page=newsletter_emails_index">Go create</a>.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="tnp-step <?php echo!empty($steps['delivery-speed']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Change the delivery speed</h3>
+                                <p>
+                                    Set how many emails per hour you want to send.
+
+                                    <a href="?page=newsletter_main_main">Review</a>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="tnp-step <?php echo!empty($steps['automated']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Explore the Automated Newsletters</h3>
+                                <p>
+                                    Everything on autopilot: set the direction and relax
+
+                                    <a href="?page=newsletter_main_automated">Check it out.</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            <?php } ?>
+
+
+
+
+            <div class="tnp-cards-container">
+                <div class="tnp-card">
+                    <div class="tnp-card-header">
+                        <div class="tnp-card-title"><?php esc_html_e('Subscribers', 'newsletter') ?></div>
+                        <div class="tnp-card-upper-buttons"><a href="?page=newsletter_users_statistics"><i class="fas fa-chart-bar"></i></a></div>
+                    </div>
+                    <div class="tnp-card-value"><?php echo esc_html($subscribers_count); ?></div>
+                    <div class="tnp-card-description">Confirmed subscribers</div>
+                </div>
+
+                <div class="tnp-card">
+                    <div class="tnp-card-title"><?php esc_html_e('Last 30 days', 'newsletter') ?></div>
+                    <div class="tnp-card-value"><?php echo esc_html($subscribers_count_last_30_days); ?></div>
+                    <div class="tnp-card-description">Confirmed subscribers</div>
+
+                </div>
+
+
+                <div class="tnp-card">
+                    <div class="tnp-card-title"><?php esc_html_e('Queued emails', 'newsletter') ?></div>
+                    <div class="tnp-card-value"><?php echo esc_html($queued); ?></div>
+                    <div class="tnp-card-description">Delivering at <?php echo esc_html($speed); ?> emails per hour.</div>
+                </div>
+
+                <div class="tnp-card">
+                    <div class="tnp-card-title"><?php esc_html_e('Total sent emails', 'newsletter') ?></div>
+                    <div class="tnp-card-value"><?php echo esc_html($total_sent); ?></div>
+                    <div class="tnp-card-description"></div>
+                </div>
+
+
+            </div>
+
+
+            <div class="tnp-cards-container">
+
+
+                <div class="tnp-card">
+                    <div class="tnp-card-header">
+                        <div class="tnp-card-title"><?php esc_html_e('Subscribers', 'newsletter') ?></div>
+                        <div class="tnp-card-upper-buttons"><a href="?page=newsletter_users_index"><i class="fas fa-folder-open"></i></a></div>
+                    </div>
+                    <div class="tnp-card-content">
+                        <table class="widefat" style="width: 100%">
+                            <thead></thead>
+                            <tbody>
+                                <?php foreach ($subscribers as $s) { ?>
+                                    <tr>
+                                        <td>
+                                            <?php echo esc_html($s->email) ?>
+                                        </td>
+                                        <td>
+                                            <?php echo esc_html($s->name) ?> <?php echo esc_html($s->surname) ?>
+                                        </td>
+                                        <td style="text-align: center">
+                                            <?php echo $emails_module->get_user_status_label($s, true) ?>
+                                        </td>
+                                        <td style="text-align: right">
+                                            <?php $controls->button_icon_edit('?page=newsletter_users_edit&id=' . $s->id, ['tertiary' => true]) ?>
+                                        </td>
+                                    </tr>
+                                <?php } ?>
+                            </tbody>
+                        </table>
+
+
+                    </div>
+                </div>
+
+                <div class="tnp-card">
+                    <div class="tnp-card-header">
+                        <div class="tnp-card-title"><?php esc_html_e('Newsletters', 'newsletter') ?></div>
+                        <div class="tnp-card-upper-buttons"><a href="?page=newsletter_emails_index"><i class="fas fa-folder-open"></i></a></div>
+                    </div>
+                    <div class="tnp-card-content">
+
+                        <table class="widefat" style="width: 100%">
+                            <thead></thead>
+                            <tbody>
+                                <?php foreach ($emails as $email) { ?>
+                                    <tr>
+                                        <td>
+                                            <small><?php echo esc_html($email->type == 'message' ? 'Regular newsletter' : 'Automated newsletter'); ?></small><br>
+                                            <?php echo esc_html($email->subject) ?>
+                                        </td>
+                                        <td style="text-align: center">
+                                            <?php $emails_module->show_email_status_label($email) ?>
+                                        </td>
+                                        <td style="text-align: center">
+                                            <?php $emails_module->show_email_progress_bar($email, array('scheduled' => true)) ?>
+                                        </td>
+                                        <td style="text-align: right">
+                                            <?php
+                                            if ($email->status === TNP_Email::STATUS_SENT || $email->status === TNP_Email::STATUS_SENDING) {
+                                                $controls->button_icon_statistics($statistics_module->get_statistics_url($email->id), ['tertiary' => true]);
+                                            } else {
+                                                $controls->button_icon_edit('?page=newsletter_emails_edit&id=' . $email->id, ['tertiary' => true]);
+                                            }
+                                            ?>
+
+                                        </td>
+                                    </tr>
+                                <?php } ?>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="tnp-cards-container">
+
+                <div class="tnp-card">
+                    <div class="tnp-card-header">
+                        <div class="tnp-card-title"><?php esc_html_e('Confirmed subscriptions', 'newsletter') ?></div>
+                        <div class="tnp-card-upper-buttons"><a href="?page=newsletter_users_statistics"><?php _e('Full statistics', 'newsletter') ?></a></div>
+                    </div>
+
+                    <div class="tnp-card-content">
+
+                        <div class="tnp-canvas">
+                            <canvas id="tnp-events-chart-canvas" height="300"></canvas>
+                        </div>
+                    </div>
+
+                    <script type="text/javascript">
+                        var events_data = {
+                            labels: <?php echo json_encode($labels) ?>,
+                            datasets: [
+                                {
+                                    label: "",
+                                    fill: true,
+                                    strokeColor: "#3498db",
+                                    backgroundColor: "#72b8e6",
+                                    borderColor: "#3498db",
+                                    data: <?php echo wp_json_encode($values) ?>
+                                }
+                            ]
+                        };
+
+                        jQuery(function ($) {
+                            ctxe = $('#tnp-events-chart-canvas').get(0).getContext("2d");
+                            eventsLineChart = new Chart(ctxe, {
+                                type: 'bar', data: events_data,
+                                options: {
+                                    maintainAspectRatio: false,
+                                    xresponsive: true,
+                                    scales: {
+                                        xAxes: [{
+                                                type: "category",
+                                            }],
+                                        yAxes: [
+                                            {
+                                                type: "linear",
+                                                ticks: {
+                                                    beginAtZero: true
+                                                }
+                                            },
+                                        ]
+                                    },
+                                }
+                            });
+                        });
+                    </script>
+                </div>
+            </div>
+
+            <div class="tnp-cards-container">
+
+                <div class="tnp-card">
+                    <div class="tnp-card-header">
+                        <div class="tnp-card-title"><?php esc_html_e('Unconfirmed subscriptions', 'newsletter') ?></div>
+                        <div class="tnp-card-upper-buttons"><a href="?page=newsletter_users_statistics"><?php _e('Full statistics', 'newsletter') ?></a></div>
+                    </div>
+
+                    <div class="tnp-card-content">
+
+                        <div class="tnp-canvas">
+                            <canvas id="tnp-unconfirmed-chart" height="300"></canvas>
+                        </div>
+                    </div>
+
+                    <script type="text/javascript">
+                        var events_data2 = {
+                            labels: <?php echo json_encode($unconfirmed['x']) ?>,
+                            datasets: [
+                                {
+                                    label: "",
+                                    fill: true,
+                                    backgroundColor: "#f27b36",
+                                    data: <?php echo wp_json_encode($unconfirmed['y']) ?>
+                                }
+                            ]
+                        };
+
+                        jQuery(function ($) {
+                            ctxe = $('#tnp-unconfirmed-chart').get(0).getContext("2d");
+                            eventsLineChart2 = new Chart(ctxe, {
+                                type: 'bar', data: events_data2,
+                                options: {
+                                    maintainAspectRatio: false,
+                                    xresponsive: true,
+                                    scales: {
+                                        xAxes: [{
+                                                type: "category",
+                                            }],
+                                        yAxes: [
+                                            {
+                                                type: "linear",
+                                                ticks: {
+                                                    beginAtZero: true
+                                                }
+                                            },
+                                        ]
+                                    },
+                                }
+                            });
+                        });
+                    </script>
+                </div>
+            </div>
+
+
+            <div class="tnp-cards-container">
+
+
+                <div class="tnp-card">
+                    <div class="tnp-card-header">
+                        <div class="tnp-card-title"><?php _e('Documentation', 'newsletter') ?></div>
+                    </div>
+                    <div>
+                        <a href="https://www.thenewsletterplugin.com/documentation/installation/" target="_blank">
+                            <div class="tnp-card-documentation-index">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><title>saved items</title><g class="nc-icon-wrapper" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  ><path d="M37,4h3a4,4,0,0,1,4,4V40a4,4,0,0,1-4,4H8a4,4,0,0,1-4-4V8A4,4,0,0,1,8,4h3" fill="none"  stroke-miterlimit="10"/> <polygon points="32 24 24 18 16 24 16 4 32 4 32 24" fill="none" stroke-miterlimit="10" data-color="color-2"/></g></svg>
+                                Installation
+                            </div>
+                        </a>
+                        <a href="https://www.thenewsletterplugin.com/documentation/subscription/" target="_blank">
+                            <div class="tnp-card-documentation-index">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><title>saved items</title><g class="nc-icon-wrapper" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  ><path d="M37,4h3a4,4,0,0,1,4,4V40a4,4,0,0,1-4,4H8a4,4,0,0,1-4-4V8A4,4,0,0,1,8,4h3" fill="none"  stroke-miterlimit="10"/> <polygon points="32 24 24 18 16 24 16 4 32 4 32 24" fill="none" stroke-miterlimit="10" data-color="color-2"/></g></svg>
+                                Subscription
+                            </div>
+                        </a>
+                        <a href="https://www.thenewsletterplugin.com/category/tips" target="_blank">
+                            <div class="tnp-card-documentation-index">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><title>saved items</title><g class="nc-icon-wrapper" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  ><path d="M37,4h3a4,4,0,0,1,4,4V40a4,4,0,0,1-4,4H8a4,4,0,0,1-4-4V8A4,4,0,0,1,8,4h3" fill="none"  stroke-miterlimit="10"/> <polygon points="32 24 24 18 16 24 16 4 32 4 32 24" fill="none" stroke-miterlimit="10" data-color="color-2"/></g></svg>
+                                Tips & Tricks
+                            </div>
+                        </a>
+                        <a href="https://www.thenewsletterplugin.com/documentation/subscribers-and-management/" target="_blank">
+                            <div class="tnp-card-documentation-index">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><title>saved items</title><g class="nc-icon-wrapper" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  ><path d="M37,4h3a4,4,0,0,1,4,4V40a4,4,0,0,1-4,4H8a4,4,0,0,1-4-4V8A4,4,0,0,1,8,4h3" fill="none"  stroke-miterlimit="10"/> <polygon points="32 24 24 18 16 24 16 4 32 4 32 24" fill="none" stroke-miterlimit="10" data-color="color-2"/></g></svg>
+                                Subscribers and management
+                            </div>
+                        </a>
+                        <a href="https://www.thenewsletterplugin.com/documentation/newsletters/newsletters-module/" target="_blank">
+                            <div class="tnp-card-documentation-index">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><title>saved items</title><g class="nc-icon-wrapper" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  ><path d="M37,4h3a4,4,0,0,1,4,4V40a4,4,0,0,1-4,4H8a4,4,0,0,1-4-4V8A4,4,0,0,1,8,4h3" fill="none"  stroke-miterlimit="10"/> <polygon points="32 24 24 18 16 24 16 4 32 4 32 24" fill="none" stroke-miterlimit="10" data-color="color-2"/></g></svg>
+                                Creating Newsletters
+                            </div>
+                        </a>
+                        <a href="https://www.thenewsletterplugin.com/documentation/addons/" target="_blank">
+                            <div class="tnp-card-documentation-index">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><title>saved items</title><g class="nc-icon-wrapper" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  ><path d="M37,4h3a4,4,0,0,1,4,4V40a4,4,0,0,1-4,4H8a4,4,0,0,1-4-4V8A4,4,0,0,1,8,4h3" fill="none"  stroke-miterlimit="10"/> <polygon points="32 24 24 18 16 24 16 4 32 4 32 24" fill="none" stroke-miterlimit="10" data-color="color-2"/></g></svg>
+                                Premium Addons
+                            </div>
+                        </a>
+                        <a href="https://www.thenewsletterplugin.com/documentation/customization/" target="_blank">
+                            <div class="tnp-card-documentation-index">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><title>saved items</title><g class="nc-icon-wrapper" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  ><path d="M37,4h3a4,4,0,0,1,4,4V40a4,4,0,0,1-4,4H8a4,4,0,0,1-4-4V8A4,4,0,0,1,8,4h3" fill="none"  stroke-miterlimit="10"/> <polygon points="32 24 24 18 16 24 16 4 32 4 32 24" fill="none" stroke-miterlimit="10" data-color="color-2"/></g></svg>
+                                Customization
+                            </div>
+                        </a>
+                        <a href="https://www.thenewsletterplugin.com/documentation/delivery-and-spam/" target="_blank">
+                            <div class="tnp-card-documentation-index">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><title>saved items</title><g class="nc-icon-wrapper" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  ><path d="M37,4h3a4,4,0,0,1,4,4V40a4,4,0,0,1-4,4H8a4,4,0,0,1-4-4V8A4,4,0,0,1,8,4h3" fill="none"  stroke-miterlimit="10"/> <polygon points="32 24 24 18 16 24 16 4 32 4 32 24" fill="none" stroke-miterlimit="10" data-color="color-2"/></g></svg>
+                                Delivery and spam
+                            </div>
+                        </a>
+                        <a href="https://www.thenewsletterplugin.com/documentation/developers/" target="_blank">
+                            <div class="tnp-card-documentation-index">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><title>saved items</title><g class="nc-icon-wrapper" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"  ><path d="M37,4h3a4,4,0,0,1,4,4V40a4,4,0,0,1-4,4H8a4,4,0,0,1-4-4V8A4,4,0,0,1,8,4h3" fill="none"  stroke-miterlimit="10"/> <polygon points="32 24 24 18 16 24 16 4 32 4 32 24" fill="none" stroke-miterlimit="10" data-color="color-2"/></g></svg>
+                                Developers & Advanced Topics
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+        </div>
+
+    </div>
 </div>
