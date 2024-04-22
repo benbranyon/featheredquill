@@ -1,10 +1,10 @@
-=== Easy Accept Payments for PayPal ===
+=== Easy Accept Payments via PayPal ===
 Contributors: Tips and Tricks HQ, Ruhul Amin, mbrsolution
 Donate link: https://www.tipsandtricks-hq.com
-Tags: Paypal payment, Accept payment for services or product, PayPal donation, wordpress paypal, paypal for wordpress, paypal plugin for wordpress, paypal integration, paypal, buy now, payment, currency,
+Tags: PayPal, PayPal payment, WordPress PayPal, PayPal donation, Accept payment for services or product
 Requires at least: 5.5
-Tested up to: 6.1
-Stable tag: 4.9.10
+Tested up to: 6.5
+Stable tag: 5.0.5
 License: GPLv2 or later
 
 Easy to use Wordpress plugin to accept PayPal payments for a service or product or donation in one click
@@ -17,30 +17,24 @@ For information, detailed documentation, video tutorial and updates, please visi
 
 * Quick installation and setup.
 * Easily take payment for a service from your site via PayPal.
-* The ultimate plugin to create PayPal buy now buttons.
+* Easily create PayPal buy now buttons.
 * Create the payment buttons on the fly and embed them anywhere on your site using a shortcode.
-* Add multiple payment widget for different services or products.
+* Add multiple payment widgets for different services or products.
 * Ability to configure which currency you want to use to accept the payment.
 * You will need to have your own PayPal account (creating a PayPal account is free).
 * Integrate PayPal with your WordPress powered site.
 * Accept donation on your WordPress site for a cause.
 * Allow your users to specify an amount that they wish to pay. Useful when you need to accept variable payment amount.
-* Ability to specify a reference value for the payment.
+* Ability to specify a reference text for the payment.
 * Ability to specify a payment subject for the payment widget.
-* Add PayPal Buy Now buttons anywhere on a WordPress post or a page.
-* Ability to set the country code to use a particular language for the PayPal checkout page.
+* Add PayPal Buy Now buttons anywhere on a WordPress page.
 * Create a payment button widget to accept payment in any currency accepted by PayPal. 
 * Ability to specify a payment subject for each paypal payment widget.
-* Ability to specify a custom button image for the payment button.
-* Ability to specify a cancel URL for the payment widget.
-* Ability to collect tax for the payment (if you need to).
-* Ability to open the payment window in a new browser tab or window.
 * Create a payment widget to accept any amount from your customer. Users will specify the amount to pay (useful for donations).
-* Create text based or image based payment buttons.
 * Ability to return the user to a specific page after the payment.
 
 == Note ==
-This is NOT an official plugin from PayPal. This plugin has been developed by an independent developer.
+This is not an official plugin from PayPal. This plugin has been developed by an independent developer.
 
 == Usage ==
 
@@ -48,12 +42,9 @@ https://www.youtube.com/watch?v=Jvy5E1ea8VA
 
 https://www.youtube.com/watch?v=XL7Q8eU9dOY
 
-There are few ways you can use this plugin:
-
-1. Use the sortcode [wp_paypal_payment] to place the payment accept form.
-2. Add the paypal payment widget to your sidebar widgets.
-3. Call the function from a template file: <?php echo Paypal_payment_accept(); ?>
-4. Use the shortcode with custom parameter option to add multiple different payment widget in different areas of the site.
+1) Navigate to the 'PayPal PPCP' tab in the settings to set up your PayPal API credentials.
+2) Adjust the settings as needed, then insert the shortcode [wp_paypal_payment] into a post, page, or sidebar widget where you wish to display the payment button.
+3) For more versatility, you can use the [wp_paypal_payment_box] shortcode to incorporate various payment widgets, each with its unique configuration. View shortcode documentation
 
 == Installation ==
 
@@ -69,6 +60,27 @@ There are few ways you can use this plugin:
 Visit the plugin site at https://www.tipsandtricks-hq.com/wordpress-easy-paypal-payment-or-donation-accept-plugin-120 for screenshots.
 
 == Changelog ==
+
+= 5.0.5 =
+- Added more currency codes to the list of supported currencies in the settings menu.
+
+= 5.0.4 =
+- Fix for multiple payment widget shortcodes on the same page with other amount not working properly.
+
+= 5.0.3 =
+- The New PayPal API is the only supported option now. The old PayPal option has been removed.
+
+= 5.0.2 =
+- Currency code is always taken from the settings. The new PayPal API doesn't allow multiple different currency codes to be used in the SDK load on the same page.
+
+= 5.0.1 =
+- Fixed an issue with the "reference" parameter in the shortcode.
+
+= 5.0 =
+- Important: this version upgrades the PayPal API to the new PayPal Commerce Platform API for better security. It has breaking changes. Please read the following notes carefully.
+- Important: After updating to this version, you will need to go to the settings menu of the plugin and configure your PayPal API credentials for the new Paypal API.
+- It is recommended to test this version on a staging site before updating the live site.
+- Link to the previous version (4.9.10) is available here: https://downloads.wordpress.org/plugin/wordpress-easy-paypal-payment-or-donation-accept-plugin.4.9.10.zip
 
 = 4.9.10 =
 - Added output escaping to one shortcode parameter.

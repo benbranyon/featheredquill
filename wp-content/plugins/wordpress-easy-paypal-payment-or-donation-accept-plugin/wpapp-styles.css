@@ -30,3 +30,28 @@
 .wpapp_payment_button{
     margin: 10px 0px;
 }
+
+.wpapp-btn-txn-success-msg{
+    background-color: #f4f8ff;
+    border: 1px solid #007cba;
+    border-radius: 3px;
+    padding: 15px 20px;
+}
+.wpapp-grey-box {
+    margin: 10px 0px;
+    padding: 15px 10px;
+    background-color: #DDDDDD;
+    border-color: #CCCCCC;
+    border-radius: 3px 3px 3px 3px;
+    border-style: solid;
+    border-width: 1px;
+}
+.wpapp-yellow-box {
+    margin: 10px 0px;
+    padding: 10px;
+    background-color: #FFFFE0;
+    border-color: #E6DB55;
+    border-radius: 3px 3px 3px 3px;
+    border-style: solid;
+    border-width: 1px;
+}
