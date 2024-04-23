@@ -19,6 +19,13 @@
         position: relative;
     }
 </style>
+<script> 
+
+jQuery(document).ready(function($) {
+    $('.screen-reader-response').prepend('<span role="status" aria-live="polite" aria-atomic="true"></span>'); 
+}); 
+
+</script> 
 </head>
 
 <body <?php body_class(); ?>>
