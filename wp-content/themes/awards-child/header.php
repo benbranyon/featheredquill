@@ -23,7 +23,6 @@
 
 jQuery(document).ready(function($) {
     if($('.wpcf7').length) {
-        alert('here');
         $('.screen-reader-response').prepend('<span role="status" aria-live="polite" aria-atomic="true"></span>'); 
     }
 }); 
