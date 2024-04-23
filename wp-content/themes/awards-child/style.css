@@ -15,3 +15,18 @@
 #nav-expander {
   display: none;
 }
+
+.ts-pricing {
+	display: grid;
+	row-gap: 30px;
+	@media only screen and (min-width: 769px) {
+		grid-template-columns: 1fr 1fr;
+	}
+}
+
+.ts-pricing .col-md-6 {
+	@media only screen and (min-width: 769px) {
+		width: 100%;
+		display: flex;
+	}
+}
