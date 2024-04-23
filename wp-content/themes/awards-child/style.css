@@ -11,3 +11,7 @@
  Tags:         custom-background, threaded-comments, custom-menu, featured-images, full-width-template, theme-options, translation-ready
  Text Domain:  awards-child
 */
+
+#nav-expander {
+  display: none;
+}
